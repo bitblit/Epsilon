@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true,
+
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+    "noImplicitReturns": true,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2015", "dom"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [ "node_modules", "build", "webpack" ],
+  "types": [ "typePatches" ],
+  "CAW_NOTES" : "Set noImplicitAny, noImplicitThis and noUnusedLocals back to true at some point"
+}

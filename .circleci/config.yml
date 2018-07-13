@@ -1,0 +1,104 @@
+defaults: &defaults
+  working_directory: ~/bitblit/Epsilon
+  parallelism: 1
+  shell: /bin/bash --login
+
+  environment:
+    CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+    CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+
+  docker:
+    - image: circleci/node:8.11.1
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - run:
+        # Use Pacific Time Zone
+        working_directory: ~/bitblit/Epsilon
+        command: 'echo ''America/Los_Angeles'' | sudo tee -a /etc/timezone; sudo dpkg-reconfigure
+          -f noninteractive tzdata; '
+    # This would typically go in either a build or a build-and-test job when using workflows
+    # Restore the dependency cache
+    - restore_cache:
+        keys:
+        # This branch if available
+        - v1-dep-{{ .Branch }}-
+        # Default branch if not
+        - v1-dep-master-
+        # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
+        - v1-dep-
+    - run: yarn install
+    # Save dependency cache
+    - save_cache:
+        key: v1-dep-{{ .Branch }}-{{ epoch }}
+        paths:
+        - ./node_modules
+    # Test
+    - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-SNAPSHOT/$CIRCLE_BUILD_NUM/ {} \;
+    - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-BRANCH/$CIRCLE_BRANCH/ {} \;
+    - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-TAG/$CIRCLE_TAG/ {} \;
+    - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-HASH/$CIRCLE_SHA1/ {} \;
+    - run: cp src/build-properties.json $CIRCLE_ARTIFACTS
+    - run: yarn run compile
+    - run: yarn run test
+
+    # Teardown
+    #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
+    # Save test results
+    - store_test_results:
+        path: /tmp/circleci-test-results
+    # Save artifacts
+    - store_artifacts:
+        path: /tmp/circleci-artifacts
+    - store_artifacts:
+        path: /tmp/circleci-test-results
+
+    # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
+    - persist_to_workspace:
+        # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+    # taken to be the root directory of the workspace.
+        root: ~/bitblit
+        # Must be relative path from root
+        paths:
+          - Epsilon
+
+  deploy:
+    <<: *defaults
+
+    # CAW 2018-05-09 : This semes redundant but I don't have anything else working yet - still learning Circle V2
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ~/bitblit
+      # Setup npm token
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      # Update the version number
+      - run: find . -type f -regex ".*/package\.json" -exec sed -i.bak s/0\.0\.0/${CIRCLE_TAG:8}+$CIRCLE_BUILD_NUM/ {} \;
+      - run: echo publishing to NPM as version ${CIRCLE_TAG:8}+$CIRCLE_BUILD_NUM
+      - run: yarn publish --access=public
+
+
+      #- run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^release-.*/
+            branches:
+              ignore: /.*/
+
