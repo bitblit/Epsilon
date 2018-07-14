@@ -1,6 +1,6 @@
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext} from 'aws-lambda';
-import {EpsilonJwtToken} from './epsilon-jwt-token';
+import {EpsilonJwtToken} from './auth/epsilon-jwt-token';
 
 /**
  * Endpoints about the api itself

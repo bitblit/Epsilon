@@ -1,7 +1,7 @@
 import {APIGatewayEvent, Callback, Context, Handler, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {EpsilonAuthProvider} from './epsilon-auth-provider';
-import {EventUtil} from './event-util';
+import {EventUtil} from '../event-util';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {EpsilonJwtToken} from './epsilon-jwt-token';
 

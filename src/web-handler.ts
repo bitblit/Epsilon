@@ -1,4 +1,4 @@
-import {RouterConfig} from './router-config';
+import {RouterConfig} from './route/router-config';
 import {APIGatewayEvent, Callback, Context, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
