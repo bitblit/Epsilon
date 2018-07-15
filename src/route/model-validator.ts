@@ -11,17 +11,25 @@ import {BadRequestError} from '../error/bad-request-error';
  */
 export class ModelValidator {
 
-    public static validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
-                           extraPropertiesAllowed: boolean = true): string[] {
-        let rval: string[] = [];
-        const contents: Buffer = fs.readFileSync(`${__dirname}/../api-swagger-definition-template.yaml`);
+    private allModels: any;
+
+    constructor(pathToSwagger:string)
+    {
+        const contents: Buffer = fs.readFileSync(pathToSwagger);
         const swagger = yaml.parse(contents);
-        const allModels = swagger['definitions'];
+        this.allModels = swagger['definitions'];
+    }
 
-        Logger.info('Validating model %s all definitions are : %s', modelName, JSON.stringify(allModels));
 
-        if (allModels && modelName && allModels[modelName]) {
-            const validation = new Validator().validate(modelObject, allModels[modelName], allModels, emptyAllowed, extraPropertiesAllowed);
+    public validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
+                           extraPropertiesAllowed: boolean = true): string[] {
+
+        Logger.info('Validating model %s all definitions are : %j', modelName, this.allModels);
+
+        let rval: string[] = [];
+
+        if (this.allModels && modelName && this.allModels[modelName]) {
+            const validation = new Validator().validate(modelObject, this.allModels[modelName], this.allModels, emptyAllowed, extraPropertiesAllowed);
 
             if (validation.errorCount > 0) {
                 rval = validation.errors;
@@ -32,9 +40,9 @@ export class ModelValidator {
         return rval;
     }
 
-    public static continueOnValidBody(res: Response, modelName: string, modelObject: any,
+    public continueOnValidBody(res: Response, modelName: string, modelObject: any,
                                       emptyAllowed: boolean = false, extraPropertiesAllowed: boolean = true): boolean {
-        const errors: any[] = ModelValidator.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
+        const errors: any[] = this.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
         if (errors.length > 0) {
             const errorStrings: string[] = errors.map(x => {
                 return String(x)
@@ -48,9 +56,9 @@ export class ModelValidator {
 
     }
 
-    public static validateBody(modelName: string, modelObject: any, emptyAllowed: boolean = false,
+    public validateBody(modelName: string, modelObject: any, emptyAllowed: boolean = false,
                                extraPropertiesAllowed: boolean = true): Promise<any> {
-        const errors: any[] = ModelValidator.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
+        const errors: any[] = this.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
         if (errors.length > 0) {
             const errorStrings: string[] = errors.map(x => {
                 return String(x)
