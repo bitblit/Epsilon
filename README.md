@@ -18,5 +18,4 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 
 # Other service
-* S3 caching service
 * Environmental service

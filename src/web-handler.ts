@@ -64,8 +64,13 @@ export class WebHandler {
         return rval;
     }
 
-    public static errorResponse(errorMessage:string, statusCode:number) : ProxyResult
+    public static errorResponse(errorMessages:string[], statusCode:number) : ProxyResult
     {
+        let body: any = {
+            errors:errorMessages,
+            httpStatusCode:statusCode
+        };
+
         let errorResponse: ProxyResult =
             {
                 statusCode: statusCode,
@@ -73,10 +78,22 @@ export class WebHandler {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: '{"errors":["'+errorMessage+'"], "httpStatusCode": '+statusCode+'}'
+                body: JSON.stringify(body)
             };
 
         return errorResponse;
+    }
+
+    public static redirect(target:string) : ProxyResult
+    {
+        return {
+            statusCode: 301,
+            body: '{"redirect-target":"'+target+'}',
+            headers: {
+                'Content-Type' : 'application/json',
+                'Location': target
+            }
+        } as ProxyResult;
     }
 
     public static buildHttpError(errorMessage:string, statusCode:number) : Error {
@@ -89,7 +106,10 @@ export class WebHandler {
     public static errorToProxyResult(error:Error) : ProxyResult
     {
         let code = error['statusCode'] || 500;
-        return this.errorResponse((error.message || JSON.stringify(error)),code);
+        let errorMessages: string[] = (error['messages'] && error['messages'].length>0)?error['messages']:null;
+        errorMessages = (errorMessages)?errorMessages:[(error.message || JSON.stringify(error))];
+
+        return this.errorResponse(errorMessages,code);
     }
 
     private coerceToProxyResult(input:any) : ProxyResult
@@ -162,7 +182,7 @@ export class WebHandler {
         if (!rval)
         {
             Logger.debug('Failed to find handler for %s',event.path);
-            rval = Promise.resolve(WebHandler.errorResponse('No such endpoint',404));
+            rval = Promise.resolve(WebHandler.errorResponse(['No such endpoint'],404));
         }
         return rval;
 
