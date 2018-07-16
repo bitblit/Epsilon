@@ -25,11 +25,12 @@ export class WebHandler {
             Logger.info('Processing event : %j', event);
 
             handler.then(result=>{
-                Logger.info('Returning : %j', result);
+                Logger.debug('Returning : %j', result);
                 let proxyResult: ProxyResult = this.coerceToProxyResult(result);
                 callback(null, proxyResult);
                 // TODO: Reenable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
+                Logger.warn('Unhandled error (in promise catch) : %s',err);
                 callback(null,WebHandler.errorToProxyResult(err));
             });
 
@@ -37,6 +38,7 @@ export class WebHandler {
         }
         catch (err)
         {
+            Logger.warn('Unhandled error (in wrapping catch) : %s',err);
             callback(null,WebHandler.errorToProxyResult(err));
         }
     };
