@@ -1,4 +1,4 @@
-import {APIGatewayEvent, Callback, Context, Handler, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, Callback, Context, CustomAuthorizerEvent, Handler, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {EpsilonAuthProvider} from './epsilon-auth-provider';
 import {EventUtil} from '../event-util';
@@ -57,14 +57,14 @@ export class AuthHandler {
      * @param {Context} context
      * @param {Callback} callback
      */
-    public lamdaHandler(event: APIGatewayEvent, context: Context, callback: Callback) : void {
+    public lamdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback) : void {
         Logger.info('Got event : %j', event);
 
-        let token: string = EventUtil.extractTokenSrc(event);
+        let token: string = event.authorizationToken;
 
         if (token && token.startsWith(AuthHandler.AUTH_HEADER_PREFIX)) {
             const srcString = token.substring(7); // Strip "Bearer "
-            const methodArn = 'XX'; //TODO: Fix event.methodArn;
+            const methodArn = event.methodArn;
 
             let parsed:EpsilonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
 
