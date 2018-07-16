@@ -28,7 +28,7 @@ export class WebHandler {
                 Logger.debug('Returning : %j', result);
                 let proxyResult: ProxyResult = this.coerceToProxyResult(result);
                 callback(null, proxyResult);
-                // TODO: Reenable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
+                // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
                 callback(null,WebHandler.errorToProxyResult(err));
@@ -63,6 +63,25 @@ export class WebHandler {
             rval = rval.substring(1);
         }
 
+        return rval;
+    }
+
+    public static bodyObject(event: APIGatewayEvent): any {
+        let rval:any = null;
+        if (event.body)
+        {
+            let contentType = event.headers['content-type'] || 'application/octet-stream';
+            rval = event.body;
+
+            if (event.isBase64Encoded)
+            {
+                rval = Buffer.from(rval, 'base64');
+            }
+            if (contentType==='application/json')
+            {
+                rval = JSON.parse(rval.toString('ascii'));
+            }
+        }
         return rval;
     }
 
