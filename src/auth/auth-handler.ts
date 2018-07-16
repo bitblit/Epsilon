@@ -1,4 +1,12 @@
-import {APIGatewayEvent, Callback, Context, CustomAuthorizerEvent, Handler, ProxyResult} from 'aws-lambda';
+import {
+    AuthResponseContext, AuthResponse,
+    Callback,
+    Context,
+    CustomAuthorizerEvent,
+    Handler,
+    PolicyDocument,
+    ProxyResult
+} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {EpsilonAuthProvider} from './epsilon-auth-provider';
 import {EventUtil} from '../event-util';
@@ -16,7 +24,7 @@ export class AuthHandler {
         this.webTokenManipulator = new WebTokenManipulator(encryptionKey, issuer);
     }
 
-    private createPolicy(methodArn: string, srcString: string, userOb: any): any
+    private createPolicy(methodArn: string, srcString: string, userOb: any): AuthResponse
     {
         // If we reached here, create a policy document
         // parse the ARN from the incoming event
@@ -27,7 +35,7 @@ export class AuthHandler {
         const stage = apiGatewayArnTmp[1];
         const restApiId = apiGatewayArnTmp[0];
 
-        const response = {
+        const response:AuthResponse = {
             principalId: 'user',
             policyDocument: {
                 Version: '2012-10-17',
@@ -40,12 +48,12 @@ export class AuthHandler {
                         ]
                     }
                 ]
-            },
+            } as PolicyDocument,
             context: {
                 userJSON: JSON.stringify(userOb),
                 srcData: srcString  // Put this in in-case we are doing a token update
-            }
-        };
+            } as AuthResponseContext
+        } as AuthResponse;
 
         return response;
     };
