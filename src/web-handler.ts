@@ -22,7 +22,7 @@ export class WebHandler {
 
             let handler: Promise<any> = this.findHandler(event);
 
-            Logger.info('Processing event : %j', event);
+            Logger.debug('Processing event : %j', event);
 
             handler.then(result=>{
                 Logger.debug('Returning : %j', result);
@@ -30,7 +30,7 @@ export class WebHandler {
                 callback(null, proxyResult);
                 // TODO: Reenable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
-                Logger.warn('Unhandled error (in promise catch) : %s',err);
+                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
                 callback(null,WebHandler.errorToProxyResult(err));
             });
 
@@ -38,7 +38,7 @@ export class WebHandler {
         }
         catch (err)
         {
-            Logger.warn('Unhandled error (in wrapping catch) : %s',err);
+            Logger.warn('Unhandled error (in wrapping catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
             callback(null,WebHandler.errorToProxyResult(err));
         }
     };
