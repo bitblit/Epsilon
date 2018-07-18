@@ -70,7 +70,7 @@ export class WebHandler {
         let rval:any = null;
         if (event.body)
         {
-            let contentType = event.headers['content-type'] || 'application/octet-stream';
+            let contentType = event.headers['content-type'] || event.headers['Content-Type'] || 'application/octet-stream';
             rval = event.body;
 
             if (event.isBase64Encoded)

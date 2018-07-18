@@ -3,7 +3,9 @@ import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-l
 import {WebHandler} from '../../src/web-handler';
 import {BadRequestError} from '../../src/error/bad-request-error';
 
+
 describe('#errorToProxyResult', function() {
+
     it('should set the default status code to 500', function() {
 
         let err:Error = new BadRequestError('this is a test','a1','a2');
@@ -36,5 +38,6 @@ describe('#errorToProxyResult', function() {
         expect(body.number).to.equal(1);
 
     });
+
 
 });
