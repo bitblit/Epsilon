@@ -27,11 +27,11 @@ export class WebHandler {
             handler.then(result=>{
                 Logger.debug('Returning : %j', result);
                 let proxyResult: ProxyResult = this.coerceToProxyResult(result);
-                callback(null, proxyResult);
+                callback(null, this.addCors(proxyResult));
                 // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
-                callback(null,WebHandler.errorToProxyResult(err));
+                callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
             });
 
 
@@ -39,7 +39,7 @@ export class WebHandler {
         catch (err)
         {
             Logger.warn('Unhandled error (in wrapping catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
-            callback(null,WebHandler.errorToProxyResult(err));
+            callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
         }
     };
 
@@ -172,6 +172,20 @@ export class WebHandler {
         }
 
         return rval;
+    }
+
+    private addCors(input: ProxyResult) : ProxyResult
+    {
+        if (!this.routerConfig.disableCORS)
+        {
+            if (!input.headers)
+            {
+                input.headers = {};
+            }
+            input.headers['Access-Control-Allow-Origin']=input.headers['Access-Control-Allow-Origin'] || '*';
+            input.headers['Access-Control-Allow-Headers']=input.headers['Access-Control-Allow-Headers'] || '*';
+        }
+        return input;
     }
 
     private findHandler(event: APIGatewayEvent): Promise<any>
