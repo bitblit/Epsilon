@@ -6,7 +6,8 @@ import * as Route from 'route-parser';
 
 export class WebHandler {
     private routerConfig: RouterConfig;
-    private corsResponse: ProxyResult = {statusCode:200, body: '{"cors":true}', headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*'}} as ProxyResult;
+    private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates *
+    private corsResponse: ProxyResult = {statusCode:200, body: '{"cors":true}', headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':this.corsAllowedHeaders}} as ProxyResult;
 
     constructor(routing: RouterConfig)
     {
