@@ -184,7 +184,7 @@ export class WebHandler {
                 input.headers = {};
             }
             input.headers['Access-Control-Allow-Origin']=input.headers['Access-Control-Allow-Origin'] || '*';
-            input.headers['Access-Control-Allow-Headers']=input.headers['Access-Control-Allow-Headers'] || '*';
+            input.headers['Access-Control-Allow-Headers']=input.headers['Access-Control-Allow-Headers'] || this.corsAllowedHeaders;
         }
         return input;
     }
