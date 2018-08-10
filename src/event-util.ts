@@ -1,6 +1,6 @@
-import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext} from 'aws-lambda';
 import {EpsilonJwtToken} from './auth/epsilon-jwt-token';
+import {UnauthorizedError} from './error/unauthorized-error';
 
 /**
  * Endpoints about the api itself
@@ -11,7 +11,7 @@ export class EventUtil {
         const auth:AuthResponseContext = EventUtil.extractAuthorizer(event);
 
         if (!auth || !auth.userJSON) {
-            throw new Error('Missing authorization context');
+            throw new UnauthorizedError('Missing authorization context');
         } else {
             const userJSON = auth.userJSON;
             const usr = JSON.parse(userJSON) as EpsilonJwtToken<T>;
