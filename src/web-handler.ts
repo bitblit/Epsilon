@@ -14,7 +14,7 @@ export class WebHandler {
         this.routerConfig = routing;
     }
 
-    public lamdaHandler (event: APIGatewayEvent, context: Context, callback: Callback) : void {
+    public lambdaHandler (event: APIGatewayEvent, context: Context, callback: Callback) : void {
         try {
             if (!this.routerConfig)
             {
@@ -57,6 +57,8 @@ export class WebHandler {
         if (stage && rval.startsWith(stage))
         {
             rval = rval.substring(stage.length);
+        } else if (stage && this.routerConfig.customStageValue && rval.startsWith(this.routerConfig.customStageValue)) {
+            rval = rval.substring(this.routerConfig.customStageValue.length);
         }
         // Finally, strip any more leading /
         while (rval.startsWith('/'))
@@ -175,7 +177,8 @@ export class WebHandler {
         return rval;
     }
 
-    private addCors(input: ProxyResult) : ProxyResult
+    // Public so it can be used in auth-web-handler
+    public addCors(input: ProxyResult) : ProxyResult
     {
         if (!this.routerConfig.disableCORS)
         {

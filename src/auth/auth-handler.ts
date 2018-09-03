@@ -65,7 +65,7 @@ export class AuthHandler {
      * @param {Context} context
      * @param {Callback} callback
      */
-    public lamdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback) : void {
+    public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback) : void {
         Logger.info('Got event : %j', event);
 
         let token: string = event.authorizationToken;
