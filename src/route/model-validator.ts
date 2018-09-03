@@ -1,7 +1,6 @@
 import * as Validator from 'swagger-model-validator';
 import * as fs from 'fs';
 import * as yaml from 'node-yaml';
-import {Response} from 'express';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {BadRequestError} from '../error/bad-request-error';
 
@@ -38,22 +37,6 @@ export class ModelValidator {
             rval = ['Model named "' + modelName + '" not present in schema'];
         }
         return rval;
-    }
-
-    public continueOnValidBody(res: Response, modelName: string, modelObject: any,
-                                      emptyAllowed: boolean = false, extraPropertiesAllowed: boolean = true): boolean {
-        const errors: any[] = this.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
-        if (errors.length > 0) {
-            const errorStrings: string[] = errors.map(x => {
-                return String(x)
-            });
-            Logger.info('Found errors while validating %s object %s', modelName, JSON.stringify(errorStrings));
-            res.status(400).json({errors: errorStrings});
-            return false;
-        } else {
-            return true;
-        }
-
     }
 
     public validateBody(modelName: string, modelObject: any, emptyAllowed: boolean = false,
