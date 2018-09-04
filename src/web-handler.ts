@@ -3,15 +3,28 @@ import {APIGatewayEvent, Callback, Context, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
 import * as Route from 'route-parser';
+import {AuthHandler} from './auth/auth-handler';
+import {EpsilonJwtToken} from './auth/epsilon-jwt-token';
+import {EventUtil} from './event-util';
+import {UnauthorizedError} from './error/unauthorized-error';
+import {ForbiddenError} from './error/forbidden-error';
+import {WebTokenManipulator} from './auth/web-token-manipulator';
 
 export class WebHandler {
     private routerConfig: RouterConfig;
+    private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates *
     private corsResponse: ProxyResult = {statusCode:200, body: '{"cors":true}', headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':this.corsAllowedHeaders}} as ProxyResult;
 
     constructor(routing: RouterConfig)
     {
         this.routerConfig = routing;
+        if (this.routerConfig.enableAuthorizationHeaderParsing) {
+            if (!this.routerConfig.authorizationHeaderEncryptionKey) {
+                throw new Error('If you set enableAuthorizationHeaderParsing you must set authorizationHeaderEncryptionKey');
+            }
+            this.webTokenManipulator = new WebTokenManipulator(this.routerConfig.authorizationHeaderEncryptionKey, '');
+        }
     }
 
     public lambdaHandler (event: APIGatewayEvent, context: Context, callback: Callback) : void {
@@ -21,6 +34,7 @@ export class WebHandler {
                 throw new Error('Router config not found');
             }
 
+            this.processAuthorizationHeader(event);
             let handler: Promise<any> = this.findHandler(event);
 
             Logger.debug('Processing event : %j', event);
@@ -43,6 +57,40 @@ export class WebHandler {
             callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
         }
     };
+
+
+    public processAuthorizationHeader (event: APIGatewayEvent) : void {
+
+        if (this.routerConfig.enableAuthorizationHeaderParsing) {
+            const header: string = (event && event.headers) ? event.headers['Authorization'] : null;
+            const token: string = (header && header.startsWith(AuthHandler.AUTH_HEADER_PREFIX)) ? header.substring(7) : null; // Strip "Bearer "
+            const parsed: EpsilonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(token);
+
+            if (parsed) {
+                event.requestContext.authorizer = {
+                    userJSON: JSON.stringify(parsed)
+                }
+            }
+        }
+    };
+
+    private checkAuthorization(event: APIGatewayEvent, requiredRoles: string[]):void {
+        if (requiredRoles && requiredRoles.length>0)
+        {
+            const token:EpsilonJwtToken<any> = EventUtil.extractToken(event);
+            if (!token) {
+                throw new UnauthorizedError('Unauthorized');
+            }
+
+            requiredRoles.forEach(r => {
+                if (!token.roles || token.roles.indexOf(r) == -1) {
+                    throw new ForbiddenError('Missing role ' + r);
+                }
+            })
+        }
+    }
+
+
 
     private cleanPath(event: APIGatewayEvent) : string
     {
@@ -211,6 +259,7 @@ export class WebHandler {
                         let routeParser: Route = new Route(rm.path);
                         if (routeParser.match(cleanPath))
                         {
+                            this.checkAuthorization(event, rm.requiredRoles);
                             rval = rm.handlerOb[rm.handlerName](event);
                         }
                     }

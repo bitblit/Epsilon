@@ -3,5 +3,7 @@ export interface RouteMapping {
     method: string,
     path: string,
     handlerOb: any,
-    handlerName: string
+    handlerName: string,
+
+    requiredRoles: string[];
 }

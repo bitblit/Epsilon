@@ -9,4 +9,6 @@ export interface RouterConfig {
     staticContentPaths: string[];
     // If set, this means the stage does not match what is in the event (due to mapping at the custom name level)
     customStageValue: string;
+    enableAuthorizationHeaderParsing: boolean;
+    authorizationHeaderEncryptionKey: string;
 }
