@@ -240,7 +240,7 @@ export class WebHandler {
         return input;
     }
 
-    private findHandler(event: APIGatewayEvent): Promise<any>
+    public findHandler(event: APIGatewayEvent): Promise<any>
     {
         let rval: Promise<any> = null;
 
@@ -257,9 +257,12 @@ export class WebHandler {
                     if (rm.method && rm.method.toLowerCase()===event.httpMethod.toLowerCase())
                     {
                         let routeParser: Route = new Route(rm.path);
-                        if (routeParser.match(cleanPath))
+                        let parsed: any = routeParser.match(cleanPath);
+                        if (parsed)
                         {
                             this.checkAuthorization(event, rm.requiredRoles);
+                            // We extend with the parsed params here in case we are using the AWS any proxy
+                            event.pathParameters = Object.assign(event.pathParameters, parsed);
                             rval = rm.handlerOb[rm.handlerName](event);
                         }
                     }
