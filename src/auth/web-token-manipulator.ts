@@ -52,7 +52,7 @@ export class WebTokenManipulator {
     }
 
 
-    public createJWTString<T>(principal: string, userObject: T, roles: string[] = ['USER'], expirationSeconds: number = 3600): string {
+    public createJWTString<T>(principal: string, userObject: T, roles: string[] = ['USER'], expirationSeconds: number = 3600, proxyUser: T = null): string {
         Logger.info('Creating JWT token for %s  that expires in %s', principal, expirationSeconds);
         const now = new Date().getTime();
         const expires = now + (expirationSeconds * 1000);
@@ -65,6 +65,7 @@ export class WebTokenManipulator {
             iat: now,
 
             user: userObject,
+            proxy: proxyUser,
             roles: roles,
         } as CommonJwtToken<T>;
 
