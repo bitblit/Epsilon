@@ -262,7 +262,7 @@ export class WebHandler {
                         {
                             this.checkAuthorization(event, rm.requiredRoles);
                             // We extend with the parsed params here in case we are using the AWS any proxy
-                            event.pathParameters = Object.assign(event.pathParameters, parsed);
+                            event.pathParameters = Object.assign({}, event.pathParameters, parsed);
                             rval = rm.handlerOb[rm.handlerName](event);
                         }
                     }
