@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
-import {EpsilonJwtToken} from './epsilon-jwt-token';
+import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 /**
  * Service for handling jwt tokens
@@ -18,7 +18,7 @@ export class WebTokenManipulator {
     public refreshJWTString<T>(tokenString: string, expirationSeconds: number): string {
 
         const now = new Date().getTime();
-        let payload: EpsilonJwtToken<T> = this.parseAndValidateJWTString(tokenString, now);
+        let payload: CommonJwtToken<T> = this.parseAndValidateJWTString(tokenString, now);
         let time = (payload['exp'] - payload['iat']);
         time = expirationSeconds || time;
         const expires = now + time;
@@ -29,8 +29,8 @@ export class WebTokenManipulator {
         return token;
     }
 
-    public parseAndValidateJWTString<T>(tokenString: string, now: number = new Date().getTime()): EpsilonJwtToken<T> {
-        let payload: EpsilonJwtToken<T> = this.parseJWTString(tokenString);
+    public parseAndValidateJWTString<T>(tokenString: string, now: number = new Date().getTime()): CommonJwtToken<T> {
+        let payload: CommonJwtToken<T> = this.parseJWTString(tokenString);
 
         if (payload['exp'] != null && now < payload['exp']) {
             return payload;
@@ -40,7 +40,7 @@ export class WebTokenManipulator {
         }
     }
 
-    public parseJWTString<T>(tokenString: string): EpsilonJwtToken<T> {
+    public parseJWTString<T>(tokenString: string): CommonJwtToken<T> {
         const payload = jwt.verify(tokenString, this.encryptionKey);
 
         if (payload) {
@@ -58,7 +58,7 @@ export class WebTokenManipulator {
         const expires = now + (expirationSeconds * 1000);
 
         // Build token data and add claims
-        const tokenData: EpsilonJwtToken<T> = {
+        const tokenData: CommonJwtToken<T> = {
             exp: expires,
             iss: this.issuer,
             sub: principal,
@@ -66,7 +66,7 @@ export class WebTokenManipulator {
 
             user: userObject,
             roles: roles,
-        } as EpsilonJwtToken<T>;
+        } as CommonJwtToken<T>;
 
         const token = jwt.sign(tokenData, this.encryptionKey); // , algorithm = 'HS256')
         return token;

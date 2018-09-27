@@ -1,20 +1,20 @@
 import {APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext} from 'aws-lambda';
-import {EpsilonJwtToken} from './auth/epsilon-jwt-token';
 import {UnauthorizedError} from './error/unauthorized-error';
+import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 /**
  * Endpoints about the api itself
  */
 export class EventUtil {
 
-    public static extractToken<T>(event: APIGatewayEvent): EpsilonJwtToken<T> {
+    public static extractToken<T>(event: APIGatewayEvent): CommonJwtToken<T> {
         const auth:AuthResponseContext = EventUtil.extractAuthorizer(event);
 
         if (!auth || !auth.userJSON) {
             throw new UnauthorizedError('Missing authorization context');
         } else {
             const userJSON = auth.userJSON;
-            const usr = JSON.parse(userJSON) as EpsilonJwtToken<T>;
+            const usr = JSON.parse(userJSON) as CommonJwtToken<T>;
             return usr;
         }
     }

@@ -4,11 +4,11 @@ import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
 import * as Route from 'route-parser';
 import {AuthHandler} from './auth/auth-handler';
-import {EpsilonJwtToken} from './auth/epsilon-jwt-token';
 import {EventUtil} from './event-util';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {ForbiddenError} from './error/forbidden-error';
 import {WebTokenManipulator} from './auth/web-token-manipulator';
+import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 export class WebHandler {
     private routerConfig: RouterConfig;
@@ -64,7 +64,7 @@ export class WebHandler {
         if (this.routerConfig.enableAuthorizationHeaderParsing) {
             const header: string = (event && event.headers) ? event.headers['Authorization'] : null;
             const token: string = (header && header.startsWith(AuthHandler.AUTH_HEADER_PREFIX)) ? header.substring(7) : null; // Strip "Bearer "
-            const parsed: EpsilonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(token);
+            const parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(token);
 
             if (parsed) {
                 event.requestContext.authorizer = {
@@ -77,7 +77,7 @@ export class WebHandler {
     private checkAuthorization(event: APIGatewayEvent, requiredRoles: string[]):void {
         if (requiredRoles && requiredRoles.length>0)
         {
-            const token:EpsilonJwtToken<any> = EventUtil.extractToken(event);
+            const token:CommonJwtToken<any> = EventUtil.extractToken(event);
             if (!token) {
                 throw new UnauthorizedError('Unauthorized');
             }

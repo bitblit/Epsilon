@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@bitblit/ratchet@0.0.82":
-  version "0.0.82"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.82.tgz#00c1678e093ef69043cd0ff5e62ef23f07d88005"
+"@bitblit/ratchet@0.0.89":
+  version "0.0.89"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.89.tgz#1c61fbdf3d996d4aaa579a105fc232017ad0bdb9"
   dependencies:
     moment "^2.20.1"
     moment-timezone "^0.5.14"

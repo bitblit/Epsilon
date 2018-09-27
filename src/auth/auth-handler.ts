@@ -9,9 +9,8 @@ import {
 } from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {EpsilonAuthProvider} from './epsilon-auth-provider';
-import {EventUtil} from '../event-util';
 import {WebTokenManipulator} from './web-token-manipulator';
-import {EpsilonJwtToken} from './epsilon-jwt-token';
+import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 export class AuthHandler {
     public static readonly AUTH_HEADER_PREFIX:string = 'Bearer ';
@@ -74,7 +73,7 @@ export class AuthHandler {
             const srcString = token.substring(7); // Strip "Bearer "
             const methodArn = event.methodArn;
 
-            let parsed:EpsilonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
+            let parsed:CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
 
             if (parsed) {
                 callback(null, this.createPolicy(methodArn, srcString, parsed));
