@@ -20,3 +20,71 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 # Other service
 * Environmental service
 * Simple redirects
+
+
+# Usage
+
+## Using WebHandler to simplify the Lambda 
+
+You will configure a RouterConfig, and then create a WebHandler from that.  Your lambda
+function should look like:
+
+```
+const handler: Handler = (event: APIGatewayEvent, context: Context, callback: Callback) => {
+    const routerConfig: RouterConfig = getMyRouterConfig(); // Implement this function
+    const commonHandler: WebHandler = new WebHandler(routerConfig);
+    commonHandler.lambdaHandler(event, context, callback);
+};
+
+export {handler};
+
+```
+
+
+
+## Using auth/AuthHandler to simplify a JWT token based auth
+
+Your auth lambda should look like this (I here assume you are storing your encryption key in AWS
+System Manager so you can keep it encrypted at rest, which you definitely should be doing):
+
+```
+
+import {AuthHandler} from '@bitblit/epsilon/dist/auth/auth-handler';
+import {Callback, Context, CustomAuthorizerEvent, Handler} from 'aws-lambda';
+import {EnvironmentService} from '@bitblit/ratchet/dist/aws/environment-service';
+import 'reflect-metadata';
+
+const handler: Handler = (event: CustomAuthorizerEvent, context: Context, callback: Callback) => {
+
+    EnvironmentService.getConfig('MyConfigurationName').then(cfg => {
+        const commonAuth: AuthHandler = new AuthHandler('api.mycompany.com', cfg['encryptionKey']);
+        commonAuth.lambdaHandler(event, context, callback);
+    });
+};
+
+export {handler};
+
+```
+
+This will pass through anyone with a valid JWT token.  Note that Epsilon doesn't yet support role based
+filtering in this version.
+
+
+To create valid JWT tokens, your authentication endpoint can use the **auth/WebTokenManipulator** class like so 
+(after you have verified the users principal/credentials pair) :
+
+```
+  // Other authentication stuff happens up here.
+  const email: string = 'user-email@test.com';
+  const roles: string[] = ['USER','NOT-AN-ADMIN'];
+  const userData: any = {'other': 'stuff'};
+  const myConfig: any = await EnvironmentService.getConfig('MyConfigurationName'); // same as above
+  const encryptionKey: string =  cfg['encryptionKey'];
+  const adminUser: any = null; // Set this if the user is an admin doing run-as (this is the admin user)
+  const expSec: number = 3600; // How long until this token expires in seconds
+
+  const tokenHandler: WebTokenManipulator = new WebTokenManipulator(encryptionKey, 'api.mycompany.com');
+  const token: string = tokenHandler.createJWTString(email, userData, roles, expSec, admin);
+
+```
+

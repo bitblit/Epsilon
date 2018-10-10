@@ -9,8 +9,12 @@ import {UnauthorizedError} from './error/unauthorized-error';
 import {ForbiddenError} from './error/forbidden-error';
 import {WebTokenManipulator} from './auth/web-token-manipulator';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
+import {RouteMapping} from './route/route-mapping';
+import {MisconfiguredError} from './error/misconfigured-error';
+import {BadRequestError} from './error/bad-request-error';
 
 export class WebHandler {
+    public static readonly DEFAULT_HANDLER_FUNCTION_NAME: string = 'handler';
     private routerConfig: RouterConfig;
     private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates *
@@ -34,7 +38,6 @@ export class WebHandler {
                 throw new Error('Router config not found');
             }
 
-            this.processAuthorizationHeader(event);
             let handler: Promise<any> = this.findHandler(event);
 
             Logger.debug('Processing event : %j', event);
@@ -57,39 +60,6 @@ export class WebHandler {
             callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
         }
     };
-
-
-    public processAuthorizationHeader (event: APIGatewayEvent) : void {
-
-        if (this.routerConfig.enableAuthorizationHeaderParsing) {
-            const header: string = (event && event.headers) ? event.headers['Authorization'] : null;
-            const token: string = (header && header.startsWith(AuthHandler.AUTH_HEADER_PREFIX)) ? header.substring(7) : null; // Strip "Bearer "
-            const parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(token);
-
-            if (parsed) {
-                event.requestContext.authorizer = {
-                    userJSON: JSON.stringify(parsed)
-                }
-            }
-        }
-    };
-
-    private checkAuthorization(event: APIGatewayEvent, requiredRoles: string[]):void {
-        if (requiredRoles && requiredRoles.length>0)
-        {
-            const token:CommonJwtToken<any> = EventUtil.extractToken(event);
-            if (!token) {
-                throw new UnauthorizedError('Unauthorized');
-            }
-
-            requiredRoles.forEach(r => {
-                if (!token.roles || token.roles.indexOf(r) == -1) {
-                    throw new ForbiddenError('Missing role ' + r);
-                }
-            })
-        }
-    }
-
 
 
     private cleanPath(event: APIGatewayEvent) : string
@@ -240,7 +210,7 @@ export class WebHandler {
         return input;
     }
 
-    public findHandler(event: APIGatewayEvent): Promise<any>
+    public async findHandler(event: APIGatewayEvent): Promise<any>
     {
         let rval: Promise<any> = null;
 
@@ -251,7 +221,9 @@ export class WebHandler {
         } else {
             // See: https://www.npmjs.com/package/route-parser
             let cleanPath:string = this.cleanPath(event);
-            this.routerConfig.routes.forEach(rm=>{
+            for (let i = 0; i<this.routerConfig.routes.length; i++)
+            {
+                const rm: RouteMapping = this.routerConfig.routes[i];
                 if (!rval) // TODO: Short circuit would be better
                 {
                     if (rm.method && rm.method.toLowerCase()===event.httpMethod.toLowerCase())
@@ -260,14 +232,22 @@ export class WebHandler {
                         let parsed: any = routeParser.match(cleanPath);
                         if (parsed)
                         {
-                            this.checkAuthorization(event, rm.requiredRoles);
                             // We extend with the parsed params here in case we are using the AWS any proxy
                             event.pathParameters = Object.assign({}, event.pathParameters, parsed);
-                            rval = rm.handlerOb[rm.handlerName](event);
+
+                            // Check authentication / authorization
+                            const passAuth: boolean = await this.applyAuth(event, rm);
+
+                            // Check validation
+                            const passBodyValid: boolean = await this.applyBodyObjectValidation(event, rm);
+
+                            // Cannot get here without a valid auth/body, would've thrown an error
+                            const handlerName: string = rm.handlerName || WebHandler.DEFAULT_HANDLER_FUNCTION_NAME;
+                            rval = rm.handlerOb[handlerName](event);
                         }
                     }
                 }
-            });
+            }
         }
 
         if (!rval)
@@ -277,6 +257,60 @@ export class WebHandler {
         }
         return rval;
 
+    }
+
+    private async applyBodyObjectValidation(event: APIGatewayEvent, route: RouteMapping): Promise<boolean> {
+        if (!event || !route) {
+            throw new MisconfiguredError('Missing event or route');
+        }
+        let rval: boolean = true;
+
+        if (route.validation) {
+            if (!this.routerConfig.modelValidator) {
+                throw new MisconfiguredError('Requested body validation but supplied no validator');
+            }
+            const errors: string[] = this.routerConfig.modelValidator.validate(route.validation.modelName,
+                route.validation.emptyAllowed, route.validation.extraPropertiesAllowed);
+            if (errors.length > 0) {
+                Logger.info('Found errors while validating %s object %j', route.validation.modelName, errors);
+                const newError: BadRequestError = new BadRequestError(...errors);
+                rval = false;
+                throw newError;
+            }
+        }
+        return rval;
+    }
+
+    // Returns a failing proxy result if no auth, otherwise returns null
+    private async applyAuth(event: APIGatewayEvent, route: RouteMapping): Promise<boolean> {
+        if (!event || !route) {
+            throw new MisconfiguredError('Missing event or route');
+        }
+        let rval: boolean = true;
+
+        if (route.auth) {
+            if (!this.webTokenManipulator) {
+                throw new MisconfiguredError('Auth is defined, but token manipulator not set - missing key?');
+            }
+            // Extract the token
+            const token: CommonJwtToken<any> = this.webTokenManipulator.extractTokenFromStandardEvent(event);
+            if (!token) {
+                Logger.info('Failed auth for route : %s - missing/bad token', route.path);
+                rval = false; // Not that it matters
+                throw new UnauthorizedError('Missing or bad token');
+            } else {
+                if (route.auth.handlerOb) {
+                    const handlerName: string = route.auth.handlerName || WebHandler.DEFAULT_HANDLER_FUNCTION_NAME;
+                    const passes: boolean = await route.auth.handlerOb[handlerName](token, event, route);
+                    if (!passes) {
+                        throw new ForbiddenError('Failed authorization');
+                        rval = false;
+                    }
+                }
+            }
+        }
+
+        return rval;
     }
 
     private zipAndReturn(content:any, contentType:string, callback:Callback) : void

@@ -1,6 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
+import {APIGatewayEvent, Callback, Context, CustomAuthorizerEvent} from 'aws-lambda';
+import {EpsilonConstants} from '../epsilon-constants';
 
 /**
  * Service for handling jwt tokens
@@ -71,6 +73,40 @@ export class WebTokenManipulator {
 
         const token = jwt.sign(tokenData, this.encryptionKey); // , algorithm = 'HS256')
         return token;
+    }
+
+    public static extractTokenStringFromAuthorizerEvent(event: CustomAuthorizerEvent): string {
+        Logger.silly('Extracting token from event : %j', event);
+        let rval: string = null;
+        if (event && event.authorizationToken) {
+            let token: string = event.authorizationToken;
+            if (token && token.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
+                rval = token.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length); // Strip "Bearer "
+            }
+        }
+        return rval;
+    }
+
+
+    public static extractTokenStringFromStandardEvent(event: APIGatewayEvent): string {
+        Logger.silly('Extracting token from event : %j', event);
+        let rval: string = null;
+        if (event && event.headers) {
+            Object.keys(event.headers).forEach( k => {
+                if (k && k.toLowerCase().trim() === EpsilonConstants.AUTH_HEADER_NAME_LOWERCASE) {
+                    const v: string = event.headers[k];
+                    if (v && v.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
+                        rval = v.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length);
+                    }
+                }
+            });
+        }
+        return rval;
+    }
+
+    public extractTokenFromStandardEvent<T>(event: APIGatewayEvent): CommonJwtToken<T> {
+        const tokenString: string = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
+        return (tokenString) ? this.parseAndValidateJWTString(tokenString) : null;
     }
 
 }

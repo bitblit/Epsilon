@@ -3,23 +3,21 @@ import {
     Callback,
     Context,
     CustomAuthorizerEvent,
-    Handler,
     PolicyDocument,
-    ProxyResult
 } from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
-import {EpsilonAuthProvider} from './epsilon-auth-provider';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
+import {EpsilonConstants} from '../epsilon-constants';
 
+/**
+ * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
+ */
 export class AuthHandler {
-    public static readonly AUTH_HEADER_PREFIX:string = 'Bearer ';
-    private authorizer: EpsilonAuthProvider;
     private webTokenManipulator: WebTokenManipulator;
 
-    constructor(authorizer: EpsilonAuthProvider, issuer:string, encryptionKey:string)
+    constructor(issuer:string, encryptionKey:string)
     {
-        this.authorizer = authorizer;
         this.webTokenManipulator = new WebTokenManipulator(encryptionKey, issuer);
     }
 
@@ -67,10 +65,9 @@ export class AuthHandler {
     public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback) : void {
         Logger.info('Got event : %j', event);
 
-        let token: string = event.authorizationToken;
+        let srcString = WebTokenManipulator.extractTokenStringFromAuthorizerEvent(event);
 
-        if (token && token.startsWith(AuthHandler.AUTH_HEADER_PREFIX)) {
-            const srcString = token.substring(7); // Strip "Bearer "
+        if (srcString) {
             const methodArn = event.methodArn;
 
             let parsed:CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);

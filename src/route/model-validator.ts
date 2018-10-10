@@ -46,7 +46,7 @@ export class ModelValidator {
             const errorStrings: string[] = errors.map(x => {
                 return String(x)
             });
-            Logger.info('Found errors while validating %s object %s', modelName, JSON.stringify(errorStrings));
+            Logger.info('Found errors while validating %s object %j', modelName, errorStrings);
             const newError: BadRequestError = new BadRequestError(...errorStrings);
             throw newError;
         } else {
