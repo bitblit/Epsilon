@@ -3,8 +3,6 @@ import {APIGatewayEvent, Callback, Context, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
 import * as Route from 'route-parser';
-import {AuthHandler} from './auth/auth-handler';
-import {EventUtil} from './event-util';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {ForbiddenError} from './error/forbidden-error';
 import {WebTokenManipulator} from './auth/web-token-manipulator';
@@ -12,12 +10,13 @@ import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 import {RouteMapping} from './route/route-mapping';
 import {MisconfiguredError} from './error/misconfigured-error';
 import {BadRequestError} from './error/bad-request-error';
+import {ResponseUtil} from './response-util';
 
 export class WebHandler {
     public static readonly DEFAULT_HANDLER_FUNCTION_NAME: string = 'handler';
     private routerConfig: RouterConfig;
     private webTokenManipulator;
-    private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates *
+    private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
     private corsResponse: ProxyResult = {statusCode:200, body: '{"cors":true}', headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':this.corsAllowedHeaders}} as ProxyResult;
 
     constructor(routing: RouterConfig)
@@ -44,12 +43,12 @@ export class WebHandler {
 
             handler.then(result=>{
                 Logger.debug('Returning : %j', result);
-                let proxyResult: ProxyResult = this.coerceToProxyResult(result);
+                let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
                 callback(null, this.addCors(proxyResult));
                 // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
-                callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
+                callback(null,this.addCors(ResponseUtil.errorToProxyResult(err)));
             });
 
 
@@ -57,7 +56,7 @@ export class WebHandler {
         catch (err)
         {
             Logger.warn('Unhandled error (in wrapping catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
-            callback(null,this.addCors(WebHandler.errorToProxyResult(err)));
+            callback(null,this.addCors(ResponseUtil.errorToProxyResult(err)));
         }
     };
 
@@ -87,125 +86,12 @@ export class WebHandler {
         return rval;
     }
 
-    public static bodyObject(event: APIGatewayEvent): any {
-        let rval:any = null;
-        if (event.body)
-        {
-            let contentType = event.headers['content-type'] || event.headers['Content-Type'] || 'application/octet-stream';
-            rval = event.body;
-
-            if (event.isBase64Encoded)
-            {
-                rval = Buffer.from(rval, 'base64');
-            }
-            if (contentType==='application/json')
-            {
-                rval = JSON.parse(rval.toString('ascii'));
-            }
-        }
-        return rval;
-    }
-
-    public static errorResponse(errorMessages:string[], statusCode:number) : ProxyResult
-    {
-        let body: any = {
-            errors:errorMessages,
-            httpStatusCode:statusCode
-        };
-
-        let errorResponse: ProxyResult =
-            {
-                statusCode: statusCode,
-                isBase64Encoded: false,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body)
-            };
-
-        return errorResponse;
-    }
-
-    public static redirect(target:string) : ProxyResult
-    {
-        return {
-            statusCode: 301,
-            body: '{"redirect-target":"'+target+'}',
-            headers: {
-                'Content-Type' : 'application/json',
-                'Location': target
-            }
-        } as ProxyResult;
-    }
-
-    public static buildHttpError(errorMessage:string, statusCode:number) : Error {
-        let rval : Error = new Error(errorMessage);
-        rval['statusCode']=statusCode;
-
-        return rval
-    }
-
-    public static errorToProxyResult(error:Error) : ProxyResult
-    {
-        let code = error['statusCode'] || 500;
-        let errorMessages: string[] = (error['messages'] && error['messages'].length>0)?error['messages']:null;
-        errorMessages = (errorMessages)?errorMessages:[(error.message || JSON.stringify(error))];
-
-        return this.errorResponse(errorMessages,code);
-    }
-
-    private coerceToProxyResult(input:any) : ProxyResult
-    {
-        let rval: ProxyResult = null;
-
-        if (input!=null)
-        {
-            if (typeof input === 'object')
-            {
-                if (input.statusCode && input.body)
-                {
-                    rval = Object.assign({}, input) as ProxyResult;
-                    if (typeof input.body==='string')
-                    {
-                        // Do Nothing
-                    }
-                    else if (Buffer.isBuffer(input.body))
-                    {
-                        rval.body = input.body.toString('base64');
-                        rval.headers = input.headers || {};
-                        rval.headers['Content-Type']=input.body.contentType; // TODO: Does this work?
-                        rval.isBase64Encoded = true;
-                    }
-                }
-                else
-                {
-                    // Its a generic object
-                    let headers : any = input.headers || {};
-                    headers['Content-Type']='application/json';
-                    rval = this.coerceToProxyResult({statusCode:200, body:JSON.stringify(input),headers:headers});
-                }
-            }
-            else if (typeof input === 'string' || Buffer.isBuffer(input))
-            {
-                rval = this.coerceToProxyResult({statusCode:200, body:input});
-            }
-
-        }
-
-        return rval;
-    }
-
     // Public so it can be used in auth-web-handler
     public addCors(input: ProxyResult) : ProxyResult
     {
         if (!this.routerConfig.disableCORS)
         {
-            if (!input.headers)
-            {
-                input.headers = {};
-            }
-            input.headers['Access-Control-Allow-Origin']=input.headers['Access-Control-Allow-Origin'] || '*';
-            input.headers['Access-Control-Allow-Headers']=input.headers['Access-Control-Allow-Headers'] || this.corsAllowedHeaders;
+            ResponseUtil.addCORSToProxyResult(input, this.corsAllowedHeaders);
         }
         return input;
     }
@@ -253,7 +139,7 @@ export class WebHandler {
         if (!rval)
         {
             Logger.debug('Failed to find handler for %s',event.path);
-            rval = Promise.resolve(WebHandler.errorResponse(['No such endpoint'],404));
+            rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'],404));
         }
         return rval;
 
@@ -308,6 +194,14 @@ export class WebHandler {
                     }
                 }
             }
+
+            if (rval) {
+                // Put the token into scope just like it would be from a AWS authorizer
+                event.requestContext.authorizer['userData'] = token;
+                event.requestContext.authorizer['userDataJSON'] = (token) ? JSON.stringify(token) : null;
+                event.requestContext.authorizer['srcData'] = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
+            }
+
         }
 
         return rval;

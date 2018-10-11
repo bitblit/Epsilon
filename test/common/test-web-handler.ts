@@ -2,6 +2,8 @@ import { expect } from 'chai';
 import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
 import {WebHandler} from '../../src/web-handler';
 import {BadRequestError} from '../../src/error/bad-request-error';
+import {ResponseUtil} from '../../src/response-util';
+import {EventUtil} from '../../src/event-util';
 
 
 describe('#errorToProxyResult', function() {
@@ -9,7 +11,7 @@ describe('#errorToProxyResult', function() {
     it('should set the default status code to 500', function() {
 
         let err:Error = new BadRequestError('this is a test','a1','a2');
-        let res:ProxyResult = WebHandler.errorToProxyResult(err);
+        let res:ProxyResult = ResponseUtil.errorToProxyResult(err);
 
         expect(res.statusCode).to.equal(400);
     });
@@ -32,7 +34,7 @@ describe('#errorToProxyResult', function() {
 
         } as APIGatewayEvent;
 
-        let body = WebHandler.bodyObject(evt);
+        let body = EventUtil.bodyObject(evt);
         expect(body).to.not.be.null;
         expect(body.message).to.equal('this is a test');
         expect(body.number).to.equal(1);
