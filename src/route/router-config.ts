@@ -1,8 +1,11 @@
 import {RouteMapping} from './route-mapping';
 import {ModelValidator} from './model-validator';
+import {AuthorizerFunction} from './authorizer-function';
 
 export interface RouterConfig {
     routes: RouteMapping[];
+
+    authorizers: Map<string, AuthorizerFunction>;
 
     // Future expansion
     disableCORS: boolean;

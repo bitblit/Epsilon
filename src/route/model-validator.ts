@@ -10,15 +10,33 @@ import {BadRequestError} from '../error/bad-request-error';
  */
 export class ModelValidator {
 
-    private allModels: any;
 
-    constructor(pathToSwagger:string)
-    {
-        const contents: Buffer = fs.readFileSync(pathToSwagger);
-        const swagger = yaml.parse(contents);
-        this.allModels = swagger['definitions'];
+    constructor(private allModels: any) {
+        if (!allModels || Object.keys(allModels).length==0) {
+            throw new Error('Cannot create model validator, passed models was null/empty : '+JSON.stringify(allModels));
+        }
     }
 
+    public static createFromOpenApiPath(pathToSwagger: string): ModelValidator {
+        const contents: Buffer = fs.readFileSync(pathToSwagger);
+        return ModelValidator.createFromOpenApiYaml(contents.toString());
+    }
+
+    public static createFromOpenApiYaml(yamlString: string): ModelValidator {
+        const openApi = yaml.parse(yamlString);
+        return ModelValidator.createFromParsedOpenApiObject(openApi);
+    }
+
+    public static createFromParsedOpenApiObject(openApi: any): ModelValidator {
+        if (!openApi || !openApi['components'] || !openApi['components']['schemas']) {
+            throw new Error('Cannot use this yaml - either null, or missing path components/schemas');
+        }
+        return new ModelValidator(openApi['components']['schemas']);
+    }
+
+    public fetchModel(modelName: string): any {
+        return this.allModels[modelName];
+    }
 
     public validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
                            extraPropertiesAllowed: boolean = true): string[] {

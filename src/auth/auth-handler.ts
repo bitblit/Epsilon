@@ -1,14 +1,7 @@
-import {
-    AuthResponseContext, AuthResponse,
-    Callback,
-    Context,
-    CustomAuthorizerEvent,
-    PolicyDocument,
-} from 'aws-lambda';
+import {AuthResponse, AuthResponseContext, Callback, Context, CustomAuthorizerEvent, PolicyDocument,} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
-import {EpsilonConstants} from '../epsilon-constants';
 
 /**
  * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
@@ -46,6 +39,7 @@ export class AuthHandler {
                     }
                 ]
             } as PolicyDocument,
+            // Context matches what would come in ExtendedAuthResponseContext if using epsilon auth
             context: {
                 userJSON: JSON.stringify(userOb),
                 srcData: srcString  // Put this in in-case we are doing a token update

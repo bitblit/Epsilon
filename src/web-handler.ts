@@ -13,9 +13,11 @@ import {BadRequestError} from './error/bad-request-error';
 import {ResponseUtil} from './response-util';
 import {ExtendedAPIGatewayEvent} from './route/extended-api-gateway-event';
 import {EventUtil} from './event-util';
+import {AuthorizerConfig} from './route/authorizer-config';
+import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
+import {AuthorizerFunction} from './route/authorizer-function';
 
 export class WebHandler {
-    public static readonly DEFAULT_HANDLER_FUNCTION_NAME: string = 'handler';
     private routerConfig: RouterConfig;
     private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
@@ -149,9 +151,8 @@ export class WebHandler {
                             const passBodyValid: boolean = await this.applyBodyObjectValidation(event, rm);
 
                             // Cannot get here without a valid auth/body, would've thrown an error
-                            const handlerName: string = rm.handlerName || WebHandler.DEFAULT_HANDLER_FUNCTION_NAME;
                             const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
-                            rval = rm.handlerOb[handlerName](extEvent);
+                            rval = rm.function(extEvent);
                         }
                     }
                 }
@@ -196,7 +197,7 @@ export class WebHandler {
         }
         let rval: boolean = true;
 
-        if (route.auth) {
+        if (route.authorizerName) {
             if (!this.webTokenManipulator) {
                 throw new MisconfiguredError('Auth is defined, but token manipulator not set - missing key?');
             }
@@ -207,9 +208,13 @@ export class WebHandler {
                 rval = false; // Not that it matters
                 throw new UnauthorizedError('Missing or bad token');
             } else {
-                if (route.auth.handlerOb) {
-                    const handlerName: string = route.auth.handlerName || WebHandler.DEFAULT_HANDLER_FUNCTION_NAME;
-                    const passes: boolean = await route.auth.handlerOb[handlerName](token, event, route);
+                const authorizer: AuthorizerFunction = this.routerConfig.authorizers.get(route.authorizerName);
+                if (!authorizer) {
+                    throw new MisconfiguredError('Route requires authorizer ' + route.authorizerName + ' but its not in the config');
+                }
+
+                if (authorizer) {
+                    const passes: boolean = await authorizer(token, event, route);
                     if (!passes) {
                         throw new ForbiddenError('Failed authorization');
                         rval = false;
@@ -219,11 +224,13 @@ export class WebHandler {
 
             if (rval) {
                 // Put the token into scope just like it would be from a AWS authorizer
-                event.requestContext.authorizer['userData'] = token;
-                event.requestContext.authorizer['userDataJSON'] = (token) ? JSON.stringify(token) : null;
-                event.requestContext.authorizer['srcData'] = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
+                const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as
+                    ExtendedAuthResponseContext;
+                newAuth.userData = token;
+                newAuth.userDataJSON =  (token) ? JSON.stringify(token) : null;
+                newAuth.srcData = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
+                event.requestContext.authorizer = newAuth;
             }
-
         }
 
         return rval;

@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  version: v0
+  title: SampleAPI
+tags:
+- name: CORS
+  description: These endpoints are here to support CORS
+- name: Public
+  description: These endpoints can be called without setting the authorization header
+- name: Secure
+  description: Authentication and authorization of the API
+paths:
+  /:
+    get:
+      description: Redirects to the /meta/server endpoint
+      tags:
+      - Meta
+      - Public
+      responses:
+        '301':
+          description: Redirects to the /meta/server endpoint
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+  /meta/server:
+    get:
+      description: >
+        Returns information about the current build and time.  Can be used to
+        test error-handling code by passing a specific http error code in the
+        error query parameter.  Can also be used to process specific named tests
+        by passing those names to the test parameter.
+      tags:
+      - Public
+      parameters:
+      - name: error
+        in: query
+        description: >-
+          If set, throw a specific error for testing (valid are
+          500,400,403,404)
+        required: false
+        schema:
+          type: number
+      - name: test
+        in: query
+        description: Run a specific named test (currently none are publicly available)
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Simulated bad request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Simulated unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '404':
+          description: Simulated not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '500':
+          description: Simulated internal server error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+  /meta/user:
+    get:
+      description: >
+        When logged in, returns the contents of the JWT token as the server
+        parses it.  This should match what you get when you process the token
+        returned from the "POST /access-token" endpoint through a standard JWT
+        token processor.
+      tags:
+      - Meta
+      security:
+      - SampleAuthorizer: []
+      responses:
+        '200':
+          description: Success
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenContents'
+        '401':
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  /meta/item/{itemId}:
+    get:
+      description: >
+        Example of a path param
+      parameters:
+      - name: itemId
+        in: path
+        description: A sample item id
+        required: true
+        schema:
+          type: string
+      tags:
+      - Meta
+      security:
+      - SampleAuthorizer: []
+      responses:
+        '200':
+          description: Success
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Empty'
+        '401':
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  /secure/access-token:
+    post:
+      tags:
+      - Secure
+      - Public
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessTokenRequest'
+        description: Request for the access token
+        required: true
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
+x-amazon-apigateway-binary-media-types:
+- '*/*'
+x-amazon-apigateway-gateway-responses:
+  UNAUTHORIZED:
+    statusCode: 401
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: '{"errors":["Unauthorized"], "httpStatusCode": 401}'
+  MISSING_AUTHENTICATION_TOKEN:
+    statusCode: 404
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: '{"errors":["No such endpoint"], "httpStatusCode": 404}'
+  INTEGRATION_TIMEOUT:
+    statusCode: 504
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: '{"errors":["Timeout"], "httpStatusCode": 504}'
+  DEFAULT_5XX:
+    statusCode: 500
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: '{"errors":["Internal Server Error"], "httpStatusCode": 500}'
+
+servers:
+- url: 'https://api.sample.com/dev'
+components:
+  securitySchemes:
+    SampleAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    Empty:
+      type: object
+      title: Empty Schema
+    AccessTokenRequest:
+      type: object
+      title: Access Token Request
+      required:
+      - email
+      - password
+      - scope
+      properties:
+        email:
+          type: string
+          description: Email address of the account to authenticate
+          format: email
+          minLength: 7
+        password:
+          type: string
+          description: Password of the account to authenticate
+          minLength: 6
+        scope:
+          type: string
+          enum:
+          - OWNER
+          - ADVERTISER
+          - GLOBAL
+          - RUN_AS_OWNER
+          - RUN_AS_ADVERTISER
+          description: |
+            What style of account to authenticate:
+             * `OWNER` - A device owner account
+             * `ADVERTISER` - A advertising account
+             * `GLOBAL` - Used by Adomni customer service
+             * `RUN_AS_OWNER` - Used by Adomni customer service
+             * `RUN_AS_ADVERTISER` - Used by Adomni customer service
+          default: OWNER
+        runAs:
+          type: string
+          description: Used by Adomni customer service
+          format: email
+        expirationSeconds:
+          type: number
+          minimum: 10
+          maximum: 3600
+          default: 3600
+    AccessTokenResponse:
+      type: object
+      title: Access Token Response
+      required:
+      - token
+      - expires
+      properties:
+        token:
+          type: string
+          description: A JWT access token for the API
+        expires:
+          type: number
+          format: int64
+          description: 'The time this token will expire, expressed in epoch ms'
+    AccessTokenContents:
+      type: object
+      title: Access Token Contents
+      description: The contents of the JWT token
+      required:
+      - exp
+      - iss
+      - sub
+      - iat
+      - user
+      properties:
+        exp:
+          type: number
+          description: >-
+            Expiration claim - The time this token will expire, expressed in
+            epoch ms
+        iss:
+          type: string
+          description: Issuer claim - Who created the token
+        sub:
+          type: string
+          description: Subject claim - The target of the token (typically user email)
+        iat:
+          type: number
+          description: >-
+            Issued at claim - The time this token was created, expressed in
+            epoch ms
+        user:
+          type: object
+          description: Object describing the user authenticated by this token
+    ApiErrorResponse:
+      type: object
+      title: API Error Response
+      required:
+      - errors
+      - httpStatusCode
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+          description: List of the errors that occurred
+        httpStatusCode:
+          type: number
+          description: Http status code of this error
+        detailCode:
+          type: number
+          description: Adomni detail status code for this error
