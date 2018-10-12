@@ -7,6 +7,8 @@ import {AuthorizerFunction} from '../../src/route/authorizer-function';
 import {SimpleRoleRouteAuth} from '../../src/simple-role-route-auth';
 import {HandlerFunction} from '../../src/route/handler-function';
 import {ExtendedAPIGatewayEvent} from '../../src/route/extended-api-gateway-event';
+import {WebHandler} from '../../src/web-handler';
+import {APIGatewayEvent} from 'aws-lambda';
 
 describe('#routerUtilApplyOpenApiDoc', function() {
 
@@ -19,7 +21,7 @@ describe('#routerUtilApplyOpenApiDoc', function() {
         authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
         const fakeHandler: HandlerFunction<any> = function (evt: ExtendedAPIGatewayEvent): Promise<boolean> {
             return Promise.resolve(true);
-        }
+        };
         handlers.set('get /', (event) => fakeHandler(event));
         handlers.set('get /meta/server', (event) => fakeHandler(event));
         handlers.set('get /meta/user', (event) => fakeHandler(event));
@@ -30,6 +32,19 @@ describe('#routerUtilApplyOpenApiDoc', function() {
 
         expect(cfg.modelValidator).to.not.be.null;
         expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).to.not.be.null;
+
+        // TODO: move this to its own test
+        const evt: APIGatewayEvent = {
+            httpMethod: 'get',
+            path: '/v0/meta/server',
+            requestContext: {
+                stage: 'v0'
+            }
+        } as APIGatewayEvent;
+        const webHandler: WebHandler = new WebHandler(cfg);
+        return webHandler.findHandler(evt, false).then(find => {
+            expect(find).to.not.be.null;
+        });
     });
 
     it('should reformat a path to match the other library', function() {

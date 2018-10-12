@@ -21,7 +21,6 @@ export class WebHandler {
     private routerConfig: RouterConfig;
     private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
-    private corsResponse: ProxyResult = {statusCode:200, body: '{"cors":true}', headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':this.corsAllowedHeaders}} as ProxyResult;
 
     constructor(routing: RouterConfig)
     {
@@ -81,11 +80,13 @@ export class WebHandler {
         } else if (stage && this.routerConfig.customStageValue && rval.startsWith(this.routerConfig.customStageValue)) {
             rval = rval.substring(this.routerConfig.customStageValue.length);
         }
-        // Finally, strip any more leading /
+        // Strip any more leading /
         while (rval.startsWith('/'))
         {
             rval = rval.substring(1);
         }
+        // Finally, put back exactly 1 leading / to match what comes out of open api
+        rval = '/' + rval;
 
         return rval;
     }
@@ -119,47 +120,41 @@ export class WebHandler {
         return rval;
     }
 
-    public async findHandler(event: APIGatewayEvent): Promise<any>
+    public async findHandler(event: APIGatewayEvent, add404OnMissing: boolean = true): Promise<any>
     {
         let rval: Promise<any> = null;
 
-        if (event.httpMethod=='OPTIONS' && !this.routerConfig.disableCORS)
+        // See: https://www.npmjs.com/package/route-parser
+        let cleanPath:string = this.cleanPath(event);
+        for (let i = 0; i<this.routerConfig.routes.length; i++)
         {
-            Logger.debug('Options call, returning CORS');
-            rval = Promise.resolve(this.corsResponse);
-        } else {
-            // See: https://www.npmjs.com/package/route-parser
-            let cleanPath:string = this.cleanPath(event);
-            for (let i = 0; i<this.routerConfig.routes.length; i++)
+            const rm: RouteMapping = this.routerConfig.routes[i];
+            if (!rval) // TODO: Short circuit would be better
             {
-                const rm: RouteMapping = this.routerConfig.routes[i];
-                if (!rval) // TODO: Short circuit would be better
+                if (rm.method && rm.method.toLowerCase()===event.httpMethod.toLowerCase())
                 {
-                    if (rm.method && rm.method.toLowerCase()===event.httpMethod.toLowerCase())
+                    let routeParser: Route = new Route(rm.path);
+                    let parsed: any = routeParser.match(cleanPath);
+                    if (parsed)
                     {
-                        let routeParser: Route = new Route(rm.path);
-                        let parsed: any = routeParser.match(cleanPath);
-                        if (parsed)
-                        {
-                            // We extend with the parsed params here in case we are using the AWS any proxy
-                            event.pathParameters = Object.assign({}, event.pathParameters, parsed);
+                        // We extend with the parsed params here in case we are using the AWS any proxy
+                        event.pathParameters = Object.assign({}, event.pathParameters, parsed);
 
-                            // Check authentication / authorization
-                            const passAuth: boolean = await this.applyAuth(event, rm);
+                        // Check authentication / authorization
+                        const passAuth: boolean = await this.applyAuth(event, rm);
 
-                            // Check validation
-                            const passBodyValid: boolean = await this.applyBodyObjectValidation(event, rm);
+                        // Check validation
+                        const passBodyValid: boolean = await this.applyBodyObjectValidation(event, rm);
 
-                            // Cannot get here without a valid auth/body, would've thrown an error
-                            const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
-                            rval = rm.function(extEvent);
-                        }
+                        // Cannot get here without a valid auth/body, would've thrown an error
+                        const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+                        rval = rm.function(extEvent);
                     }
                 }
             }
         }
 
-        if (!rval)
+        if (!rval && add404OnMissing)
         {
             Logger.debug('Failed to find handler for %s',event.path);
             rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'],404));
