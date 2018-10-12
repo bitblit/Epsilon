@@ -11,6 +11,8 @@ import {RouteMapping} from './route/route-mapping';
 import {MisconfiguredError} from './error/misconfigured-error';
 import {BadRequestError} from './error/bad-request-error';
 import {ResponseUtil} from './response-util';
+import {ExtendedAPIGatewayEvent} from './route/extended-api-gateway-event';
+import {EventUtil} from './event-util';
 
 export class WebHandler {
     public static readonly DEFAULT_HANDLER_FUNCTION_NAME: string = 'handler';
@@ -96,6 +98,25 @@ export class WebHandler {
         return input;
     }
 
+    private extendApiGatewayEvent(event: APIGatewayEvent, routeMap: RouteMapping): ExtendedAPIGatewayEvent {
+        const rval: ExtendedAPIGatewayEvent = Object.assign({}, event) as ExtendedAPIGatewayEvent;
+        // Default all the key maps
+        if (!rval.queryStringParameters && !routeMap.disableQueryMapAssure) {
+            rval.queryStringParameters = {};
+        }
+        if (!rval.headers && !routeMap.disableHeaderMapAssure) {
+            rval.headers = {};
+        }
+        if (!rval.pathParameters && !routeMap.disablePathMapAssure) {
+            rval.pathParameters = {};
+        }
+        if (event.body && !routeMap.disableAutomaticBodyParse) {
+            rval.parsedBody = EventUtil.bodyObject(rval);
+        }
+
+        return rval;
+    }
+
     public async findHandler(event: APIGatewayEvent): Promise<any>
     {
         let rval: Promise<any> = null;
@@ -129,7 +150,8 @@ export class WebHandler {
 
                             // Cannot get here without a valid auth/body, would've thrown an error
                             const handlerName: string = rm.handlerName || WebHandler.DEFAULT_HANDLER_FUNCTION_NAME;
-                            rval = rm.handlerOb[handlerName](event);
+                            const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+                            rval = rm.handlerOb[handlerName](extEvent);
                         }
                     }
                 }

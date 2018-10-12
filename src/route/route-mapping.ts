@@ -17,4 +17,9 @@ export interface RouteMapping {
     // If there is a required role that isnt found it will 403
     auth: RouteAuthorizationConfig; // Leave blank for unauthenticated
 
+    disableAutomaticBodyParse: boolean;
+    disableQueryMapAssure: boolean;
+    disableHeaderMapAssure: boolean;
+    disablePathMapAssure: boolean;
+
 }
