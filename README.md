@@ -88,3 +88,19 @@ To create valid JWT tokens, your authentication endpoint can use the **auth/WebT
 
 ```
 
+
+# Notes on adding a new gateway/stage
+
+You'll need to auth the gateway to hit the lambda (yes, as of 2018-10-13 this is still ugly) :
+
+```
+aws lambda add-permission --function-name "arn:aws:lambda:us-east-1:{accountId}:function:{lambda-function-name}"  
+  --source-arn "arn:aws:execute-api:us-east-1:{account number}:{api id}/*/*/*"  
+    --principal apigateway.amazonaws.com  
+      --statement-id b57d8a0f-08e5-407c-9093-47d7e8e840bc  
+        --action lambda:InvokeFunction
+
+```
+
+And you'll need to remember to go to IAM / Keys and authorize the new stack user to use your KMS key (if you are 
+using KMS to encrypt your config via SystemManager, which you should be doing)

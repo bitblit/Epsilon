@@ -40,6 +40,10 @@ export class WebHandler {
                 throw new Error('Router config not found');
             }
 
+            // Setup logging
+            const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this.routerConfig);
+            Logger.setLevelByName(logLevel);
+
             let handler: Promise<any> = this.findHandler(event);
 
             Logger.debug('Processing event : %j', event);
@@ -72,14 +76,15 @@ export class WebHandler {
         {
             rval = rval.substring(1);
         }
-        // Next, if there is a stage, remove it
-        let stage : string = event.requestContext.stage;
-        if (stage && rval.startsWith(stage))
-        {
-            rval = rval.substring(stage.length);
-        } else if (stage && this.routerConfig.customStageValue && rval.startsWith(this.routerConfig.customStageValue)) {
-            rval = rval.substring(this.routerConfig.customStageValue.length);
+        // If there are any listed prefixes, strip them
+        if (this.routerConfig.prefixesToStripBeforeRouteMatch) {
+            this.routerConfig.prefixesToStripBeforeRouteMatch.forEach(prefix => {
+                if (rval.toLowerCase().startsWith(prefix.toLowerCase())) {
+                    rval = rval.substring(prefix.length);
+                }
+            })
         }
+
         // Strip any more leading /
         while (rval.startsWith('/'))
         {

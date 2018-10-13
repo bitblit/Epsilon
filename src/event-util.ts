@@ -1,6 +1,8 @@
 import {APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext} from 'aws-lambda';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
+import {RouterConfig} from './route/router-config';
+import {Logger} from '@bitblit/ratchet/dist/common/logger';
 
 /**
  * Endpoints about the api itself
@@ -72,6 +74,20 @@ export class EventUtil {
             {
                 rval = JSON.parse(rval.toString('ascii'));
             }
+        }
+        return rval;
+    }
+
+    public static calcLogLevelViaEventOrEnvParam(curLevel:string, event: APIGatewayEvent, rConfig: RouterConfig): string {
+        let rval: string = curLevel;
+        if (rConfig && rConfig.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
+            rval = process.env[rConfig.envParamLogLevelName];
+            Logger.silly('Found env log level : %s', rval);
+        }
+        if (rConfig && rConfig.queryParamLogLevelName && event && event.queryStringParameters &&
+                event.queryStringParameters[rConfig.queryParamLogLevelName]) {
+            rval = event.queryStringParameters[rConfig.queryParamLogLevelName];
+            Logger.silly('Found query log level : %s', rval);
         }
         return rval;
     }

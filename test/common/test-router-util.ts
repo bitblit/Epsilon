@@ -41,6 +41,8 @@ describe('#routerUtilApplyOpenApiDoc', function() {
                 stage: 'v0'
             }
         } as APIGatewayEvent;
+
+        cfg.prefixesToStripBeforeRouteMatch = ['v0'];
         const webHandler: WebHandler = new WebHandler(cfg);
         return webHandler.findHandler(evt, false).then(find => {
             expect(find).to.not.be.null;
