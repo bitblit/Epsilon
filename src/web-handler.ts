@@ -54,7 +54,7 @@ export class WebHandler {
                 callback(null, this.addCors(proxyResult));
                 // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
-                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
+                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j',err.message, err.stack, event, this.routerConfig);
                 callback(null,this.addCors(ResponseUtil.errorToProxyResult(err)));
             });
 
