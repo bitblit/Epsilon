@@ -11,9 +11,9 @@ export interface RouterConfig {
     disableCORS: boolean;
     disableCompression: boolean;
     staticContentPaths: string[];
-    enableAuthorizationHeaderParsing: boolean;
 
-    authorizationHeaderEncryptionKey: string; // You must set this if you will use epsilon auth
+    // If you set the auth header encryption key, epsilon will auto-parse the Authorization header
+    authorizationHeaderEncryptionKey: string;
     modelValidator: ModelValidator; // Must be set to use model validation in your route mappings
 
     // Should typically be your stage name, but can be different in weird cases like custom name map

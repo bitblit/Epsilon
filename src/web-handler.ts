@@ -25,10 +25,7 @@ export class WebHandler {
     constructor(routing: RouterConfig)
     {
         this.routerConfig = routing;
-        if (this.routerConfig.enableAuthorizationHeaderParsing) {
-            if (!this.routerConfig.authorizationHeaderEncryptionKey) {
-                throw new Error('If you set enableAuthorizationHeaderParsing you must set authorizationHeaderEncryptionKey');
-            }
+        if (this.routerConfig.authorizationHeaderEncryptionKey) {
             this.webTokenManipulator = new WebTokenManipulator(this.routerConfig.authorizationHeaderEncryptionKey, '');
         }
     }
