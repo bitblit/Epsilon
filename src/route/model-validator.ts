@@ -40,19 +40,24 @@ export class ModelValidator {
 
     public validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
                     extraPropertiesAllowed: boolean = true): string[] {
-
-        Logger.info('Validating model %s all definitions are : %j', modelName, this.allModels);
-
         let rval: string[] = [];
+        Logger.debug('Validating model %s all definitions are : %j', modelName, this.allModels);
 
-        if (this.allModels && modelName && this.allModels[modelName]) {
-            const validation = new Validator().validate(modelObject, this.allModels[modelName], this.allModels, emptyAllowed, extraPropertiesAllowed);
-
-            if (validation.errorCount > 0) {
-                rval = validation.errors;
+        let modelEmpty: boolean = (!modelObject || Object.keys(modelObject).length === 0);
+        if (modelEmpty) {
+            if (!emptyAllowed) {
+                rval.push('Empty / null object sent, but empty not allowed here');
             }
         } else {
-            rval = ['Model named "' + modelName + '" not present in schema'];
+            if (this.allModels && modelName && this.allModels[modelName]) {
+                const validation = new Validator().validate(modelObject, this.allModels[modelName], this.allModels, emptyAllowed, extraPropertiesAllowed);
+
+                if (validation.errorCount > 0) {
+                    rval = validation.errors;
+                }
+            } else {
+                rval = ['Model named "' + modelName + '" not present in schema'];
+            }
         }
         return rval;
     }

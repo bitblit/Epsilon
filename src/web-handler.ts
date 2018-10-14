@@ -50,7 +50,9 @@ export class WebHandler {
             // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             return proxyResult;
         } catch (err) {
-            Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
+            if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
+                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
+            }
             const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
             const errWithCORS: ProxyResult = this.addCors(errProxy);
             return errWithCORS;
