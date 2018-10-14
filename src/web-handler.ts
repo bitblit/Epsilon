@@ -46,9 +46,12 @@ export class WebHandler {
             Logger.debug('Processing event : %j', event);
 
             handler.then(result=>{
-                Logger.debug('Returning : %j', result);
+                Logger.debug('Initial return value : %j', result);
                 let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
-                callback(null, this.addCors(proxyResult));
+                Logger.silly('Proxy result : %j', proxyResult);
+                proxyResult = this.addCors(proxyResult);
+                Logger.silly('CORS result : %j', proxyResult);
+                callback(null, proxyResult);
                 // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j',err.message, err.stack, event, this.routerConfig);
@@ -96,8 +99,7 @@ export class WebHandler {
     // Public so it can be used in auth-web-handler
     public addCors(input: ProxyResult) : ProxyResult
     {
-        if (!this.routerConfig.disableCORS)
-        {
+        if (!this.routerConfig.disableCORS) {
             ResponseUtil.addCORSToProxyResult(input, this.corsAllowedHeaders);
         }
         return input;
