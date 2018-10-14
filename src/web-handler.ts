@@ -1,5 +1,5 @@
 import {RouterConfig} from './route/router-config';
-import {APIGatewayEvent, Callback, Context, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, Callback, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
 import * as Route from 'route-parser';
@@ -13,7 +13,6 @@ import {BadRequestError} from './error/bad-request-error';
 import {ResponseUtil} from './response-util';
 import {ExtendedAPIGatewayEvent} from './route/extended-api-gateway-event';
 import {EventUtil} from './event-util';
-import {AuthorizerConfig} from './route/authorizer-config';
 import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
 import {AuthorizerFunction} from './route/authorizer-function';
 
@@ -22,18 +21,16 @@ export class WebHandler {
     private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
 
-    constructor(routing: RouterConfig)
-    {
+    constructor(routing: RouterConfig) {
         this.routerConfig = routing;
         if (this.routerConfig.authorizationHeaderEncryptionKey) {
             this.webTokenManipulator = new WebTokenManipulator(this.routerConfig.authorizationHeaderEncryptionKey, '');
         }
     }
 
-    public lambdaHandler (event: APIGatewayEvent, context: Context, callback: Callback) : void {
+    public async lambdaHandler(event: APIGatewayEvent): Promise<ProxyResult> {
         try {
-            if (!this.routerConfig)
-            {
+            if (!this.routerConfig) {
                 throw new Error('Router config not found');
             }
 
@@ -42,39 +39,76 @@ export class WebHandler {
             Logger.setLevelByName(logLevel);
 
             let handler: Promise<any> = this.findHandler(event);
-
             Logger.debug('Processing event : %j', event);
 
-            handler.then(result=>{
-                Logger.debug('Initial return value : %j', result);
-                let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
-                Logger.silly('Proxy result : %j', proxyResult);
-                proxyResult = this.addCors(proxyResult);
-                Logger.silly('CORS result : %j', proxyResult);
-                Logger.silly('Callback is %s %s', typeof callback, callback);
-                callback(null, proxyResult);
-                // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
-            }).catch(err=>{
-                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j',err.message, err.stack, event, this.routerConfig);
-                callback(null,this.addCors(ResponseUtil.errorToProxyResult(err)));
-            });
-
-
+            const result: any = await handler;
+            Logger.debug('Initial return value : %j', result);
+            let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
+            Logger.silly('Proxy result : %j', proxyResult);
+            proxyResult = this.addCors(proxyResult);
+            Logger.silly('CORS result : %j', proxyResult);
+            // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
+            return proxyResult;
+        } catch (err) {
+            Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
+            const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
+            const errWithCORS: ProxyResult = this.addCors(errProxy);
+            return errWithCORS;
         }
-        catch (err)
-        {
-            Logger.warn('Unhandled error (in wrapping catch) : %s \nStack was: %s\nEvt was: %j',err.message, err.stack, event);
-            callback(null,this.addCors(ResponseUtil.errorToProxyResult(err)));
-        }
+        ;
     };
 
+    // Public so it can be used in auth-web-handler
+    public addCors(input: ProxyResult): ProxyResult {
+        if (!this.routerConfig.disableCORS) {
+            ResponseUtil.addCORSToProxyResult(input, this.corsAllowedHeaders);
+        }
+        return input;
+    }
 
-    private cleanPath(event: APIGatewayEvent) : string
-    {
-        let rval : string = event.path;
+    public async findHandler(event: APIGatewayEvent, add404OnMissing: boolean = true): Promise<any> {
+        let rval: Promise<any> = null;
+
+        // See: https://www.npmjs.com/package/route-parser
+        let cleanPath: string = this.cleanPath(event);
+        for (let i = 0; i < this.routerConfig.routes.length; i++) {
+            const rm: RouteMapping = this.routerConfig.routes[i];
+            if (!rval) // TODO: Short circuit would be better
+            {
+                if (rm.method && rm.method.toLowerCase() === event.httpMethod.toLowerCase()) {
+                    let routeParser: Route = new Route(rm.path);
+                    let parsed: any = routeParser.match(cleanPath);
+                    if (parsed) {
+                        // We extend with the parsed params here in case we are using the AWS any proxy
+                        event.pathParameters = Object.assign({}, event.pathParameters, parsed);
+
+                        // Check authentication / authorization
+                        const passAuth: boolean = await this.applyAuth(event, rm);
+
+                        // Cannot get here without a valid auth/body, would've thrown an error
+                        const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+
+                        // Check validation
+                        const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
+
+                        rval = rm.function(extEvent);
+                    }
+                }
+            }
+        }
+
+        if (!rval && add404OnMissing) {
+            Logger.debug('Failed to find handler for %s', event.path);
+            rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'], 404));
+        }
+        return rval;
+
+    }
+
+    private cleanPath(event: APIGatewayEvent): string {
+        let rval: string = event.path;
         // First, strip any leading /
-        while (rval.startsWith('/'))
-        {
+        while (rval.startsWith('/')) {
             rval = rval.substring(1);
         }
         // If there are any listed prefixes, strip them
@@ -87,23 +121,13 @@ export class WebHandler {
         }
 
         // Strip any more leading /
-        while (rval.startsWith('/'))
-        {
+        while (rval.startsWith('/')) {
             rval = rval.substring(1);
         }
         // Finally, put back exactly 1 leading / to match what comes out of open api
         rval = '/' + rval;
 
         return rval;
-    }
-
-    // Public so it can be used in auth-web-handler
-    public addCors(input: ProxyResult) : ProxyResult
-    {
-        if (!this.routerConfig.disableCORS) {
-            ResponseUtil.addCORSToProxyResult(input, this.corsAllowedHeaders);
-        }
-        return input;
     }
 
     private extendApiGatewayEvent(event: APIGatewayEvent, routeMap: RouteMapping): ExtendedAPIGatewayEvent {
@@ -123,50 +147,6 @@ export class WebHandler {
         }
 
         return rval;
-    }
-
-    public async findHandler(event: APIGatewayEvent, add404OnMissing: boolean = true): Promise<any>
-    {
-        let rval: Promise<any> = null;
-
-        // See: https://www.npmjs.com/package/route-parser
-        let cleanPath:string = this.cleanPath(event);
-        for (let i = 0; i<this.routerConfig.routes.length; i++)
-        {
-            const rm: RouteMapping = this.routerConfig.routes[i];
-            if (!rval) // TODO: Short circuit would be better
-            {
-                if (rm.method && rm.method.toLowerCase()===event.httpMethod.toLowerCase())
-                {
-                    let routeParser: Route = new Route(rm.path);
-                    let parsed: any = routeParser.match(cleanPath);
-                    if (parsed)
-                    {
-                        // We extend with the parsed params here in case we are using the AWS any proxy
-                        event.pathParameters = Object.assign({}, event.pathParameters, parsed);
-
-                        // Check authentication / authorization
-                        const passAuth: boolean = await this.applyAuth(event, rm);
-
-                        // Cannot get here without a valid auth/body, would've thrown an error
-                        const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
-
-                        // Check validation
-                        const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
-
-                        rval = rm.function(extEvent);
-                    }
-                }
-            }
-        }
-
-        if (!rval && add404OnMissing)
-        {
-            Logger.debug('Failed to find handler for %s',event.path);
-            rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'],404));
-        }
-        return rval;
-
     }
 
     private async applyBodyObjectValidation(event: ExtendedAPIGatewayEvent, route: RouteMapping): Promise<boolean> {
@@ -229,7 +209,7 @@ export class WebHandler {
                 const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as
                     ExtendedAuthResponseContext;
                 newAuth.userData = token;
-                newAuth.userDataJSON =  (token) ? JSON.stringify(token) : null;
+                newAuth.userDataJSON = (token) ? JSON.stringify(token) : null;
                 newAuth.srcData = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
                 event.requestContext.authorizer = newAuth;
             }
@@ -238,9 +218,8 @@ export class WebHandler {
         return rval;
     }
 
-    private zipAndReturn(content:any, contentType:string, callback:Callback) : void
-    {
-        if (this.shouldGzip(content.length,contentType)) {
+    private zipAndReturn(content: any, contentType: string, callback: Callback): void {
+        if (this.shouldGzip(content.length, contentType)) {
             this.gzip(content).then((compressed) => {
                 let contents64 = compressed.toString('base64');
 
@@ -254,12 +233,11 @@ export class WebHandler {
                     body: contents64
                 };
 
-                Logger.debug("Sending response with gzip body, length is %d", contents64.length);
+                Logger.debug('Sending response with gzip body, length is %d', contents64.length);
                 callback(null, response);
             });
         }
-        else
-        {
+        else {
             let contents64 = content.toString('base64');
 
             let response = {
@@ -271,14 +249,14 @@ export class WebHandler {
                 body: contents64
             };
 
-            Logger.debug("Sending response with gzip body, length is %d", contents64.length);
+            Logger.debug('Sending response with gzip body, length is %d', contents64.length);
             callback(null, response);
 
         }
     }
 
 
-    private shouldGzip(fileSize: number, contentType:string) : boolean {
+    private shouldGzip(fileSize: number, contentType: string): boolean {
         /*
 
         let rval : boolean = (fileSize>2048); // MTU packet is 1400 bytes
@@ -301,10 +279,10 @@ export class WebHandler {
     }
 
 
-    private gzip(input, options={}) : Promise<Buffer>{
+    private gzip(input, options = {}): Promise<Buffer> {
         var promise = new Promise<Buffer>(function (resolve, reject) {
             zlib.gzip(input, options, function (error, result) {
-                if (!error) resolve(result);else reject(error);
+                if (!error) resolve(result); else reject(error);
             });
         });
         return promise;

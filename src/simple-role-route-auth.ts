@@ -11,16 +11,16 @@ export class SimpleRoleRouteAuth {
     public async handler(token: CommonJwtToken<any>, event: APIGatewayEvent, route: RouteMapping): Promise<boolean> {
         let rval: boolean = true;
         if (this.requiredRoleOneOf) {
-            this.requiredRoleOneOf.forEach( r => {
-                rval = rval || (token.roles.indexOf(r)>-1);
+            this.requiredRoleOneOf.forEach(r => {
+                rval = rval || (token.roles.indexOf(r) > -1);
             });
             if (!rval) {
                 Logger.warn('Request to %s failed to find at least one of %j', route.path, this.requiredRoleOneOf);
             }
         }
         if (rval && this.requiredRoleAllOf) {
-            this.requiredRoleAllOf.forEach( r => {
-                rval = rval && (token.roles.indexOf(r)>-1);
+            this.requiredRoleAllOf.forEach(r => {
+                rval = rval && (token.roles.indexOf(r) > -1);
             });
             if (!rval) {
                 Logger.warn('Request to %s failed to find all of %j', route.path, this.requiredRoleAllOf);

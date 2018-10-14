@@ -9,13 +9,41 @@ import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 export class AuthHandler {
     private webTokenManipulator: WebTokenManipulator;
 
-    constructor(issuer:string, encryptionKey:string)
-    {
+    constructor(issuer: string, encryptionKey: string) {
         this.webTokenManipulator = new WebTokenManipulator(encryptionKey, issuer);
     }
 
-    private createPolicy(methodArn: string, srcString: string, userOb: any): AuthResponse
-    {
+    /**
+     * This is the default authorizer - parses the incoming JWT token and sticks it
+     * into context (or blocks if none/invalid found)
+     * @param event
+     * @param {Context} context
+     * @param {Callback} callback
+     */
+    public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback): void {
+        Logger.info('Got event : %j', event);
+
+        let srcString = WebTokenManipulator.extractTokenStringFromAuthorizerEvent(event);
+
+        if (srcString) {
+            const methodArn = event.methodArn;
+
+            let parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
+
+            if (parsed) {
+                callback(null, this.createPolicy(methodArn, srcString, parsed));
+            } else {
+                Logger.info('Invalid bearer token');
+                callback(new Error('Unauthorized')); // Required by Lambda
+            }
+
+        } else {
+            Logger.info('Token not supplied');
+            callback(new Error('Unauthorized')); // Required by Lambda
+        }
+    }
+
+    private createPolicy(methodArn: string, srcString: string, userOb: any): AuthResponse {
         // If we reached here, create a policy document
         // parse the ARN from the incoming event
         const tmp = methodArn.split(':'); // event.methodArn;
@@ -25,7 +53,7 @@ export class AuthHandler {
         const stage = apiGatewayArnTmp[1];
         const restApiId = apiGatewayArnTmp[0];
 
-        const response:AuthResponse = {
+        const response: AuthResponse = {
             principalId: 'user',
             policyDocument: {
                 Version: '2012-10-17',
@@ -48,35 +76,5 @@ export class AuthHandler {
 
         return response;
     };
-
-    /**
-     * This is the default authorizer - parses the incoming JWT token and sticks it
-     * into context (or blocks if none/invalid found)
-     * @param event
-     * @param {Context} context
-     * @param {Callback} callback
-     */
-    public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback) : void {
-        Logger.info('Got event : %j', event);
-
-        let srcString = WebTokenManipulator.extractTokenStringFromAuthorizerEvent(event);
-
-        if (srcString) {
-            const methodArn = event.methodArn;
-
-            let parsed:CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
-
-            if (parsed) {
-                callback(null, this.createPolicy(methodArn, srcString, parsed));
-            } else {
-                Logger.info('Invalid bearer token');
-                callback(new Error('Unauthorized')); // Required by Lambda
-            }
-
-        } else {
-            Logger.info('Token not supplied');
-            callback(new Error('Unauthorized')); // Required by Lambda
-        }
-    }
 
 }

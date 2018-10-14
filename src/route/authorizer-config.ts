@@ -1,4 +1,3 @@
-
 export interface AuthorizerConfig {
     name: string;
 

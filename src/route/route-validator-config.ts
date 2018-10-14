@@ -1,4 +1,3 @@
-
 export interface RouteValidatorConfig {
     modelName: string; // Must be a valid entry in the model validator
     emptyAllowed: boolean; // If true, an empty body passes validation, otherwise fails

@@ -12,8 +12,8 @@ export class ModelValidator {
 
 
     constructor(private allModels: any) {
-        if (!allModels || Object.keys(allModels).length==0) {
-            throw new Error('Cannot create model validator, passed models was null/empty : '+JSON.stringify(allModels));
+        if (!allModels || Object.keys(allModels).length == 0) {
+            throw new Error('Cannot create model validator, passed models was null/empty : ' + JSON.stringify(allModels));
         }
     }
 
@@ -39,7 +39,7 @@ export class ModelValidator {
     }
 
     public validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
-                           extraPropertiesAllowed: boolean = true): string[] {
+                    extraPropertiesAllowed: boolean = true): string[] {
 
         Logger.info('Validating model %s all definitions are : %j', modelName, this.allModels);
 
@@ -58,7 +58,7 @@ export class ModelValidator {
     }
 
     public validateBody(modelName: string, modelObject: any, emptyAllowed: boolean = false,
-                               extraPropertiesAllowed: boolean = true): Promise<any> {
+                        extraPropertiesAllowed: boolean = true): Promise<any> {
         const errors: any[] = this.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
         if (errors.length > 0) {
             const errorStrings: string[] = errors.map(x => {

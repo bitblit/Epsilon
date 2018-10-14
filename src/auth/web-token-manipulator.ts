@@ -17,6 +17,34 @@ export class WebTokenManipulator {
         this.issuer = issuer;
     }
 
+    public static extractTokenStringFromAuthorizerEvent(event: CustomAuthorizerEvent): string {
+        Logger.silly('Extracting token from event : %j', event);
+        let rval: string = null;
+        if (event && event.authorizationToken) {
+            let token: string = event.authorizationToken;
+            if (token && token.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
+                rval = token.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length); // Strip "Bearer "
+            }
+        }
+        return rval;
+    }
+
+    public static extractTokenStringFromStandardEvent(event: APIGatewayEvent): string {
+        Logger.silly('Extracting token from event : %j', event);
+        let rval: string = null;
+        if (event && event.headers) {
+            Object.keys(event.headers).forEach(k => {
+                if (k && k.toLowerCase().trim() === EpsilonConstants.AUTH_HEADER_NAME_LOWERCASE) {
+                    const v: string = event.headers[k];
+                    if (v && v.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
+                        rval = v.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length);
+                    }
+                }
+            });
+        }
+        return rval;
+    }
+
     public refreshJWTString<T>(tokenString: string, expirationSeconds: number): string {
 
         const now = new Date().getTime();
@@ -53,7 +81,6 @@ export class WebTokenManipulator {
         }
     }
 
-
     public createJWTString<T>(principal: string, userObject: T, roles: string[] = ['USER'], expirationSeconds: number = 3600, proxyUser: T = null): string {
         Logger.info('Creating JWT token for %s  that expires in %s', principal, expirationSeconds);
         const now = new Date().getTime();
@@ -73,35 +100,6 @@ export class WebTokenManipulator {
 
         const token = jwt.sign(tokenData, this.encryptionKey); // , algorithm = 'HS256')
         return token;
-    }
-
-    public static extractTokenStringFromAuthorizerEvent(event: CustomAuthorizerEvent): string {
-        Logger.silly('Extracting token from event : %j', event);
-        let rval: string = null;
-        if (event && event.authorizationToken) {
-            let token: string = event.authorizationToken;
-            if (token && token.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
-                rval = token.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length); // Strip "Bearer "
-            }
-        }
-        return rval;
-    }
-
-
-    public static extractTokenStringFromStandardEvent(event: APIGatewayEvent): string {
-        Logger.silly('Extracting token from event : %j', event);
-        let rval: string = null;
-        if (event && event.headers) {
-            Object.keys(event.headers).forEach( k => {
-                if (k && k.toLowerCase().trim() === EpsilonConstants.AUTH_HEADER_NAME_LOWERCASE) {
-                    const v: string = event.headers[k];
-                    if (v && v.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
-                        rval = v.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length);
-                    }
-                }
-            });
-        }
-        return rval;
     }
 
     public extractTokenFromStandardEvent<T>(event: APIGatewayEvent): CommonJwtToken<T> {
