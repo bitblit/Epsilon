@@ -3,6 +3,7 @@ import {UnauthorizedError} from './error/unauthorized-error';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 import {RouterConfig} from './route/router-config';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
+import {BadRequestError} from './error/bad-request-error';
 
 /**
  * Endpoints about the api itself
@@ -34,6 +35,21 @@ export class EventUtil {
     }
 
     public static extractStage(event: APIGatewayEvent): string {
+        // This differs from extractApiGatewayStage in that the "real" stage can be
+        // mapped differently than the gateway stage.  This extracts the "real" stage
+        // as just being the first part of the path.  If they are the same, no harm no
+        // foul
+        if (!event.path.startsWith('/')) {
+            throw new BadRequestError('Path should start with / but does not : ' + event.path);
+        }
+        const idx = event.path.indexOf('/',1);
+        if (idx == -1) {
+            throw new BadRequestError('No second / found in the path : ' + event.path);
+        }
+        return event.path.substring(1, idx);
+    }
+
+    public static extractApiGatewayStage(event: APIGatewayEvent): string {
         let rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
         return (rc) ? rc.stage : null;
     }

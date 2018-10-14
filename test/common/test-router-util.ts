@@ -9,6 +9,7 @@ import {HandlerFunction} from '../../src/route/handler-function';
 import {ExtendedAPIGatewayEvent} from '../../src/route/extended-api-gateway-event';
 import {WebHandler} from '../../src/web-handler';
 import {APIGatewayEvent} from 'aws-lambda';
+import {EventUtil} from '../../src/event-util';
 
 describe('#routerUtilApplyOpenApiDoc', function() {
 
@@ -53,6 +54,21 @@ describe('#routerUtilApplyOpenApiDoc', function() {
         const inString: string = '/meta/item/{itemId}';
         const outString: string = RouterUtil.openApiPathToRouteParserPath(inString);
         expect(outString).to.equal('/meta/item/:itemId');
+    });
+
+
+    it('should correctly calculate stages', function() {
+        // TODO: move this to its own test
+        const evt: APIGatewayEvent = {
+            httpMethod: 'get',
+            path: '/cw/meta/server',
+            requestContext: {
+                stage: 'v0'
+            }
+        } as APIGatewayEvent;
+
+        expect(EventUtil.extractStage(evt)).to.equal('cw');
+        expect(EventUtil.extractApiGatewayStage(evt)).to.equal('v0');
     });
 
 });
