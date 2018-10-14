@@ -51,6 +51,7 @@ export class WebHandler {
                 Logger.silly('Proxy result : %j', proxyResult);
                 proxyResult = this.addCors(proxyResult);
                 Logger.silly('CORS result : %j', proxyResult);
+                Logger.silly('Callback is %s %s', typeof callback, callback);
                 callback(null, proxyResult);
                 // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
             }).catch(err=>{

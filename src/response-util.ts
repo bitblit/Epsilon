@@ -80,7 +80,7 @@ export class ResponseUtil {
                     // Its a generic object
                     let headers : any = input.headers || {};
                     headers['Content-Type']='application/json';
-                    rval = this.coerceToProxyResult({statusCode:200, body:JSON.stringify(input),headers:headers});
+                    rval = this.coerceToProxyResult({statusCode:200, body:JSON.stringify(input),headers:headers,isBase64Encoded:false});
                 }
             }
             else if (typeof input === 'string' || Buffer.isBuffer(input))
