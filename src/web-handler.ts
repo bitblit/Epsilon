@@ -145,11 +145,12 @@ export class WebHandler {
                         // Check authentication / authorization
                         const passAuth: boolean = await this.applyAuth(event, rm);
 
-                        // Check validation
-                        const passBodyValid: boolean = await this.applyBodyObjectValidation(event, rm);
-
                         // Cannot get here without a valid auth/body, would've thrown an error
                         const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+
+                        // Check validation
+                        const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
+
                         rval = rm.function(extEvent);
                     }
                 }
@@ -165,7 +166,7 @@ export class WebHandler {
 
     }
 
-    private async applyBodyObjectValidation(event: APIGatewayEvent, route: RouteMapping): Promise<boolean> {
+    private async applyBodyObjectValidation(event: ExtendedAPIGatewayEvent, route: RouteMapping): Promise<boolean> {
         if (!event || !route) {
             throw new MisconfiguredError('Missing event or route');
         }
@@ -176,6 +177,7 @@ export class WebHandler {
                 throw new MisconfiguredError('Requested body validation but supplied no validator');
             }
             const errors: string[] = this.routerConfig.modelValidator.validate(route.validation.modelName,
+                event.parsedBody,
                 route.validation.emptyAllowed, route.validation.extraPropertiesAllowed);
             if (errors.length > 0) {
                 Logger.info('Found errors while validating %s object %j', route.validation.modelName, errors);
