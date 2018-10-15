@@ -1,7 +1,7 @@
 import {APIGatewayEvent} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
-import {RouteMapping} from './route/route-mapping';
+import {RouteMapping} from '../route/route-mapping';
 
 export class SimpleRoleRouteAuth {
 

@@ -4,7 +4,7 @@ import * as path from 'path';
 import {RouterConfig} from '../../src/route/router-config';
 import {RouterUtil} from '../../src/route/router-util';
 import {AuthorizerFunction} from '../../src/route/authorizer-function';
-import {SimpleRoleRouteAuth} from '../../src/simple-role-route-auth';
+import {SimpleRoleRouteAuth} from '../../src/auth/simple-role-route-auth';
 import {HandlerFunction} from '../../src/route/handler-function';
 import {ExtendedAPIGatewayEvent} from '../../src/route/extended-api-gateway-event';
 import {WebHandler} from '../../src/web-handler';
