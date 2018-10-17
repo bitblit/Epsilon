@@ -78,9 +78,18 @@ export class ResponseUtil {
                         isBase64Encoded: false
                     });
                 }
-            }
-            else if (typeof input === 'string' || Buffer.isBuffer(input)) {
+            } else if (typeof input === 'string' || Buffer.isBuffer(input)) {
                 rval = ResponseUtil.coerceToProxyResult({statusCode: 200, body: input});
+            } else { // boolean , number, etc - other top level types
+                // See : https://stackoverflow.com/questions/18419428/what-is-the-minimum-valid-json
+                let headers: any = input.headers || {};
+                headers['Content-Type'] = 'application/json';
+                rval = ResponseUtil.coerceToProxyResult({
+                    statusCode: 200,
+                    body: JSON.stringify(input),
+                    headers: headers,
+                    isBase64Encoded: false
+                });
             }
 
         }
