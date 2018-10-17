@@ -47,7 +47,7 @@ export class ResponseUtil {
         let errorMessages: string[] = (error['messages'] && error['messages'].length > 0) ? error['messages'] : null;
         errorMessages = (errorMessages) ? errorMessages : [(error.message || JSON.stringify(error))];
 
-        return this.errorResponse(errorMessages, code);
+        return ResponseUtil.errorResponse(errorMessages, code);
     }
 
     public static coerceToProxyResult(input: any): ProxyResult {
@@ -71,7 +71,7 @@ export class ResponseUtil {
                     // Its a generic object
                     let headers: any = input.headers || {};
                     headers['Content-Type'] = 'application/json';
-                    rval = this.coerceToProxyResult({
+                    rval = ResponseUtil.coerceToProxyResult({
                         statusCode: 200,
                         body: JSON.stringify(input),
                         headers: headers,
@@ -80,7 +80,7 @@ export class ResponseUtil {
                 }
             }
             else if (typeof input === 'string' || Buffer.isBuffer(input)) {
-                rval = this.coerceToProxyResult({statusCode: 200, body: input});
+                rval = ResponseUtil.coerceToProxyResult({statusCode: 200, body: input});
             }
 
         }

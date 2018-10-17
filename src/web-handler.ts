@@ -40,7 +40,6 @@ export class WebHandler {
 
             let handler: Promise<any> = this.findHandler(event);
             Logger.debug('Processing event : %j', event);
-
             const result: any = await handler;
             Logger.debug('Initial return value : %j', result);
             let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
