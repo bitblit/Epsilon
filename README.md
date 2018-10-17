@@ -1,6 +1,12 @@
 # Epsilon
 A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
+# TODO:
+- Integrate SaltMine for internal batch handling and cron handling
+- Discuss pros/cons of single lambda for http/batch in this document
+- path/query var checking against open api doc
+- check compression handling
+
 ## How better than just using straight Node?
 * Uses typescript instead of the Godforsaken straight javascript
 * Handles route mapping (multiple ends, single lambda)

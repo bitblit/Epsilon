@@ -7,13 +7,13 @@ import {EventUtil} from '../../src/event-util';
 import * as fs from "fs";
 import * as path from "path";
 import {ModelValidator} from '../../src/route/model-validator';
-
+import {loadSampleOpenApiYaml} from '../../src/local-server';
 
 describe('#modelValidator', function() {
 
     it('should list an error', function() {
 
-        const yamlString: string = fs.readFileSync(path.join(__dirname, 'test-open-api-doc.yaml')).toString();
+        const yamlString: string = loadSampleOpenApiYaml();
         const validator: ModelValidator = ModelValidator.createFromOpenApiYaml(yamlString);
 
         const testOb: any =

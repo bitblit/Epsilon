@@ -10,26 +10,12 @@ import {ExtendedAPIGatewayEvent} from '../../src/route/extended-api-gateway-even
 import {WebHandler} from '../../src/web-handler';
 import {APIGatewayEvent} from 'aws-lambda';
 import {EventUtil} from '../../src/event-util';
+import {createSampleRouterConfig} from '../../src/local-server';
 
 describe('#routerUtilApplyOpenApiDoc', function() {
 
     it('should create a router config from a yaml file', function() {
-        const yamlString: string = fs.readFileSync(path.join(__dirname, 'test-open-api-doc.yaml')).toString();
-
-        const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
-        const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
-        const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'],[]);
-        authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
-        const fakeHandler: HandlerFunction<any> = function (evt: ExtendedAPIGatewayEvent): Promise<boolean> {
-            return Promise.resolve(true);
-        };
-        handlers.set('get /', (event) => fakeHandler(event));
-        handlers.set('get /meta/server', (event) => fakeHandler(event));
-        handlers.set('get /meta/user', (event) => fakeHandler(event));
-        handlers.set('get /meta/item/{itemId}', (event) => fakeHandler(event));
-        handlers.set('post /secure/access-token', (event) => fakeHandler(event));
-
-        const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
+        const cfg: RouterConfig = createSampleRouterConfig();
 
         expect(cfg.modelValidator).to.not.be.null;
         expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).to.not.be.null;

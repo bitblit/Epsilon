@@ -12,10 +12,12 @@
   ],
   "config": {},
   "scripts": {
-    "compile": "yarn run clean && tsc",
+    "compile": "yarn run clean && tsc && yarn run copy-static-files",
+    "copy-static-files": "cd src && cp -R static ../dist",
     "watch": "tsc -w .",
     "clean": "rm -Rf dist",
-    "test": "mocha -r ts-node/register test/**/*.ts"
+    "test": "mocha -r ts-node/register test/**/*.ts",
+    "run-sample-server": "yarn compile && node dist/sample-local-server.js"
   },
   "repository": {
     "type": "git",

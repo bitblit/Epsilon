@@ -8,16 +8,23 @@ import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
 import * as moment from 'moment-timezone';
 import * as qs from 'querystring';
+import {AuthorizerFunction} from './route/authorizer-function';
+import {HandlerFunction} from './route/handler-function';
+import {SimpleRoleRouteAuth} from './auth/simple-role-route-auth';
+import {SampleHandler} from './route/sample-handler';
+import {RouterUtil} from './route/router-util';
+import * as fs from "fs";
+import * as path from "path";
 
 /**
  * A simplistic server for testing your lambdas locally
  */
-export class TestServer {
+export class LocalServer {
     private server: Server;
     private webHandler: WebHandler;
     private aborted: boolean = false;
 
-    constructor(private routerConfig: RouterConfig, private stage: string = 'Prod', private port: number = 8888) {
+    constructor(private routerConfig: RouterConfig, private port: number = 8888) {
         this.webHandler = new WebHandler(routerConfig);
     }
 
@@ -148,4 +155,29 @@ export class TestServer {
         response.end(proxyResult.body);
         return !!proxyResult.body;
     }
+}
+
+
+// Functions below here are for using as samples
+
+export function createSampleRouterConfig(): RouterConfig {
+    const yamlString: string = loadSampleOpenApiYaml();
+    const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
+    const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
+    const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'],[]);
+    const sampleHandler: SampleHandler = new SampleHandler();
+    authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
+    handlers.set('get /', (event) => sampleHandler.handle(event));
+    handlers.set('get /meta/server', (event) => sampleHandler.handle(event));
+    handlers.set('get /meta/user', (event) => sampleHandler.handle(event));
+    handlers.set('get /meta/item/{itemId}', (event) => sampleHandler.handle(event));
+    handlers.set('post /secure/access-token', (event) => sampleHandler.handle(event));
+
+    const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
+    return cfg;
+}
+
+export function loadSampleOpenApiYaml(): string {
+    const yamlString: string = fs.readFileSync(path.join(__dirname, 'static', 'sample-open-api-doc.yaml')).toString();
+    return yamlString;
 }

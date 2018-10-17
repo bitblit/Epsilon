@@ -16,6 +16,9 @@ import {EventUtil} from './event-util';
 import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
 import {AuthorizerFunction} from './route/authorizer-function';
 
+/**
+ * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
+ */
 export class WebHandler {
     private routerConfig: RouterConfig;
     private webTokenManipulator;
