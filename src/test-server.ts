@@ -31,6 +31,10 @@ export class TestServer {
             }
         });
         Logger.info('Epsilon server is listening');
+
+        // Also listen for SIGINT
+        process.on('SIGINT', () => {Logger.info('Caught SIGINT - shutting down test server...');this.aborted=true;});
+
         return this.checkFinished();
     }
 
@@ -38,7 +42,7 @@ export class TestServer {
         if (this.aborted) {
             return true;
         } else {
-            const wait: any = await PromiseRatchet.createTimeoutPromise('Wait', 2500, true, false);
+            const wait: any = await PromiseRatchet.createTimeoutPromise('Wait', 1000, true, false);
             return this.checkFinished();
         }
     }
