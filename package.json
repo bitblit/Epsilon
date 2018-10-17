@@ -41,7 +41,9 @@
     "node-yaml": "^3.1.1",
     "route-parser": "^0.0.5",
     "strip-js": "^1.2.0",
-    "swagger-model-validator": "^2.2.8"
+    "swagger-model-validator": "^2.2.8",
+    "moment": "^2.20.1",
+    "moment-timezone": "^0.5.14"
   },
   "peerDependencies": {
   },

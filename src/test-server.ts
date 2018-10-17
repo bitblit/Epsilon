@@ -5,6 +5,9 @@ import * as http from 'http';
 import {IncomingMessage, Server, ServerResponse} from 'http';
 import {WebHandler} from './web-handler';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
+import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
+import * as moment from 'moment-timezone';
+import * as qs from 'querystring';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -75,16 +78,18 @@ export class TestServer {
         const stage: string = request.url.substring(1, stageIdx);
         const path: string = request.url.substring(stageIdx+1);
 
+        const reqTime: number = new Date().getTime();
+        const formattedTime: string = moment.tz(reqTime, 'UTC').format('DD/MMM/YYYY:hh:mm:ss ZZ');
+        const queryIdx: number = request.url.indexOf('?');
+        const queryStringParams: any = (queryIdx > -1) ? qs.parse(request.url.substring(queryIdx+1)) : {};
 
         const rval: APIGatewayEvent = {
             body: bodyString,
             resource: '/{proxy+}',
-            path: path, // /meta/server
+            path: path,
             httpMethod: request.method.toLowerCase(),
             isBase64Encoded: true,
-            queryStringParameters: {
-                foo: 'bar'
-            },
+            queryStringParameters: queryStringParams,
             pathParameters: {
                 proxy: path
             },
@@ -95,10 +100,12 @@ export class TestServer {
             requestContext: {
                 accountId: '123456789012',
                 resourceId: '123456',
-                stage: 'prod',
-                requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
-                requestTime: '09/Apr/2015:12:34:56 +0000',
-                requestTimeEpoch: 1428582896000,
+                stage: stage,
+                requestId: StringRatchet.createType4Guid(),
+                requestTime: formattedTime, // '09/Apr/2015:12:34:56 +0000',
+                requestTimeEpoch: reqTime, //1428582896000,
+                identity: null,
+                /*
                 identity: {
                     apiKey: null,
                     cognitoIdentityPoolId: null,
@@ -113,6 +120,7 @@ export class TestServer {
                     userAgent: 'Custom User Agent String',
                     user: null
                 },
+                */
                 path: request.url, // /prod/path/to/resource
                 resourcePath: '/{proxy+}',
                 httpMethod: request.method.toLowerCase(),
