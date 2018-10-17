@@ -13,8 +13,8 @@ import {HandlerFunction} from './route/handler-function';
 import {SimpleRoleRouteAuth} from './auth/simple-role-route-auth';
 import {SampleHandler} from './route/sample-handler';
 import {RouterUtil} from './route/router-util';
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -28,7 +28,7 @@ export class LocalServer {
         this.webHandler = new WebHandler(routerConfig);
     }
 
-    async runServer(): Promise<boolean>{
+    async runServer(): Promise<boolean> {
         Logger.info('Starting Epsilon server on port %d', this.port);
         this.server = http.createServer(this.requestHandler.bind(this));
         this.server.listen(this.port, (err) => {
@@ -40,7 +40,10 @@ export class LocalServer {
         Logger.info('Epsilon server is listening');
 
         // Also listen for SIGINT
-        process.on('SIGINT', () => {Logger.info('Caught SIGINT - shutting down test server...');this.aborted=true;});
+        process.on('SIGINT', () => {
+            Logger.info('Caught SIGINT - shutting down test server...');
+            this.aborted = true;
+        });
 
         return this.checkFinished();
     }
@@ -56,7 +59,7 @@ export class LocalServer {
 
     async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {
         const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request);
-        Logger.info('Processing event: %j',evt);
+        Logger.info('Processing event: %j', evt);
 
         if (evt.path == '/epsilon-poison-pill') {
             this.aborted = true;
@@ -69,12 +72,12 @@ export class LocalServer {
     }
 
     private async bodyAsBase64String(request: IncomingMessage): Promise<string> {
-        return new Promise<string>((res,rej) => {
+        return new Promise<string>((res, rej) => {
             let body = [];
             request.on('data', (chunk) => {
                 body.push(chunk);
             });
-            request.on('end', () =>{
+            request.on('end', () => {
                 const rval: string = Buffer.concat(body).toString('base64');
                 res(rval);
             })
@@ -85,14 +88,14 @@ export class LocalServer {
     private async messageToApiGatewayEvent(request: IncomingMessage): Promise<APIGatewayEvent> {
 
         const bodyString: string = await this.bodyAsBase64String(request);
-        const stageIdx: number = request.url.indexOf('/',1);
+        const stageIdx: number = request.url.indexOf('/', 1);
         const stage: string = request.url.substring(1, stageIdx);
-        const path: string = request.url.substring(stageIdx+1);
+        const path: string = request.url.substring(stageIdx + 1);
 
         const reqTime: number = new Date().getTime();
         const formattedTime: string = moment.tz(reqTime, 'UTC').format('DD/MMM/YYYY:hh:mm:ss ZZ');
         const queryIdx: number = request.url.indexOf('?');
-        const queryStringParams: any = (queryIdx > -1) ? qs.parse(request.url.substring(queryIdx+1)) : {};
+        const queryStringParams: any = (queryIdx > -1) ? qs.parse(request.url.substring(queryIdx + 1)) : {};
 
         const rval: APIGatewayEvent = {
             body: bodyString,
@@ -164,7 +167,7 @@ export function createSampleRouterConfig(): RouterConfig {
     const yamlString: string = loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
-    const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'],[]);
+    const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'], []);
     const sampleHandler: SampleHandler = new SampleHandler();
     authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
     handlers.set('get /', (event) => sampleHandler.handle(event));

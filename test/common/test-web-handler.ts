@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
-import {WebHandler} from '../../src/web-handler';
 import {BadRequestError} from '../../src/error/bad-request-error';
 import {ResponseUtil} from '../../src/response-util';
 import {EventUtil} from '../../src/event-util';

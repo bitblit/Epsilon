@@ -1,11 +1,4 @@
-import { expect } from 'chai';
-import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
-import {WebHandler} from '../../src/web-handler';
-import {BadRequestError} from '../../src/error/bad-request-error';
-import {ResponseUtil} from '../../src/response-util';
-import {EventUtil} from '../../src/event-util';
-import * as fs from "fs";
-import * as path from "path";
+import {expect} from 'chai';
 import {ModelValidator} from '../../src/route/model-validator';
 import {loadSampleOpenApiYaml} from '../../src/local-server';
 

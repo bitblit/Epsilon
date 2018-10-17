@@ -1,12 +1,6 @@
-import { expect } from 'chai';
-import * as fs from 'fs';
-import * as path from 'path';
+import {expect} from 'chai';
 import {RouterConfig} from '../../src/route/router-config';
 import {RouterUtil} from '../../src/route/router-util';
-import {AuthorizerFunction} from '../../src/route/authorizer-function';
-import {SimpleRoleRouteAuth} from '../../src/auth/simple-role-route-auth';
-import {HandlerFunction} from '../../src/route/handler-function';
-import {ExtendedAPIGatewayEvent} from '../../src/route/extended-api-gateway-event';
 import {WebHandler} from '../../src/web-handler';
 import {APIGatewayEvent} from 'aws-lambda';
 import {EventUtil} from '../../src/event-util';

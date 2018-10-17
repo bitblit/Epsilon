@@ -7,6 +7,7 @@ export class DefaultCORSHandler {
         statusCode: 200, body: '{"cors":true}',
         headers: {
             'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': '*',
             'Access-Control-Allow-Headers': DefaultCORSHandler.DEFAULT_CORS_ALLOWED_HEADERS
         }
     } as ProxyResult;

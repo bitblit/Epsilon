@@ -53,7 +53,7 @@ export class ModelValidator {
                 const validation = new Validator().validate(modelObject, this.allModels[modelName], this.allModels, emptyAllowed, extraPropertiesAllowed);
 
                 if (validation.errorCount > 0) {
-                    rval = validation.errors.map( e => e.message);
+                    rval = validation.errors.map(e => e.message);
                 }
             } else {
                 rval = ['Model named "' + modelName + '" not present in schema'];

@@ -103,6 +103,7 @@ export class ResponseUtil {
             input.headers = {};
         }
         input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || '*';
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || '*';
         input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || corsAllowedHeaders;
 
         return input;

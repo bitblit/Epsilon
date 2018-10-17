@@ -42,7 +42,7 @@ export class EventUtil {
         if (!event.path.startsWith('/')) {
             throw new BadRequestError('Path should start with / but does not : ' + event.path);
         }
-        const idx = event.path.indexOf('/',1);
+        const idx = event.path.indexOf('/', 1);
         if (idx == -1) {
             throw new BadRequestError('No second / found in the path : ' + event.path);
         }
