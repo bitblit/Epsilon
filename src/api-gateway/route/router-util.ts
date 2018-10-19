@@ -96,7 +96,7 @@ export class RouterUtil {
                             && entry['requestBody']['content']['application/json']['schema']) {
                             // TODO: this is brittle as hell, need to firm up
                             const schema: any = entry['requestBody']['content'];
-                            Logger.debug('Applying schema %j to %s', schema, finder);
+                            Logger.silly('Applying schema %j to %s', schema, finder);
                             const schemaPath: string = schema['application/json']['schema']['$ref'];
                             const schemaName: string = schemaPath.substring(schemaPath.lastIndexOf('/') + 1);
                             if (!rval.modelValidator.fetchModel(schemaName)) {

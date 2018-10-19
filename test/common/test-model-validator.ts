@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ModelValidator} from '../../src/route/model-validator';
+import {ModelValidator} from '../../src/api-gateway/route/model-validator';
 import {loadSampleOpenApiYaml} from '../../src/local-server';
 
 describe('#modelValidator', function() {

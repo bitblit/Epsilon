@@ -1,18 +1,18 @@
-import {RouterConfig} from './route/router-config';
+import {RouterConfig} from './api-gateway/route/router-config';
 import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as http from 'http';
 import {IncomingMessage, Server, ServerResponse} from 'http';
-import {WebHandler} from './web-handler';
+import {WebHandler} from './api-gateway/web-handler';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
 import * as moment from 'moment-timezone';
 import * as qs from 'querystring';
-import {AuthorizerFunction} from './route/authorizer-function';
-import {HandlerFunction} from './route/handler-function';
-import {SimpleRoleRouteAuth} from './auth/simple-role-route-auth';
-import {SampleHandler} from './route/sample-handler';
-import {RouterUtil} from './route/router-util';
+import {AuthorizerFunction} from './api-gateway/route/authorizer-function';
+import {HandlerFunction} from './api-gateway/route/handler-function';
+import {SimpleRoleRouteAuth} from './api-gateway/auth/simple-role-route-auth';
+import {SampleHandler} from './api-gateway/route/sample-handler';
+import {RouterUtil} from './api-gateway/route/router-util';
 import * as fs from 'fs';
 import * as path from 'path';
 

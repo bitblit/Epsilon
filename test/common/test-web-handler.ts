@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
-import {BadRequestError} from '../../src/error/bad-request-error';
-import {ResponseUtil} from '../../src/response-util';
-import {EventUtil} from '../../src/event-util';
+import {BadRequestError} from '../../src/api-gateway/error/bad-request-error';
+import {ResponseUtil} from '../../src/api-gateway/response-util';
+import {EventUtil} from '../../src/api-gateway/event-util';
 
 
 describe('#errorToProxyResult', function() {

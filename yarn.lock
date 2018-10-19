@@ -2,13 +2,28 @@
 # yarn lockfile v1
 
 
-"@bitblit/ratchet@0.0.92":
-  version "0.0.92"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.92.tgz#3883dd0af15cbee6d756e90cd442732943904ffe"
-  integrity sha512-Ii7H22O7XHLYqWbvAwvKZSR2I1N5fxrvBPuX2LUpzsICOwCJChUWncjOgw3fOuLkMIaSj4gbsjdb+ISBHAZt3w==
+"@bitblit/ratchet@0.0.87":
+  version "0.0.87"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.87.tgz#8d05dc7ed94a951a88caff5052833f51b0ea02ee"
+  integrity sha512-RH9vDU2wWyTi8cWQcFSaTOmobZGxpOI2bGxPuRzgryn9aJKshmp96Y7YB0KDjhePBBPcCobIHxSel5JzRWKJFw==
   dependencies:
     moment "^2.20.1"
     moment-timezone "^0.5.14"
+
+"@bitblit/ratchet@0.0.95":
+  version "0.0.95"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.95.tgz#61cf0ce24ea36e52ed9b51357089ee2fc8100855"
+  integrity sha512-lojvmQqasmlj1aH229iS0+9IY8dy0FgxZ6iuWfWix7oGrB7vTWqIs1m8AanOrz19jB9O4ws4Rc9HrAEwqZS+RA==
+  dependencies:
+    moment "^2.20.1"
+    moment-timezone "^0.5.14"
+
+"@bitblit/saltmine@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.2.2.tgz#b8c2717969f6bebb1470065a28f2d3b731655754"
+  integrity sha512-H8g/RsgDUi9PIUiwr2rITN2OY2CQyjA2Env/wSN2FV6m87hDPC1SltLYqRyB9E6l/a25+mdFKmk8wvtPRfxQAQ==
+  dependencies:
+    "@bitblit/ratchet" "0.0.87"
 
 "@types/aws-lambda@0.0.31":
   version "0.0.31"

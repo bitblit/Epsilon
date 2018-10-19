@@ -1,9 +1,9 @@
 import {expect} from 'chai';
-import {RouterConfig} from '../../src/route/router-config';
-import {RouterUtil} from '../../src/route/router-util';
-import {WebHandler} from '../../src/web-handler';
+import {RouterConfig} from '../../src/api-gateway/route/router-config';
+import {RouterUtil} from '../../src/api-gateway/route/router-util';
+import {WebHandler} from '../../src/api-gateway/web-handler';
 import {APIGatewayEvent} from 'aws-lambda';
-import {EventUtil} from '../../src/event-util';
+import {EventUtil} from '../../src/api-gateway/event-util';
 import {createSampleRouterConfig} from '../../src/local-server';
 
 describe('#routerUtilApplyOpenApiDoc', function() {
