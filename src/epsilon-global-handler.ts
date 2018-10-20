@@ -10,7 +10,6 @@ import {EpsilonConfig} from './global/epsilon-config';
 import {WebHandler} from './api-gateway/web-handler';
 import {LambdaEventDetector} from '@bitblit/ratchet/dist/aws/lambda-event-detector';
 import {EpsilonDisableSwitches} from './global/epsilon-disable-switches';
-import {SaltMineFactory} from '@bitblit/saltmine/dist/salt-mine-factory';
 import {SaltMine} from '@bitblit/saltmine/dist/salt-mine';
 import {SnsHandlerFunction} from './batch/sns-handler-function';
 import {S3HandlerFunction} from './batch/s3-handler-function';
@@ -21,9 +20,8 @@ import {DynamoDbHandlerFunction} from './batch/dynamo-db-handler-function';
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
  */
-export class GlobalHandler {
+export class EpsilonGlobalHandler {
     private cacheWebHandler: WebHandler;
-    private cacheSaltMine: SaltMine;
 
     constructor(private config: EpsilonConfig) {
         if (!config) {
@@ -36,13 +34,7 @@ export class GlobalHandler {
     }
 
     private fetchSaltMine(): SaltMine {
-        if (!this.cacheSaltMine) {
-            if (this.config.saltMine && !this.config.disabled.saltMine) {
-                this.cacheSaltMine = SaltMineFactory.createSaltMine(this.config.saltMine);
-            }
-        }
-        return this.cacheSaltMine;
-
+        return (this.config.saltMine && !this.config.disabled.saltMine) ? this.config.saltMine : null;
     }
 
     private fetchWebHandler(): WebHandler {
