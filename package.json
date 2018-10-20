@@ -38,7 +38,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@bitblit/ratchet": "0.0.95",
-    "@bitblit/saltmine": "0.2.3",
+    "@bitblit/saltmine": "0.2.5",
     "crypt3": "^1.0.0",
     "jsonwebtoken": "^8.1.1",
     "node-yaml": "^3.1.1",

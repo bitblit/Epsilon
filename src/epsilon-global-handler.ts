@@ -10,11 +10,11 @@ import {EpsilonConfig} from './global/epsilon-config';
 import {WebHandler} from './api-gateway/web-handler';
 import {LambdaEventDetector} from '@bitblit/ratchet/dist/aws/lambda-event-detector';
 import {EpsilonDisableSwitches} from './global/epsilon-disable-switches';
-import {SaltMine} from '@bitblit/saltmine/dist/salt-mine';
 import {SnsHandlerFunction} from './batch/sns-handler-function';
 import {S3HandlerFunction} from './batch/s3-handler-function';
 import {CronHandlerFunction} from './batch/cron-handler-function';
 import {DynamoDbHandlerFunction} from './batch/dynamo-db-handler-function';
+import {SaltMineHandler} from '@bitblit/saltmine/dist/salt-mine-handler';
 
 
 /**
@@ -33,7 +33,7 @@ export class EpsilonGlobalHandler {
 
     }
 
-    private fetchSaltMine(): SaltMine {
+    private fetchSaltMineHandler(): SaltMineHandler {
         return (this.config.saltMine && !this.config.disabled.saltMine) ? this.config.saltMine : null;
     }
 
@@ -63,9 +63,9 @@ export class EpsilonGlobalHandler {
                 }
             } else if (LambdaEventDetector.isValidSnsEvent(event)) {
                 // If salt mine is here, it takes precedence
-                const sm: SaltMine = this.fetchSaltMine();
-                if (sm && sm.handler.isSaltMineStartSnsEvent(event)) {
-                    rval = await sm.handler.processSaltMineSNSEvent(event, context);
+                const sm: SaltMineHandler = this.fetchSaltMineHandler();
+                if (sm && sm.isSaltMineStartSnsEvent(event)) {
+                    rval = await sm.processSaltMineSNSEvent(event, context);
                 } else {
                     rval = await this.processSnsEvent(event as SNSEvent);
                 }
