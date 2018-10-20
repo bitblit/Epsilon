@@ -153,10 +153,16 @@ export class EpsilonGlobalHandler {
     private findInMap<T>(toFind: string, map: Map<string, T>): T {
         let rval: T = null;
         map.forEach((val, key) => {
-            if (toFind.match(key)) {}
-            rval = val;
+            if (this.matchExact(key, toFind)) {
+                rval = val;
+            }
         })
         return rval;
+    }
+
+    private matchExact(r, str) {
+        var match = str.match(r);
+        return match != null && str == match[0];
     }
 
 }
