@@ -18,10 +18,10 @@
     moment "^2.20.1"
     moment-timezone "^0.5.14"
 
-"@bitblit/saltmine@0.2.2":
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.2.2.tgz#b8c2717969f6bebb1470065a28f2d3b731655754"
-  integrity sha512-H8g/RsgDUi9PIUiwr2rITN2OY2CQyjA2Env/wSN2FV6m87hDPC1SltLYqRyB9E6l/a25+mdFKmk8wvtPRfxQAQ==
+"@bitblit/saltmine@0.2.3":
+  version "0.2.3"
+  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.2.3.tgz#5a37ba07dcb569519f665229d793a1ae9b692f02"
+  integrity sha512-3fM6t987jlqIRLtOePAktHuedimyMv5h6ygN7HwLAQrnO8DZ2NZ/pZLT77Dkhtax/WCTaEfW6yo1fsY+MUmzZQ==
   dependencies:
     "@bitblit/ratchet" "0.0.87"
 
