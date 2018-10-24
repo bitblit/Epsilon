@@ -22,4 +22,6 @@ export interface RouterConfig {
 
     envParamLogLevelName: string;
     queryParamLogLevelName: string;
+
+    queryParamTracePrefixName: string;
 }

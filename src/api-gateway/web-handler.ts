@@ -41,6 +41,11 @@ export class WebHandler {
             const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this.routerConfig);
             Logger.setLevelByName(logLevel);
 
+            if (this.routerConfig.queryParamTracePrefixName && event.queryStringParameters && event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]) {
+                Logger.info('Setting trace prefix to %s', event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]);
+                Logger.setTracePrefix(event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]);
+            }
+
             let handler: Promise<any> = this.findHandler(event);
             Logger.debug('Processing event : %j', event);
             const result: any = await handler;
@@ -50,6 +55,8 @@ export class WebHandler {
             proxyResult = this.addCors(proxyResult);
             Logger.silly('CORS result : %j', proxyResult);
             // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
+
+            Logger.setTracePrefix(null); // Just in case it was set
             return proxyResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
@@ -57,9 +64,9 @@ export class WebHandler {
             }
             const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
             const errWithCORS: ProxyResult = this.addCors(errProxy);
+            Logger.setTracePrefix(null); // Just in case it was set
             return errWithCORS;
         }
-        ;
     };
 
     // Public so it can be used in auth-web-handler
