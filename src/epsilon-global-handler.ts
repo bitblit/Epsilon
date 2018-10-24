@@ -1,7 +1,7 @@
 import {
     APIGatewayEvent,
     Context, DynamoDBStreamEvent,
-    S3CreateEvent,
+    S3CreateEvent, S3Event,
     ScheduledEvent,
     SNSEvent
 } from 'aws-lambda';
@@ -11,10 +11,11 @@ import {WebHandler} from './api-gateway/web-handler';
 import {LambdaEventDetector} from '@bitblit/ratchet/dist/aws/lambda-event-detector';
 import {EpsilonDisableSwitches} from './global/epsilon-disable-switches';
 import {SnsHandlerFunction} from './batch/sns-handler-function';
-import {S3HandlerFunction} from './batch/s3-handler-function';
 import {CronHandlerFunction} from './batch/cron-handler-function';
 import {DynamoDbHandlerFunction} from './batch/dynamo-db-handler-function';
 import {SaltMineHandler} from '@bitblit/saltmine/dist/salt-mine-handler';
+import {S3CreateHandlerFunction} from './batch/s3-create-handler-function';
+import {S3RemoveHandlerFunction} from './batch/s3-remove-handler-function';
 
 
 /**
@@ -108,16 +109,29 @@ export class EpsilonGlobalHandler {
         return rval;
     }
 
-    private async processS3Event(evt: S3CreateEvent): Promise<any> {
+    private async processS3Event(evt: S3Event): Promise<any> {
         let rval: any = null;
         if (this.config && this.config.s3 && !this.config.disabled.s3 && evt && evt.Records.length>0) {
-            const finder: string = evt.Records[0].s3.bucket.name;
-            const handler: S3HandlerFunction = this.findInMap<S3HandlerFunction>(finder, this.config.s3.handlers);
-            if (handler) {
-                rval = await handler(evt);
+            const finder: string = evt.Records[0].s3.bucket.name + '/' + evt.Records[0].s3.object.key;
+            const isRemoveEvent: boolean = evt.Records[0].eventName && evt.Records[0].eventName.startsWith('ObjectRemoved');
+
+            if (isRemoveEvent) {
+                const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(finder, this.config.s3.removeHandlers);
+                if (handler) {
+                    rval = await handler(evt);
+                } else {
+                    Logger.info('Found no s3 create handler for : %s', finder);
+                }
+
             } else {
-                Logger.info('Found no s3 handler for : %s', finder);
+                const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(finder, this.config.s3.createHandlers);
+                if (handler) {
+                    rval = await handler(evt);
+                } else {
+                    Logger.info('Found no s3 remove handler for : %s', finder);
+                }
             }
+
         }
         return rval;
     }

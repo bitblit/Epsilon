@@ -25,10 +25,10 @@
   dependencies:
     "@bitblit/ratchet" "0.0.87"
 
-"@types/aws-lambda@0.0.31":
-  version "0.0.31"
-  resolved "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-0.0.31.tgz#174d763bd801bc9106eaf40263fd78d8c300d950"
-  integrity sha512-Vp/Q4OHrSXLtCja/v4tRlIBtRSeQOUYccFvjMyuGAgNPXfkWlsbM4rjQzHBS3p91+3EXcaJ/bvsCX8KcgPbHUA==
+"@types/aws-lambda@8.10.14":
+  version "8.10.14"
+  resolved "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-8.10.14.tgz#979eaa4abafff8de93854fe5cc1ae6e0bb888913"
+  integrity sha512-dBVxru7n7Q2oYDR1wEqqIEizrb2p1IQ0Rz0sxsiY6FLfx65JuU8kS58PGnAf4KUcM4QURyMq2sTPA01wR6y/Ig==
 
 "@types/aws-lambda@8.10.3":
   version "8.10.3"

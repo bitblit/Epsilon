@@ -1,6 +1,8 @@
-import {S3HandlerFunction} from './s3-handler-function';
+import {S3CreateHandlerFunction} from './s3-create-handler-function';
+import {S3RemoveHandlerFunction} from './s3-remove-handler-function';
 
 export interface S3Config {
     // S3 events mapped by bucket name
-    handlers: Map<string, S3HandlerFunction>;
+    createHandlers: Map<string, S3CreateHandlerFunction>;
+    removeHandlers: Map<string, S3RemoveHandlerFunction>;
 }
