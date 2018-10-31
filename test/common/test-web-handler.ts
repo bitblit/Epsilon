@@ -3,6 +3,7 @@ import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-l
 import {BadRequestError} from '../../src/api-gateway/error/bad-request-error';
 import {ResponseUtil} from '../../src/api-gateway/response-util';
 import {EventUtil} from '../../src/api-gateway/event-util';
+import * as fs from 'fs';
 
 
 describe('#errorToProxyResult', function() {
@@ -38,6 +39,30 @@ describe('#errorToProxyResult', function() {
         expect(body.message).to.equal('this is a test');
         expect(body.number).to.equal(1);
 
+    });
+
+    it('should parse a request body correctly part 2', function() {
+
+        let evt:APIGatewayEvent = {
+            httpMethod:'post',
+            path:'/test',
+            pathParameters: null,
+            queryStringParameters: null,
+            stageVariables:null,
+            requestContext:{} as APIGatewayEventRequestContext,
+            resource:'/test',
+            headers: {
+                'content-type':'application/json; charset=UTF-8'
+            },
+            isBase64Encoded: true,
+            body: 'ew0KICJtZXNzYWdlIiA6ICJ0aGlzIGlzIGEgdGVzdCIsDQogIm51bWJlciIgOiAxDQp9'
+
+        } as APIGatewayEvent;
+
+        let body = EventUtil.bodyObject(evt);
+        expect(body).to.not.be.null;
+        expect(body.message).to.equal('this is a test');
+        expect(body.number).to.equal(1);
     });
 
 

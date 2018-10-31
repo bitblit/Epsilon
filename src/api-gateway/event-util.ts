@@ -85,7 +85,7 @@ export class EventUtil {
             if (event.isBase64Encoded) {
                 rval = Buffer.from(rval, 'base64');
             }
-            if (contentType === 'application/json') {
+            if (contentType.startsWith('application/json')) { // to handle cases where the charset is specified
                 rval = JSON.parse(rval.toString('ascii'));
             }
         }
