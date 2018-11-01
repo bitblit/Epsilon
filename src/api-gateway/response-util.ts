@@ -1,4 +1,5 @@
-import {ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
+import {Logger} from '@bitblit/ratchet/dist/common/logger';
 
 export class ResponseUtil {
 
@@ -24,13 +25,34 @@ export class ResponseUtil {
         return errorResponse;
     }
 
-    public static redirect(target: string): ProxyResult {
+    public static redirect(target: string, code: number = 301, srcEvent: APIGatewayEvent = null): ProxyResult {
+        if (code!==301 && code!==302) {
+            throw new Error('Code must be 301 or 302 for a redirect');
+        }
+
+        let redirectTarget:string = target;
+        if (srcEvent && srcEvent.queryStringParameters) {
+            const keys:string[] = Object.keys(srcEvent.queryStringParameters);
+            if (keys.length > 0) {
+                Logger.silly('Applying params to input target : %j', srcEvent.queryStringParameters);
+                redirectTarget += (redirectTarget.indexOf('?') === -1) ? '?' : '&';
+                for (let i=0; i < keys.length ; i++) {
+                    const k: string = keys[i];
+                    // TODO: make sure not double encoding
+                    redirectTarget += k + '=' + encodeURIComponent(srcEvent.queryStringParameters[k]);
+                    if (i < keys.length -1 ) {
+                        redirectTarget += '&';
+                    }
+                }
+            }
+        }
+
         return {
-            statusCode: 301,
-            body: '{"redirect-target":"' + target + '}',
+            statusCode: code,
+            body: '{"redirect-target":"' + redirectTarget + '}',
             headers: {
                 'Content-Type': 'application/json',
-                'Location': target
+                'Location': redirectTarget
             }
         } as ProxyResult;
     }
