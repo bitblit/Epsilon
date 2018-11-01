@@ -30,12 +30,12 @@ describe('#responseUtil', function() {
         } as APIGatewayEvent;
 
 
-        const out1: ProxyResult = ResponseUtil.redirect('myTarget?e=f', 301, evt);
+        const out1: ProxyResult = ResponseUtil.redirect('myTarget?e=f', 301, evt.queryStringParameters);
         expect(out1).to.not.be.null;
         expect(out1.headers).to.not.be.null;
         expect(out1.headers.Location).to.equal('myTarget?e=f&a=b&c=d');
 
-        const out2: ProxyResult = ResponseUtil.redirect('myTarget', 301, evt);
+        const out2: ProxyResult = ResponseUtil.redirect('myTarget', 301, evt.queryStringParameters);
         expect(out2).to.not.be.null;
         expect(out2.headers).to.not.be.null;
         expect(out2.headers.Location).to.equal('myTarget?a=b&c=d');

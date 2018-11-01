@@ -25,21 +25,21 @@ export class ResponseUtil {
         return errorResponse;
     }
 
-    public static redirect(target: string, code: number = 301, srcEvent: APIGatewayEvent = null): ProxyResult {
+    public static redirect(target: string, code: number = 301, queryParams:any = null): ProxyResult {
         if (code!==301 && code!==302) {
             throw new Error('Code must be 301 or 302 for a redirect');
         }
 
         let redirectTarget:string = target;
-        if (srcEvent && srcEvent.queryStringParameters) {
-            const keys:string[] = Object.keys(srcEvent.queryStringParameters);
+        if (queryParams) {
+            const keys:string[] = Object.keys(queryParams);
             if (keys.length > 0) {
-                Logger.silly('Applying params to input target : %j', srcEvent.queryStringParameters);
+                Logger.silly('Applying params to input target : %j', queryParams);
                 redirectTarget += (redirectTarget.indexOf('?') === -1) ? '?' : '&';
                 for (let i=0; i < keys.length ; i++) {
                     const k: string = keys[i];
                     // TODO: make sure not double encoding
-                    redirectTarget += k + '=' + encodeURIComponent(srcEvent.queryStringParameters[k]);
+                    redirectTarget += k + '=' + encodeURIComponent(queryParams[k]);
                     if (i < keys.length -1 ) {
                         redirectTarget += '&';
                     }
