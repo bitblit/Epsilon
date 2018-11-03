@@ -1,5 +1,5 @@
 import {RouterConfig} from './route/router-config';
-import {APIGatewayEvent, Callback, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as zlib from 'zlib';
 import * as Route from 'route-parser';
@@ -15,6 +15,7 @@ import {ExtendedAPIGatewayEvent} from './route/extended-api-gateway-event';
 import {EventUtil} from './event-util';
 import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
 import {AuthorizerFunction} from './route/authorizer-function';
+import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -54,10 +55,9 @@ export class WebHandler {
             Logger.silly('Proxy result : %j', proxyResult);
             proxyResult = this.addCors(proxyResult);
             Logger.silly('CORS result : %j', proxyResult);
-            // TODO: Re-enable : this.zipAndReturn(JSON.stringify(result), 'application/json', callback);
-
+            const gzipResult = await this.applyGzipIfPossible(event, proxyResult);
             Logger.setTracePrefix(null); // Just in case it was set
-            return proxyResult;
+            return gzipResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
@@ -229,66 +229,35 @@ export class WebHandler {
         return rval;
     }
 
-    private zipAndReturn(content: any, contentType: string, callback: Callback): void {
-        if (this.shouldGzip(content.length, contentType)) {
-            this.gzip(content).then((compressed) => {
-                let contents64 = compressed.toString('base64');
+    private async applyGzipIfPossible(event: APIGatewayEvent, proxyResult: ProxyResult): Promise<ProxyResult> {
+        let rval: ProxyResult = proxyResult;
 
-                let response = {
-                    statusCode: 200,
-                    isBase64Encoded: true,
-                    headers: {
-                        'Content-Type': contentType,
-                        'content-encoding': 'gzip'
-                    },
-                    body: contents64
-                };
+        const encodingHeader: string = (event && event.headers)?
+            MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
+        if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {
+            const bigEnough: boolean = proxyResult.body.length>1400; // MTU packet is 1400 bytes
+            const contentType: string = (proxyResult && proxyResult.headers)?
+                MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type').toLowerCase() : '';
+            const exemptContent:boolean = (contentType === 'application/pdf' || contentType.startsWith('image/'));
+            if (bigEnough && !exemptContent) {
+                const asBuffer: Buffer = (proxyResult.isBase64Encoded)? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
+                const zipped: Buffer = await this.gzip(asBuffer);
+                Logger.silly('Comp from %d to %d bytes', asBuffer.length, zipped.length);
+                const zipped64: string =  zipped.toString('base64');
 
-                Logger.debug('Sending response with gzip body, length is %d', contents64.length);
-                callback(null, response);
-            });
-        }
-        else {
-            let contents64 = content.toString('base64');
-
-            let response = {
-                statusCode: 200,
-                isBase64Encoded: true,
-                headers: {
-                    'Content-Type': contentType,
-                },
-                body: contents64
-            };
-
-            Logger.debug('Sending response with gzip body, length is %d', contents64.length);
-            callback(null, response);
-
-        }
-    }
-
-
-    private shouldGzip(fileSize: number, contentType: string): boolean {
-        /*
-
-        let rval : boolean = (fileSize>2048); // MTU packet is 1400 bytes
-        if (rval && contentType) {
-          let test : string = contentType.toLowerCase();
-          if (test.startsWith("image/") && test.indexOf('svg')==-1)
-          {
-            rval = false;
-          }
-          else if (test=='application/pdf')
-          {
-            rval = false;
-          }
+                rval.body = zipped64;
+                rval.isBase64Encoded = true;
+                rval.headers = rval.headers || {};
+                rval.headers['content-encoding'] = 'gzip';
+            } else {
+                Logger.silly('Not gzipping, too small or exempt content');
+            }
+        } else {
+            Logger.silly('Not gzipping, not an accepted encoding');
         }
 
         return rval;
-        */
-        // May put this back in later
-        return true;
     }
-
 
     private gzip(input, options = {}): Promise<Buffer> {
         var promise = new Promise<Buffer>(function (resolve, reject) {

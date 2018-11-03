@@ -1,4 +1,4 @@
-import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
+import {ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 
 export class ResponseUtil {
