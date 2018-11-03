@@ -238,8 +238,9 @@ export class WebHandler {
             MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
         if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {
             const bigEnough: boolean = proxyResult.body.length>1400; // MTU packet is 1400 bytes
-            const contentType: string = (proxyResult && proxyResult.headers)?
-                MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type').toLowerCase() : '';
+            let contentType: string = (proxyResult && proxyResult.headers)?
+                MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type') : '';
+            contentType = contentType.toLowerCase(); 
             const exemptContent:boolean = (contentType === 'application/pdf' || contentType.startsWith('image/'));
             if (bigEnough && !exemptContent) {
                 const asBuffer: Buffer = (proxyResult.isBase64Encoded)? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
