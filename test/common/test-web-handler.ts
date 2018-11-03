@@ -104,7 +104,7 @@ describe('#errorToProxyResult', function() {
         expect(result).to.not.be.null;
         expect(result.isBase64Encoded).to.eq(true);
         expect(result.headers).to.not.be.null;
-        expect(result.headers['content-encoding']).to.equal('gzip');
+        expect(result.headers['Content-Encoding']).to.equal('gzip');
     });
 
 
