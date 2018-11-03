@@ -55,9 +55,11 @@ export class WebHandler {
             Logger.silly('Proxy result : %j', proxyResult);
             proxyResult = this.addCors(proxyResult);
             Logger.silly('CORS result : %j', proxyResult);
-            const gzipResult = await this.applyGzipIfPossible(event, proxyResult);
+            if (!this.routerConfig.disableCompression) {
+                proxyResult = await this.applyGzipIfPossible(event, proxyResult);
+            }
             Logger.setTracePrefix(null); // Just in case it was set
-            return gzipResult;
+            return proxyResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
                 Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
