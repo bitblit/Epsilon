@@ -250,7 +250,7 @@ export class WebHandler {
                 rval.body = zipped64;
                 rval.isBase64Encoded = true;
                 rval.headers = rval.headers || {};
-                rval.headers['content-encoding'] = 'gzip';
+                rval.headers['Content-Encoding'] = 'gzip';
             } else {
                 Logger.silly('Not gzipping, too small or exempt content');
             }
