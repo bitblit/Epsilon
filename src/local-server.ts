@@ -155,7 +155,9 @@ export class LocalServer {
                 response.setHeader(hk, String(proxyResult.headers[hk]));
             });
         }
-        response.end(proxyResult.body);
+        const toWrite:Buffer = (proxyResult.isBase64Encoded)?Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
+
+        response.end(toWrite);
         return !!proxyResult.body;
     }
 }
