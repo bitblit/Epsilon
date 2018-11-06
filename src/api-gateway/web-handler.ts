@@ -16,20 +16,15 @@ import {EventUtil} from './event-util';
 import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
 import {AuthorizerFunction} from './route/authorizer-function';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
+import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
  */
 export class WebHandler {
-    private routerConfig: RouterConfig;
-    private webTokenManipulator;
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
 
-    constructor(routing: RouterConfig) {
-        this.routerConfig = routing;
-        if (this.routerConfig.authorizationHeaderEncryptionKey) {
-            this.webTokenManipulator = new WebTokenManipulator(this.routerConfig.authorizationHeaderEncryptionKey, '');
-        }
+    constructor(private routerConfig: RouterConfig) {
     }
 
     public async lambdaHandler(event: APIGatewayEvent): Promise<ProxyResult> {
@@ -193,11 +188,11 @@ export class WebHandler {
         let rval: boolean = true;
 
         if (route.authorizerName) {
-            if (!this.webTokenManipulator) {
-                throw new MisconfiguredError('Auth is defined, but token manipulator not set - missing key?');
+            if (!this.routerConfig.webTokenManipulator) {
+                throw new MisconfiguredError('Auth is defined, but token manipulator not set');
             }
             // Extract the token
-            const token: CommonJwtToken<any> = this.webTokenManipulator.extractTokenFromStandardEvent(event);
+            const token: CommonJwtToken<any> = await this.routerConfig.webTokenManipulator.extractTokenFromStandardEvent(event);
             if (!token) {
                 Logger.info('Failed auth for route : %s - missing/bad token', route.path);
                 rval = false; // Not that it matters
@@ -211,8 +206,8 @@ export class WebHandler {
                 if (authorizer) {
                     const passes: boolean = await authorizer(token, event, route);
                     if (!passes) {
-                        throw new ForbiddenError('Failed authorization');
                         rval = false;
+                        throw new ForbiddenError('Failed authorization');
                     }
                 }
             }
@@ -223,7 +218,7 @@ export class WebHandler {
                     ExtendedAuthResponseContext;
                 newAuth.userData = token;
                 newAuth.userDataJSON = (token) ? JSON.stringify(token) : null;
-                newAuth.srcData = WebTokenManipulator.extractTokenStringFromStandardEvent(event);
+                newAuth.srcData = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
                 event.requestContext.authorizer = newAuth;
             }
         }
@@ -261,9 +256,9 @@ export class WebHandler {
         return rval;
     }
 
-    private gzip(input, options = {}): Promise<Buffer> {
+    private gzip(input: Buffer): Promise<Buffer> {
         var promise = new Promise<Buffer>(function (resolve, reject) {
-            zlib.gzip(input, options, function (error, result) {
+            zlib.gzip(input, function (error, result) {
                 if (!error) resolve(result); else reject(error);
             });
         });

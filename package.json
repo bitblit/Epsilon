@@ -39,29 +39,32 @@
   "dependencies": {
     "@bitblit/ratchet": "0.0.102",
     "@bitblit/saltmine": "0.2.5",
-    "crypt3": "^1.0.0",
-    "jsonwebtoken": "^8.1.1",
-    "node-yaml": "^3.1.1",
-    "route-parser": "^0.0.5",
-    "strip-js": "^1.2.0",
-    "swagger-model-validator": "^2.2.8",
-    "moment": "^2.20.1",
-    "moment-timezone": "^0.5.14"
+    "crypt3": "1.0.0",
+    "request": "2.88.0",
+    "request-promise": "4.2.2",
+    "jsonwebtoken": "8.3.0",
+    "jwks-rsa": "1.3.0",
+    "node-yaml": "3.1.1",
+    "route-parser": "0.0.5",
+    "strip-js": "1.2.0",
+    "swagger-model-validator": "3.0.5",
+    "moment": "2.22.2",
+    "moment-timezone": "0.5.23"
   },
   "peerDependencies": {
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.14",
-    "@types/chai": "^4.1.2",
-    "@types/mocha": "^5.0.0",
-    "@types/node": "^6.0.46",
-    "aws-lambda-typescript": "^1.0.2",
-    "aws-sdk": "^2.195.0",
-    "chai": "^3.5.0",
-    "chai-http": "^3.0.0",
-    "mocha": "^3.5.3",
-    "ts-node": "^3.3.0",
-    "tslint": "~5.7.0",
-    "typescript": "^2.7.1"
+    "@types/chai": "4.1.2",
+    "@types/mocha": "5.0.0",
+    "@types/node": "6.0.46",
+    "aws-lambda-typescript": "1.0.2",
+    "aws-sdk": "2.195.0",
+    "chai": "3.5.0",
+    "chai-http": "3.0.0",
+    "mocha": "3.5.3",
+    "ts-node": "3.3.0",
+    "tslint": "5.7.0",
+    "typescript": "2.7.1"
   }
 }

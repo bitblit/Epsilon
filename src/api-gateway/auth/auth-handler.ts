@@ -2,15 +2,17 @@ import {AuthResponse, AuthResponseContext, Callback, Context, CustomAuthorizerEv
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
+import {LocalWebTokenManipulator} from './local-web-token-manipulator';
+import {WebTokenManipulatorUtil} from './web-token-manipulator-util';
 
 /**
  * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
  */
 export class AuthHandler {
-    private webTokenManipulator: WebTokenManipulator;
+    private webTokenManipulator: LocalWebTokenManipulator;
 
     constructor(issuer: string, encryptionKey: string) {
-        this.webTokenManipulator = new WebTokenManipulator(encryptionKey, issuer);
+        this.webTokenManipulator = new LocalWebTokenManipulator(encryptionKey, issuer);
     }
 
     /**
@@ -23,7 +25,7 @@ export class AuthHandler {
     public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback): void {
         Logger.info('Got event : %j', event);
 
-        let srcString = WebTokenManipulator.extractTokenStringFromAuthorizerEvent(event);
+        let srcString = WebTokenManipulatorUtil.extractTokenStringFromAuthorizerEvent(event);
 
         if (srcString) {
             const methodArn = event.methodArn;
