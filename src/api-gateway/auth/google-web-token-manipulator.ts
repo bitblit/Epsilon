@@ -19,7 +19,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator{
 
     public async extractTokenFromStandardEvent<T>(event: APIGatewayEvent): Promise<CommonJwtToken<T>> {
         const tokenString: string = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
-        const validated: any = await this.parseAndValidateGoogleToken(tokenString, false);
+        const validated: any = (!!tokenString) ? await this.parseAndValidateGoogleToken(tokenString, false)  : null;
         return validated as CommonJwtToken<T>;
     }
 
