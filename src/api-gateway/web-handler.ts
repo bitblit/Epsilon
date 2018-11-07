@@ -235,7 +235,7 @@ export class WebHandler {
             const bigEnough: boolean = proxyResult.body.length>1400; // MTU packet is 1400 bytes
             let contentType: string = MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type') || '';
             contentType = contentType.toLowerCase();
-            const exemptContent:boolean = (contentType === 'application/pdf' || contentType.startsWith('image/'));
+            const exemptContent:boolean = (contentType === 'application/pdf' || contentType === 'application/zip' || contentType.startsWith('image/'));
             if (bigEnough && !exemptContent) {
                 const asBuffer: Buffer = (proxyResult.isBase64Encoded)? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
                 const zipped: Buffer = await this.gzip(asBuffer);
