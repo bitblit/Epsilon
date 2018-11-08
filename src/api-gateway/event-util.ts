@@ -76,6 +76,15 @@ export class EventUtil {
         return (list && list.length > 0) ? list[0] : null;
     }
 
+    public static extractFullPath(event: APIGatewayEvent, protocol: string = 'https'): string {
+        return protocol + '://' + event.requestContext['domainName'] + event.requestContext.path;
+    }
+
+    public static extractFullPrefix(event: APIGatewayEvent, protocol: string = 'https'): string {
+        const prefix: string = event.requestContext.path.substring(0, event.requestContext.path.indexOf('/',1));
+        return protocol + '://' + event.requestContext['domainName'] + prefix;
+    }
+
     public static bodyObject(event: APIGatewayEvent): any {
         let rval: any = null;
         if (event.body) {

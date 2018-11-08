@@ -37,18 +37,5 @@ describe('#routerUtilApplyOpenApiDoc', function() {
     });
 
 
-    it('should correctly calculate stages', function() {
-        // TODO: move this to its own test
-        const evt: APIGatewayEvent = {
-            httpMethod: 'get',
-            path: '/cw/meta/server',
-            requestContext: {
-                stage: 'v0'
-            }
-        } as APIGatewayEvent;
-
-        expect(EventUtil.extractStage(evt)).to.equal('cw');
-        expect(EventUtil.extractApiGatewayStage(evt)).to.equal('v0');
-    });
 
 });
