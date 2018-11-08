@@ -9,7 +9,6 @@ import {createSampleRouterConfig} from '../../src/local-server';
 describe('#eventUtil', function() {
 
     it('should extract pieces', function() {
-        // TODO: move this to its own test
         const evt: APIGatewayEvent = {
             httpMethod: 'GET',
             path: '/cw/meta/server',

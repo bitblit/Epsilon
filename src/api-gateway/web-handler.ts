@@ -5,7 +5,6 @@ import * as zlib from 'zlib';
 import * as Route from 'route-parser';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {ForbiddenError} from './error/forbidden-error';
-import {WebTokenManipulator} from './auth/web-token-manipulator';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 import {RouteMapping} from './route/route-mapping';
 import {MisconfiguredError} from './error/misconfigured-error';
@@ -51,7 +50,9 @@ export class WebHandler {
             proxyResult = this.addCors(proxyResult);
             Logger.silly('CORS result : %j', proxyResult);
             if (!this.routerConfig.disableCompression) {
-                proxyResult = await this.applyGzipIfPossible(event, proxyResult);
+                const encodingHeader: string = (event && event.headers)?
+                    MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
+                proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
             }
             Logger.setTracePrefix(null); // Just in case it was set
             return proxyResult;
@@ -225,44 +226,5 @@ export class WebHandler {
 
         return rval;
     }
-
-    private async applyGzipIfPossible(event: APIGatewayEvent, proxyResult: ProxyResult): Promise<ProxyResult> {
-        let rval: ProxyResult = proxyResult;
-
-        const encodingHeader: string = (event && event.headers)?
-            MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
-        if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {
-            const bigEnough: boolean = proxyResult.body.length>1400; // MTU packet is 1400 bytes
-            let contentType: string = MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type') || '';
-            contentType = contentType.toLowerCase();
-            const exemptContent:boolean = (contentType === 'application/pdf' || contentType === 'application/zip' || contentType.startsWith('image/'));
-            if (bigEnough && !exemptContent) {
-                const asBuffer: Buffer = (proxyResult.isBase64Encoded)? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
-                const zipped: Buffer = await this.gzip(asBuffer);
-                Logger.silly('Comp from %d to %d bytes', asBuffer.length, zipped.length);
-                const zipped64: string =  zipped.toString('base64');
-
-                rval.body = zipped64;
-                rval.isBase64Encoded = true;
-                rval.headers = rval.headers || {};
-                rval.headers['Content-Encoding'] = 'gzip';
-            } else {
-                Logger.silly('Not gzipping, too small or exempt content');
-            }
-        } else {
-            Logger.silly('Not gzipping, not an accepted encoding');
-        }
-
-        return rval;
-    }
-
-    private gzip(input: Buffer): Promise<Buffer> {
-        var promise = new Promise<Buffer>(function (resolve, reject) {
-            zlib.gzip(input, function (error, result) {
-                if (!error) resolve(result); else reject(error);
-            });
-        });
-        return promise;
-    };
 
 }

@@ -1,14 +1,12 @@
 import {expect} from 'chai';
-import {RouterConfig} from '../../src/api-gateway/route/router-config';
-import {RouterUtil} from '../../src/api-gateway/route/router-util';
-import {WebHandler} from '../../src/api-gateway/web-handler';
 import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
-import {EventUtil} from '../../src/api-gateway/event-util';
-import {createSampleRouterConfig} from '../../src/local-server';
 import {ResponseUtil} from '../../src/api-gateway/response-util';
+import * as fs from 'fs';
 
 describe('#responseUtil', function() {
 
+    this.timeout(30000);
+    /*
     it('should correctly combine a redirect url and query params', function() {
 
         const evt: APIGatewayEvent = {
@@ -41,6 +39,29 @@ describe('#responseUtil', function() {
         expect(out2.headers.Location).to.equal('myTarget?a=b&c=d');
 
 
+    });
+
+*/
+
+    it('should leave already encoded stuff alone', async () => {
+
+        const singlePixel: string = fs.readFileSync('test/test.png').toString('base64');
+
+        const temp: ProxyResult = {
+            body: singlePixel,
+            statusCode: 200,
+            isBase64Encoded: true,
+            headers: {
+                'content-type': 'application/zip',
+                'content-disposition': 'attachment; filename="adomni_bs_'+new Date().getTime()+'.zip"'
+            }
+        } as ProxyResult;
+
+        const cast: ProxyResult = ResponseUtil.coerceToProxyResult(temp);
+        expect(cast.body).to.equal(temp.body);
+
+        const gzip: ProxyResult = await ResponseUtil.applyGzipIfPossible('gzip', cast);
+        expect(cast.body).to.equal(gzip.body);
     });
 
 });

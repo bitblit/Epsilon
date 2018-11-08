@@ -1,5 +1,7 @@
-import {ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
+import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
+import * as zlib from "zlib";
 
 export class ResponseUtil {
 
@@ -130,5 +132,42 @@ export class ResponseUtil {
 
         return input;
     }
+
+    public static async applyGzipIfPossible(encodingHeader: string, proxyResult: ProxyResult): Promise<ProxyResult> {
+        let rval: ProxyResult = proxyResult;
+        if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {
+            const bigEnough: boolean = proxyResult.body.length>1400; // MTU packet is 1400 bytes
+            let contentType: string = MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type') || '';
+            contentType = contentType.toLowerCase();
+            const exemptContent:boolean = (contentType === 'application/pdf' || contentType === 'application/zip' || contentType.startsWith('image/'));
+            if (bigEnough && !exemptContent) {
+                const asBuffer: Buffer = (proxyResult.isBase64Encoded)? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
+                const zipped: Buffer = await this.gzip(asBuffer);
+                Logger.silly('Comp from %d to %d bytes', asBuffer.length, zipped.length);
+                const zipped64: string =  zipped.toString('base64');
+
+                rval.body = zipped64;
+                rval.isBase64Encoded = true;
+                rval.headers = rval.headers || {};
+                rval.headers['Content-Encoding'] = 'gzip';
+            } else {
+                Logger.silly('Not gzipping, too small or exempt content');
+            }
+        } else {
+            Logger.silly('Not gzipping, not an accepted encoding');
+        }
+
+        return rval;
+    }
+
+    public static gzip(input: Buffer): Promise<Buffer> {
+        var promise = new Promise<Buffer>(function (resolve, reject) {
+            zlib.gzip(input, function (error, result) {
+                if (!error) resolve(result); else reject(error);
+            });
+        });
+        return promise;
+    };
+
 
 }
