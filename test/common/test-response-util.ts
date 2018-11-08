@@ -6,7 +6,6 @@ import * as fs from 'fs';
 describe('#responseUtil', function() {
 
     this.timeout(30000);
-    /*
     it('should correctly combine a redirect url and query params', function() {
 
         const evt: APIGatewayEvent = {
@@ -40,8 +39,6 @@ describe('#responseUtil', function() {
 
 
     });
-
-*/
 
     it('should leave already encoded stuff alone', async () => {
 
