@@ -46,6 +46,7 @@ export class WebHandler {
             const result: any = await handler;
             Logger.debug('Initial return value : %j', result);
             let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
+            const initSize: number = proxyResult.body.length;
             Logger.silly('Proxy result : %j', proxyResult);
             proxyResult = this.addCors(proxyResult);
             Logger.silly('CORS result : %j', proxyResult);
@@ -55,6 +56,7 @@ export class WebHandler {
                 proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
             }
             Logger.setTracePrefix(null); // Just in case it was set
+            Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
             return proxyResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose

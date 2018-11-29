@@ -24,7 +24,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator{
     }
 
     public async parseAndValidateGoogleToken<T>(googleToken: string, allowExpired: boolean = false) : Promise<CommonJwtToken<T>> {
-        Logger.info('Auth : %s', StringRatchet.obscure(googleToken, 4));
+        Logger.debug('Auth : %s', StringRatchet.obscure(googleToken, 4));
 
         // First decode so we can get the keys
         const fullToken: any = jwt.decode(googleToken, {complete: true});

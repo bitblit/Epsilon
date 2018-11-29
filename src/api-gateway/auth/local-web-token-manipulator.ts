@@ -5,6 +5,7 @@ import {APIGatewayEvent, CustomAuthorizerEvent} from 'aws-lambda';
 import {EpsilonConstants} from '../../epsilon-constants';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {WebTokenManipulatorUtil} from './web-token-manipulator-util';
+import {UnauthorizedError} from '../error/unauthorized-error';
 
 /**
  * Service for handling jwt tokens
@@ -28,7 +29,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator{
         const expires = now + time;
         payload['exp'] = expires;
         payload['iat'] = now;
-        Logger.info('Signing new payload : %j', payload);
+        Logger.debug('Signing new payload : %j', payload);
         const token = jwt.sign(payload, this.encryptionKey) // , algorithm = 'HS256')
         return token;
     }
@@ -40,7 +41,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator{
             return payload;
         } else {
             const age: number = now - payload['exp'];
-            throw new Error('Failing JWT token read/validate - token expired on ' + payload['exp'] + ', ' + age + ' ms ago');
+            throw new UnauthorizedError('Failing JWT token read/validate - token expired on ' + payload['exp'] + ', ' + age + ' ms ago');
         }
     }
 
@@ -51,7 +52,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator{
             Logger.debug('Got Payload : %j', payload);
             return payload;
         } else {
-            throw new Error('Unable to parse a token from this string');
+            throw new UnauthorizedError('Unable to parse a token from this string');
         }
     }
 

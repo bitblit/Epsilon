@@ -79,7 +79,7 @@ export class ResponseUtil {
 
         if (input != null) {
             if (typeof input === 'object') {
-                if (input.statusCode && input.body) {
+                if (input.statusCode && input.body !== undefined) {
                     rval = Object.assign({}, input) as ProxyResult;
                     if (typeof input.body === 'string') {
                         // Do Nothing
