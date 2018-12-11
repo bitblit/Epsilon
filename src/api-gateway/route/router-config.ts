@@ -22,8 +22,4 @@ export interface RouterConfig {
     // These will be matched case insensitive
     prefixesToStripBeforeRouteMatch: string[];
 
-    envParamLogLevelName: string;
-    queryParamLogLevelName: string;
-
-    queryParamTracePrefixName: string;
 }

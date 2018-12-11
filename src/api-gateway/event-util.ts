@@ -4,6 +4,7 @@ import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 import {RouterConfig} from './route/router-config';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {BadRequestError} from './error/bad-request-error';
+import {EpsilonLoggerConfig} from '../global/epsilon-logger-config';
 
 /**
  * Endpoints about the api itself
@@ -101,7 +102,7 @@ export class EventUtil {
         return rval;
     }
 
-    public static calcLogLevelViaEventOrEnvParam(curLevel: string, event: APIGatewayEvent, rConfig: RouterConfig): string {
+    public static calcLogLevelViaEventOrEnvParam(curLevel: string, event: APIGatewayEvent, rConfig: EpsilonLoggerConfig): string {
         let rval: string = curLevel;
         if (rConfig && rConfig.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
             rval = process.env[rConfig.envParamLogLevelName];

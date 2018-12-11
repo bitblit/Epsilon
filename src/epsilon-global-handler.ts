@@ -57,8 +57,15 @@ export class EpsilonGlobalHandler {
             }
 
             // Setup logging
-            const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this.routerConfig);
+            const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this.config.loggerConfig);
             Logger.setLevelByName(logLevel);
+
+            if (this.config.loggerConfig && this.config.loggerConfig.queryParamTracePrefixName &&
+                event.queryStringParameters &&
+                event.queryStringParameters[this.config.loggerConfig.queryParamTracePrefixName]) {
+                Logger.info('Setting trace prefix to %s', event.queryStringParameters[this.config.loggerConfig.queryParamTracePrefixName]);
+                Logger.setTracePrefix(event.queryStringParameters[this.config.loggerConfig.queryParamTracePrefixName]);
+            }
 
             if (LambdaEventDetector.isValidApiGatewayEvent(event)) {
                 Logger.debug('Epsilon: APIG: %j', event);

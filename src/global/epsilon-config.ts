@@ -5,6 +5,7 @@ import {S3Config} from '../batch/s3-config';
 import {SnsConfig} from '../batch/sns-config';
 import {EpsilonDisableSwitches} from './epsilon-disable-switches';
 import {SaltMineHandler} from '@bitblit/saltmine/dist/salt-mine-handler';
+import {EpsilonLoggerConfig} from './epsilon-logger-config';
 
 export interface EpsilonConfig {
     apiGateway: RouterConfig;
@@ -17,4 +18,5 @@ export interface EpsilonConfig {
     sns: SnsConfig;
 
     disabled: EpsilonDisableSwitches;
+    loggerConfig: EpsilonLoggerConfig;
 }

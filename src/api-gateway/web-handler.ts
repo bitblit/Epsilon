@@ -32,11 +32,6 @@ export class WebHandler {
                 throw new Error('Router config not found');
             }
 
-            if (this.routerConfig.queryParamTracePrefixName && event.queryStringParameters && event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]) {
-                Logger.info('Setting trace prefix to %s', event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]);
-                Logger.setTracePrefix(event.queryStringParameters[this.routerConfig.queryParamTracePrefixName]);
-            }
-
             let handler: Promise<any> = this.findHandler(event);
             Logger.debug('Processing event : %j', event);
             const result: any = await handler;
