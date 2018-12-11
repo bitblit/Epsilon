@@ -16,6 +16,7 @@ import {DynamoDbHandlerFunction} from './batch/dynamo-db-handler-function';
 import {SaltMineHandler} from '@bitblit/saltmine/dist/salt-mine-handler';
 import {S3CreateHandlerFunction} from './batch/s3-create-handler-function';
 import {S3RemoveHandlerFunction} from './batch/s3-remove-handler-function';
+import {EventUtil} from './api-gateway/event-util';
 
 
 /**
@@ -54,6 +55,10 @@ export class EpsilonGlobalHandler {
                 Logger.error('Config not found, abandoning');
                 return false;
             }
+
+            // Setup logging
+            const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this.routerConfig);
+            Logger.setLevelByName(logLevel);
 
             if (LambdaEventDetector.isValidApiGatewayEvent(event)) {
                 Logger.debug('Epsilon: APIG: %j', event);
