@@ -2,13 +2,13 @@ import {expect} from 'chai';
 import {RouterConfig} from '../../src/api-gateway/route/router-config';
 import {RouterUtil} from '../../src/api-gateway/route/router-util';
 import {WebHandler} from '../../src/api-gateway/web-handler';
-import {APIGatewayEvent} from 'aws-lambda';
+import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
 import {EventUtil} from '../../src/api-gateway/event-util';
 import {createSampleRouterConfig} from '../../src/local-server';
 
 describe('#routerUtilApplyOpenApiDoc', function() {
 
-    it('should create a router config from a yaml file', function() {
+    it('should create a router config from a yaml file', async() => {
         const cfg: RouterConfig = createSampleRouterConfig();
 
         expect(cfg.modelValidator).to.not.be.null;
@@ -25,9 +25,8 @@ describe('#routerUtilApplyOpenApiDoc', function() {
 
         cfg.prefixesToStripBeforeRouteMatch = ['v0'];
         const webHandler: WebHandler = new WebHandler(cfg);
-        return webHandler.findHandler(evt, false).then(find => {
-            expect(find).to.not.be.null;
-        });
+        const find: ProxyResult = await webHandler.findHandler(evt, false);
+        expect(find).to.not.be.null;
     });
 
     it('should reformat a path to match the other library', function() {

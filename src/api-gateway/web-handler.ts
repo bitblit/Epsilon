@@ -1,7 +1,6 @@
 import {RouterConfig} from './route/router-config';
 import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
-import * as zlib from 'zlib';
 import * as Route from 'route-parser';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {ForbiddenError} from './error/forbidden-error';
@@ -73,30 +72,41 @@ export class WebHandler {
 
         // See: https://www.npmjs.com/package/route-parser
         let cleanPath: string = this.cleanPath(event);
-        for (let i = 0; i < this.routerConfig.routes.length; i++) {
-            const rm: RouteMapping = this.routerConfig.routes[i];
-            if (!rval) // TODO: Short circuit would be better
-            {
-                if (rm.method && rm.method.toLowerCase() === event.httpMethod.toLowerCase()) {
-                    let routeParser: Route = new Route(rm.path);
-                    let parsed: any = routeParser.match(cleanPath);
-                    if (parsed) {
-                        // We extend with the parsed params here in case we are using the AWS any proxy
-                        event.pathParameters = Object.assign({}, event.pathParameters, parsed);
 
-                        // Check authentication / authorization
-                        const passAuth: boolean = await this.applyAuth(event, rm);
-
-                        // Cannot get here without a valid auth/body, would've thrown an error
-                        const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
-
-                        // Check validation
-                        const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
-
-                        rval = rm.function(extEvent);
-                    }
-                }
+        // Filter routes to only matches
+        const methodLower: string = event.httpMethod.toLowerCase();
+        const matchRoutes: RouteMapping[] = this.routerConfig.routes.filter(r => {
+            let rval: boolean = false;
+            if (r.method && r.method.toLowerCase() === methodLower) {
+                let routeParser: Route = new Route(r.path);
+                let parsed: any = routeParser.match(cleanPath);
+                rval = parsed !== false;
             }
+            return rval;
+        });
+        // Pick the 'best' match
+        matchRoutes.sort((a,b) => {return a.path.length-b.path.length});
+
+        // Execute
+        // TODO: Remove the reparse of the route
+        if (matchRoutes.length>0) {
+            const rm: RouteMapping = matchRoutes[0];
+            let routeParser: Route = new Route(rm.path);
+            let parsed: any = routeParser.match(cleanPath);
+
+            // We extend with the parsed params here in case we are using the AWS any proxy
+            event.pathParameters = Object.assign({}, event.pathParameters, parsed);
+
+            // Check authentication / authorization
+            const passAuth: boolean = await this.applyAuth(event, rm);
+
+            // Cannot get here without a valid auth/body, would've thrown an error
+            const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+
+            // Check validation
+            const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
+
+            rval = rm.function(extEvent);
         }
 
         if (!rval && add404OnMissing) {
