@@ -75,38 +75,41 @@ export class WebHandler {
 
         // Filter routes to only matches
         const methodLower: string = event.httpMethod.toLowerCase();
-        const matchRoutes: RouteMapping[] = this.routerConfig.routes.filter(r => {
-            let rval: boolean = false;
+        let matchRoutes: RouteAndParse[] = this.routerConfig.routes.map(r => {
+            let rval: RouteAndParse = null;
             if (r.method && r.method.toLowerCase() === methodLower) {
                 let routeParser: Route = new Route(r.path);
                 let parsed: any = routeParser.match(cleanPath);
-                rval = parsed !== false;
+                if (parsed!==false) {
+                    rval = {
+                        mapping: r,
+                        route: routeParser,
+                        parsed: parsed
+                    }
+                }
             }
             return rval;
-        });
+        }).filter(r => r!=null);
         // Pick the 'best' match
-        matchRoutes.sort((a,b) => {return a.path.length-b.path.length});
+        matchRoutes.sort((a,b) => {return (Object.keys(a.parsed).length - Object.keys(b.parsed).length);});
 
         // Execute
-        // TODO: Remove the reparse of the route
         if (matchRoutes.length>0) {
-            const rm: RouteMapping = matchRoutes[0];
-            let routeParser: Route = new Route(rm.path);
-            let parsed: any = routeParser.match(cleanPath);
+            const rm: RouteAndParse = matchRoutes[0];
 
             // We extend with the parsed params here in case we are using the AWS any proxy
-            event.pathParameters = Object.assign({}, event.pathParameters, parsed);
+            event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
 
             // Check authentication / authorization
-            const passAuth: boolean = await this.applyAuth(event, rm);
+            const passAuth: boolean = await this.applyAuth(event, rm.mapping);
 
             // Cannot get here without a valid auth/body, would've thrown an error
-            const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm);
+            const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm.mapping);
 
             // Check validation
-            const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm);
+            const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm.mapping);
 
-            rval = rm.function(extEvent);
+            rval = rm.mapping.function(extEvent);
         }
 
         if (!rval && add404OnMissing) {
@@ -230,4 +233,10 @@ export class WebHandler {
         return rval;
     }
 
+}
+
+export interface RouteAndParse {
+    mapping: RouteMapping;
+    route: Route;
+    parsed: any;
 }

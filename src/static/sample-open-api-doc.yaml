@@ -149,6 +149,13 @@ paths:
     options:
       tags:
       - CORS
+      parameters:
+      - name: itemId
+        in: path
+        description: A sample item id
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -195,6 +202,49 @@ paths:
       responses:
         '200':
           description: Standard CORS header response
+  /multi/fixed:
+    get:
+      description: Tests path matching from most specific to least (this is most)
+      tags:
+      - Public
+      responses:
+        '200':
+          description: Success
+    options:
+      tags:
+      - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+  /multi/{v}:
+    get:
+      description: Tests path matching from most specific to least (this is least)
+      tags:
+      - Public
+      parameters:
+      - name: v
+        in: path
+        description: A variable
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+    options:
+      tags:
+      - CORS
+      parameters:
+      - name: v
+        in: path
+        description: A variable
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Standard CORS header response
+
 
 x-amazon-apigateway-binary-media-types:
 - '*/*'

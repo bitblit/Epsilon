@@ -29,6 +29,39 @@ describe('#routerUtilApplyOpenApiDoc', function() {
         expect(find).to.not.be.null;
     });
 
+    it('should find the most specific route and the least specific', async() => {
+        const cfg: RouterConfig = createSampleRouterConfig();
+
+        expect(cfg.modelValidator).to.not.be.null;
+
+        // TODO: move this to its own test
+        const evtFixed: APIGatewayEvent = {
+            httpMethod: 'get',
+            path: '/v0/multi/fixed',
+            requestContext: {
+                stage: 'v0'
+            }
+        } as APIGatewayEvent;
+
+        const evtVar: APIGatewayEvent = {
+            httpMethod: 'get',
+            path: '/v0/multi/xyz',
+            requestContext: {
+                stage: 'v0'
+            }
+        } as APIGatewayEvent;
+
+        cfg.prefixesToStripBeforeRouteMatch = ['v0'];
+        const webHandler: WebHandler = new WebHandler(cfg);
+
+        const findFixed: ProxyResult = await webHandler.findHandler(evtFixed, false);
+        const findVariable: ProxyResult = await webHandler.findHandler(evtVar, false);
+        expect(findFixed).to.not.be.null;
+        expect(findFixed['flag']).to.eq('fixed');
+        expect(findVariable).to.not.be.null;
+        expect(findVariable['flag']).to.eq('variable');
+    });
+
     it('should reformat a path to match the other library', function() {
         const inString: string = '/meta/item/{itemId}';
         const outString: string = RouterUtil.openApiPathToRouteParserPath(inString);

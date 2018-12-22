@@ -178,6 +178,9 @@ export function createSampleRouterConfig(): RouterConfig {
     handlers.set('get /meta/item/{itemId}', (event) => sampleHandler.handle(event));
     handlers.set('post /secure/access-token', (event) => sampleHandler.handle(event));
 
+    handlers.set('get /multi/fixed', (event) => sampleHandler.handle(event, 'fixed'));
+    handlers.set('get /multi/{v}', (event) => sampleHandler.handle(event, 'variable'));
+
     const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
     return cfg;
 }
