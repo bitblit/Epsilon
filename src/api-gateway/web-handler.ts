@@ -113,7 +113,7 @@ export class WebHandler {
         }
 
         if (!rval && add404OnMissing) {
-            Logger.debug('Failed to find handler for %s (cleaned path was %s, strip prefixes were %d)', event.path,
+            Logger.debug('Failed to find handler for %s (cleaned path was %s, strip prefixes were %j)', event.path,
                 cleanPath, this.routerConfig.prefixesToStripBeforeRouteMatch);
             rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'], 404));
         }
@@ -130,7 +130,7 @@ export class WebHandler {
         // If there are any listed prefixes, strip them
         if (this.routerConfig.prefixesToStripBeforeRouteMatch) {
             this.routerConfig.prefixesToStripBeforeRouteMatch.forEach(prefix => {
-                if (rval.toLowerCase().startsWith(prefix.toLowerCase())) {
+                if (rval.toLowerCase().startsWith(prefix.toLowerCase() + '/')) {
                     rval = rval.substring(prefix.length);
                 }
             })
