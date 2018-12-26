@@ -113,7 +113,8 @@ export class WebHandler {
         }
 
         if (!rval && add404OnMissing) {
-            Logger.debug('Failed to find handler for %s', event.path);
+            Logger.debug('Failed to find handler for %s (cleaned path was %s, strip prefixes were %d)', event.path,
+                cleanPath, this.routerConfig.prefixesToStripBeforeRouteMatch);
             rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'], 404));
         }
         return rval;
