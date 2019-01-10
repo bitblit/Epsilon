@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@bitblit/ratchet@0.0.102":
-  version "0.0.102"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.102.tgz#f30380a6384bb8d4475b96dfde6e91681625dc97"
-  integrity sha512-3rGn6CAXdya1jUbZJ/3laT0lKHI8KMsd9XROzWu/xuHB44EmQMjWcHYH+0snFIxFiIbew0deQV06G/gyKf40Kw==
+"@bitblit/ratchet@0.0.129":
+  version "0.0.129"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.0.129.tgz#6a16b765880bd04fcb8e429d261546bddcd062b7"
+  integrity sha512-Vr29DJ3pL4RBbrQ+senFPwIYpt5Ez3Xp0RxTZRqTRfX9ptYEgcsO9GSUE8sp5GwJQg7jaeeSnZ/42sZ5VblCtw==
   dependencies:
     moment "^2.20.1"
     moment-timezone "^0.5.14"

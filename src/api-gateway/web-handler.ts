@@ -57,6 +57,12 @@ export class WebHandler {
                     Logger.error('Really bad - your error processor has an error in it : %s',err,err);
                 }
             }
+
+            // Do this after the above code, since we want timeouts logged
+            if (err.message==='Timeout') {
+                err['statusCode'] = 504; // Set as a gateway timeout
+            }
+
             const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
             const errWithCORS: ProxyResult = this.addCors(errProxy);
             Logger.setTracePrefix(null); // Just in case it was set
