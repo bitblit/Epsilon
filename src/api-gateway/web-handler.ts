@@ -114,7 +114,7 @@ export class WebHandler {
             // Check validation
             const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm.mapping);
 
-            rval = PromiseRatchet.timeout(rm.mapping.function(extEvent), 'Timed out', rm.mapping.timeoutMS, false);
+            rval = PromiseRatchet.timeout(rm.mapping.function(extEvent), 'Timed out after '+rm.mapping.timeoutMS+' ms', rm.mapping.timeoutMS, false);
         }
 
         if (!rval && add404OnMissing) {
