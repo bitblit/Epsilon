@@ -2,6 +2,7 @@ import {RouteMapping} from './route-mapping';
 import {ModelValidator} from './model-validator';
 import {AuthorizerFunction} from './authorizer-function';
 import {WebTokenManipulator} from '../auth/web-token-manipulator';
+import {ErrorProcessorFunction} from './error-processor-function';
 
 export interface RouterConfig {
     routes: RouteMapping[];
@@ -12,6 +13,10 @@ export interface RouterConfig {
     disableCORS: boolean;
     disableCompression: boolean;
     staticContentPaths: string[];
+
+    defaultTimeoutMS: number;
+
+    errorProcessor: ErrorProcessorFunction;
 
     // If you set a web token manipulator, epsilon will auto-parse the Authorization header
     webTokenManipulator: WebTokenManipulator;

@@ -6,6 +6,10 @@ export interface RouteMapping {
     path: string;
     function: HandlerFunction<any>,
 
+    // If set, then epsilon will auto-timeout with a 504
+    // Mostly useful for when you want variable timeouts (APIGateway/Lambda only set one)
+    timeoutMS: number;
+
     // If this is set, and fails, then it will 400
     validation: RouteValidatorConfig;
 

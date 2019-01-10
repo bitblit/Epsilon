@@ -11,10 +11,10 @@ import * as qs from 'querystring';
 import {AuthorizerFunction} from './api-gateway/route/authorizer-function';
 import {HandlerFunction} from './api-gateway/route/handler-function';
 import {SimpleRoleRouteAuth} from './api-gateway/auth/simple-role-route-auth';
-import {SampleHandler} from './api-gateway/route/sample-handler';
 import {RouterUtil} from './api-gateway/route/router-util';
 import * as fs from 'fs';
 import * as path from 'path';
+import {BuiltInHandlers} from './api-gateway/route/built-in-handlers';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -170,16 +170,15 @@ export function createSampleRouterConfig(): RouterConfig {
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
     const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'], []);
-    const sampleHandler: SampleHandler = new SampleHandler();
     authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
-    handlers.set('get /', (event) => sampleHandler.handle(event));
-    handlers.set('get /meta/server', (event) => sampleHandler.handle(event));
-    handlers.set('get /meta/user', (event) => sampleHandler.handle(event));
-    handlers.set('get /meta/item/{itemId}', (event) => sampleHandler.handle(event));
-    handlers.set('post /secure/access-token', (event) => sampleHandler.handle(event));
+    handlers.set('get /', (event) => BuiltInHandlers.sample(event));
+    handlers.set('get /meta/server', (event) => BuiltInHandlers.sample(event));
+    handlers.set('get /meta/user', (event) => BuiltInHandlers.sample(event));
+    handlers.set('get /meta/item/{itemId}', (event) => BuiltInHandlers.sample(event));
+    handlers.set('post /secure/access-token', (event) => BuiltInHandlers.sample(event));
 
-    handlers.set('get /multi/fixed', (event) => sampleHandler.handle(event, 'fixed'));
-    handlers.set('get /multi/{v}', (event) => sampleHandler.handle(event, 'variable'));
+    handlers.set('get /multi/fixed', (event) => BuiltInHandlers.sample(event, 'fixed'));
+    handlers.set('get /multi/{v}', (event) => BuiltInHandlers.sample(event, 'variable'));
 
     const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
     return cfg;

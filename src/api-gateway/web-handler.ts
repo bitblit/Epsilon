@@ -15,6 +15,7 @@ import {ExtendedAuthResponseContext} from './route/extended-auth-response-contex
 import {AuthorizerFunction} from './route/authorizer-function';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
+import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -50,7 +51,11 @@ export class WebHandler {
             return proxyResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
-                Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, this.routerConfig);
+                try {
+                    await this.routerConfig.errorProcessor(event, err, this.routerConfig);
+                } catch (err) {
+                    Logger.error('Really bad - your error processor has an error in it : %s',err,err);
+                }
             }
             const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
             const errWithCORS: ProxyResult = this.addCors(errProxy);
@@ -109,7 +114,7 @@ export class WebHandler {
             // Check validation
             const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm.mapping);
 
-            rval = rm.mapping.function(extEvent);
+            rval = PromiseRatchet.timeout(rm.mapping.function(extEvent), 'Timed out', rm.mapping.timeoutMS, false);
         }
 
         if (!rval && add404OnMissing) {

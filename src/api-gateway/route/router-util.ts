@@ -10,6 +10,8 @@ import {RouteValidatorConfig} from './route-validator-config';
 import {BooleanRatchet} from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import {DefaultCORSHandler} from '../default-cors-handler';
 import {OpenApiConvertOptions} from './open-api-convert-options';
+import {ErrorProcessorFunction} from './error-processor-function';
+import {BuiltInHandlers} from './built-in-handlers';
 
 /**
  * Endpoints about the api itself
@@ -23,7 +25,10 @@ export class RouterUtil {
     public static openApiYamlToRouterConfig(yamlString: string, handlers: Map<string, HandlerFunction<any>>,
                                             authorizers: Map<string, AuthorizerFunction>,
                                             options: OpenApiConvertOptions =
-                                                RouterUtil.createDefaultOpenApiConvertOptions()): RouterConfig {
+                                                RouterUtil.createDefaultOpenApiConvertOptions(),
+                                            errorProcessor: ErrorProcessorFunction = BuiltInHandlers.defaultErrorProcessor,
+                                            defaultTimeoutMS: number = 30*1000,
+                                            customTimeouts: Map<string, number> = new Map<string, number>()): RouterConfig {
         if (!yamlString) {
             throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
         }
@@ -31,7 +36,8 @@ export class RouterUtil {
 
         const rval: RouterConfig = {
             authorizers: authorizers,
-            routes: []
+            routes: [],
+            errorProcessor: errorProcessor
         } as RouterConfig;
 
         const corsHandler: DefaultCORSHandler = new DefaultCORSHandler();
@@ -47,6 +53,8 @@ export class RouterUtil {
                 }
             })
         }
+
+        const missingPaths: string[] = [];
 
         if (doc['paths']) {
             Object.keys(doc['paths']).forEach(path => {
@@ -64,6 +72,7 @@ export class RouterUtil {
                                 disableQueryMapAssure: true,
                                 disableHeaderMapAssure: true,
                                 disablePathMapAssure: true,
+                                timeoutMS: 10000, // short timeouts for auto-generated CORS since its constant
                                 validation: null
                             } as RouteMapping
                         );
@@ -71,13 +80,15 @@ export class RouterUtil {
                         const finder: string = method + ' ' + path;
                         const entry: any = doc['paths'][path][method];
                         if (!handlers || !handlers.get(finder)) {
-                            throw new MisconfiguredError('Expected to find handler "' + finder + '" but not found');
+                            missingPaths.push(finder);
                         }
                         if (entry && entry['security'] && entry['security'].length > 1) {
                             throw new MisconfiguredError(
                                 'Epsilon does not currently support multiple security (path was ' + finder + ')');
                         }
                         const authorizerName: string = (entry['security'] && entry['security'].length == 1) ? (Object.keys(entry['security'][0])[0]) : null;
+
+                        const timeoutMS: number = customTimeouts.get(finder) || defaultTimeoutMS;
 
 
                         const newRoute: RouteMapping = {
@@ -89,6 +100,7 @@ export class RouterUtil {
                             disableQueryMapAssure: options.disableQueryMapAssure,
                             disableHeaderMapAssure: options.disableHeaderMapAssure,
                             disablePathMapAssure: options.disablePathMapAssure,
+                            timeoutMS: timeoutMS,
                             validation: null
                         } as RouteMapping;
 
@@ -119,6 +131,9 @@ export class RouterUtil {
             });
         }
 
+        if (missingPaths.length > 0) {
+            throw new MisconfiguredError('Missing expected handlers : "' + JSON.stringify(missingPaths));
+        }
 
         return rval;
     }
