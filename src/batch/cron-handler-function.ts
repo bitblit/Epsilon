@@ -1,5 +1,5 @@
 import {ScheduledEvent} from 'aws-lambda';
 
 export interface CronHandlerFunction {
-    (event: ScheduledEvent): Promise<any>
+    (event: ScheduledEvent): Promise<void>
 }
