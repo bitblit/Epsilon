@@ -7,6 +7,7 @@ import * as jwt from 'jsonwebtoken';
 import * as jwks from 'jwks-rsa';
 import {WebTokenManipulator} from './web-token-manipulator';
 import {WebTokenManipulatorUtil} from './web-token-manipulator-util';
+import {UnauthorizedError} from '../error/unauthorized-error';
 
 
 export class GoogleWebTokenManipulator implements WebTokenManipulator{
@@ -18,9 +19,14 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator{
     }
 
     public async extractTokenFromStandardEvent<T>(event: APIGatewayEvent): Promise<CommonJwtToken<T>> {
-        const tokenString: string = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
-        const validated: any = (!!tokenString) ? await this.parseAndValidateGoogleToken(tokenString, false)  : null;
-        return validated as CommonJwtToken<T>;
+        try {
+            const tokenString: string = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
+            const validated: any = (!!tokenString) ? await this.parseAndValidateGoogleToken(tokenString, false)  : null;
+            return validated as CommonJwtToken<T>;
+        } catch (err) {
+            Logger.warn('Authentication of token failed : %s', err, err);
+            throw new UnauthorizedError('Failed to extract google token : ' + String(err));
+        }
     }
 
     public async parseAndValidateGoogleToken<T>(googleToken: string, allowExpired: boolean = false) : Promise<CommonJwtToken<T>> {
