@@ -37,8 +37,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.0.129",
-    "@bitblit/saltmine": "0.2.5",
+    "@bitblit/ratchet": "0.0.137",
+    "@bitblit/saltmine": "0.3.0",
     "crypt3": "1.0.0",
     "request": "2.88.0",
     "request-promise": "4.2.2",
