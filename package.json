@@ -12,11 +12,12 @@
   ],
   "config": {},
   "scripts": {
-    "compile": "yarn run clean && tsc && yarn run copy-static-files",
-    "copy-static-files": "cd src && cp -R static ../dist",
+    "prepublishOnly": "yarn run compile",
+    "compile": "yarn run clean && ts && yarn run copy-static-filesc",
     "watch": "tsc -w .",
     "clean": "rm -Rf dist",
     "test": "mocha -r ts-node/register test/**/*.ts",
+    "apply-circle": "node dist/circleci/apply-circle-ci-env-variables-to-files src/static/build-properties.json",
     "run-sample-server": "yarn compile && node dist/sample-local-server.js"
   },
   "repository": {
