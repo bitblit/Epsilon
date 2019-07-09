@@ -16,6 +16,8 @@ import {AuthorizerFunction} from './route/authorizer-function';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
+import {TimeoutToken} from '@bitblit/ratchet/dist/common/timeout-token';
+import {RequestTimeoutError} from './error/request-timeout-error';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -35,6 +37,9 @@ export class WebHandler {
             let handler: Promise<any> = this.findHandler(event);
             Logger.debug('Processing event : %j', event);
             const result: any = await handler;
+            if (result instanceof TimeoutToken) {
+                throw new RequestTimeoutError('Timed out');
+            }
             Logger.debug('Initial return value : %j', result);
             let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
             const initSize: number = proxyResult.body.length;
@@ -120,7 +125,8 @@ export class WebHandler {
             // Check validation
             const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm.mapping);
 
-            rval = PromiseRatchet.timeout(rm.mapping.function(extEvent), 'Timed out after '+rm.mapping.timeoutMS+' ms', rm.mapping.timeoutMS, false);
+            rval = PromiseRatchet.timeout(rm.mapping.function(extEvent), 'Timed out after '+rm.mapping.timeoutMS+' ms', rm.mapping.timeoutMS);
+
         }
 
         if (!rval && add404OnMissing) {

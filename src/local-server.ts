@@ -52,7 +52,7 @@ export class LocalServer {
         if (this.aborted) {
             return true;
         } else {
-            const wait: any = await PromiseRatchet.createTimeoutPromise('Wait', 1000, true, false);
+            const wait: any = await PromiseRatchet.wait(1000);
             return this.checkFinished();
         }
     }

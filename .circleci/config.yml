@@ -67,23 +67,41 @@ jobs:
         paths:
           - Epsilon
 
+
   deploy:
     <<: *defaults
 
     # CAW 2018-05-09 : This semes redundant but I don't have anything else working yet - still learning Circle V2
     steps:
-      - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: ~/bitblit
-      # Setup npm token
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-      # Update the version number
-      - run: find . -type f -regex ".*/package\.json" -exec sed -i.bak s/0\.0\.0/${CIRCLE_TAG:8}+$CIRCLE_BUILD_NUM/ {} \;
-      - run: echo publishing to NPM as version ${CIRCLE_TAG:8}+$CIRCLE_BUILD_NUM
-      - run: yarn publish --access=public --new-version ${CIRCLE_TAG:8}
+    - attach_workspace:
+        # Must be absolute path or relative path from working_directory
+        at: ~/bitblit
+    - run: echo Publishing production library
+    - run: export
+    - run: set
+    - run: git config --global user.email "bitblit@gmail.com"
+    - run: git config --global user.name "Chris Weiss"
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    # These shouldn't be necessary but circle mysteriously failing on 12/18/18 after working before
+    - run: sudo npm install -g yarn
+    - run: sudo chmod a+rwx  /usr/local/lib/node_modules/yarn/bin/yarn*
+    - run: sudo chmod a+rwx  /usr/local/bin/yarn*
+    - run: yarn install
+    - run: echo Updating props
+    - run: yarn compile
+    - run: yarn run apply-circle
+    - run: yarn publish --patch --no-git-tag-version
+    - run: echo Pushing tag back to Github
+    - run: git status
+    - run: git checkout master
+    - run: git add package.json
+    - run: git commit -m "Upping version in package.json"
+    - run: git status
+    - run: git push -q https://${GITHUB_PERSONAL_TOKEN}@github.com/bitblit/Epsilon.git HEAD:master --tags
+    - run: git status
 
 
-      #- run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    #- run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
 
 workflows:
   version: 2

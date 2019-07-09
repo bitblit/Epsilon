@@ -2,6 +2,6 @@ export class RequestTimeoutError extends Error {
     constructor(...messages: string[]) {
         super(messages.join(','));
         this['messages'] = messages;
-        this['statusCode'] = 408;
+        this['statusCode'] = 500;
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.0.0",
+  "version": "0.0.84",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -37,7 +37,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.0.137",
+    "@bitblit/ratchet": "0.2.1",
     "@bitblit/saltmine": "0.3.0",
     "crypt3": "1.0.0",
     "request": "2.88.0",
