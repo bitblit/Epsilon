@@ -38,6 +38,7 @@ export class WebHandler {
             Logger.debug('Processing event : %j', event);
             const result: any = await handler;
             if (result instanceof TimeoutToken) {
+                (result as TimeoutToken).writeToLog();
                 throw new RequestTimeoutError('Timed out');
             }
             Logger.debug('Initial return value : %j', result);
