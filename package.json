@@ -13,7 +13,7 @@
   "config": {},
   "scripts": {
     "prepublishOnly": "yarn run compile",
-    "compile": "yarn run clean && ts && yarn run copy-static-files",
+    "compile": "yarn run clean && tsc && yarn run copy-static-files",
     "watch": "tsc -w .",
     "clean": "rm -Rf dist",
     "test": "mocha -r ts-node/register test/**/*.ts",
