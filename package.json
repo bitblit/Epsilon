@@ -18,7 +18,7 @@
     "clean": "rm -Rf dist",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "copy-static-files": "cd src && cp -R static ../dist",
-    "apply-circle": "node dist/circleci/apply-circle-ci-env-variables-to-files src/static/build-properties.json",
+    "apply-circle": "node node_modules/@bitblit/ratchet/dist/circleci/apply-circle-ci-env-variables-to-files src/static/build-properties.json",
     "run-sample-server": "yarn compile && node dist/sample-local-server.js"
   },
   "repository": {
