@@ -10,10 +10,10 @@
     moment "^2.20.1"
     moment-timezone "^0.5.14"
 
-"@bitblit/ratchet@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.2.1.tgz#e041d1d8af49768a760fcc4f5925bd4906b79902"
-  integrity sha512-o+bwsUFngOIiiPAGikCbKB9LayCsW81NTLQ1Vzf8s8C3d5RRMwCKFnXQ4sk/tzQv7yvDDJLGT6lBI4UITwgYtA==
+"@bitblit/ratchet@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.2.6.tgz#bd7b14637e4aa19bb6133bdae167cddfe3c497d1"
+  integrity sha512-sVCSOSXRiCLu4QuPi/nj4KTuy02xZkOqdXZnO5EcThe1r2q6Pm3FgjMzJVWpMGwJiVB+7qN/WraAC2rZAGkE6Q==
   dependencies:
     moment "^2.20.1"
     moment-timezone "^0.5.14"
