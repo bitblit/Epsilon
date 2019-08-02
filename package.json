@@ -54,10 +54,7 @@
     "moment-timezone": "0.5.26"
   },
   "resolutions": {
-    "request-promise/**/lodash": "4.17.15",
-    "mocha/**/lodash": "4.17.15",
-    "jwks-rsa/**/lodash": "4.17.15",
-    "node-yaml/**/lodash": "4.17.15"
+    "lodash": "4.17.15"
   },
   "peerDependencies": {
   },
