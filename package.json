@@ -39,11 +39,11 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.2.6",
-    "@bitblit/saltmine": "0.3.0",
+    "@bitblit/ratchet": "0.3.4",
+    "@bitblit/saltmine": "0.3.2",
     "crypt3": "1.0.0",
     "request": "2.88.0",
-    "request-promise": "4.2.2",
+    "request-promise": "4.2.4",
     "jsonwebtoken": "8.3.0",
     "jwks-rsa": "1.3.0",
     "node-yaml": "3.1.1",
@@ -56,11 +56,11 @@
   "peerDependencies": {
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.14",
+    "@types/aws-lambda": "8.10.31",
     "@types/chai": "4.1.2",
     "@types/mocha": "5.0.0",
     "@types/node": "6.0.46",
-    "aws-lambda-typescript": "1.0.2",
+    "aws-lambda-typescript": "3.0.0",
     "aws-sdk": "2.195.0",
     "chai": "3.5.0",
     "chai-http": "3.0.0",
