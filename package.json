@@ -53,6 +53,9 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.26"
   },
+  "resolutions": {
+    "**/**/lodash": "4.17.15"
+  },
   "peerDependencies": {
   },
   "devDependencies": {
