@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as yaml from 'node-yaml';
 import {OpenApiDocModifications} from './open-api-doc-modifications';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';

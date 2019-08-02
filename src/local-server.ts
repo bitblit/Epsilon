@@ -99,6 +99,8 @@ export class LocalServer {
 
         const rval: APIGatewayEvent = {
             body: bodyString,
+            multiValueHeaders: {},
+            multiValueQueryStringParameters: {},
             resource: '/{proxy+}',
             path: request.url,
             httpMethod: request.method.toLowerCase(),

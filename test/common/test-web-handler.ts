@@ -82,6 +82,8 @@ describe('#errorToProxyResult', function() {
 
         let evt:APIGatewayEvent = {
             httpMethod:'get',
+            multiValueHeaders: {},
+            multiValueQueryStringParameters: {},
             path:'/meta/server',
             pathParameters: null,
             queryStringParameters: null,

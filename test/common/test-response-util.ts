@@ -10,6 +10,8 @@ describe('#responseUtil', function() {
 
         const evt: APIGatewayEvent = {
             httpMethod: 'get',
+            multiValueHeaders: {},
+            multiValueQueryStringParameters: {},
             path: '/v0/meta/server',
             body: null,
             headers: null,
