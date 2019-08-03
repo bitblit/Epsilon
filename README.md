@@ -27,6 +27,53 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 * Environmental service
 * Simple redirects
 
+# GraphQL Support (v0.1.x and above)
+
+If you are just doing straight GraphQL then you don't really need to use Epsilon at all (I'd recommend just
+going with straight https://www.npmjs.com/package/apollo-server-lambda).  However, if you want to start messing
+with GraphQL while maintaining your existing OpenAPI 3.0 endpoints, Epsilon allows you to designate a regular
+expression for which all matching requests are delegated to a supplied ApolloServer, bypassing Epsilon.
+
+To do this, you must include the following libraries (They aren't marked as dependencies of Epsilon since they
+aren't required if you don't support GraphQL)
+
+```
+    "apollo-server-lambda": "2.8.1",
+    "graphql": "14.4.2",
+```
+
+Then, in your router-config, you must set an ApolloServer and an Apollo Regex:
+
+```typescript
+        const typeDefs = gql`
+          type Query {
+            hello: String
+          }
+        `;
+
+        // Provide resolver functions for your schema fields
+        const resolvers = {
+            Query: {
+                hello: () => 'Hello world!',
+            },
+        };
+
+        const server:ApolloServer = new ApolloServer({ typeDefs, resolvers });
+
+        // ...
+
+        const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers, options);
+
+        // ...
+        cfg.apolloServer = server;
+        cfg.apolloCreateHandlerOptions = {
+            origin: '*',
+            credentials: true,
+        } as CreateHandlerOptions;
+        cfg.apolloRegex = new RegExp('.*graphql.*');
+
+
+```
 
 # Usage
 
