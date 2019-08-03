@@ -18,6 +18,7 @@ import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 import {TimeoutToken} from '@bitblit/ratchet/dist/common/timeout-token';
 import {RequestTimeoutError} from './error/request-timeout-error';
+import {Base64Ratchet} from '@bitblit/ratchet/dist/common/base64-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -93,16 +94,24 @@ export class WebHandler {
             if (!this.cacheApolloHandler) {
                 this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
             }
-            event.httpMethod = event.httpMethod.toUpperCase();
-
-            this.cacheApolloHandler(event, context, (err,value)=>{
-                if (!!err) {
-                    Logger.error('Error when processing : %j : %s',event, err,err);
-                    rej(err);
-                } else {
-                    res(value);
+            try {
+                event.httpMethod = event.httpMethod.toUpperCase();
+                if (event.isBase64Encoded && !!event.body) {
+                    event.body = new Buffer(event.body, 'base64').toString();
                 }
-            });
+
+                this.cacheApolloHandler(event, context, (err, value) => {
+                    if (!!err) {
+                        Logger.error('Error when processing : %j : %s', event, err, err);
+                        rej(err);
+                    } else {
+                        res(value);
+                    }
+                });
+            } catch (err) {
+                Logger.error('External catch fired for %j : %s : %s', event, err, err);
+                rej(err);
+            }
         });
     }
 
