@@ -93,6 +93,8 @@ export class WebHandler {
             if (!this.cacheApolloHandler) {
                 this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
             }
+            event.httpMethod = event.httpMethod.toUpperCase();
+
             this.cacheApolloHandler(event, context, (err,value)=>{
                 if (!!err) {
                     rej(err);
