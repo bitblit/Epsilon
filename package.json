@@ -69,8 +69,11 @@
     "mocha": "6.2.0",
     "ts-node": "8.3.0",
     "tslint": "5.18.0",
-    "typescript": "2.7.1",
+    "ts-loader": "6.0.4",
+    "typescript": "3.5.3",
     "apollo-server-lambda": "2.8.1",
     "graphql": "14.4.2"
   }
 }
+
+

@@ -2,21 +2,26 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
+    "baseUrl": "src",
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
 
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "sourceMap": true,
     "noImplicitAny": false,
     "noUnusedLocals": false,
     "noImplicitThis": false,
     "strictNullChecks": false,
+    "strictBindCallApply": false,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "suppressImplicitAnyIndexErrors": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6", "dom"]
+    "lib": ["ES2015", "dom"]
   },
   "include": ["src/**/*.ts"],
   "exclude": [ "node_modules", "build", "webpack" ],
