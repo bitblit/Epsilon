@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -42,38 +42,35 @@
     "@bitblit/ratchet": "0.3.4",
     "@bitblit/saltmine": "0.3.2",
     "crypt3": "1.0.0",
-    "request": "2.88.0",
-    "request-promise": "4.2.4",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.5.0",
+    "moment": "2.24.0",
+    "moment-timezone": "0.5.26",
     "node-yaml": "3.2.0",
+    "request": "2.88.0",
+    "request-promise": "4.2.4",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
-    "swagger-model-validator": "3.0.5",
-    "moment": "2.24.0",
-    "moment-timezone": "0.5.26"
+    "swagger-model-validator": "3.0.5"
   },
   "resolutions": {
     "lodash": "4.17.15"
   },
-  "peerDependencies": {
-  },
+  "peerDependencies": {},
   "devDependencies": {
     "@types/aws-lambda": "8.10.31",
     "@types/chai": "4.1.7",
     "@types/mocha": "5.2.7",
     "@types/node": "6.0.46",
+    "apollo-server-lambda": "2.8.1",
     "aws-sdk": "2.503.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
+    "graphql": "14.4.2",
     "mocha": "6.2.0",
+    "ts-loader": "6.0.4",
     "ts-node": "8.3.0",
     "tslint": "5.18.0",
-    "ts-loader": "6.0.4",
-    "typescript": "3.5.3",
-    "apollo-server-lambda": "2.8.1",
-    "graphql": "14.4.2"
+    "typescript": "3.5.3"
   }
 }
-
-
