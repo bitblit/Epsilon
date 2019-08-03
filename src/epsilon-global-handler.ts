@@ -71,7 +71,7 @@ export class EpsilonGlobalHandler {
                 Logger.debug('Epsilon: APIG: %j', event);
                 const wh: WebHandler = this.fetchWebHandler();
                 if (wh) {
-                    rval = await wh.lambdaHandler(event as APIGatewayEvent);
+                    rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
                 } else {
                     Logger.warn('API Gateway event, but no handler or disabled');
                 }

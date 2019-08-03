@@ -1,5 +1,5 @@
 import {RouterConfig} from './api-gateway/route/router-config';
-import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as http from 'http';
 import {IncomingMessage, Server, ServerResponse} from 'http';
@@ -59,13 +59,14 @@ export class LocalServer {
 
     async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {
         const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request);
+        const context: Context = {} as Context; //TBD
         Logger.info('Processing event: %j', evt);
 
         if (evt.path == '/epsilon-poison-pill') {
             this.aborted = true;
             return true;
         } else {
-            const result: ProxyResult = await this.webHandler.lambdaHandler(evt);
+            const result: ProxyResult = await this.webHandler.lambdaHandler(evt, context);
             const written: boolean = await this.writeProxyResultToServerResponse(result, response);
             return written;
         }

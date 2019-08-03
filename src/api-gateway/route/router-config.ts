@@ -3,6 +3,7 @@ import {ModelValidator} from './model-validator';
 import {AuthorizerFunction} from './authorizer-function';
 import {WebTokenManipulator} from '../auth/web-token-manipulator';
 import {ErrorProcessorFunction} from './error-processor-function';
+import {ApolloServer, CreateHandlerOptions} from 'apollo-server-lambda';
 
 export interface RouterConfig {
     routes: RouteMapping[];
@@ -27,4 +28,8 @@ export interface RouterConfig {
     // These will be matched case insensitive
     prefixesToStripBeforeRouteMatch: string[];
 
+    // If set, paths matching this are sent to Apollo for Graphql instead
+    apolloRegex?: RegExp;
+    apolloServer?: ApolloServer;
+    apolloCreateHandlerOptions?: CreateHandlerOptions;
 }

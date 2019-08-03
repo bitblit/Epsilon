@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult} from 'aws-lambda';
 import {BadRequestError} from '../../src/api-gateway/error/bad-request-error';
 import {ResponseUtil} from '../../src/api-gateway/response-util';
 import {EventUtil} from '../../src/api-gateway/event-util';
@@ -101,7 +101,7 @@ describe('#errorToProxyResult', function() {
 
 
         Logger.setLevelByName('silly');
-        const result: ProxyResult = await webHandler.lambdaHandler(evt);
+        const result: ProxyResult = await webHandler.lambdaHandler(evt,{} as Context);
 
         expect(result).to.not.be.null;
         expect(result.isBase64Encoded).to.eq(true);

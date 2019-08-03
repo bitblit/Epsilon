@@ -1,5 +1,5 @@
 import {RouterConfig} from './route/router-config';
-import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, Context, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import * as Route from 'route-parser';
 import {UnauthorizedError} from './error/unauthorized-error';
@@ -24,37 +24,21 @@ import {RequestTimeoutError} from './error/request-timeout-error';
  */
 export class WebHandler {
     private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
+    private cacheApolloHandler: Function;
 
     constructor(private routerConfig: RouterConfig) {
     }
 
-    public async lambdaHandler(event: APIGatewayEvent): Promise<ProxyResult> {
+    public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
         try {
             if (!this.routerConfig) {
                 throw new Error('Router config not found');
             }
-
-            let handler: Promise<any> = this.findHandler(event);
-            Logger.debug('Processing event : %j', event);
-            const result: any = await handler;
-            if (result instanceof TimeoutToken) {
-                (result as TimeoutToken).writeToLog();
-                throw new RequestTimeoutError('Timed out');
+            if (!!this.routerConfig.apolloRegex && this.routerConfig.apolloRegex.test(event.path)) {
+                return this.apolloLambdaHandler(event, context);
+            } else {
+                return  this.openApiLambdaHandler(event);
             }
-            Logger.debug('Initial return value : %j', result);
-            let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
-            const initSize: number = proxyResult.body.length;
-            Logger.silly('Proxy result : %j', proxyResult);
-            proxyResult = this.addCors(proxyResult);
-            Logger.silly('CORS result : %j', proxyResult);
-            if (!this.routerConfig.disableCompression) {
-                const encodingHeader: string = (event && event.headers)?
-                    MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
-                proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
-            }
-            Logger.setTracePrefix(null); // Just in case it was set
-            Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
-            return proxyResult;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
                 try {
@@ -75,6 +59,49 @@ export class WebHandler {
             return errWithCORS;
         }
     };
+
+    public async openApiLambdaHandler(event: APIGatewayEvent): Promise<ProxyResult> {
+        Logger.info('Processing with apollo: %j',event);
+
+        let handler: Promise<any> = this.findHandler(event);
+        Logger.debug('Processing event : %j', event);
+        const result: any = await handler;
+        if (result instanceof TimeoutToken) {
+            (result as TimeoutToken).writeToLog();
+            throw new RequestTimeoutError('Timed out');
+        }
+        Logger.debug('Initial return value : %j', result);
+        let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
+        const initSize: number = proxyResult.body.length;
+        Logger.silly('Proxy result : %j', proxyResult);
+        proxyResult = this.addCors(proxyResult);
+        Logger.silly('CORS result : %j', proxyResult);
+        if (!this.routerConfig.disableCompression) {
+            const encodingHeader: string = (event && event.headers)?
+                MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
+            proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
+        }
+        Logger.setTracePrefix(null); // Just in case it was set
+        Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
+        return proxyResult;
+    }
+
+
+    public async apolloLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
+        Logger.info('Processing with apollo: %j',event);
+        return new Promise<ProxyResult>((res,rej)=>{
+            if (!this.cacheApolloHandler) {
+                this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
+            }
+            this.cacheApolloHandler(event, context, (err,value)=>{
+                if (!!err) {
+                    rej(err);
+                } else {
+                    res(value);
+                }
+            });
+        });
+    }
 
     // Public so it can be used in auth-web-handler
     public addCors(input: ProxyResult): ProxyResult {
