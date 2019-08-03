@@ -62,10 +62,8 @@ export class WebHandler {
     };
 
     public async openApiLambdaHandler(event: APIGatewayEvent): Promise<ProxyResult> {
-        Logger.info('Processing with apollo: %j',event);
-
         let handler: Promise<any> = this.findHandler(event);
-        Logger.debug('Processing event : %j', event);
+        Logger.debug('Processing event with epsilon: %j', event);
         const result: any = await handler;
         if (result instanceof TimeoutToken) {
             (result as TimeoutToken).writeToLog();
@@ -89,7 +87,7 @@ export class WebHandler {
 
 
     public async apolloLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
-        Logger.info('Processing with apollo: %j',event);
+        Logger.silly('Processing event with apollo: %j',event);
         return new Promise<ProxyResult>((res,rej)=>{
             if (!this.cacheApolloHandler) {
                 this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
