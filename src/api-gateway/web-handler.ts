@@ -97,6 +97,7 @@ export class WebHandler {
 
             this.cacheApolloHandler(event, context, (err,value)=>{
                 if (!!err) {
+                    Logger.error('Error when processing : %j : %s',event, err,err);
                     rej(err);
                 } else {
                     res(value);
