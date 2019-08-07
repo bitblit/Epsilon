@@ -15,6 +15,7 @@ import {RouterUtil} from './api-gateway/route/router-util';
 import * as fs from 'fs';
 import * as path from 'path';
 import {BuiltInHandlers} from './api-gateway/route/built-in-handlers';
+import {UnauthorizedError} from './api-gateway/error/unauthorized-error';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -182,6 +183,7 @@ export function createSampleRouterConfig(): RouterConfig {
 
     handlers.set('get /multi/fixed', (event) => BuiltInHandlers.sample(event, 'fixed'));
     handlers.set('get /multi/{v}', (event) => BuiltInHandlers.sample(event, 'variable'));
+    handlers.set('get /err/{code}', (event) => {throw new Error('Fake err: '+JSON.stringify(event))});
 
     const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
     return cfg;

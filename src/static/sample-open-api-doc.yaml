@@ -245,6 +245,35 @@ paths:
         '200':
           description: Standard CORS header response
 
+  /err/{code}:
+    get:
+      description: Tests path matching from most specific to least (this is least)
+      tags:
+        - Public
+      parameters:
+        - name: code
+          in: path
+          description: Error code
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success
+    options:
+      tags:
+        - CORS
+      parameters:
+        - name: code
+          in: path
+          description: A variable
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Standard CORS header response
+
 
 x-amazon-apigateway-binary-media-types:
 - '*/*'

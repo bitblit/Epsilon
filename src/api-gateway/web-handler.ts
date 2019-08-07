@@ -32,14 +32,16 @@ export class WebHandler {
 
     public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
         try {
+            let rval: ProxyResult = null;
             if (!this.routerConfig) {
                 throw new Error('Router config not found');
             }
             if (!!this.routerConfig.apolloRegex && this.routerConfig.apolloRegex.test(event.path)) {
-                return this.apolloLambdaHandler(event, context);
+                rval = await this.apolloLambdaHandler(event, context);
             } else {
-                return  this.openApiLambdaHandler(event);
+                rval = await this.openApiLambdaHandler(event);
             }
+            return rval;
         } catch (err) {
             if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
                 try {
