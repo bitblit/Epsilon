@@ -127,9 +127,9 @@ export class ResponseUtil {
         if (!input.headers) {
             input.headers = {};
         }
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || cfg.corsAllowedOrigins;
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || cfg.corsAllowedMethods;
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || cfg.corsAllowedHeaders;
+        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || cfg.corsAllowedOrigins || '*';
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || cfg.corsAllowedMethods || '*';
+        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || cfg.corsAllowedHeaders || '*';
 
         return input;
     }
