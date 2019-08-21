@@ -28,7 +28,8 @@ export class RouterUtil {
                                                 RouterUtil.createDefaultOpenApiConvertOptions(),
                                             errorProcessor: ErrorProcessorFunction = BuiltInHandlers.defaultErrorProcessor,
                                             defaultTimeoutMS: number = 30*1000,
-                                            customTimeouts: Map<string, number> = new Map<string, number>()): RouterConfig {
+                                            customTimeouts: Map<string, number> = new Map<string, number>(),
+                                            inCorsHandler: HandlerFunction<any> = null): RouterConfig {
         if (!yamlString) {
             throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
         }
@@ -40,7 +41,11 @@ export class RouterUtil {
             errorProcessor: errorProcessor
         } as RouterConfig;
 
-        const corsHandler: DefaultCORSHandler = new DefaultCORSHandler();
+        let corsHandler: HandlerFunction<any> = inCorsHandler;
+        if (!corsHandler) {
+            const corsHandlerOb: DefaultCORSHandler = new DefaultCORSHandler();
+            corsHandler = (e)=>corsHandlerOb.handle(e);
+        }
 
         if (doc['components'] && doc['components']['schemas']) {
             rval.modelValidator = ModelValidator.createFromParsedOpenApiObject(doc)
@@ -66,7 +71,7 @@ export class RouterUtil {
                             {
                                 path: convertedPath,
                                 method: method,
-                                function: (evt) => corsHandler.handle(evt),
+                                function: corsHandler,
                                 authorizerName: null,
                                 disableAutomaticBodyParse: true,
                                 disableQueryMapAssure: true,
