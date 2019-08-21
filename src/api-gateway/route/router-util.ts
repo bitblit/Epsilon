@@ -8,10 +8,10 @@ import {HandlerFunction} from './handler-function';
 import {RouteMapping} from './route-mapping';
 import {RouteValidatorConfig} from './route-validator-config';
 import {BooleanRatchet} from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import {DefaultCORSHandler} from '../default-cors-handler';
 import {OpenApiConvertOptions} from './open-api-convert-options';
 import {ErrorProcessorFunction} from './error-processor-function';
 import {BuiltInHandlers} from './built-in-handlers';
+import {ProxyResult} from 'aws-lambda';
 
 /**
  * Endpoints about the api itself
@@ -43,8 +43,8 @@ export class RouterUtil {
 
         let corsHandler: HandlerFunction<any> = inCorsHandler;
         if (!corsHandler) {
-            const corsHandlerOb: DefaultCORSHandler = new DefaultCORSHandler();
-            corsHandler = (e)=>corsHandlerOb.handle(e);
+            const corsOb: ProxyResult = RouterUtil.buildCorsResponse();
+            corsHandler = async (e)=>{return corsOb};
         }
 
         if (doc['components'] && doc['components']['schemas']) {
@@ -168,6 +168,31 @@ export class RouterUtil {
         } as OpenApiConvertOptions;
     }
 
+    public static buildCorsResponse(allowedOrigins: string = '*',
+                                    allowedMethods: string = '*',
+                                    allowedHeaders: string = '*',
+                                    body: string = '{"cors":true}',
+                                    statusCode: number = 200): ProxyResult {
+
+        const rval: ProxyResult = {
+            statusCode: statusCode,
+            body: body,
+            headers: {
+                'Access-Control-Allow-Origin': allowedOrigins || '*',
+                'Access-Control-Allow-Methods': allowedMethods || '*',
+                'Access-Control-Allow-Headers': allowedHeaders || '*'
+            }
+        };
+        return rval;
+    }
+
+
+    public static buildCorsResponseForRouterConfig(cfg:RouterConfig): ProxyResult {
+        return RouterUtil.buildCorsResponse(cfg.corsAllowedOrigins || '*',
+            cfg.corsAllowedMethods || '*',
+            cfg.corsAllowedHeaders || '*',
+            '{"cors":true}', 200);
+    }
 }
 
 

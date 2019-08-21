@@ -18,13 +18,11 @@ import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 import {TimeoutToken} from '@bitblit/ratchet/dist/common/timeout-token';
 import {RequestTimeoutError} from './error/request-timeout-error';
-import {Base64Ratchet} from '@bitblit/ratchet/dist/common/base64-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
  */
 export class WebHandler {
-    private corsAllowedHeaders: string = 'Authorization, Origin, X-Requested-With, Content-Type, Range';  // Since safari hates '*'
     private cacheApolloHandler: Function;
 
     constructor(private routerConfig: RouterConfig) {
@@ -118,7 +116,7 @@ export class WebHandler {
     // Public so it can be used in auth-web-handler
     public addCors(input: ProxyResult): ProxyResult {
         if (!this.routerConfig.disableCORS) {
-            ResponseUtil.addCORSToProxyResult(input, this.corsAllowedHeaders);
+            ResponseUtil.addCORSToProxyResult(input, this.routerConfig);
         }
         return input;
     }

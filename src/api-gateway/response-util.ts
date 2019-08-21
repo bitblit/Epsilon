@@ -2,6 +2,7 @@ import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import * as zlib from "zlib";
+import {RouterConfig} from './route/router-config';
 
 export class ResponseUtil {
 
@@ -122,13 +123,13 @@ export class ResponseUtil {
     }
 
     // Public so it can be used in auth-web-handler
-    public static addCORSToProxyResult(input: ProxyResult, corsAllowedHeaders: string): ProxyResult {
+    public static addCORSToProxyResult(input: ProxyResult, cfg: RouterConfig): ProxyResult {
         if (!input.headers) {
             input.headers = {};
         }
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || '*';
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || '*';
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || corsAllowedHeaders;
+        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || cfg.corsAllowedOrigins;
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || cfg.corsAllowedMethods;
+        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || cfg.corsAllowedHeaders;
 
         return input;
     }

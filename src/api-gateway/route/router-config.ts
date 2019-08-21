@@ -19,6 +19,10 @@ export interface RouterConfig {
 
     errorProcessor: ErrorProcessorFunction;
 
+    corsAllowedOrigins: string;
+    corsAllowedMethods: string;
+    corsAllowedHeaders: string;
+
     // If you set a web token manipulator, epsilon will auto-parse the Authorization header
     webTokenManipulator: WebTokenManipulator;
 
