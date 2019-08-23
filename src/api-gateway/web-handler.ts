@@ -95,7 +95,7 @@ export class WebHandler {
             try {
                 event.httpMethod = event.httpMethod.toUpperCase();
                 if (event.isBase64Encoded && !!event.body) {
-                    event.body = new Buffer(event.body, 'base64').toString();
+                    event.body = Buffer.from(event.body, 'base64').toString();
                 }
 
                 this.cacheApolloHandler(event, context, (err, value) => {

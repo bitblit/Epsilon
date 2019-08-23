@@ -63,7 +63,7 @@
     "@types/mocha": "5.2.7",
     "@types/node": "6.0.46",
     "apollo-server-lambda": "2.8.1",
-    "aws-sdk": "2.503.0",
+    "aws-sdk": "2.517.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
     "graphql": "14.4.2",
