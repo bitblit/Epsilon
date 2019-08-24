@@ -151,7 +151,11 @@ export class LocalServer {
     }
 
     private async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse): Promise<boolean> {
-        Logger.info('d:%j', proxyResult);
+        const isGraphQLSchemaResponse: boolean = (!!proxyResult && !!proxyResult.body && proxyResult.body.indexOf('{\"data\":{\"__schema\"')>-1);
+
+        if (!isGraphQLSchemaResponse) {
+            Logger.debug('Result: %j', proxyResult);
+        }
 
         response.statusCode = proxyResult.statusCode;
         if (proxyResult.headers) {
