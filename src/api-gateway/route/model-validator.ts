@@ -41,7 +41,7 @@ export class ModelValidator {
     public validate(modelName: string, modelObject: any, emptyAllowed: boolean = false,
                     extraPropertiesAllowed: boolean = true): string[] {
         let rval: string[] = [];
-        Logger.debug('Validating model %s all definitions are : %j', modelName, this.allModels);
+        Logger.silly('Validating model %s all definitions are : %j', modelName, this.allModels);
 
         let modelEmpty: boolean = (!modelObject || Object.keys(modelObject).length === 0);
         if (modelEmpty) {
