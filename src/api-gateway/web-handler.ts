@@ -18,6 +18,7 @@ import {WebTokenManipulatorUtil} from './auth/web-token-manipulator-util';
 import {PromiseRatchet} from '@bitblit/ratchet/dist/common/promise-ratchet';
 import {TimeoutToken} from '@bitblit/ratchet/dist/common/timeout-token';
 import {RequestTimeoutError} from './error/request-timeout-error';
+import {RequireRatchet} from '@bitblit/ratchet/dist/common/require-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -26,6 +27,7 @@ export class WebHandler {
     private cacheApolloHandler: Function;
 
     constructor(private routerConfig: RouterConfig) {
+        RequireRatchet.notNullOrUndefined(routerConfig);
     }
 
     public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {

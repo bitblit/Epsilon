@@ -111,6 +111,15 @@
     moment-timezone "0.5.26"
     yargs "13.3.0"
 
+"@bitblit/ratchet@0.4.7":
+  version "0.4.7"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.4.7.tgz#a3d5f635527a6bb34ffbbd29dbba5586bb62f066"
+  integrity sha512-FcaNhJXsDznPfBKAJwT2yTFmiTG+D0vKZDLgd/R47ug1sZJpw87I/hBIxufmuazdbrT2/B1CVTMe8GfAC7DoJQ==
+  dependencies:
+    moment "2.24.0"
+    moment-timezone "0.5.26"
+    yargs "14.0.0"
+
 "@bitblit/saltmine@0.3.2":
   version "0.3.2"
   resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.3.2.tgz#74930f080a357e222e9f6bd17036cd82bd6865ca"
@@ -3251,6 +3260,23 @@ yargs@13.3.0:
   integrity sha512-2eehun/8ALW8TLoIl7MVaRUrg+yCnenu8B4kBlRxj3GJGDKU1Og7sMXPNm1BYyM1DOJmTZ4YeN/Nwxv+8XJsUA==
   dependencies:
     cliui "^5.0.0"
+    find-up "^3.0.0"
+    get-caller-file "^2.0.1"
+    require-directory "^2.1.1"
+    require-main-filename "^2.0.0"
+    set-blocking "^2.0.0"
+    string-width "^3.0.0"
+    which-module "^2.0.0"
+    y18n "^4.0.0"
+    yargs-parser "^13.1.1"
+
+yargs@14.0.0:
+  version "14.0.0"
+  resolved "https://registry.npmjs.org/yargs/-/yargs-14.0.0.tgz#ba4cacc802b3c0b3e36a9e791723763d57a85066"
+  integrity sha512-ssa5JuRjMeZEUjg7bEL99AwpitxU/zWGAGpdj0di41pOEmJti8NR6kyUIJBkR78DTYNPZOU08luUo0GTHuB+ow==
+  dependencies:
+    cliui "^5.0.0"
+    decamelize "^1.2.0"
     find-up "^3.0.0"
     get-caller-file "^2.0.1"
     require-directory "^2.1.1"
