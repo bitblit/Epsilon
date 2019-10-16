@@ -14,10 +14,12 @@ describe('#eventUtil', function() {
             path: '/cw/meta/server',
             body: null,
             headers: {
-                'Host': 'api.test.com'
+                'Host': 'api.test.com',
+                'X-Forwarded-Proto': 'https'
             },
             multiValueHeaders:{
-                'Host': ['api.test.com']
+                'Host': ['api.test.com'],
+                'X-Forwarded-Proto': ['https']
             },
             multiValueQueryStringParameters:null,
             isBase64Encoded: false,

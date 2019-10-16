@@ -98,6 +98,8 @@ export class LocalServer {
         const formattedTime: string = moment.tz(reqTime, 'UTC').format('DD/MMM/YYYY:hh:mm:ss ZZ');
         const queryIdx: number = request.url.indexOf('?');
         const queryStringParams: any = (queryIdx > -1) ? qs.parse(request.url.substring(queryIdx + 1)) : {};
+        const headers: any = Object.assign({}, request.headers);
+        headers['X-Forwarded-Proto']='http'; // This server is always unencrypted
 
         const rval: APIGatewayEvent = {
             body: bodyString,
@@ -114,7 +116,7 @@ export class LocalServer {
             stageVariables: {
                 baz: 'qux'
             },
-            headers: request.headers,
+            headers: headers,
             requestContext: {
                 accountId: '123456789012',
                 resourceId: '123456',

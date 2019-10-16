@@ -55,6 +55,11 @@ export class EventUtil {
         return MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Host');
     }
 
+    public static extractProtocol(event: APIGatewayEvent): string {
+        // Since API gateway ALWAYS sets this
+        return MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'X-Forwarded-Proto');
+    }
+
     public static extractApiGatewayStage(event: APIGatewayEvent): string {
         let rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
         return (rc) ? rc.stage : null;
@@ -82,11 +87,13 @@ export class EventUtil {
         return (list && list.length > 0) ? list[0] : null;
     }
 
-    public static extractFullPath(event: APIGatewayEvent, protocol: string = 'https'): string {
+    public static extractFullPath(event: APIGatewayEvent, overrideProtocol: string = null): string {
+        const protocol: string = overrideProtocol || EventUtil.extractProtocol(event) || 'https';
         return protocol + '://' + event.requestContext['domainName'] + event.requestContext.path;
     }
 
-    public static extractFullPrefix(event: APIGatewayEvent, protocol: string = 'https'): string {
+    public static extractFullPrefix(event: APIGatewayEvent, overrideProtocol: string = null): string {
+        const protocol: string = overrideProtocol || EventUtil.extractProtocol(event) || 'https';
         const prefix: string = event.requestContext.path.substring(0, event.requestContext.path.indexOf('/',1));
         return protocol + '://' + event.requestContext['domainName'] + prefix;
     }
