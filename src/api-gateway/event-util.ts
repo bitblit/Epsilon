@@ -5,6 +5,7 @@ import {RouterConfig} from './route/router-config';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {BadRequestError} from './error/bad-request-error';
 import {EpsilonLoggerConfig} from '../global/epsilon-logger-config';
+import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 
 /**
  * Endpoints about the api itself
@@ -48,6 +49,10 @@ export class EventUtil {
             throw new BadRequestError('No second / found in the path : ' + event.path);
         }
         return event.path.substring(1, idx);
+    }
+
+    public static extractHostHeader(event: APIGatewayEvent): string {
+        return MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Host');
     }
 
     public static extractApiGatewayStage(event: APIGatewayEvent): string {

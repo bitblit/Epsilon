@@ -13,7 +13,13 @@ describe('#eventUtil', function() {
             httpMethod: 'GET',
             path: '/cw/meta/server',
             body: null,
-            headers: {},
+            headers: {
+                'Host': 'api.test.com'
+            },
+            multiValueHeaders:{
+                'Host': ['api.test.com']
+            },
+            multiValueQueryStringParameters:null,
             isBase64Encoded: false,
             pathParameters: null,
             queryStringParameters: null,
@@ -39,6 +45,7 @@ describe('#eventUtil', function() {
         expect(EventUtil.extractApiGatewayStage(evt)).to.equal('v0');
         expect(EventUtil.extractFullPrefix(evt)).to.equal('https://api.test.com/cw');
         expect(EventUtil.extractFullPath(evt)).to.equal('https://api.test.com/cw/meta/server');
+        expect(EventUtil.extractHostHeader(evt)).to.equal('api.test.com');
     });
 
 });

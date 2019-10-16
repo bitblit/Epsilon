@@ -140,6 +140,7 @@ export class LocalServer {
                 },
                 */
                 path: request.url, // /prod/path/to/resource
+                domainName: request.headers['host'],
                 resourcePath: '/{proxy+}',
                 httpMethod: request.method.toLowerCase(),
                 apiId: '1234567890',
