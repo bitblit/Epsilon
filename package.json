@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -57,8 +57,8 @@
     "lodash": "4.17.15"
   },
   "peerDependencies": {
-    "aws-sdk": "2.552.0",
-    "@types/aws-lambda": "8.10.33"
+    "@types/aws-lambda": "8.10.33",
+    "aws-sdk": "2.552.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.33",
