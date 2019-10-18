@@ -43,7 +43,8 @@ export class WebHandler {
             }
             return rval;
         } catch (err) {
-            if (!err['statusCode']) { // If it has a status code field then I'm assuming it was sent on purpose
+            // If it has a status code field then I'm assuming it was sent on purpose, do not run the processor
+            if (!err['statusCode']) {
                 try {
                     await this.routerConfig.errorProcessor(event, err, this.routerConfig);
                 } catch (err) {
