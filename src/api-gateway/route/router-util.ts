@@ -114,17 +114,12 @@ export class RouterUtil {
                             // TODO: this is brittle as hell, need to firm up
                             const schema: any = entry['requestBody']['content'];
                             Logger.silly('Applying schema %j to %s', schema, finder);
-                            const schemaPath: string = schema['application/json']['schema']['$ref'];
-                            const schemaName: string = schemaPath.substring(schemaPath.lastIndexOf('/') + 1);
-                            if (!rval.modelValidator.fetchModel(schemaName)) {
-                                throw new MisconfiguredError('Path ' + finder + ' refers to schema ' + schemaName +
-                                    ' but its not in the schema section');
-                            }
+                            const modelName = this.findAndValidateModelName(method,path,schema,rval.modelValidator);
                             const required: boolean = BooleanRatchet.parseBool(entry['requestBody']['required']);
                             const validation: RouteValidatorConfig = {
                                 extraPropertiesAllowed: true,
                                 emptyAllowed: !required,
-                                modelName: schemaName
+                                modelName: modelName
                             } as RouteValidatorConfig;
 
                             newRoute.validation = validation;
@@ -140,6 +135,23 @@ export class RouterUtil {
             throw new MisconfiguredError('Missing expected handlers : "' + JSON.stringify(missingPaths));
         }
 
+        return rval;
+    }
+
+    private static findAndValidateModelName(method: string, path: string, schema: any, modelValidator: ModelValidator): string | undefined {
+        let rval: string | undefined = undefined;
+        const schemaPath: string = schema['application/json']['schema']['$ref'];
+        const inlinePath: string = schema['application/json']['schema']['type'];
+        if(schemaPath){
+            rval = schemaPath.substring(schemaPath.lastIndexOf('/') + 1);
+            if (!modelValidator.fetchModel(rval)) {
+                throw new MisconfiguredError(`Path ${method} ${path} refers to schema ${rval} but its not in the schema section`);
+            }
+        }else if(inlinePath){
+            rval = `${method}-${path}-requestBodyModel`;
+            const model = schema['application/json']['schema'];
+            modelValidator.addModel(rval,model);
+        }
         return rval;
     }
 
