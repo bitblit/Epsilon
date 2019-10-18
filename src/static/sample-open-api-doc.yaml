@@ -193,7 +193,47 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AccessTokenRequest'
+              type: object
+              title: Access Token Request
+              required:
+              - email
+              - password
+              - scope
+              properties:
+                email:
+                  type: string
+                  description: Email address of the account to authenticate
+                  format: email
+                  minLength: 7
+                password:
+                  type: string
+                  description: Password of the account to authenticate
+                  minLength: 6
+                scope:
+                  type: string
+                  enum:
+                  - OWNER
+                  - ADVERTISER
+                  - GLOBAL
+                  - RUN_AS_OWNER
+                  - RUN_AS_ADVERTISER
+                  description: |
+                    What style of account to authenticate:
+                    * `OWNER` - A device owner account
+                    * `ADVERTISER` - A advertising account
+                    * `GLOBAL` - Used by Adomni customer service
+                    * `RUN_AS_OWNER` - Used by Adomni customer service
+                    * `RUN_AS_ADVERTISER` - Used by Adomni customer service
+                  default: OWNER
+                runAs:
+                  type: string
+                  description: Used by Adomni customer service
+                  format: email
+                expirationSeconds:
+                  type: number
+                  minimum: 10
+                  maximum: 3600
+                  default: 3600
         description: Request for the access token
         required: true
     options:

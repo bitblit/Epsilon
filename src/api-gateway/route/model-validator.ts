@@ -34,6 +34,10 @@ export class ModelValidator {
         return new ModelValidator(openApi['components']['schemas']);
     }
 
+    public addModel(modelName: string, model: any): void {
+        this.allModels[modelName] = model;
+    }
+
     public fetchModel(modelName: string): any {
         return this.allModels[modelName];
     }
