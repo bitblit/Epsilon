@@ -8,7 +8,7 @@ defaults: &defaults
     CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
 
   docker:
-    - image: circleci/node:8.11.1
+    - image: bitblit/circleci-node-10.15-java-10.0.1-phantomjs-2.1.1
 
 version: 2
 jobs:
