@@ -102,30 +102,21 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@bitblit/ratchet@0.3.4":
-  version "0.3.4"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.3.4.tgz#a212166f81f917bec56b520f2ef2688c0843cf3f"
-  integrity sha512-Kpp/1BsSLtky4k0bQYmzFIlAWGMzablutB1G2KAy4fMLM0zYYpEQPDRv3Wza+D6FBVBw4Mohc6Gm+Z5YbowJyA==
-  dependencies:
-    moment "2.24.0"
-    moment-timezone "0.5.26"
-    yargs "13.3.0"
-
-"@bitblit/ratchet@0.4.7":
-  version "0.4.7"
-  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.4.7.tgz#a3d5f635527a6bb34ffbbd29dbba5586bb62f066"
-  integrity sha512-FcaNhJXsDznPfBKAJwT2yTFmiTG+D0vKZDLgd/R47ug1sZJpw87I/hBIxufmuazdbrT2/B1CVTMe8GfAC7DoJQ==
+"@bitblit/ratchet@0.5.7":
+  version "0.5.7"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.5.7.tgz#d1b7b2e2d5cc71653b98b14cf376d533c66b0383"
+  integrity sha512-RVQLChn3cPJzY+6kgTo9vVKScpGc58UWtB9sddBqZIY7VyGsJpKuIFgblmxOQ8ILAOlEQpP4UlpT2CKdcHjaIA==
   dependencies:
     moment "2.24.0"
     moment-timezone "0.5.26"
     yargs "14.0.0"
 
-"@bitblit/saltmine@0.3.2":
-  version "0.3.2"
-  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.3.2.tgz#74930f080a357e222e9f6bd17036cd82bd6865ca"
-  integrity sha512-WYfX32lD2XRI654JNy11QaK6RAPJ/WE+iIB1FxN8gGLvbLl7IYU/hOwT59iMY5NU/jCw9+Xg9ZW1nmwsFgH6vQ==
+"@bitblit/saltmine@0.3.3":
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.3.3.tgz#0fe8104519247fb779f17d377adb876a5a1614b1"
+  integrity sha512-Grf2ccG6TyMfSp5VanlJuWOT0gJ+H4CFrysf90dZc6W6724o7bDMTTe+MbEddRAwz9NwI67JzQtqpEvA4bwWPQ==
   dependencies:
-    "@bitblit/ratchet" "0.3.4"
+    "@bitblit/ratchet" "0.5.7"
 
 "@octetstream/eslint-config@3.0.0":
   version "3.0.0"
@@ -3253,22 +3244,6 @@ yargs@13.2.2:
     which-module "^2.0.0"
     y18n "^4.0.0"
     yargs-parser "^13.0.0"
-
-yargs@13.3.0:
-  version "13.3.0"
-  resolved "https://registry.npmjs.org/yargs/-/yargs-13.3.0.tgz#4c657a55e07e5f2cf947f8a366567c04a0dedc83"
-  integrity sha512-2eehun/8ALW8TLoIl7MVaRUrg+yCnenu8B4kBlRxj3GJGDKU1Og7sMXPNm1BYyM1DOJmTZ4YeN/Nwxv+8XJsUA==
-  dependencies:
-    cliui "^5.0.0"
-    find-up "^3.0.0"
-    get-caller-file "^2.0.1"
-    require-directory "^2.1.1"
-    require-main-filename "^2.0.0"
-    set-blocking "^2.0.0"
-    string-width "^3.0.0"
-    which-module "^2.0.0"
-    y18n "^4.0.0"
-    yargs-parser "^13.1.1"
 
 yargs@14.0.0:
   version "14.0.0"
