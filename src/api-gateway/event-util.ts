@@ -76,7 +76,8 @@ export class EventUtil {
 
 
     public static ipAddressChain(event: APIGatewayEvent): string[] {
-        const headerVal: string = (event && event.headers) ? event.headers['X-Forwarded-For'] : null;
+        const headerVal: string = (event && event.headers) ?
+            MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'X-Forwarded-For') : null;
         let headerList: string[] = (headerVal) ? String(headerVal).split(',') : [];
         headerList = headerList.map(s => s.trim());
         return headerList;
@@ -101,7 +102,8 @@ export class EventUtil {
     public static bodyObject(event: APIGatewayEvent): any {
         let rval: any = null;
         if (event.body) {
-            let contentType = event.headers['content-type'] || event.headers['Content-Type'] || 'application/octet-stream';
+            let contentType = MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Content-Type')
+                || 'application/octet-stream';
             rval = event.body;
 
             if (event.isBase64Encoded) {
