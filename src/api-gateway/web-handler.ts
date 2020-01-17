@@ -36,6 +36,10 @@ export class WebHandler {
             if (!this.routerConfig) {
                 throw new Error('Router config not found');
             }
+            // Make sure no params of the format amp;(param) are in the event
+            if (this.routerConfig.autoFixStillEncodedQueryParams) {
+                EventUtil.fixStillEncodedQueryParams(event);
+            }
             if (!!this.routerConfig.apolloRegex && this.routerConfig.apolloRegex.test(event.path)) {
                 rval = await this.apolloLambdaHandler(event, context);
             } else {

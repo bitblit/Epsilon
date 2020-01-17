@@ -50,4 +50,58 @@ describe('#eventUtil', function() {
         expect(EventUtil.extractHostHeader(evt)).to.equal('api.test.com');
     });
 
+
+    it('should fix still encoded query params', function() {
+        const evt: APIGatewayEvent = {
+            httpMethod: 'GET',
+            path: '/cw/meta/server',
+            body: null,
+            headers: {
+                'Host': 'api.test.com',
+                'X-Forwarded-Proto': 'https'
+            },
+            multiValueHeaders:{
+                'Host': ['api.test.com'],
+                'X-Forwarded-Proto': ['https']
+            },
+            isBase64Encoded: false,
+            pathParameters: null,
+            multiValueQueryStringParameters: {
+                a: ['b'],
+                'amp;c': ['d']
+            },
+            queryStringParameters: {
+                a: 'b',
+                'amp;c': 'd'
+            },
+            stageVariables: null,
+            resource: '/{proxy+}',
+            requestContext: {
+                httpMethod: 'GET',
+                accountId: '1234',
+                apiId: '7890',
+                stage: 'v0',
+                path: '/cw/meta/server',
+                domainName: 'api.test.com',
+                identity: null,
+                requestId: 'asdf1234',
+                requestTimeEpoch: 1234,
+                resourceId: '1234',
+                resourcePath: '/{proxy+}'
+
+            } as APIGatewayEventRequestContext
+        } as APIGatewayEvent;
+
+        expect(evt.queryStringParameters['a']).to.not.be.null;
+        expect(evt.queryStringParameters['amp;c']).to.not.be.null;
+        expect(evt.queryStringParameters['c']).to.be.undefined;
+
+        EventUtil.fixStillEncodedQueryParams(evt);
+
+        expect(evt.queryStringParameters['a']).to.not.be.null;
+        expect(evt.queryStringParameters['amp;c']).to.be.undefined;
+        expect(evt.queryStringParameters['c']).to.not.be.null;
+
+    });
+
 });

@@ -10,6 +10,9 @@ export interface RouterConfig {
 
     authorizers: Map<string, AuthorizerFunction>;
 
+    // See EventUtil.fixStillEncodedQueryParams for an explanation here
+    autoFixStillEncodedQueryParams: boolean;
+
     // Future expansion
     disableCORS: boolean;
     disableCompression: boolean;

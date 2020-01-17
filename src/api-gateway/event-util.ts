@@ -129,6 +129,47 @@ export class EventUtil {
         }
         return rval;
     }
+
+    /**
+     * This is a weird function - sometimes your customers will not unencode their query params and it
+     * results in query params that look like 'amp;SOMETHING' instead of 'SOMETHING'.  This function
+     * looks for params that look like that, and strips the amp; from them.  If you have any
+     * params you are expecting that have 'amp;' in front of them, DON'T use this function.
+     *
+     * Also, you are a moron for having a param that looks like that
+     *
+     * Yes, it would be better to fix this on the client side, but that is not always an option
+     * in production
+     * @param event
+     */
+    public static fixStillEncodedQueryParams(event: APIGatewayEvent): void {
+        if (!!event) {
+            if (!!event.queryStringParameters) {
+                const newParams: any = {};
+                Object.keys(event.queryStringParameters).forEach(k => {
+                    const val: string = event.queryStringParameters[k];
+                   if (k.toLowerCase().startsWith('amp;')) {
+                       newParams[k.substring(4)] = val;
+                   } else {
+                       newParams[k] = val;
+                   }
+                });
+                event.queryStringParameters = newParams;
+            }
+            if (!!event.multiValueQueryStringParameters) {
+                const newParams: any = {};
+                Object.keys(event.multiValueQueryStringParameters).forEach(k => {
+                    const val: string[] = event.multiValueQueryStringParameters[k];
+                    if (k.toLowerCase().startsWith('amp;')) {
+                        newParams[k.substring(4)] = val;
+                    } else {
+                        newParams[k] = val;
+                    }
+                });
+                event.multiValueQueryStringParameters = newParams;
+            }
+        }
+    }
 }
 
 
