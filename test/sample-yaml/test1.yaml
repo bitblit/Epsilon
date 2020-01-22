@@ -1,0 +1,22 @@
+Object1:
+  type: object
+  title: Object 1
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      description: Email address of the account to authenticate
+      format: email
+      minLength: 7
+    password:
+      type: string
+      description: Password of the account to authenticate
+      minLength: 6
+Object2:
+  type: object
+  title: Object 2
+  properties:
+    someField:
+      type: string
+

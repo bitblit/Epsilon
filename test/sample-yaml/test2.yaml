@@ -1,0 +1,15 @@
+Object3:
+  type: object
+  title: Object 3
+  properties:
+    bob:
+      type: string
+    sam:
+      type: string
+Object4:
+  type: object
+  title: Object 4
+  properties:
+    joe:
+      type: string
+
