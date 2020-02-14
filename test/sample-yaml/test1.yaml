@@ -19,4 +19,5 @@ Object2:
   properties:
     someField:
       type: string
-
+    testRef:
+      $ref: '#/Object2'

@@ -15,7 +15,6 @@ import {RouterUtil} from './api-gateway/route/router-util';
 import * as fs from 'fs';
 import * as path from 'path';
 import {BuiltInHandlers} from './api-gateway/route/built-in-handlers';
-import {UnauthorizedError} from './api-gateway/error/unauthorized-error';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -31,13 +30,7 @@ export class LocalServer {
 
     async runServer(): Promise<boolean> {
         Logger.info('Starting Epsilon server on port %d', this.port);
-        this.server = http.createServer(this.requestHandler.bind(this));
-        this.server.listen(this.port, (err) => {
-            if (err) {
-                Logger.error('Error serving : %s', err, err);
-                return console.error('Something bad happened', err);
-            }
-        });
+        this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
         Logger.info('Epsilon server is listening');
 
         // Also listen for SIGINT

@@ -2,7 +2,6 @@ import {APIGatewayEvent} from 'aws-lambda';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
 import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
-import * as rp from 'request-promise';
 import * as jwt from 'jsonwebtoken';
 import * as jwks from 'jwks-rsa';
 import {WebTokenManipulator} from './web-token-manipulator';
@@ -79,11 +78,8 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator{
 
     private async fetchGoogleDiscoveryDocument(): Promise<any> {
         if (!this.cacheGoogleDiscoveryDocument) {
-            const options: any = {
-                uri: GoogleWebTokenManipulator.GOOGLE_DISCOVERY_DOCUMENT,
-                json: true,
-            };
-            const doc: any = await rp(options);
+            const resp: Response = await fetch(GoogleWebTokenManipulator.GOOGLE_DISCOVERY_DOCUMENT);
+            const doc: any = await resp.json();
             this.cacheGoogleDiscoveryDocument = doc;
 
         }

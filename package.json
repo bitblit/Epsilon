@@ -35,44 +35,43 @@
   },
   "homepage": "https://github.com/bitblit/Epsilon#readme",
   "engines": {
-    "node": ">=8.9.4"
+    "node": ">=12.8"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.5.7",
-    "@bitblit/saltmine": "0.3.3",
+    "@bitblit/ratchet": "0.5.14",
+    "@bitblit/saltmine": "0.4.1",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "1.5.0",
+    "jwks-rsa": "1.6.2",
     "moment": "2.24.0",
-    "moment-timezone": "0.5.26",
+    "moment-timezone": "0.5.27",
     "node-yaml": "3.2.0",
-    "request": "2.88.0",
-    "request-promise": "4.2.4",
+    "portable-fetch": "3.0.0",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
-    "swagger-model-validator": "3.0.5"
+    "swagger-model-validator": "3.0.18"
   },
   "resolutions": {
     "lodash": "4.17.15"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.33",
-    "aws-sdk": "2.552.0"
+    "@types/aws-lambda": "8.10.40",
+    "aws-sdk": "2.618.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.33",
-    "@types/chai": "4.1.7",
-    "@types/mocha": "5.2.7",
-    "@types/node": "6.0.46",
-    "apollo-server-lambda": "2.8.1",
-    "aws-sdk": "2.552.0",
+    "@types/aws-lambda": "8.10.40",
+    "@types/chai": "4.2.9",
+    "@types/mocha": "7.0.1",
+    "@types/node": "12.12.6",
+    "apollo-server-lambda": "2.10.0",
+    "aws-sdk": "2.618.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
-    "graphql": "14.4.2",
-    "mocha": "6.2.0",
-    "ts-loader": "6.0.4",
-    "ts-node": "8.3.0",
-    "tslint": "5.18.0",
-    "typescript": "3.5.3"
+    "graphql": "14.6.0",
+    "mocha": "7.0.1",
+    "ts-loader": "6.2.1",
+    "ts-node": "8.6.2",
+    "eslint": "6.8.0",
+    "typescript": "3.7.5"
   }
 }
