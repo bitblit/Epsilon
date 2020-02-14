@@ -79,7 +79,7 @@ export class EpsilonGlobalHandler {
                 Logger.debug('Epsilon: SNS: %j', event);
                 // If salt mine is here, it takes precedence
                 const sm: SaltMineHandler = this.fetchSaltMineHandler();
-                if (sm && sm.isSaltMineStartSnsEvent(event)) {
+                if (sm && sm.isSaltMineSNSEvent(event)) {
                     rval = await sm.processSaltMineSNSEvent(event, context);
                 } else {
                     rval = await this.processSnsEvent(event as SNSEvent);

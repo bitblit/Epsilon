@@ -129,9 +129,9 @@
     moment-timezone "0.5.26"
     yargs "14.0.0"
 
-"@bitblit/saltmine@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.4.1.tgz#24c372fad4ec78664caacd4369f9a5ba418a2c7d"
+"@bitblit/saltmine@0.4.2":
+  version "0.4.2"
+  resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.4.2.tgz#f4a145f98f9d97a795bd2ea37b27053db06ff709"
   dependencies:
     "@bitblit/ratchet" "0.5.14"
 

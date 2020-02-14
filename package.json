@@ -40,7 +40,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@bitblit/ratchet": "0.5.14",
-    "@bitblit/saltmine": "0.4.1",
+    "@bitblit/saltmine": "0.4.2",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.6.2",
     "moment": "2.24.0",
