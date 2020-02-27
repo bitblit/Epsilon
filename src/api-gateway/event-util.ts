@@ -1,11 +1,12 @@
 import {APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext} from 'aws-lambda';
 import {UnauthorizedError} from './error/unauthorized-error';
 import {CommonJwtToken} from '@bitblit/ratchet/dist/common/common-jwt-token';
-import {RouterConfig} from './route/router-config';
 import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {BadRequestError} from './error/bad-request-error';
 import {EpsilonLoggerConfig} from '../global/epsilon-logger-config';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
+import * as jwt from 'jsonwebtoken';
+import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
 
 /**
  * Endpoints about the api itself
@@ -169,6 +170,29 @@ export class EventUtil {
                 event.multiValueQueryStringParameters = newParams;
             }
         }
+    }
+
+    /**
+     * Allows you to force in a token for an arbitrary event without having to pass the whole thing
+     * through Epsilon.  Useful for when you need to test a handler that needs authorization,
+     * and don't need to instantiate all of epsilon, just the handler
+     * @param event Event to decorate
+     * @param jwtToken String containing a valid JWT token
+     */
+    public static applyTokenToEventForTesting(event: APIGatewayEvent, jwtToken: string): void {
+        const jwtData: any = jwt.decode(jwtToken, {complete: true});
+
+        // Make the header consistent with the authorizer
+        event.headers = event.headers || {};
+        event.headers['authorization'] = 'Bearer ' + jwtToken;
+
+        event.requestContext = event.requestContext || {} as APIGatewayEventRequestContext;
+        const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as
+            ExtendedAuthResponseContext;
+        newAuth.userData = jwtData;
+        newAuth.userDataJSON = (jwtData) ? JSON.stringify(jwtData) : null;
+        newAuth.srcData = jwt.token;
+        event.requestContext.authorizer = newAuth;
     }
 }
 
