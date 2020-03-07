@@ -290,6 +290,8 @@ export class WebHandler {
                 newAuth.userDataJSON = (token) ? JSON.stringify(token) : null;
                 newAuth.srcData = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
                 event.requestContext.authorizer = newAuth;
+            } else {
+                Logger.debug('RouteAuth is %s, but no auth created : %j : %j', route.authorizerName, token, event);
             }
         }
 

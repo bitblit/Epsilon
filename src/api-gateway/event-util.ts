@@ -20,6 +20,7 @@ export class EventUtil {
         const auth: AuthResponseContext = EventUtil.extractAuthorizer(event);
 
         if (!auth) {
+            Logger.debug('Could not extract authorizer from event : %j', event);
             throw new UnauthorizedError('Missing authorization context');
         } else {
             if (auth.userData) {
