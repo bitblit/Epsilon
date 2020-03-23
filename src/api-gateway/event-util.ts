@@ -7,6 +7,8 @@ import {EpsilonLoggerConfig} from '../global/epsilon-logger-config';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import * as jwt from 'jsonwebtoken';
 import {ExtendedAuthResponseContext} from './route/extended-auth-response-context';
+import {BasicAuthToken} from './auth/basic-auth-token';
+import {Base64Ratchet} from '@bitblit/ratchet/dist/common/base64-ratchet';
 
 /**
  * Endpoints about the api itself
@@ -195,6 +197,31 @@ export class EventUtil {
         newAuth.srcData = jwt.token;
         event.requestContext.authorizer = newAuth;
     }
+
+    public static extractBasicAuthenticationToken(event: APIGatewayEvent, throwErrorOnMissingBad: boolean = false):
+        BasicAuthToken {
+        let rval: BasicAuthToken = null;
+        if (!!event && !!event.headers) {
+            const headerVal: string = MapRatchet.caseInsensitiveAccess(event.headers, 'authorization');
+            if (!!headerVal && headerVal.startsWith('Basic ')) {
+                const parsed: string = Base64Ratchet.base64StringToString(headerVal.substring(6));
+                const sp: string[] = parsed.split(':');
+                Logger.silly('Parsed to %j', sp);
+                if (!!sp && sp.length===2) {
+                    rval = {
+                        username: sp[0],
+                        password: sp[1]
+                    };
+                }
+            }
+        }
+
+        if (!rval && throwErrorOnMissingBad) {
+            throw new UnauthorizedError('Could not find valid basic authentication header');
+        }
+        return rval;
+    }
+
 }
 
 

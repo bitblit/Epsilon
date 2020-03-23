@@ -39,12 +39,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.5.14",
+    "@bitblit/ratchet": "0.5.24",
     "@bitblit/saltmine": "0.4.2",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "1.6.2",
+    "jwks-rsa": "1.7.0",
     "moment": "2.24.0",
-    "moment-timezone": "0.5.27",
+    "moment-timezone": "0.5.28",
     "node-yaml": "3.2.0",
     "portable-fetch": "3.0.0",
     "route-parser": "0.0.5",
@@ -55,8 +55,8 @@
     "lodash": "4.17.15"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.40",
-    "aws-sdk": "2.618.0"
+    "@types/aws-lambda": "8.10.46",
+    "aws-sdk": "2.644.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.40",
@@ -64,7 +64,7 @@
     "@types/mocha": "7.0.1",
     "@types/node": "12.12.6",
     "apollo-server-lambda": "2.10.0",
-    "aws-sdk": "2.618.0",
+    "aws-sdk": "2.644.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
     "eslint": "6.8.0",

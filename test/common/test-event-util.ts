@@ -1,10 +1,7 @@
 import {expect} from 'chai';
-import {RouterConfig} from '../../src/api-gateway/route/router-config';
-import {RouterUtil} from '../../src/api-gateway/route/router-util';
-import {WebHandler} from '../../src/api-gateway/web-handler';
 import {APIGatewayEvent, APIGatewayEventRequestContext} from 'aws-lambda';
 import {EventUtil} from '../../src/api-gateway/event-util';
-import {createSampleRouterConfig} from '../../src/local-server';
+import {BasicAuthToken} from '../../src/api-gateway/auth/basic-auth-token';
 
 describe('#eventUtil', function() {
 
@@ -101,6 +98,60 @@ describe('#eventUtil', function() {
         expect(evt.queryStringParameters['a']).to.not.be.null;
         expect(evt.queryStringParameters['amp;c']).to.be.undefined;
         expect(evt.queryStringParameters['c']).to.not.be.null;
+
+    });
+
+
+
+    it('should extract basic auth from headers', function() {
+        const evt: APIGatewayEvent = {
+            httpMethod: 'GET',
+            path: '/cw/meta/server',
+            body: null,
+            headers: {
+                'Host': 'api.test.com',
+                'X-Forwarded-Proto': 'https',
+                'Authorization': 'Basic dGVzdHVzZXI6dGVzdHBhc3M='
+            },
+            multiValueHeaders:{
+                'Host': ['api.test.com'],
+                'X-Forwarded-Proto': ['https'],
+                'Authorization': ['Basic dGVzdHVzZXI6dGVzdHBhc3M=']
+            },
+            isBase64Encoded: false,
+            pathParameters: null,
+            multiValueQueryStringParameters: {
+                a: ['b'],
+                'amp;c': ['d']
+            },
+            queryStringParameters: {
+                a: 'b',
+                'amp;c': 'd'
+            },
+            stageVariables: null,
+            resource: '/{proxy+}',
+            requestContext: {
+                httpMethod: 'GET',
+                accountId: '1234',
+                apiId: '7890',
+                stage: 'v0',
+                path: '/cw/meta/server',
+                domainName: 'api.test.com',
+                identity: null,
+                requestId: 'asdf1234',
+                requestTimeEpoch: 1234,
+                resourceId: '1234',
+                resourcePath: '/{proxy+}'
+
+            } as APIGatewayEventRequestContext
+        } as APIGatewayEvent;
+
+        const basic: BasicAuthToken = EventUtil.extractBasicAuthenticationToken(evt);
+        expect(basic).to.not.be.null;
+        expect(basic.username).to.not.be.null;
+        expect(basic.password).to.not.be.null;
+        expect(basic.username).to.eq('testuser');
+        expect(basic.password).to.eq('testpass');
 
     });
 

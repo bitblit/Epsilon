@@ -129,6 +129,15 @@
     moment-timezone "0.5.26"
     yargs "14.0.0"
 
+"@bitblit/ratchet@0.5.24":
+  version "0.5.24"
+  resolved "https://registry.npmjs.org/@bitblit/ratchet/-/ratchet-0.5.24.tgz#36001f934be6015e5c52b1e1bd26713fb21e7ea8"
+  integrity sha512-xms4dUFKDDHGvf35MHE8j6jnBgbtTUJYHVV5oX+oAZDap6KvrA+uyFHxl40Y0UXaboPoHBUT68tpM6Et4F7P0g==
+  dependencies:
+    moment "2.24.0"
+    moment-timezone "0.5.26"
+    yargs "14.0.0"
+
 "@bitblit/saltmine@0.4.2":
   version "0.4.2"
   resolved "https://registry.npmjs.org/@bitblit/saltmine/-/saltmine-0.4.2.tgz#f4a145f98f9d97a795bd2ea37b27053db06ff709"
@@ -620,9 +629,10 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-aws-sdk@2.618.0:
-  version "2.618.0"
-  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.618.0.tgz#628d4d3bdd5024ce0701ff74713e5be0a2ffd803"
+aws-sdk@2.644.0:
+  version "2.644.0"
+  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.644.0.tgz#a7422be28b5952955db8a0e09defb5341082b252"
+  integrity sha512-FkglRU5fvWHwT2Ll0caXS/QzRNzh5ZCS5cs4pF2nP0OjdD7VNJhNtu5lOnSzvMHAtZQJMsG3k0em8PoI8vk1AQ==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -1820,9 +1830,10 @@ jwa@^1.4.1:
     ecdsa-sig-formatter "1.0.11"
     safe-buffer "^5.0.1"
 
-jwks-rsa@1.6.2:
-  version "1.6.2"
-  resolved "https://registry.npmjs.org/jwks-rsa/-/jwks-rsa-1.6.2.tgz#0870588db70cffa1f4e233f09ae234ae7b4ea012"
+jwks-rsa@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.npmjs.org/jwks-rsa/-/jwks-rsa-1.7.0.tgz#5f3362bb428d72a5f40719b5e10785fa094d1a01"
+  integrity sha512-tq7DVJt9J6wTvl9+AQfwZIiPSuY2Vf0F+MovfRTFuBqLB1xgDVhegD33ChEAQ6yBv9zFvUIyj4aiwrSA5VehUw==
   dependencies:
     "@types/express-jwt" "0.0.42"
     debug "^4.1.0"
@@ -2106,9 +2117,10 @@ moment-timezone@0.5.26:
   dependencies:
     moment ">= 2.9.0"
 
-moment-timezone@0.5.27:
-  version "0.5.27"
-  resolved "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.27.tgz#73adec8139b6fe30452e78f210f27b1f346b8877"
+moment-timezone@0.5.28:
+  version "0.5.28"
+  resolved "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.28.tgz#f093d789d091ed7b055d82aa81a82467f72e4338"
+  integrity sha512-TDJkZvAyKIVWg5EtVqRzU97w0Rb0YVbfpqyjgu6GwXCAohVRqwZjf4fOzDE6p1Ch98Sro/8hQQi65WDXW5STPw==
   dependencies:
     moment ">= 2.9.0"
 
