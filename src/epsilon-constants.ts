@@ -14,6 +14,8 @@ export class EpsilonConstants {
     public static readonly AUTH_HEADER_NAME: string = 'Authorization';
     public static readonly AUTH_HEADER_NAME_LOWERCASE: string = 'authorization'; // Since this can vary
 
+    public static readonly CORS_MATCH_REQUEST_FLAG: string = 'MATCH';
+
 
     // Prevent instantiation
     private constructor() {

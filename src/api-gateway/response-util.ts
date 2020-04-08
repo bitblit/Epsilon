@@ -3,6 +3,9 @@ import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import * as zlib from "zlib";
 import {RouterConfig} from './route/router-config';
+import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
+import {CorsRequestData} from './cors-request-data';
+import {EpsilonConstants} from '../epsilon-constants';
 
 export class ResponseUtil {
 
@@ -122,16 +125,53 @@ export class ResponseUtil {
         return rval;
     }
 
+    public static buildCorsRequestData(event: APIGatewayEvent): CorsRequestData {
+        const rval: CorsRequestData = {
+            accessControlRequestMethod: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Method'),
+            accessControlRequestHeaders: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Headers'),
+            origin: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Origin'),
+            method: (!!event.httpMethod) ? event.httpMethod.toUpperCase() : null
+        };
+        return rval;
+    }
+
     // Public so it can be used in auth-web-handler
-    public static addCORSToProxyResult(input: ProxyResult, cfg: RouterConfig): ProxyResult {
+    public static addCORSToProxyResult(input: ProxyResult, cfg: RouterConfig, requestData: CorsRequestData): ProxyResult {
         if (!input.headers) {
             input.headers = {};
         }
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || cfg.corsAllowedOrigins || '*';
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || cfg.corsAllowedMethods || '*';
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || cfg.corsAllowedHeaders || '*';
+
+        // Matching the request is mainly here to support old safari browsers
+        const allowedOrigins: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedOrigins,
+            StringRatchet.safeString(requestData.origin), '*');
+        const allowedMethods: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedMethods,
+            StringRatchet.safeString(requestData.accessControlRequestMethod), '*');
+        const allowedHeaders: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedHeaders,
+            StringRatchet.safeString(requestData.accessControlRequestHeaders), '*');
+
+        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || allowedOrigins;
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || allowedMethods;
+        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || allowedHeaders;
 
         return input;
+    }
+
+    private static calculateHeaderWithMatchAndOverride(overrideValue: string, matchValue: string, defaultValue: string): string {
+        let rval: string = defaultValue;
+
+        if (!!overrideValue) {
+            if (overrideValue === EpsilonConstants.CORS_MATCH_REQUEST_FLAG) {
+                if (!!matchValue) {
+                    rval = matchValue;
+                } else {
+                    Logger.silly('Asked for match but no value provided, using default');
+                }
+            } else {
+                rval = overrideValue;
+            }
+        }
+
+        return rval;
     }
 
     public static async applyGzipIfPossible(encodingHeader: string, proxyResult: ProxyResult): Promise<ProxyResult> {

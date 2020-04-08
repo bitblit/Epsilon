@@ -62,7 +62,7 @@ export class WebHandler {
             }
 
             const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err);
-            const errWithCORS: ProxyResult = this.addCors(errProxy);
+            const errWithCORS: ProxyResult = this.addCors(errProxy, event);
             Logger.setTracePrefix(null); // Just in case it was set
             return errWithCORS;
         }
@@ -80,7 +80,7 @@ export class WebHandler {
         let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
         const initSize: number = proxyResult.body.length;
         Logger.silly('Proxy result : %j', proxyResult);
-        proxyResult = this.addCors(proxyResult);
+        proxyResult = this.addCors(proxyResult, event);
         Logger.silly('CORS result : %j', proxyResult);
         if (!this.routerConfig.disableCompression) {
             const encodingHeader: string = (event && event.headers)?
@@ -121,9 +121,9 @@ export class WebHandler {
     }
 
     // Public so it can be used in auth-web-handler
-    public addCors(input: ProxyResult): ProxyResult {
+    public addCors(input: ProxyResult, srcEvent: APIGatewayEvent): ProxyResult {
         if (!this.routerConfig.disableCORS) {
-            ResponseUtil.addCORSToProxyResult(input, this.routerConfig);
+            ResponseUtil.addCORSToProxyResult(input, this.routerConfig, ResponseUtil.buildCorsRequestData(srcEvent));
         }
         return input;
     }
