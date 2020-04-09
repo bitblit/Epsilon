@@ -11,7 +11,8 @@ import {BooleanRatchet} from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import {OpenApiConvertOptions} from './open-api-convert-options';
 import {ErrorProcessorFunction} from './error-processor-function';
 import {BuiltInHandlers} from './built-in-handlers';
-import {ProxyResult} from 'aws-lambda';
+import {APIGatewayEvent, ProxyResult} from 'aws-lambda';
+import {ResponseUtil} from '../response-util';
 
 /**
  * Endpoints about the api itself
@@ -204,6 +205,18 @@ export class RouterUtil {
             cfg.corsAllowedMethods || '*',
             cfg.corsAllowedHeaders || '*',
             '{"cors":true}', 200);
+    }
+
+    public static buildCorsResponseForRouterConfigWithReflection(cfg: RouterConfig, evt: APIGatewayEvent): ProxyResult {
+        const temp: ProxyResult = {
+            statusCode: 204,
+            body: '',
+            headers: {}
+        };
+
+        ResponseUtil.addCORSToProxyResult(temp, cfg, evt);
+        return temp;
+
     }
 }
 
