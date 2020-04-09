@@ -130,19 +130,39 @@ export class ResponseUtil {
 
         // Matching the request is mainly here to support old safari browsers
         const targetOrigin: string = (cfg.corsAllowedOrigins !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedOrigins :
-            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Origin');
+            ResponseUtil.buildReflectCorsAllowOrigin(srcEvent, '*');
         const targetHeaders: string = (cfg.corsAllowedHeaders !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedHeaders :
-            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Headers') ||
-            Object.keys(srcEvent.headers).join(', ');
+            ResponseUtil.buildReflectCorsAllowHeaders(srcEvent, '*');
         const targetMethod: string = (cfg.corsAllowedMethods !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedMethods :
-            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
-            srcEvent.httpMethod.toUpperCase();
+            ResponseUtil.buildReflectCorsAllowMethods(srcEvent, '*');
 
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || targetOrigin || '*';
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || targetMethod || '*';
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || targetHeaders || '*';
+        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || targetOrigin;
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || targetMethod;
+        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || targetHeaders;
 
         return input;
+    }
+
+    public static buildReflectCorsAllowOrigin(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
+        const rval: string =
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Origin') || defaultValue;
+        return rval;
+    }
+
+
+    public static buildReflectCorsAllowHeaders(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
+        const rval: string =
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Headers') ||
+            Object.keys(srcEvent.headers).join(', ') || '*';
+        return rval;
+    }
+
+
+    public static buildReflectCorsAllowMethods(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
+        const rval: string =
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
+            srcEvent.httpMethod.toUpperCase() || '*';
+        return rval;
     }
 
     private static calculateHeaderWithMatchAndOverride(overrideValue: string, headerSrc: any, headerNames: string[], defaultValue: string): string {

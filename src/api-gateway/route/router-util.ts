@@ -207,17 +207,6 @@ export class RouterUtil {
             '{"cors":true}', 200);
     }
 
-    public static buildCorsResponseForRouterConfigWithReflection(cfg: RouterConfig, evt: APIGatewayEvent): ProxyResult {
-        const temp: ProxyResult = {
-            statusCode: 204,
-            body: '',
-            headers: {}
-        };
-
-        ResponseUtil.addCORSToProxyResult(temp, cfg, evt);
-        return temp;
-
-    }
 }
 
 
