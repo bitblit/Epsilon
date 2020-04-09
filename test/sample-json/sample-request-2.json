@@ -1,0 +1,28 @@
+{
+  "requestContext": {
+    "elb": {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:0123456789ab:targetgroup/MyLambda/0123456789abcdef"
+    }
+  },
+  "httpMethod": "OPTIONS",
+  "path": "/my-path/1",
+  "queryStringParameters": {},
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br",
+    "accept-language": "en-US,en;q=0.9",
+    "connection": "keep-alive",
+    "host": "www.sample.com",
+    "origin": "http://localhost:4200",
+    "referer": "http://localhost:4200/my-path/1",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36",
+    "x-amzn-trace-id": "Root=1-5e8eaf45-c5db6136ce812e9ba51fc91c",
+    "x-forwarded-for": "69.226.3.161",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https"
+  },
+  "body": "",
+  "isBase64Encoded": false
+}

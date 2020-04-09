@@ -136,9 +136,15 @@ export class ResponseUtil {
         const targetMethod: string = (cfg.corsAllowedMethods !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedMethods :
             ResponseUtil.buildReflectCorsAllowMethods(srcEvent, '*');
 
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || targetOrigin;
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || targetMethod;
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || targetHeaders;
+        if (!input.headers['Access-Control-Allow-Origin'] && !!targetOrigin) {
+            input.headers['Access-Control-Allow-Origin'] = targetOrigin;
+        }
+        if (!input.headers['Access-Control-Allow-Methods'] && !!targetMethod) {
+            input.headers['Access-Control-Allow-Methods'] = targetMethod;
+        }
+        if (!input.headers['Access-Control-Allow-Headers'] && !!targetHeaders) {
+            input.headers['Access-Control-Allow-Headers'] = targetHeaders;
+        }
 
         return input;
     }
@@ -162,22 +168,6 @@ export class ResponseUtil {
         const rval: string =
             MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
             srcEvent.httpMethod.toUpperCase() || '*';
-        return rval;
-    }
-
-    private static calculateHeaderWithMatchAndOverride(overrideValue: string, headerSrc: any, headerNames: string[], defaultValue: string): string {
-        let rval: string = null;
-
-        if (!!overrideValue) {
-            if (overrideValue === EpsilonConstants.CORS_MATCH_REQUEST_FLAG && !!headerSrc && !!headerNames) {
-                for (let i=0;i<headerNames.length && !rval;i++) {
-                    rval = MapRatchet.caseInsensitiveAccess<string>(headerSrc, headerNames[i]);
-                }
-            } else {
-                rval = overrideValue;
-            }
-        }
-        rval = rval || defaultValue;
         return rval;
     }
 
