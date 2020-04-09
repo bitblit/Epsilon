@@ -123,7 +123,7 @@ export class WebHandler {
     // Public so it can be used in auth-web-handler
     public addCors(input: ProxyResult, srcEvent: APIGatewayEvent): ProxyResult {
         if (!this.routerConfig.disableCORS) {
-            ResponseUtil.addCORSToProxyResult(input, this.routerConfig, ResponseUtil.buildCorsRequestData(srcEvent));
+            ResponseUtil.addCORSToProxyResult(input, this.routerConfig, srcEvent);
         }
         return input;
     }

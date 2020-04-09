@@ -3,8 +3,6 @@ import {Logger} from '@bitblit/ratchet/dist/common/logger';
 import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import * as zlib from "zlib";
 import {RouterConfig} from './route/router-config';
-import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
-import {CorsRequestData} from './cors-request-data';
 import {EpsilonConstants} from '../epsilon-constants';
 
 export class ResponseUtil {
@@ -125,52 +123,41 @@ export class ResponseUtil {
         return rval;
     }
 
-    public static buildCorsRequestData(event: APIGatewayEvent): CorsRequestData {
-        const rval: CorsRequestData = {
-            accessControlRequestMethod: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Method'),
-            accessControlRequestHeaders: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Headers'),
-            origin: MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Origin'),
-            method: (!!event.httpMethod) ? event.httpMethod.toUpperCase() : null
-        };
-        return rval;
-    }
-
     // Public so it can be used in auth-web-handler
-    public static addCORSToProxyResult(input: ProxyResult, cfg: RouterConfig, requestData: CorsRequestData): ProxyResult {
-        if (!input.headers) {
-            input.headers = {};
-        }
+    public static addCORSToProxyResult(input: ProxyResult, cfg: RouterConfig, srcEvent: APIGatewayEvent): ProxyResult {
+        input.headers = input.headers || {};
+        srcEvent.headers = srcEvent.headers || {};
 
         // Matching the request is mainly here to support old safari browsers
-        const allowedOrigins: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedOrigins,
-            StringRatchet.safeString(requestData.origin), '*');
-        const allowedMethods: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedMethods,
-            StringRatchet.safeString(requestData.accessControlRequestMethod), '*');
-        const allowedHeaders: string = ResponseUtil.calculateHeaderWithMatchAndOverride(cfg.corsAllowedHeaders,
-            StringRatchet.safeString(requestData.accessControlRequestHeaders), '*');
+        const targetOrigin: string = (cfg.corsAllowedOrigins !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedOrigins :
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Origin');
+        const targetHeaders: string = (cfg.corsAllowedHeaders !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedHeaders :
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Headers') ||
+            Object.keys(srcEvent.headers).join(', ');
+        const targetMethod: string = (cfg.corsAllowedMethods !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedMethods :
+            MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
+            srcEvent.httpMethod.toUpperCase();
 
-        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || allowedOrigins;
-        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || allowedMethods;
-        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || allowedHeaders;
+        input.headers['Access-Control-Allow-Origin'] = input.headers['Access-Control-Allow-Origin'] || targetOrigin || '*';
+        input.headers['Access-Control-Allow-Methods'] = input.headers['Access-Control-Allow-Methods'] || targetMethod || '*';
+        input.headers['Access-Control-Allow-Headers'] = input.headers['Access-Control-Allow-Headers'] || targetHeaders || '*';
 
         return input;
     }
 
-    private static calculateHeaderWithMatchAndOverride(overrideValue: string, matchValue: string, defaultValue: string): string {
-        let rval: string = defaultValue;
+    private static calculateHeaderWithMatchAndOverride(overrideValue: string, headerSrc: any, headerNames: string[], defaultValue: string): string {
+        let rval: string = null;
 
         if (!!overrideValue) {
-            if (overrideValue === EpsilonConstants.CORS_MATCH_REQUEST_FLAG) {
-                if (!!matchValue) {
-                    rval = matchValue;
-                } else {
-                    Logger.silly('Asked for match but no value provided, using default');
+            if (overrideValue === EpsilonConstants.CORS_MATCH_REQUEST_FLAG && !!headerSrc && !!headerNames) {
+                for (let i=0;i<headerNames.length && !rval;i++) {
+                    rval = MapRatchet.caseInsensitiveAccess<string>(headerSrc, headerNames[i]);
                 }
             } else {
                 rval = overrideValue;
             }
         }
-
+        rval = rval || defaultValue;
         return rval;
     }
 
