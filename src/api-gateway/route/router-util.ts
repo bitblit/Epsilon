@@ -207,6 +207,18 @@ export class RouterUtil {
             '{"cors":true}', 200);
     }
 
+
+    public static defaultReflectiveCorsHandler(evt: APIGatewayEvent): ProxyResult {
+        const corsResponse: ProxyResult = RouterUtil.buildCorsResponse(
+            ResponseUtil.buildReflectCorsAllowOrigin(evt, '*'),
+            ResponseUtil.buildReflectCorsAllowMethods(evt, '*'),
+            ResponseUtil.buildReflectCorsAllowHeaders(evt, '*'),
+            '',
+            204
+        );
+        return corsResponse;
+    }
+
 }
 
 
