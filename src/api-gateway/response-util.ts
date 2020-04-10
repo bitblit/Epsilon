@@ -4,6 +4,7 @@ import {MapRatchet} from '@bitblit/ratchet/dist/common/map-ratchet';
 import * as zlib from "zlib";
 import {RouterConfig} from './route/router-config';
 import {EpsilonConstants} from '../epsilon-constants';
+import {StringRatchet} from '@bitblit/ratchet/dist/common/string-ratchet';
 
 export class ResponseUtil {
 
@@ -136,13 +137,15 @@ export class ResponseUtil {
         const targetMethod: string = (cfg.corsAllowedMethods !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG) ? cfg.corsAllowedMethods :
             ResponseUtil.buildReflectCorsAllowMethods(srcEvent, '*');
 
-        if (!input.headers['Access-Control-Allow-Origin'] && !!targetOrigin) {
+        Logger.silly('Adding CORS to proxy result tOrigin: %s tHeaders: %s tMethod: %s', targetOrigin, targetHeaders, targetMethod);
+
+        if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Origin'])) === null && !!targetOrigin) {
             input.headers['Access-Control-Allow-Origin'] = targetOrigin;
         }
-        if (!input.headers['Access-Control-Allow-Methods'] && !!targetMethod) {
+        if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Methods'])) === null && !!targetMethod) {
             input.headers['Access-Control-Allow-Methods'] = targetMethod;
         }
-        if (!input.headers['Access-Control-Allow-Headers'] && !!targetHeaders) {
+        if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Headers'])) === null && !!targetHeaders) {
             input.headers['Access-Control-Allow-Headers'] = targetHeaders;
         }
 

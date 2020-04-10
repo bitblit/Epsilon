@@ -18,6 +18,11 @@ import {ResponseUtil} from '../response-util';
  * Endpoints about the api itself
  */
 export class RouterUtil {
+    // Thin wrapper to implement the handler interface
+    public static readonly DEFAULT_REFLECTIVE_CORS_OPTION_HANDLER : HandlerFunction<ProxyResult> = async (e) => {
+        const rval: ProxyResult = RouterUtil.defaultReflectiveCorsOptionsFunction(e);
+        return rval;
+    };
 
     private constructor() {
     } // Prevent instantiation
@@ -208,7 +213,7 @@ export class RouterUtil {
     }
 
 
-    public static defaultReflectiveCorsHandler(evt: APIGatewayEvent): ProxyResult {
+    public static defaultReflectiveCorsOptionsFunction(evt: APIGatewayEvent): ProxyResult {
         const corsResponse: ProxyResult = RouterUtil.buildCorsResponse(
             ResponseUtil.buildReflectCorsAllowOrigin(evt, '*'),
             ResponseUtil.buildReflectCorsAllowMethods(evt, '*'),
