@@ -19,7 +19,7 @@ import { CronDirectEntry } from './batch/cron/cron-direct-entry';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 /**
- * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
+ * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
  */
 export class EpsilonGlobalHandler {
   private cacheWebHandler: WebHandler;
