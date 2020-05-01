@@ -16,6 +16,7 @@ import { SaltMineEntry } from '@bitblit/saltmine/dist/salt-mine-entry';
 import { SaltMineQueueUtil } from '@bitblit/saltmine/dist/salt-mine-queue-util';
 import { SaltMineConfig } from '@bitblit/saltmine/dist/salt-mine-config';
 import { CronDirectEntry } from './batch/cron/cron-direct-entry';
+import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -24,11 +25,18 @@ export class EpsilonGlobalHandler {
   private cacheWebHandler: WebHandler;
 
   constructor(private config: EpsilonConfig) {
-    if (!config) {
-      throw new Error('Cannot create with null config');
-    }
+    this.validateGlobalConfig(config);
     if (!config.disabled) {
       config.disabled = {} as EpsilonDisableSwitches;
+    }
+  }
+
+  private validateGlobalConfig(config: EpsilonConfig) {
+    if (!config) {
+      ErrorRatchet.throwFormattedErr('Config may not be null');
+    }
+    if (!!config.cron && !config.cron.timezone) {
+      ErrorRatchet.throwFormattedErr('Cron is defined, but timezone is not set');
     }
   }
 
