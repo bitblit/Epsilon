@@ -165,7 +165,7 @@ export class EpsilonGlobalHandler {
           for (let i = 0; i < this.config.cron.saltMineEntries.length; i++) {
             const smCronEntry: CronSaltMineEntry = this.config.cron.saltMineEntries[i];
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, this.config.cron)) {
-              Logger.info('Firing saltmine cron : %s', smCronEntry.name || 'No name - set in config');
+              Logger.info('Firing saltmine cron : %s', smCronEntry.name || smCronEntry.saltMineTaskType);
 
               const saltMineEntry: SaltMineEntry = {
                 type: smCronEntry.saltMineTaskType,
@@ -194,7 +194,7 @@ export class EpsilonGlobalHandler {
         for (let i = 0; i < this.config.cron.directEntries.length; i++) {
           const directEntry: CronDirectEntry = this.config.cron.directEntries[i];
           if (CronUtil.eventMatchesEntry(evt, directEntry, this.config.cron)) {
-            Logger.info('Firing direct cron : %s', directEntry.name || 'No name - set in config');
+            Logger.info('Firing direct cron : %s', directEntry.name || 'Direct entry #' + i);
             await directEntry.directHandler(evt);
           }
         }

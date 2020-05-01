@@ -1,5 +1,5 @@
 export interface AbstractCronEntry {
-  name: string; // Just used for labeling in logs
+  name?: string; // Just used for labeling in logs
   eventFilter?: RegExp; // If set, matches against the schedule name from CloudWatch events
   minuteFilter?: number[]; // If set and length>0, only minutes matching this array will trigger 0-59
   hourFilter?: number[]; // If set and length>0, only hours matching this array will trigger (as defined by the timezone in cron config) 0-23
