@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -79,12 +79,12 @@
     "chai-http": "4.3.0",
     "eslint": "6.8.0",
     "graphql": "14.6.0",
-    "mocha": "7.0.1",
-    "ts-loader": "6.2.1",
-    "ts-node": "8.6.2",
     "husky": "3.0.5",
+    "mocha": "7.0.1",
     "prettier": "1.18.2",
     "pretty-quick": "1.11.1",
+    "ts-loader": "6.2.1",
+    "ts-node": "8.6.2",
     "typescript": "3.7.5"
   }
 }
