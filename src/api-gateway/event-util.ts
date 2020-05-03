@@ -185,7 +185,12 @@ export class EventUtil {
    * @param jwtToken String containing a valid JWT token
    */
   public static applyTokenToEventForTesting(event: APIGatewayEvent, jwtToken: string): void {
-    const jwtData: any = jwt.decode(jwtToken, { complete: true });
+    const jwtFullData: any = jwt.decode(jwtToken, { complete: true });
+    if (!jwtFullData['payload']) {
+      throw new Error('No payload found in passed token');
+    }
+    // CAW 2020-05-03 : Have to strip the payload layer to match behavior of WebTokenManipulator in live
+    const jwtData: any = jwtFullData['payload'];
 
     // Make the header consistent with the authorizer
     event.headers = event.headers || {};
@@ -195,7 +200,7 @@ export class EventUtil {
     const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as ExtendedAuthResponseContext;
     newAuth.userData = jwtData;
     newAuth.userDataJSON = jwtData ? JSON.stringify(jwtData) : null;
-    newAuth.srcData = jwt.token;
+    newAuth.srcData = jwtToken;
     event.requestContext.authorizer = newAuth;
   }
 
