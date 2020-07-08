@@ -1,9 +1,8 @@
 import { expect } from 'chai';
 import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
-import { EventUtil } from '../../src/api-gateway/event-util';
-import { BasicAuthToken } from '../../src/api-gateway/auth/basic-auth-token';
+import { EventUtil } from '../../src/http/event-util';
+import { BasicAuthToken } from '../../src/http/auth/basic-auth-token';
 import * as fs from 'fs';
-import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 describe('#eventUtil', function() {
   it('should extract pieces', function() {

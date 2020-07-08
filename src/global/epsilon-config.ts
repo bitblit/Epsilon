@@ -1,4 +1,4 @@
-import { RouterConfig } from '../api-gateway/route/router-config';
+import { RouterConfig } from '../http/route/router-config';
 import { CronConfig } from '../batch/cron/cron-config';
 import { DynamoDbConfig } from '../batch/dynamo-db-config';
 import { S3Config } from '../batch/s3-config';

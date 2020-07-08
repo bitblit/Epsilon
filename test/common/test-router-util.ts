@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { RouterConfig } from '../../src/api-gateway/route/router-config';
-import { RouterUtil } from '../../src/api-gateway/route/router-util';
-import { WebHandler } from '../../src/api-gateway/web-handler';
+import { RouterConfig } from '../../src/http/route/router-config';
+import { RouterUtil } from '../../src/http/route/router-util';
+import { WebHandler } from '../../src/http/web-handler';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { createSampleRouterConfig } from '../../src/local-server';
 

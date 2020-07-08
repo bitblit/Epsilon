@@ -1,7 +1,5 @@
-import {APIGatewayEvent} from 'aws-lambda';
-
+import { APIGatewayEvent } from 'aws-lambda';
 
 export interface ExtendedAPIGatewayEvent extends APIGatewayEvent {
-    parsedBody: any;
-
+  parsedBody: any;
 }

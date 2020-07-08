@@ -1,24 +1,24 @@
-import { RouterConfig } from './api-gateway/route/router-config';
+import { RouterConfig } from './http/route/router-config';
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import * as http from 'http';
 import { IncomingMessage, Server, ServerResponse } from 'http';
-import { WebHandler } from './api-gateway/web-handler';
+import { WebHandler } from './http/web-handler';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import * as moment from 'moment-timezone';
 import * as qs from 'querystring';
-import { AuthorizerFunction } from './api-gateway/route/authorizer-function';
-import { HandlerFunction } from './api-gateway/route/handler-function';
-import { SimpleRoleRouteAuth } from './api-gateway/auth/simple-role-route-auth';
-import { RouterUtil } from './api-gateway/route/router-util';
+import { AuthorizerFunction } from './http/route/authorizer-function';
+import { HandlerFunction } from './http/route/handler-function';
+import { SimpleRoleRouteAuth } from './http/auth/simple-role-route-auth';
+import { RouterUtil } from './http/route/router-util';
 import * as fs from 'fs';
 import * as path from 'path';
-import { BuiltInHandlers } from './api-gateway/route/built-in-handlers';
+import { BuiltInHandlers } from './http/route/built-in-handlers';
 import { EpsilonConstants } from './epsilon-constants';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
-import { EventUtil } from './api-gateway/event-util';
+import { EventUtil } from './http/event-util';
 
 /**
  * A simplistic server for testing your lambdas locally

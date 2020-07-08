@@ -31,6 +31,13 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - Environmental service
 - Simple redirects
 
+# Version 0.4.0 Release Notes
+
+- Switched logging for GraphQL introspection calls on local-server down to silly level
+- Updated to new version of libraries
+- Switched to js-yaml instead of node-yaml
+- Moved api-gateway package to http package to reflect that this also handles ALB endpoints
+
 # Version 0.3.0 Release Notes
 
 - Remapped CRON handler to be able to filter on more than just the incoming Event name. Given the new mapping,

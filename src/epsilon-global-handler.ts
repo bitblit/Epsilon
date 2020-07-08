@@ -1,7 +1,7 @@
 import { APIGatewayEvent, Context, DynamoDBStreamEvent, S3CreateEvent, S3Event, ScheduledEvent, SNSEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { EpsilonConfig } from './global/epsilon-config';
-import { WebHandler } from './api-gateway/web-handler';
+import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
 import { EpsilonDisableSwitches } from './global/epsilon-disable-switches';
 import { SnsHandlerFunction } from './batch/sns-handler-function';
@@ -9,7 +9,7 @@ import { DynamoDbHandlerFunction } from './batch/dynamo-db-handler-function';
 import { SaltMineHandler } from '@bitblit/saltmine/dist/salt-mine-handler';
 import { S3CreateHandlerFunction } from './batch/s3-create-handler-function';
 import { S3RemoveHandlerFunction } from './batch/s3-remove-handler-function';
-import { EventUtil } from './api-gateway/event-util';
+import { EventUtil } from './http/event-util';
 import { CronSaltMineEntry } from './batch/cron/cron-salt-mine-entry';
 import { CronUtil } from './batch/cron/cron-util';
 import { SaltMineEntry } from '@bitblit/saltmine/dist/salt-mine-entry';
