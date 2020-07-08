@@ -62,7 +62,8 @@
     "swagger-model-validator": "3.0.19"
   },
   "resolutions": {
-    "lodash": "4.17.15"
+    "lodash": "4.17.15",
+    "minimist": "1.2.3"
   },
   "peerDependencies": {
     "@types/aws-lambda": "8.10.58",
