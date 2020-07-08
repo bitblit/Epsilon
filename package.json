@@ -73,7 +73,7 @@
     "@types/chai": "4.2.9",
     "@types/mocha": "7.0.1",
     "@types/node": "12.12.6",
-    "apollo-server-lambda": "2.10.0",
+    "apollo-server-lambda": "2.14.2",
     "aws-sdk": "2.712.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
