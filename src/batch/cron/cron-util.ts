@@ -6,6 +6,7 @@ import { Moment } from 'moment-timezone';
 import * as moment from 'moment-timezone';
 import { CronConfig } from './cron-config';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 export class CronUtil {
   public static everyNMinuteFilter(n: number): number[] {
@@ -57,6 +58,25 @@ export class CronUtil {
       }
     }
 
+    return rval;
+  }
+
+  public static cronEntryName(entry: AbstractCronEntry, idx: number = null): string {
+    RequireRatchet.notNullOrUndefined(entry);
+    let rval: string = null;
+    if (!!entry) {
+      rval = entry.name;
+      rval = rval || entry['saltMineTaskType'];
+      if (!rval && !!entry['directHandler']) {
+        if (!!idx) {
+          rval = 'Direct Entry ' + idx;
+        } else {
+          rval = 'Direct Entry (No idx specified)';
+        }
+      }
+    } else {
+      rval = 'ERROR: no entry passed';
+    }
     return rval;
   }
 }

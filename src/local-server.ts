@@ -18,6 +18,7 @@ import { BuiltInHandlers } from './api-gateway/route/built-in-handlers';
 import { EpsilonConstants } from './epsilon-constants';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { EventUtil } from './api-gateway/event-util';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -59,7 +60,9 @@ export class LocalServer {
     const context: Context = {
       awsRequestId: 'LOCAL-' + StringRatchet.createType4Guid()
     } as Context; //TBD
-    Logger.info('Processing event: %j', evt);
+    const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
+
+    Logger.logByLevel(logEventLevel, 'Processing event: %j', evt);
 
     if (evt.path == '/epsilon-poison-pill') {
       this.aborted = true;

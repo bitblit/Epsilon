@@ -157,4 +157,15 @@ describe('#eventUtil', function() {
     const roundTripTokenString: string = EventUtil.extractTokenSrc(evt);
     expect(roundTripTokenString).to.eq(jwtToken);
   });
+
+  it('should check if an event is a graphql introspection', function() {
+    const evt1: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
+    const evt2: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-gql-introspection.json').toString());
+
+    const res1: boolean = EventUtil.eventIsAGraphQLIntrospection(evt1);
+    const res2: boolean = EventUtil.eventIsAGraphQLIntrospection(evt2);
+
+    expect(res1).to.be.false;
+    expect(res2).to.be.true;
+  });
 });

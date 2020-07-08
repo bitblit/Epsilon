@@ -1,0 +1,50 @@
+{
+  "body": "eyJvcGVyYXRpb25OYW1lIjoiSW50cm9zcGVjdGlvblF1ZXJ5IiwidmFyaWFibGVzIjp7fSwicXVlcnkiOiJxdWVyeSBJbnRyb3NwZWN0aW9uUXVlcnkge1xuICBfX3NjaGVtYSB7XG4gICAgcXVlcnlUeXBlIHtcbiAgICAgIG5hbWVcbiAgICB9XG4gICAgbXV0YXRpb25UeXBlIHtcbiAgICAgIG5hbWVcbiAgICB9XG4gICAgc3Vic2NyaXB0aW9uVHlwZSB7XG4gICAgICBuYW1lXG4gICAgfVxuICAgIHR5cGVzIHtcbiAgICAgIC4uLkZ1bGxUeXBlXG4gICAgfVxuICAgIGRpcmVjdGl2ZXMge1xuICAgICAgbmFtZVxuICAgICAgZGVzY3JpcHRpb25cbiAgICAgIGxvY2F0aW9uc1xuICAgICAgYXJncyB7XG4gICAgICAgIC4uLklucHV0VmFsdWVcbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cblxuZnJhZ21lbnQgRnVsbFR5cGUgb24gX19UeXBlIHtcbiAga2luZFxuICBuYW1lXG4gIGRlc2NyaXB0aW9uXG4gIGZpZWxkcyhpbmNsdWRlRGVwcmVjYXRlZDogdHJ1ZSkge1xuICAgIG5hbWVcbiAgICBkZXNjcmlwdGlvblxuICAgIGFyZ3Mge1xuICAgICAgLi4uSW5wdXRWYWx1ZVxuICAgIH1cbiAgICB0eXBlIHtcbiAgICAgIC4uLlR5cGVSZWZcbiAgICB9XG4gICAgaXNEZXByZWNhdGVkXG4gICAgZGVwcmVjYXRpb25SZWFzb25cbiAgfVxuICBpbnB1dEZpZWxkcyB7XG4gICAgLi4uSW5wdXRWYWx1ZVxuICB9XG4gIGludGVyZmFjZXMge1xuICAgIC4uLlR5cGVSZWZcbiAgfVxuICBlbnVtVmFsdWVzKGluY2x1ZGVEZXByZWNhdGVkOiB0cnVlKSB7XG4gICAgbmFtZVxuICAgIGRlc2NyaXB0aW9uXG4gICAgaXNEZXByZWNhdGVkXG4gICAgZGVwcmVjYXRpb25SZWFzb25cbiAgfVxuICBwb3NzaWJsZVR5cGVzIHtcbiAgICAuLi5UeXBlUmVmXG4gIH1cbn1cblxuZnJhZ21lbnQgSW5wdXRWYWx1ZSBvbiBfX0lucHV0VmFsdWUge1xuICBuYW1lXG4gIGRlc2NyaXB0aW9uXG4gIHR5cGUge1xuICAgIC4uLlR5cGVSZWZcbiAgfVxuICBkZWZhdWx0VmFsdWVcbn1cblxuZnJhZ21lbnQgVHlwZVJlZiBvbiBfX1R5cGUge1xuICBraW5kXG4gIG5hbWVcbiAgb2ZUeXBlIHtcbiAgICBraW5kXG4gICAgbmFtZVxuICAgIG9mVHlwZSB7XG4gICAgICBraW5kXG4gICAgICBuYW1lXG4gICAgICBvZlR5cGUge1xuICAgICAgICBraW5kXG4gICAgICAgIG5hbWVcbiAgICAgICAgb2ZUeXBlIHtcbiAgICAgICAgICBraW5kXG4gICAgICAgICAgbmFtZVxuICAgICAgICAgIG9mVHlwZSB7XG4gICAgICAgICAgICBraW5kXG4gICAgICAgICAgICBuYW1lXG4gICAgICAgICAgICBvZlR5cGUge1xuICAgICAgICAgICAgICBraW5kXG4gICAgICAgICAgICAgIG5hbWVcbiAgICAgICAgICAgICAgb2ZUeXBlIHtcbiAgICAgICAgICAgICAgICBraW5kXG4gICAgICAgICAgICAgICAgbmFtZVxuICAgICAgICAgICAgICB9XG4gICAgICAgICAgICB9XG4gICAgICAgICAgfVxuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuICB9XG59XG4ifQ==",
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": {},
+  "resource": "/{proxy+}",
+  "path": "/graphql",
+  "httpMethod": "post",
+  "isBase64Encoded": true,
+  "queryStringParameters": {},
+  "pathParameters": {
+    "proxy": "/graphql"
+  },
+  "stageVariables": {
+    "baz": "qux"
+  },
+  "headers": {
+    "host": "localhost:8888",
+    "connection": "keep-alive",
+    "content-length": "1468",
+    "accept": "*/*",
+    "apollo-query-plan-experimental": "1",
+    "x-apollo-tracing": "1",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
+    "dnt": "1",
+    "content-type": "application/json",
+    "origin": "http://localhost:8888",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:8888/graphql",
+    "accept-encoding": "gzip, deflate, br",
+    "accept-language": "en-US,en;q=0.9",
+    "X-Forwarded-Proto": "http"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "123456",
+    "stage": "/",
+    "requestId": "82129159-51d7-49ae-8cc2-5085a600953f",
+    "requestTime": "08/Jul/2020:08:28:29 +0000",
+    "requestTimeEpoch": 1594240109462,
+    "identity": null,
+    "path": "/graphql",
+    "domainName": "localhost:8888",
+    "resourcePath": "/{proxy+}",
+    "httpMethod": "post",
+    "apiId": "1234567890",
+    "protocol": "HTTP/1.1"
+  }
+}
