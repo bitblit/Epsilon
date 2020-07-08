@@ -49,32 +49,32 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.6.1",
+    "@bitblit/ratchet": "0.8.4",
     "@bitblit/saltmine": "0.4.3",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "1.8.0",
-    "moment": "2.24.0",
-    "moment-timezone": "0.5.28",
-    "node-yaml": "3.2.0",
+    "jwks-rsa": "1.8.1",
+    "moment": "2.27.0",
+    "moment-timezone": "0.5.31",
+    "node-yaml": "4.0.1",
     "portable-fetch": "3.0.0",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
-    "swagger-model-validator": "3.0.18"
+    "swagger-model-validator": "3.0.19"
   },
   "resolutions": {
     "lodash": "4.17.15"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.51",
-    "aws-sdk": "2.667.0"
+    "@types/aws-lambda": "8.10.58",
+    "aws-sdk": "2.712.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.51",
+    "@types/aws-lambda": "8.10.58",
     "@types/chai": "4.2.9",
     "@types/mocha": "7.0.1",
     "@types/node": "12.12.6",
     "apollo-server-lambda": "2.10.0",
-    "aws-sdk": "2.667.0",
+    "aws-sdk": "2.712.0",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
     "eslint": "6.8.0",
