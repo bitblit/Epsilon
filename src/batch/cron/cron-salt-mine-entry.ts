@@ -13,4 +13,7 @@ import { AbstractCronEntry } from './abstract-cron-entry';
 export interface CronSaltMineEntry extends AbstractCronEntry {
   saltMineTaskType: string;
   fireImmediate: boolean;
+
+  data: any;
+  metadata: any;
 }

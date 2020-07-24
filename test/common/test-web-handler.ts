@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { createSampleRouterConfig, loadSampleOpenApiYaml } from '../../src/local-server';
+import { createSampleRouterConfig } from '../../src/local-server';
 import { RouterConfig } from '../../src/http/route/router-config';
 import { WebHandler } from '../../src/http/web-handler';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';

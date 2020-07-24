@@ -167,14 +167,13 @@ export class EpsilonGlobalHandler {
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, this.config.cron)) {
               Logger.info('Firing Salt-Mine cron : %s', CronUtil.cronEntryName(smCronEntry));
 
+              const metadata: any = Object.assign({}, smCronEntry.metadata, { cronDelegate: true, cronSourceEvent: evt });
+
               const saltMineEntry: SaltMineEntry = {
                 type: smCronEntry.saltMineTaskType,
                 created: new Date().getTime(),
-                data: {},
-                metadata: {
-                  cronDelegate: true,
-                  cronSourceEvent: evt
-                }
+                data: smCronEntry.data || {},
+                metadata: metadata
               };
               if (smCronEntry.fireImmediate) {
                 await SaltMineQueueUtil.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
