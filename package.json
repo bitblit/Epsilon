@@ -49,8 +49,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.8.4",
-    "@bitblit/saltmine": "0.4.3",
+    "@bitblit/ratchet": "0.8.8",
+    "@bitblit/saltmine": "0.4.5",
     "js-yaml": "3.14.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.8.1",
@@ -62,30 +62,29 @@
     "swagger-model-validator": "3.0.19"
   },
   "resolutions": {
-    "lodash": "4.17.15",
-    "minimist": "1.2.3"
+    "lodash": "4.17.19",
+    "minimist": "1.2.5"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.58",
-    "aws-sdk": "2.712.0"
+    "@types/aws-lambda": "8.10.60",
+    "aws-sdk": "2.730.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.58",
-    "@types/chai": "4.2.9",
+    "@types/aws-lambda": "8.10.60",
+    "@types/chai": "4.2.12",
     "@types/js-yaml": "3.12.5",
-    "@types/mocha": "7.0.1",
+    "@types/mocha": "8.0.1",
     "@types/node": "12.12.6",
-    "apollo-server-lambda": "2.15.1",
-    "aws-sdk": "2.712.0",
+    "apollo-server-lambda": "2.16.1",
+    "aws-sdk": "2.730.0",
     "chai": "4.2.0",
-    "eslint": "7.4.0",
-    "graphql": "14.6.0",
-    "husky": "3.0.5",
-    "mocha": "7.0.1",
-    "prettier": "1.18.2",
-    "pretty-quick": "1.11.1",
-    "ts-loader": "8.0.0",
-    "ts-node": "8.6.2",
-    "typescript": "3.7.5"
+    "eslint": "7.6.0",
+    "graphql": "15.3.0",
+    "husky": "4.2.5",
+    "mocha": "8.1.1",
+    "prettier": "2.0.5",
+    "pretty-quick": "2.0.1",
+    "ts-node": "8.10.2",
+    "typescript": "3.9.7"
   }
 }
