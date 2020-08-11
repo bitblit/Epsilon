@@ -5,6 +5,7 @@ import * as zlib from 'zlib';
 import { RouterConfig } from './route/router-config';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 
 export class ResponseUtil {
   private constructor() {} // Prevent instantiation
@@ -13,16 +14,16 @@ export class ResponseUtil {
     let body: any = {
       errors: errorMessages,
       httpStatusCode: statusCode,
-      requestId: reqId || 'MISSING'
+      requestId: reqId || 'MISSING',
     };
 
     let errorResponse: ProxyResult = {
       statusCode: statusCode,
       isBase64Encoded: false,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     };
 
     return errorResponse;
@@ -55,9 +56,28 @@ export class ResponseUtil {
       body: '{"redirect-target":"' + redirectTarget + '}',
       headers: {
         'Content-Type': 'application/json',
-        Location: redirectTarget
-      }
+        Location: redirectTarget,
+      },
     } as ProxyResult;
+  }
+
+  public static errorIsX0x(err: Error, xClass: number): boolean {
+    let rval: boolean = false;
+    if (!!err && !!err['statusCode']) {
+      const val: number = NumberRatchet.safeNumber(err['statusCode']);
+      const bot: number = xClass * 100;
+      const top: number = bot + 99;
+      rval = val >= bot && val <= top;
+    }
+    return rval;
+  }
+
+  public static errorIs40x(err: Error): boolean {
+    return ResponseUtil.errorIsX0x(err, 4);
+  }
+
+  public static errorIs50x(err: Error): boolean {
+    return ResponseUtil.errorIsX0x(err, 5);
   }
 
   public static buildHttpError(errorMessage: string, statusCode: number): Error {
@@ -104,7 +124,7 @@ export class ResponseUtil {
             statusCode: 200,
             body: JSON.stringify(input),
             headers: headers,
-            isBase64Encoded: false
+            isBase64Encoded: false,
           });
         }
       } else if (typeof input === 'string' || Buffer.isBuffer(input)) {
@@ -118,7 +138,7 @@ export class ResponseUtil {
           statusCode: 200,
           body: JSON.stringify(input),
           headers: headers,
-          isBase64Encoded: false
+          isBase64Encoded: false,
         });
       }
     }
@@ -210,8 +230,8 @@ export class ResponseUtil {
   }
 
   public static gzip(input: Buffer): Promise<Buffer> {
-    var promise = new Promise<Buffer>(function(resolve, reject) {
-      zlib.gzip(input, function(error, result) {
+    var promise = new Promise<Buffer>(function (resolve, reject) {
+      zlib.gzip(input, function (error, result) {
         if (!error) resolve(result);
         else reject(error);
       });

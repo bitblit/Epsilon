@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { GoogleWebTokenManipulator } from '../../../src/http/auth/google-web-token-manipulator';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 
-describe('#googleWebTokenManipulator', function() {
+describe('#googleWebTokenManipulator', function () {
   xit('should extract a token', async () => {
     const token: string = 'TOKEN_HERE';
     const clientId: string = 'CLIENT_HERE';

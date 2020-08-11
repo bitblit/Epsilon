@@ -5,14 +5,14 @@ import { ResponseUtil } from '../../src/http/response-util';
 import { RouterConfig } from '../../src/http/route/router-config';
 import { EpsilonConstants } from '../../src/epsilon-constants';
 
-describe('#responseUtil', function() {
+describe('#responseUtil', function () {
   it('should add cors to proxy result MATCH 1', async () => {
     const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
     const proxy: ProxyResult = {} as ProxyResult;
     const config: RouterConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG
+      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
     } as RouterConfig;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
@@ -29,11 +29,20 @@ describe('#responseUtil', function() {
     const config: RouterConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG
+      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
     } as RouterConfig;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
 
     expect(proxy.headers).to.not.be.null;
+  });
+
+  it('chould check if the error is a given class', async () => {
+    const testError: Error = ResponseUtil.buildHttpError('test', 404);
+    const nonHttpError: Error = new Error('Not HTTP');
+    expect(ResponseUtil.errorIs40x(testError)).to.be.true;
+    expect(ResponseUtil.errorIs50x(testError)).to.be.false;
+    expect(ResponseUtil.errorIs40x(nonHttpError)).to.be.false;
+    expect(ResponseUtil.errorIs50x(testError)).to.be.false;
   });
 });
