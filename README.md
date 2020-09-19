@@ -31,14 +31,21 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - Environmental service
 - Simple redirects
 
-# Version 0.4.0 Release Notes
+# Release Notes
+
+## 0.5.x
+
+- Updated core libs
+- Moved to eslint and cleaned up
+
+## 0.4.x
 
 - Switched logging for GraphQL introspection calls on local-server down to silly level
 - Updated to new version of libraries
 - Switched to js-yaml instead of node-yaml
 - Moved api-gateway package to http package to reflect that this also handles ALB endpoints
 
-# Version 0.3.0 Release Notes
+## 0.3.x
 
 - Remapped CRON handler to be able to filter on more than just the incoming Event name. Given the new mapping,
   I'd recommend just setting up an "every minute" Cloudwatch event and using filters. Filters now allow
@@ -74,8 +81,8 @@ const typeDefs = gql`
 // Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
-    hello: () => 'Hello world!'
-  }
+    hello: () => 'Hello world!',
+  },
 };
 
 const server: ApolloServer = new ApolloServer({ typeDefs, resolvers });
@@ -88,7 +95,7 @@ const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handl
 cfg.apolloServer = server;
 cfg.apolloCreateHandlerOptions = {
   origin: '*',
-  credentials: true
+  credentials: true,
 } as CreateHandlerOptions;
 cfg.apolloRegex = new RegExp('.*graphql.*');
 ```

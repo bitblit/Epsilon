@@ -1,11 +1,10 @@
 export interface EpsilonDisableSwitches {
-    apiGateway: boolean;
+  apiGateway: boolean;
 
-    saltMine: boolean;
+  saltMine: boolean;
 
-    cron: boolean;
-    dynamoDb: boolean;
-    s3: boolean;
-    sns: boolean;
-
+  cron: boolean;
+  dynamoDb: boolean;
+  s3: boolean;
+  sns: boolean;
 }

@@ -14,13 +14,13 @@ export class YamlCombiner {
     RequireRatchet.notNullOrUndefined(inRootPath, 'Root path argument');
     Logger.info('Processing %d files into output', files.length);
 
-    let allElements: {} = {};
+    let allElements: any = {};
     for (let i = 0; i < files.length; i++) {
       const fileContents: string = fs.readFileSync(files[i]).toString();
       const openApi: any = yaml.load(fileContents);
       allElements = Object.assign(allElements, openApi);
     }
-    let rootPath: string[] = Object.assign([], inRootPath);
+    const rootPath: string[] = Object.assign([], inRootPath);
     while (rootPath.length > 0) {
       const next: any = {};
       next[rootPath[rootPath.length - 1]] = allElements;

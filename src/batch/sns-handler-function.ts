@@ -1,5 +1,5 @@
-import {SNSEvent} from 'aws-lambda';
+import { SNSEvent } from 'aws-lambda';
 
 export interface SnsHandlerFunction {
-    (event: SNSEvent): Promise<void>
+  (event: SNSEvent): Promise<void>;
 }

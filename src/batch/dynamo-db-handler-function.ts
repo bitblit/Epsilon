@@ -1,5 +1,5 @@
-import {DynamoDBStreamEvent} from 'aws-lambda';
+import { DynamoDBStreamEvent } from 'aws-lambda';
 
 export interface DynamoDbHandlerFunction {
-    (event: DynamoDBStreamEvent): Promise<void>
+  (event: DynamoDBStreamEvent): Promise<void>;
 }

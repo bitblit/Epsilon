@@ -15,7 +15,9 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
  * Endpoints about the api itself
  */
 export class EventUtil {
-  private constructor() {} // Prevent instantiation
+  // Prevent instantiation
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
 
   public static extractToken<T>(event: APIGatewayEvent): CommonJwtToken<T> {
     const auth: AuthResponseContext = EventUtil.extractAuthorizer(event);
@@ -64,7 +66,7 @@ export class EventUtil {
   }
 
   public static extractApiGatewayStage(event: APIGatewayEvent): string {
-    let rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
+    const rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
     return rc ? rc.stage : null;
   }
 
@@ -73,7 +75,7 @@ export class EventUtil {
   }
 
   public static extractAuthorizer(event: APIGatewayEvent): AuthResponseContext {
-    let rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
+    const rc: APIGatewayEventRequestContext = EventUtil.extractRequestContext(event);
     return rc ? rc.authorizer : null;
   }
 
@@ -103,7 +105,7 @@ export class EventUtil {
   public static bodyObject(event: APIGatewayEvent): any {
     let rval: any = null;
     if (event.body) {
-      let contentType = MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Content-Type') || 'application/octet-stream';
+      const contentType = MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Content-Type') || 'application/octet-stream';
       rval = event.body;
 
       if (event.isBase64Encoded) {
@@ -215,7 +217,7 @@ export class EventUtil {
         if (!!sp && sp.length === 2) {
           rval = {
             username: sp[0],
-            password: sp[1]
+            password: sp[1],
           };
         }
       }

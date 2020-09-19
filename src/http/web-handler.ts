@@ -1,5 +1,5 @@
 import { RouterConfig } from './route/router-config';
-import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import * as Route from 'route-parser';
 import { UnauthorizedError } from './error/unauthorized-error';
@@ -24,7 +24,7 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
  */
 export class WebHandler {
-  private cacheApolloHandler: Function;
+  private cacheApolloHandler: ApolloHandlerFunction;
 
   constructor(private routerConfig: RouterConfig) {
     RequireRatchet.notNullOrUndefined(routerConfig);
@@ -73,7 +73,7 @@ export class WebHandler {
   }
 
   public async openApiLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
-    let handler: Promise<any> = this.findHandler(event, context);
+    const handler: Promise<any> = this.findHandler(event, context);
     Logger.debug('Processing event with epsilon: %j', event);
     const result: any = await handler;
     if (result instanceof TimeoutToken) {
@@ -135,21 +135,21 @@ export class WebHandler {
     let rval: Promise<any> = null;
 
     // See: https://www.npmjs.com/package/route-parser
-    let cleanPath: string = this.cleanPath(event);
+    const cleanPath: string = this.cleanPath(event);
 
     // Filter routes to only matches
     const methodLower: string = event.httpMethod.toLowerCase();
-    let matchRoutes: RouteAndParse[] = this.routerConfig.routes
+    const matchRoutes: RouteAndParse[] = this.routerConfig.routes
       .map((r) => {
         let rval: RouteAndParse = null;
         if (r.method && r.method.toLowerCase() === methodLower) {
-          let routeParser: Route = new Route(r.path);
-          let parsed: any = routeParser.match(cleanPath);
+          const routeParser: Route = new Route(r.path);
+          const parsed: any = routeParser.match(cleanPath);
           if (parsed !== false) {
             rval = {
               mapping: r,
               route: routeParser,
-              parsed: parsed
+              parsed: parsed,
             };
           }
         }
@@ -169,13 +169,14 @@ export class WebHandler {
       event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
 
       // Check authentication / authorization
-      const passAuth: boolean = await this.applyAuth(event, rm.mapping);
+      // Throws an error on failure / misconfiguration
+      await this.applyAuth(event, rm.mapping);
 
       // Cannot get here without a valid auth/body, would've thrown an error
       const extEvent: ExtendedAPIGatewayEvent = this.extendApiGatewayEvent(event, rm.mapping);
 
-      // Check validation
-      const passBodyValid: boolean = await this.applyBodyObjectValidation(extEvent, rm.mapping);
+      // Check validation (throws error on failure)
+      await this.applyBodyObjectValidation(extEvent, rm.mapping);
 
       rval = PromiseRatchet.timeout(
         rm.mapping.function(extEvent, context),
@@ -240,11 +241,10 @@ export class WebHandler {
     return rval;
   }
 
-  private async applyBodyObjectValidation(event: ExtendedAPIGatewayEvent, route: RouteMapping): Promise<boolean> {
+  private async applyBodyObjectValidation(event: ExtendedAPIGatewayEvent, route: RouteMapping): Promise<void> {
     if (!event || !route) {
       throw new MisconfiguredError('Missing event or route');
     }
-    let rval: boolean = true;
 
     if (route.validation) {
       if (!this.routerConfig.modelValidator) {
@@ -259,19 +259,16 @@ export class WebHandler {
       if (errors.length > 0) {
         Logger.info('Found errors while validating %s object %j', route.validation.modelName, errors);
         const newError: BadRequestError = new BadRequestError(...errors);
-        rval = false;
         throw newError;
       }
     }
-    return rval;
   }
 
   // Returns a failing proxy result if no auth, otherwise returns null
-  private async applyAuth(event: APIGatewayEvent, route: RouteMapping): Promise<boolean> {
+  private async applyAuth(event: APIGatewayEvent, route: RouteMapping): Promise<void> {
     if (!event || !route) {
       throw new MisconfiguredError('Missing event or route');
     }
-    let rval: boolean = true;
 
     if (route.authorizerName) {
       if (!this.routerConfig.webTokenManipulator) {
@@ -281,7 +278,6 @@ export class WebHandler {
       const token: CommonJwtToken<any> = await this.routerConfig.webTokenManipulator.extractTokenFromStandardEvent(event);
       if (!token) {
         Logger.info('Failed auth for route : %s - missing/bad token', route.path);
-        rval = false; // Not that it matters
         throw new UnauthorizedError('Missing or bad token');
       } else {
         const authorizer: AuthorizerFunction = this.routerConfig.authorizers.get(route.authorizerName);
@@ -292,25 +288,18 @@ export class WebHandler {
         if (authorizer) {
           const passes: boolean = await authorizer(token, event, route);
           if (!passes) {
-            rval = false;
             throw new ForbiddenError('Failed authorization');
           }
         }
       }
 
-      if (rval) {
-        // Put the token into scope just like it would be from a AWS authorizer
-        const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as ExtendedAuthResponseContext;
-        newAuth.userData = token;
-        newAuth.userDataJSON = token ? JSON.stringify(token) : null;
-        newAuth.srcData = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
-        event.requestContext.authorizer = newAuth;
-      } else {
-        Logger.debug('RouteAuth is %s, but no auth created : %j : %j', route.authorizerName, token, event);
-      }
+      // Put the token into scope just like it would be from a AWS authorizer
+      const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as ExtendedAuthResponseContext;
+      newAuth.userData = token;
+      newAuth.userDataJSON = token ? JSON.stringify(token) : null;
+      newAuth.srcData = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
+      event.requestContext.authorizer = newAuth;
     }
-
-    return rval;
   }
 }
 
@@ -318,4 +307,8 @@ export interface RouteAndParse {
   mapping: RouteMapping;
   route: Route;
   parsed: any;
+}
+
+export interface ApolloHandlerFunction {
+  (event: APIGatewayProxyEvent, context: any, callback: APIGatewayProxyCallback): void;
 }

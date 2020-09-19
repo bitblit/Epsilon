@@ -1,5 +1,5 @@
-import {S3Event} from 'aws-lambda';
+import { S3Event } from 'aws-lambda';
 
 export interface S3CreateHandlerFunction {
-    (event: S3Event): Promise<void>
+  (event: S3Event): Promise<void>;
 }

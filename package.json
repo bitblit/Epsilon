@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -29,7 +29,9 @@
     "test": "mocha -r ts-node/register test/**/*.ts",
     "copy-static-files": "cd src && cp -R static ../dist",
     "apply-circle": "node node_modules/@bitblit/ratchet/dist/circleci/apply-circle-ci-env-variables-to-files src/static/build-properties.json",
-    "run-sample-server": "yarn compile && node dist/sample-local-server.js"
+    "run-sample-server": "yarn compile && node dist/sample-local-server.js",
+    "lint": "eslint src/**/*.ts",
+    "lint-fix": "eslint --fix src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -49,12 +51,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.8.8",
-    "@bitblit/saltmine": "0.4.5",
+    "@bitblit/ratchet": "0.9.2",
+    "@bitblit/saltmine": "0.5.1",
     "js-yaml": "3.14.0",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "1.8.1",
-    "moment": "2.27.0",
+    "jwks-rsa": "1.9.0",
+    "moment": "2.28.0",
     "moment-timezone": "0.5.31",
     "portable-fetch": "3.0.0",
     "route-parser": "0.0.5",
@@ -62,29 +64,34 @@
     "swagger-model-validator": "3.0.19"
   },
   "resolutions": {
-    "lodash": "4.17.19",
+    "lodash": "^4.17.20",
     "minimist": "1.2.5"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.60",
-    "aws-sdk": "2.730.0"
+    "@types/aws-lambda": "8.10.62",
+    "aws-sdk": "2.751.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.60",
+    "@types/aws-lambda": "8.10.62",
     "@types/chai": "4.2.12",
     "@types/js-yaml": "3.12.5",
-    "@types/mocha": "8.0.1",
+    "@types/mocha": "8.0.3",
     "@types/node": "12.12.6",
-    "apollo-server-lambda": "2.16.1",
-    "aws-sdk": "2.730.0",
+    "@typescript-eslint/eslint-plugin": "4.1.0",
+    "@typescript-eslint/parser": "4.1.0",
+    "eslint": "7.9.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-import": "2.22.0",
+    "eslint-plugin-prettier": "3.1.4",
+    "apollo-server-lambda": "2.17.0",
+    "aws-sdk": "2.751.0",
     "chai": "4.2.0",
-    "eslint": "7.6.0",
     "graphql": "15.3.0",
-    "husky": "4.2.5",
-    "mocha": "8.1.1",
-    "prettier": "2.0.5",
-    "pretty-quick": "2.0.1",
-    "ts-node": "8.10.2",
+    "husky": "4.3.0",
+    "mocha": "8.1.3",
+    "prettier": "2.1.1",
+    "pretty-quick": "3.0.2",
+    "ts-node": "9.0.0",
     "typescript": "3.9.7"
   }
 }

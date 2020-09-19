@@ -33,9 +33,9 @@ export class OpenApiDocModifier {
         if (openApi['paths']) {
           let newPaths: any = {};
           Object.keys(openApi['paths']).forEach((p) => {
-            let path: any = openApi['paths'][p];
+            const path: any = openApi['paths'][p];
             Object.keys(path).forEach((verb) => {
-              let entry: any = path[verb];
+              const entry: any = path[verb];
               entry.tags = !!entry.tags ? entry.tags.filter((t) => removeTags.lastIndexOf(t.toLowerCase()) == -1) : entry.tags;
               const matcher: string = verb.toLowerCase() + ' ' + p.toLowerCase();
               if (this.matchNone(matcher, this.options.removeEndpoints)) {

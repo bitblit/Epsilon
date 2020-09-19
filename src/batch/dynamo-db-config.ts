@@ -1,5 +1,5 @@
-import {DynamoDbHandlerFunction} from './dynamo-db-handler-function';
+import { DynamoDbHandlerFunction } from './dynamo-db-handler-function';
 
 export interface DynamoDbConfig {
-    handlers: Map<string, DynamoDbHandlerFunction>;
+  handlers: Map<string, DynamoDbHandlerFunction>;
 }

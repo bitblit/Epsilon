@@ -8,16 +8,18 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 
 export class ResponseUtil {
-  private constructor() {} // Prevent instantiation
+  // Prevent instantiation
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
 
   public static errorResponse(errorMessages: string[], statusCode: number, reqId: string): ProxyResult {
-    let body: any = {
+    const body: any = {
       errors: errorMessages,
       httpStatusCode: statusCode,
       requestId: reqId || 'MISSING',
     };
 
-    let errorResponse: ProxyResult = {
+    const errorResponse: ProxyResult = {
       statusCode: statusCode,
       isBase64Encoded: false,
       headers: {
@@ -81,14 +83,14 @@ export class ResponseUtil {
   }
 
   public static buildHttpError(errorMessage: string, statusCode: number): Error {
-    let rval: Error = new Error(errorMessage);
+    const rval: Error = new Error(errorMessage);
     rval['statusCode'] = statusCode;
 
     return rval;
   }
 
   public static errorToProxyResult(error: Error, reqId: string, defaultErrorMessage: string = null): ProxyResult {
-    let code = error['statusCode'] || 500;
+    const code = error['statusCode'] || 500;
     let errorMessages: string[] = null;
     if (!!StringRatchet.trimToNull(defaultErrorMessage) && code === 500) {
       // Basically the 'Internal Server Error' info hiding use case
@@ -101,6 +103,7 @@ export class ResponseUtil {
     return ResponseUtil.errorResponse(errorMessages, code, reqId);
   }
 
+  // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
   public static coerceToProxyResult(input: any): ProxyResult {
     let rval: ProxyResult = null;
 
@@ -118,7 +121,7 @@ export class ResponseUtil {
           }
         } else {
           // Its a generic object
-          let headers: any = input.headers || {};
+          const headers: any = input.headers || {};
           headers['Content-Type'] = 'application/json';
           rval = ResponseUtil.coerceToProxyResult({
             statusCode: 200,
@@ -132,7 +135,7 @@ export class ResponseUtil {
       } else {
         // boolean , number, etc - other top level types
         // See : https://stackoverflow.com/questions/18419428/what-is-the-minimum-valid-json
-        let headers: any = input.headers || {};
+        const headers: any = input.headers || {};
         headers['Content-Type'] = 'application/json';
         rval = ResponseUtil.coerceToProxyResult({
           statusCode: 200,
@@ -189,7 +192,7 @@ export class ResponseUtil {
     const rval: string =
       MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Headers') ||
       Object.keys(srcEvent.headers).join(', ') ||
-      '*';
+      defaultValue;
     return rval;
   }
 
@@ -197,12 +200,12 @@ export class ResponseUtil {
     const rval: string =
       MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
       srcEvent.httpMethod.toUpperCase() ||
-      '*';
+      defaultValue;
     return rval;
   }
 
   public static async applyGzipIfPossible(encodingHeader: string, proxyResult: ProxyResult): Promise<ProxyResult> {
-    let rval: ProxyResult = proxyResult;
+    const rval: ProxyResult = proxyResult;
     if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {
       const bigEnough: boolean = proxyResult.body.length > 1400; // MTU packet is 1400 bytes
       let contentType: string = MapRatchet.extractValueFromMapIgnoreCase(proxyResult.headers, 'content-type') || '';
@@ -230,7 +233,7 @@ export class ResponseUtil {
   }
 
   public static gzip(input: Buffer): Promise<Buffer> {
-    var promise = new Promise<Buffer>(function (resolve, reject) {
+    const promise = new Promise<Buffer>(function (resolve, reject) {
       zlib.gzip(input, function (error, result) {
         if (!error) resolve(result);
         else reject(error);
