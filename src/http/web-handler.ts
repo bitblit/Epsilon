@@ -95,7 +95,7 @@ export class WebHandler {
     Logger.setTracePrefix(null); // Just in case it was set
     Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
     if (proxyResult.body.length > WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES) {
-      const delta: number = WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES - proxyResult.body.length;
+      const delta: number = proxyResult.body.length - WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES;
       throw ResponseUtil.buildHttpError(
         'Response size is ' + proxyResult.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler',
         500
