@@ -24,6 +24,7 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
  */
 export class WebHandler {
+  public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
   private cacheApolloHandler: ApolloHandlerFunction;
 
   constructor(private routerConfig: RouterConfig) {
@@ -93,6 +94,13 @@ export class WebHandler {
     }
     Logger.setTracePrefix(null); // Just in case it was set
     Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
+    if (proxyResult.body.length > WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES) {
+      const delta: number = WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES - proxyResult.body.length;
+      throw ResponseUtil.buildHttpError(
+        'Response size is ' + proxyResult.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler',
+        500
+      );
+    }
     return proxyResult;
   }
 
