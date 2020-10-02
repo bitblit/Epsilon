@@ -188,7 +188,7 @@ export class WebHandler {
 
       rval = PromiseRatchet.timeout(
         rm.mapping.function(extEvent, context),
-        'Timed out after ' + rm.mapping.timeoutMS + ' ms',
+        'Timed out after ' + rm.mapping.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
         rm.mapping.timeoutMS
       );
     }
