@@ -51,8 +51,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.9.14",
-    "@bitblit/saltmine": "0.5.1",
+    "@bitblit/ratchet": "0.9.15",
+    "@bitblit/saltmine": "0.5.3",
     "js-yaml": "3.14.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.10.1",
