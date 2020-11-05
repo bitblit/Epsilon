@@ -5,7 +5,6 @@ import * as zlib from 'zlib';
 import { RouterConfig } from './route/router-config';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 
 export class ResponseUtil {
@@ -76,25 +75,6 @@ export class ResponseUtil {
         Location: redirectTarget,
       },
     } as ProxyResult;
-  }
-
-  public static errorIsX0x(err: Error, xClass: number): boolean {
-    let rval: boolean = false;
-    if (!!err && !!err['statusCode']) {
-      const val: number = NumberRatchet.safeNumber(err['statusCode']);
-      const bot: number = xClass * 100;
-      const top: number = bot + 99;
-      rval = val >= bot && val <= top;
-    }
-    return rval;
-  }
-
-  public static errorIs40x(err: Error): boolean {
-    return ResponseUtil.errorIsX0x(err, 4);
-  }
-
-  public static errorIs50x(err: Error): boolean {
-    return ResponseUtil.errorIsX0x(err, 5);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types

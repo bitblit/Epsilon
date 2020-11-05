@@ -1,4 +1,5 @@
 import * as util from 'util';
+import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 
 export class EpsilonHttpError<T = void> extends Error {
   private static readonly EPSILON_HTTP_ERROR_FLAG_KEY: string = '__epsilonHttpErrorFlag';
@@ -150,5 +151,26 @@ export class EpsilonHttpError<T = void> extends Error {
 
   set wrappedError(value: Error) {
     this._wrappedError = value;
+  }
+
+  public static errorIsX0x(errIn: Error, xClass: number): boolean {
+    let rval: boolean = false;
+    if (errIn && EpsilonHttpError.objectIsEpsilonHttpError(errIn)) {
+      const err: EpsilonHttpError = errIn as EpsilonHttpError;
+
+      const val: number = NumberRatchet.safeNumber(err.httpStatusCode);
+      const bot: number = xClass * 100;
+      const top: number = bot + 99;
+      rval = val >= bot && val <= top;
+    }
+    return rval;
+  }
+
+  public static errorIs40x(err: Error): boolean {
+    return EpsilonHttpError.errorIsX0x(err, 4);
+  }
+
+  public static errorIs50x(err: Error): boolean {
+    return EpsilonHttpError.errorIsX0x(err, 5);
   }
 }
