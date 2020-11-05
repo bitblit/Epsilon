@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class RequestTimeoutError extends SimpleHttpError {
+export class RequestTimeoutError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 500;
 
-  constructor(...messages: string[]) {
-    super(RequestTimeoutError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(RequestTimeoutError.HTTP_CODE);
   }
 }

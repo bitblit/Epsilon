@@ -45,7 +45,7 @@ export class RouterUtil {
     const rval: RouterConfig = {
       authorizers: authorizers,
       routes: [],
-      errorProcessor: errorProcessor
+      errorProcessor: errorProcessor,
     } as RouterConfig;
 
     let corsHandler: HandlerFunction<any> = inCorsHandler;
@@ -86,7 +86,7 @@ export class RouterUtil {
               disableHeaderMapAssure: true,
               disablePathMapAssure: true,
               timeoutMS: 10000, // short timeouts for auto-generated CORS since its constant
-              validation: null
+              validation: null,
             } as RouteMapping);
           } else {
             const finder: string = method + ' ' + path;
@@ -111,7 +111,7 @@ export class RouterUtil {
               disableHeaderMapAssure: options.disableHeaderMapAssure,
               disablePathMapAssure: options.disablePathMapAssure,
               timeoutMS: timeoutMS,
-              validation: null
+              validation: null,
             } as RouteMapping;
 
             if (
@@ -128,7 +128,7 @@ export class RouterUtil {
               const validation: RouteValidatorConfig = {
                 extraPropertiesAllowed: true,
                 emptyAllowed: !required,
-                modelName: modelName
+                modelName: modelName,
               } as RouteValidatorConfig;
 
               newRoute.validation = validation;
@@ -170,7 +170,7 @@ export class RouterUtil {
     if (rval) {
       let sIdx: number = rval.indexOf('{');
       while (sIdx > -1) {
-        let eIdx: number = rval.indexOf('}');
+        const eIdx: number = rval.indexOf('}');
         rval = rval.substring(0, sIdx) + ':' + rval.substring(sIdx + 1, eIdx) + rval.substring(eIdx + 1);
         sIdx = rval.indexOf('{');
       }
@@ -185,7 +185,7 @@ export class RouterUtil {
       disableAutomaticBodyParse: false,
       disableQueryMapAssure: false,
       disableHeaderMapAssure: false,
-      disablePathMapAssure: false
+      disablePathMapAssure: false,
     } as OpenApiConvertOptions;
   }
 
@@ -202,8 +202,8 @@ export class RouterUtil {
       headers: {
         'Access-Control-Allow-Origin': allowedOrigins || '*',
         'Access-Control-Allow-Methods': allowedMethods || '*',
-        'Access-Control-Allow-Headers': allowedHeaders || '*'
-      }
+        'Access-Control-Allow-Headers': allowedHeaders || '*',
+      },
     };
     return rval;
   }

@@ -43,7 +43,7 @@ export class ModelValidator {
     let rval: string[] = [];
     Logger.silly('Validating model %s all definitions are : %j', modelName, this.allModels);
 
-    let modelEmpty: boolean = !modelObject || Object.keys(modelObject).length === 0;
+    const modelEmpty: boolean = !modelObject || Object.keys(modelObject).length === 0;
     if (modelEmpty) {
       if (!emptyAllowed) {
         rval.push('Empty / null object sent, but empty not allowed here');

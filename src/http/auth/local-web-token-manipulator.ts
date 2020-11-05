@@ -21,7 +21,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
 
   public refreshJWTString<T>(tokenString: string, expirationSeconds: number): string {
     const now = new Date().getTime();
-    let payload: CommonJwtToken<T> = this.parseAndValidateJWTString(tokenString, now);
+    const payload: CommonJwtToken<T> = this.parseAndValidateJWTString(tokenString, now);
     let time = payload['exp'] - payload['iat'];
     time = expirationSeconds || time;
     const expires = now + time;
@@ -33,7 +33,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
   }
 
   public parseAndValidateJWTString<T>(tokenString: string, now: number = new Date().getTime()): CommonJwtToken<T> {
-    let payload: CommonJwtToken<T> = this.parseJWTString(tokenString);
+    const payload: CommonJwtToken<T> = this.parseJWTString(tokenString);
 
     if (payload['exp'] != null && now < payload['exp']) {
       return payload;
@@ -74,7 +74,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
 
       user: userObject,
       proxy: proxyUser,
-      roles: roles
+      roles: roles,
     } as CommonJwtToken<T>;
 
     const token = jwt.sign(tokenData, this.encryptionKey); // , algorithm = 'HS256')

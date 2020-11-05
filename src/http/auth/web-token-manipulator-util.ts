@@ -13,7 +13,7 @@ export class WebTokenManipulatorUtil {
     Logger.silly('Extracting token from event : %j', event);
     let rval: string = null;
     if (event && event.authorizationToken) {
-      let token: string = event.authorizationToken;
+      const token: string = event.authorizationToken;
       if (token && token.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
         rval = token.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length); // Strip "Bearer "
       }

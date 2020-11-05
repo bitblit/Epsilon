@@ -155,7 +155,7 @@ export class EpsilonGlobalHandler {
   }
 
   private async processCronEvent(evt: ScheduledEvent): Promise<any> {
-    let rval: any = null;
+    const rval: any = null;
     if (this.config && this.config.cron && !this.config.disabled.cron && evt && evt.resources[0]) {
       // Run all the salt mine ones
       if (!!this.config.cron.saltMineEntries) {
@@ -173,7 +173,7 @@ export class EpsilonGlobalHandler {
                 type: smCronEntry.saltMineTaskType,
                 created: new Date().getTime(),
                 data: smCronEntry.data || {},
-                metadata: metadata
+                metadata: metadata,
               };
               if (smCronEntry.fireImmediate) {
                 await SaltMineQueueUtil.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
@@ -227,7 +227,7 @@ export class EpsilonGlobalHandler {
   }
 
   private matchExact(r, str) {
-    var match = str.match(r);
+    const match = str.match(r);
     return match != null && str == match[0];
   }
 }

@@ -1,5 +1,5 @@
 import { RouterConfig } from './route/router-config';
-import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, APIGatewayProxyResult, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import * as Route from 'route-parser';
 import { UnauthorizedError } from './error/unauthorized-error';
@@ -19,9 +19,8 @@ import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from './error/request-timeout-error';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
-import { HttpError } from './error/http-error';
-import { ErrorUtil } from './error/error-util';
 import { NotFoundError } from './error/not-found-error';
+import { EpsilonHttpError } from './error/epsilon-http-error';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -52,21 +51,20 @@ export class WebHandler {
       return rval;
     } catch (err) {
       // Convert to an epsilon error
-      const wrapped: HttpError = ErrorUtil.convertToHttpError(err);
+      const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
       // Force the request id in there
-      wrapped.requestId = context.awsRequestId || 'Request-Id-Missing';
+      wrapper.requestId = context.awsRequestId || 'Request-Id-Missing';
 
-      if (ErrorUtil.isEpsilonHttpError(err)) {
+      if (wrapper.isWrappedError()) {
         try {
           // If the source error was not a epsilon error, run error processors if any
-          await this.routerConfig.errorProcessor(event, wrapped, this.routerConfig);
+          await this.routerConfig.errorProcessor(event, wrapper, this.routerConfig);
         } catch (err) {
           Logger.error('Really bad - your error processor has an error in it : %s', err, err);
         }
       }
 
-      const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err, this.routerConfig.defaultErrorMessage);
-
+      const errProxy: APIGatewayProxyResult = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null)); //this.routerConfig.defaultErrorMessage));
       const errWithCORS: ProxyResult = this.addCors(errProxy, event);
       Logger.setTracePrefix(null); // Just in case it was set
       return errWithCORS;
@@ -96,10 +94,9 @@ export class WebHandler {
     Logger.debug('Pre-process: %d bytes, post: %d bytes', initSize, proxyResult.body.length);
     if (proxyResult.body.length > WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES) {
       const delta: number = proxyResult.body.length - WebHandler.MAXIMUM_LAMBDA_BODY_SIZE_BYTES;
-      throw ResponseUtil.buildHttpError(
-        'Response size is ' + proxyResult.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler',
-        500
-      );
+      throw new EpsilonHttpError(
+        'Response size is ' + proxyResult.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler'
+      ).withHttpStatusCode(500);
     }
     return proxyResult;
   }

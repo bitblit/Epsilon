@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class MisconfiguredError extends SimpleHttpError {
+export class MisconfiguredError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 500;
 
-  constructor(...messages: string[]) {
-    super(MisconfiguredError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(MisconfiguredError.HTTP_CODE);
   }
 }

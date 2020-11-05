@@ -25,12 +25,12 @@ export class AuthHandler {
   public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback): void {
     Logger.info('Got event : %j', event);
 
-    let srcString = WebTokenManipulatorUtil.extractTokenStringFromAuthorizerEvent(event);
+    const srcString = WebTokenManipulatorUtil.extractTokenStringFromAuthorizerEvent(event);
 
     if (srcString) {
       const methodArn = event.methodArn;
 
-      let parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
+      const parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
 
       if (parsed) {
         callback(null, this.createPolicy(methodArn, srcString, parsed));
@@ -62,15 +62,15 @@ export class AuthHandler {
           {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: ['arn:aws:execute-api:' + region + ':' + awsAccountId + ':' + restApiId + '/' + stage + '/*/*']
-          }
-        ]
+            Resource: ['arn:aws:execute-api:' + region + ':' + awsAccountId + ':' + restApiId + '/' + stage + '/*/*'],
+          },
+        ],
       } as PolicyDocument,
       // Context matches what would come in ExtendedAuthResponseContext if using epsilon auth
       context: {
         userJSON: JSON.stringify(userOb),
-        srcData: srcString // Put this in in-case we are doing a token update
-      } as AuthResponseContext
+        srcData: srcString, // Put this in in-case we are doing a token update
+      } as AuthResponseContext,
     } as AuthResponse;
 
     return response;

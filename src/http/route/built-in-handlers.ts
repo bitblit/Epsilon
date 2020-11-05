@@ -4,9 +4,8 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { RouterConfig } from './router-config';
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { EpsilonHttpError } from '../error/epsilon-http-error';
 import { BadRequestError } from '../error/bad-request-error';
-import { SimpleHttpError } from '../error/simple-http-error';
-import { HttpError } from '../error/http-error';
 
 export class BuiltInHandlers {
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
@@ -33,26 +32,26 @@ export class BuiltInHandlers {
       rval['context'] = context;
     }
 
-    const err: number = NumberRatchet.safeNumber(evt.queryStringParameters['error']);
-    if (err) {
-      switch (err) {
-        case BadRequestError.HTTP_CODE:
-          throw new BadRequestError('Failed test error');
+    const errNumber: number = NumberRatchet.safeNumber(evt.queryStringParameters['error']);
+    if (errNumber) {
+      switch (errNumber) {
+        case -1:
+          throw new Error('Test random failure');
+        case 400:
+          throw new BadRequestError('Bad request error');
         default:
-          throw new SimpleHttpError(500, 'Default error');
+          throw new EpsilonHttpError<any>()
+            .withFormattedErrorMessage('Default error - %s', errNumber)
+            .withHttpStatusCode(500)
+            .withDetails({ src: errNumber })
+            .withEndUserErrors(['msg1', 'msg2']);
       }
     }
 
     return rval;
   }
 
-  public static async defaultErrorProcessor(event: APIGatewayEvent, err: HttpError, cfg: RouterConfig): Promise<void> {
-    Logger.warn(
-      'Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j',
-      (err.messages || ['Internal Server Error']).join(','),
-      err.stack,
-      event,
-      cfg
-    );
+  public static async defaultErrorProcessor(event: APIGatewayEvent, err: Error, cfg: RouterConfig): Promise<void> {
+    Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, cfg);
   }
 }

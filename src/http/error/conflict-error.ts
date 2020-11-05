@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class ConflictError extends SimpleHttpError {
+export class ConflictError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 409;
 
-  constructor(...messages: string[]) {
-    super(ConflictError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(ConflictError.HTTP_CODE);
   }
 }

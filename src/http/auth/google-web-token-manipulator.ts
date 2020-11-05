@@ -40,7 +40,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator {
       audience: this.clientId,
       issuer: ['https://accounts.google.com', 'accounts.google.com'],
       ignoreExpiration: allowExpired,
-      clockTimestamp: nowEpochSeconds
+      clockTimestamp: nowEpochSeconds,
     });
 
     return validated as CommonJwtToken<T>;
@@ -67,7 +67,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator {
         cache: true,
         cacheMaxEntries: 5,
         cacheMaxAge: 1000 * 60 * 60 * 10,
-        jwksUri: discDoc.jwks_uri
+        jwksUri: discDoc.jwks_uri,
       });
       this.jwksClient = client;
     }

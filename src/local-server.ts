@@ -58,7 +58,7 @@ export class LocalServer {
   async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {
     const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request);
     const context: Context = {
-      awsRequestId: 'LOCAL-' + StringRatchet.createType4Guid()
+      awsRequestId: 'LOCAL-' + StringRatchet.createType4Guid(),
     } as Context; //TBD
     const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
 
@@ -76,7 +76,7 @@ export class LocalServer {
 
   private async bodyAsBase64String(request: IncomingMessage): Promise<string> {
     return new Promise<string>((res, rej) => {
-      let body = [];
+      const body = [];
       request.on('data', (chunk) => {
         body.push(chunk);
       });
@@ -110,10 +110,10 @@ export class LocalServer {
       isBase64Encoded: true,
       queryStringParameters: queryStringParams,
       pathParameters: {
-        proxy: path
+        proxy: path,
       },
       stageVariables: {
-        baz: 'qux'
+        baz: 'qux',
       },
       headers: headers,
       requestContext: {
@@ -145,8 +145,8 @@ export class LocalServer {
         resourcePath: '/{proxy+}',
         httpMethod: request.method.toLowerCase(),
         apiId: '1234567890',
-        protocol: 'HTTP/1.1'
-      } as APIGatewayEventRequestContext
+        protocol: 'HTTP/1.1',
+      } as APIGatewayEventRequestContext,
     } as APIGatewayEvent;
 
     return rval;

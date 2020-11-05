@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class UnauthorizedError extends SimpleHttpError {
+export class UnauthorizedError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 401;
 
-  constructor(...messages: string[]) {
-    super(UnauthorizedError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(UnauthorizedError.HTTP_CODE);
   }
 }

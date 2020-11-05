@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class MethodNotAllowedError extends SimpleHttpError {
+export class MethodNotAllowedError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 405;
 
-  constructor(...messages: string[]) {
-    super(MethodNotAllowedError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(MethodNotAllowedError.HTTP_CODE);
   }
 }

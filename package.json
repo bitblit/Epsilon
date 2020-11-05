@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -51,7 +51,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.9.13",
+    "@bitblit/ratchet": "0.9.14",
     "@bitblit/saltmine": "0.5.1",
     "js-yaml": "3.14.0",
     "jsonwebtoken": "8.5.1",
@@ -65,14 +65,16 @@
   },
   "resolutions": {
     "lodash": "^4.17.20",
-    "minimist": "1.2.5"
+    "minimist": "1.2.5",
+    "object-path": "^0.11.5",
+    "node-fetch": "^2.6.1"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.63",
-    "aws-sdk": "2.751.0"
+    "@types/aws-lambda": "8.10.64",
+    "aws-sdk": "2.785.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.62",
+    "@types/aws-lambda": "8.10.64",
     "@types/chai": "4.2.12",
     "@types/js-yaml": "3.12.5",
     "@types/mocha": "8.0.3",

@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class NotFoundError extends SimpleHttpError {
+export class NotFoundError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 404;
 
-  constructor(...messages: string[]) {
-    super(NotFoundError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(NotFoundError.HTTP_CODE);
   }
 }

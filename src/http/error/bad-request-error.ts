@@ -1,9 +1,10 @@
-import { SimpleHttpError } from './simple-http-error';
+import { EpsilonHttpError } from './epsilon-http-error';
 
-export class BadRequestError extends SimpleHttpError {
+export class BadRequestError<T = void> extends EpsilonHttpError<T> {
   public static readonly HTTP_CODE: number = 400;
 
-  constructor(...messages: string[]) {
-    super(BadRequestError.HTTP_CODE, ...messages);
+  constructor(...errors: string[]) {
+    super(...errors);
+    this.withHttpStatusCode(BadRequestError.HTTP_CODE);
   }
 }

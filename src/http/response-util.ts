@@ -6,21 +6,41 @@ import { RouterConfig } from './route/router-config';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
-import { HttpError } from './error/http-error';
+import { EpsilonHttpError } from './error/epsilon-http-error';
 
 export class ResponseUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static errorResponse(error: HttpError): ProxyResult {
+  public static errorResponse<T>(err: EpsilonHttpError<T>): ProxyResult {
+    const body: any = {
+      errors: err.errors,
+      httpStatusCode: err.httpStatusCode,
+      requestId: err.requestId,
+    };
+    if (err.detailErrorCode) {
+      body['detailErrorCode'] = err.detailErrorCode;
+    }
+    if (err.endUserErrors && err.endUserErrors.length > 0) {
+      body['endUserErrors'] = err.endUserErrors;
+    }
+    if (err.details) {
+      body['details'] = err.details;
+    }
+    if (err.wrappedError) {
+      body['wrappedError'] = err.wrappedError.name + ' : ' + err.wrappedError.message;
+    }
+
+    // No wrapped error since its already copied
+
     const errorResponse: ProxyResult = {
-      statusCode: error.httpStatusCode,
+      statusCode: err.httpStatusCode,
       isBase64Encoded: false,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(error.toBodyObject()),
+      body: JSON.stringify(body),
     };
 
     return errorResponse;
@@ -75,25 +95,6 @@ export class ResponseUtil {
 
   public static errorIs50x(err: Error): boolean {
     return ResponseUtil.errorIsX0x(err, 5);
-  }
-
-  public static buildHttpError(errorMessage: string, statusCode: number): Error {
-    const rval: Error = new Error(errorMessage);
-    rval['statusCode'] = statusCode;
-
-    return rval;
-  }
-
-  public static errorToProxyResult(error: HttpError, defaultErrorMessage: string = null): ProxyResult {
-    // Apply defaults
-    error.httpStatusCode = error.httpStatusCode || 500;
-    error.requestId = error.requestId || 'MISSING';
-    if (!!StringRatchet.trimToNull(defaultErrorMessage) && error.httpStatusCode === 500) {
-      // Basically the 'Internal Server Error' info hiding use case
-      error.messages = [defaultErrorMessage];
-    }
-
-    return ResponseUtil.errorResponse(error);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types

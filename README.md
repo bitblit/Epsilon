@@ -33,6 +33,11 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 # Release Notes
 
+## 0.6.x
+
+- Updated core libs
+- Added richer error object and builder pattern for errors
+
 ## 0.5.x
 
 - Updated core libs
