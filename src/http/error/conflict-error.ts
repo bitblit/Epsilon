@@ -1,7 +1,9 @@
-export class ConflictError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class ConflictError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 409;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 409;
+    super(ConflictError.HTTP_CODE, ...messages);
   }
 }

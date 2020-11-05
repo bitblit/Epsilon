@@ -1,7 +1,9 @@
-export class UnauthorizedError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class UnauthorizedError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 401;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 401;
+    super(UnauthorizedError.HTTP_CODE, ...messages);
   }
 }

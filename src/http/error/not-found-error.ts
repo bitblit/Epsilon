@@ -1,7 +1,9 @@
-export class NotFoundError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class NotFoundError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 404;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 404;
+    super(NotFoundError.HTTP_CODE, ...messages);
   }
 }

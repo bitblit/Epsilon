@@ -1,7 +1,9 @@
-export class TooManyRequestsError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class TooManyRequestsError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 429;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 429;
+    super(TooManyRequestsError.HTTP_CODE, ...messages);
   }
 }

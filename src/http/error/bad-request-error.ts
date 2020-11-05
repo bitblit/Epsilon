@@ -1,7 +1,9 @@
-export class BadRequestError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class BadRequestError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 400;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 400;
+    super(BadRequestError.HTTP_CODE, ...messages);
   }
 }

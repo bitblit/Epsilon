@@ -1,7 +1,9 @@
-export class MethodNotAllowedError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class MethodNotAllowedError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 405;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 405;
+    super(MethodNotAllowedError.HTTP_CODE, ...messages);
   }
 }

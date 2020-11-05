@@ -6,26 +6,21 @@ import { RouterConfig } from './route/router-config';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { HttpError } from './error/http-error';
 
 export class ResponseUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static errorResponse(errorMessages: string[], statusCode: number, reqId: string): ProxyResult {
-    const body: any = {
-      errors: errorMessages,
-      httpStatusCode: statusCode,
-      requestId: reqId || 'MISSING',
-    };
-
+  public static errorResponse(error: HttpError): ProxyResult {
     const errorResponse: ProxyResult = {
-      statusCode: statusCode,
+      statusCode: error.httpStatusCode,
       isBase64Encoded: false,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(error.toBodyObject()),
     };
 
     return errorResponse;
@@ -89,18 +84,16 @@ export class ResponseUtil {
     return rval;
   }
 
-  public static errorToProxyResult(error: Error, reqId: string, defaultErrorMessage: string = null): ProxyResult {
-    const code = error['statusCode'] || 500;
-    let errorMessages: string[] = null;
-    if (!!StringRatchet.trimToNull(defaultErrorMessage) && code === 500) {
+  public static errorToProxyResult(error: HttpError, defaultErrorMessage: string = null): ProxyResult {
+    // Apply defaults
+    error.httpStatusCode = error.httpStatusCode || 500;
+    error.requestId = error.requestId || 'MISSING';
+    if (!!StringRatchet.trimToNull(defaultErrorMessage) && error.httpStatusCode === 500) {
       // Basically the 'Internal Server Error' info hiding use case
-      errorMessages = [defaultErrorMessage];
-    } else {
-      errorMessages = error['messages'] && error['messages'].length > 0 ? error['messages'] : null;
-      errorMessages = errorMessages ? errorMessages : [error.message || JSON.stringify(error)];
+      error.messages = [defaultErrorMessage];
     }
 
-    return ResponseUtil.errorResponse(errorMessages, code, reqId);
+    return ResponseUtil.errorResponse(error);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types

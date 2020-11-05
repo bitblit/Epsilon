@@ -47,20 +47,20 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@bitblit/ratchet@0.9.2":
-  version "0.9.2"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.9.2.tgz#e9ee6b3e3d990db917059e9d8808121db6ab81c8"
-  integrity sha512-3Dq11caWL0xpWoP4anCr8TGbhkeyzz/gKmghVRtRXZZL3dM8p2iQIqjeKNbItjbIE7Gv74HOOK5RfVIDGn/SZA==
+"@bitblit/ratchet@0.9.13":
+  version "0.9.13"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.9.13.tgz#7625e2605f9c7daa4975c902e0ba7d576a270ff9"
+  integrity sha512-a+JKfjqYnPZNNZdP5PvkA6NfG86T8uxfbbjWIwjrMqpgR7CYOe4ExbOtpLnAqdyZDbZB63lspCm1uBawretTjw==
   dependencies:
     moment "2.27.0"
     moment-timezone "0.5.31"
     ts-enum-util "4.0.2"
     yargs "15.4.1"
 
-"@bitblit/ratchet@0.9.5":
-  version "0.9.5"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.9.5.tgz#c047db9d48c17bb41884c659f1eb16e93c2b17cb"
-  integrity sha512-jTaTuVkTzEIEO04vTIpDUi1jTp5Ne5+ieeL/484HlsXYB8xm9KkQxDCy5xAgSYMfwJHxq7ba05vPbnabtJeqYA==
+"@bitblit/ratchet@0.9.2":
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.9.2.tgz#e9ee6b3e3d990db917059e9d8808121db6ab81c8"
+  integrity sha512-3Dq11caWL0xpWoP4anCr8TGbhkeyzz/gKmghVRtRXZZL3dM8p2iQIqjeKNbItjbIE7Gv74HOOK5RfVIDGn/SZA==
   dependencies:
     moment "2.27.0"
     moment-timezone "0.5.31"
@@ -1656,7 +1656,7 @@ glob-parent@^5.1.0:
   dependencies:
     is-glob "^4.0.1"
 
-glob@7.1.6, glob@^7.1.3:
+glob@7.1.6, glob@^7.0.0, glob@^7.1.3:
   version "7.1.6"
   resolved "https://registry.npmjs.org/glob/-/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
   dependencies:
@@ -1872,6 +1872,11 @@ inherits@2.0.4:
   version "2.0.4"
   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
 
+interpret@^1.0.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
+  integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
+
 is-arguments@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/is-arguments/-/is-arguments-1.0.4.tgz#3faf966c7cba0ff437fb31f6250082fcf0448cf3"
@@ -1899,6 +1904,13 @@ is-callable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.0.tgz#83336560b54a38e35e3a2df7afd0454d691468bb"
   integrity sha512-pyVD9AaGLxtg6srb2Ng6ynWJqkHU9bEM087AKck0w8QwDarTfNcpIYoU8x8Hv2Icm8u6kFJM18Dag8lyqGkviw==
+
+is-core-module@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.1.0.tgz#a4cc031d9b1aca63eecbd18a650e13cb4eeab946"
+  integrity sha512-YcV7BgVMRFRua2FqQzKtTDMz8iCuLEyGKjr70q8Zm1yy2qKcurbFEd79PAdHV77oL3NrAaOVQIbMmiHQCHB7ZA==
+  dependencies:
+    has "^1.0.3"
 
 is-date-object@^1.0.1:
   version "1.0.1"
@@ -2332,7 +2344,7 @@ minimatch@3.0.4, minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimist@0.0.8, minimist@1.2.5, minimist@^1.2.0:
+minimist@0.0.8, minimist@1.2.5, minimist@^1.2.0, minimist@^1.2.3:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
@@ -2828,6 +2840,13 @@ readdirp@~3.4.0:
   dependencies:
     picomatch "^2.2.1"
 
+rechoir@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/rechoir/-/rechoir-0.6.2.tgz#85204b54dba82d5742e28c96756ef43af50e3384"
+  integrity sha1-hSBLVNuoLVdC4oyWdW70OvUOM4Q=
+  dependencies:
+    resolve "^1.1.6"
+
 regexpp@^3.0.0, regexpp@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/regexpp/-/regexpp-3.1.0.tgz#206d0ad0a5648cffbdb8ae46438f3dc51c9f78e2"
@@ -2844,6 +2863,14 @@ require-main-filename@^2.0.0:
 resolve-from@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/resolve-from/-/resolve-from-4.0.0.tgz#4abcd852ad32dd7baabfe9b40e00a36db5f392e6"
+
+resolve@^1.1.6:
+  version "1.18.1"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.18.1.tgz#018fcb2c5b207d2a6424aee361c5a266da8f4130"
+  integrity sha512-lDfCPaMKfOJXjy0dPayzPdF1phampNWr3qFCjAu+rw/qbQmr5jWH5xN2hwh9QKfw9E5v4hwV7A+jrCmL8yjjqA==
+  dependencies:
+    is-core-module "^2.0.0"
+    path-parse "^1.0.6"
 
 resolve@^1.10.0, resolve@^1.13.1, resolve@^1.17.0:
   version "1.17.0"
@@ -2969,6 +2996,23 @@ shebang-regex@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
+
+shelljs@^0.8.4:
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.4.tgz#de7684feeb767f8716b326078a8a00875890e3c2"
+  integrity sha512-7gk3UZ9kOfPLIAbslLzyWeGiEqx9e3rxwZM0KE6EL8GlGwjym9Mrlx5/p33bWTu9YG6vcS4MBxYZDHYr5lr8BQ==
+  dependencies:
+    glob "^7.0.0"
+    interpret "^1.0.0"
+    rechoir "^0.6.2"
+
+shx@0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/shx/-/shx-0.3.3.tgz#681a88c7c10db15abe18525349ed474f0f1e7b9f"
+  integrity sha512-nZJ3HFWVoTSyyB+evEKjJ1STiixGztlqwKLTUNV5KqMWtGey9fTd4KU1gdZ1X9BV6215pswQ/Jew9NsuS/fNDA==
+  dependencies:
+    minimist "^1.2.3"
+    shelljs "^0.8.4"
 
 signal-exit@^3.0.2:
   version "3.0.3"

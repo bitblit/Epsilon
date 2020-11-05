@@ -19,6 +19,9 @@ import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from './error/request-timeout-error';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { HttpError } from './error/http-error';
+import { ErrorUtil } from './error/error-util';
+import { NotFoundError } from './error/not-found-error';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -48,24 +51,21 @@ export class WebHandler {
       }
       return rval;
     } catch (err) {
+      // Convert to an epsilon error
+      const wrapped: HttpError = ErrorUtil.convertToHttpError(err);
       // Force the request id in there
-      err['requestId'] = context.awsRequestId || 'Request-Id-Missing';
+      wrapped.requestId = context.awsRequestId || 'Request-Id-Missing';
 
-      // If it has a status code field then I'm assuming it was sent on purpose, do not run the processor
-      if (!err['statusCode']) {
+      if (ErrorUtil.isEpsilonHttpError(err)) {
         try {
-          await this.routerConfig.errorProcessor(event, err, this.routerConfig);
+          // If the source error was not a epsilon error, run error processors if any
+          await this.routerConfig.errorProcessor(event, wrapped, this.routerConfig);
         } catch (err) {
           Logger.error('Really bad - your error processor has an error in it : %s', err, err);
         }
       }
 
-      // Do this after the above code, since we want timeouts logged
-      if (err.message === 'Timeout') {
-        err['statusCode'] = 504; // Set as a gateway timeout
-      }
-
-      const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err, context.awsRequestId, this.routerConfig.defaultErrorMessage);
+      const errProxy: ProxyResult = ResponseUtil.errorToProxyResult(err, this.routerConfig.defaultErrorMessage);
 
       const errWithCORS: ProxyResult = this.addCors(errProxy, event);
       Logger.setTracePrefix(null); // Just in case it was set
@@ -200,7 +200,7 @@ export class WebHandler {
         cleanPath,
         this.routerConfig.prefixesToStripBeforeRouteMatch
       );
-      rval = Promise.resolve(ResponseUtil.errorResponse(['No such endpoint'], 404, context.awsRequestId));
+      throw new NotFoundError('No such endpoint');
     }
     return rval;
   }

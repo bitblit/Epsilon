@@ -1,7 +1,9 @@
-export class MisconfiguredError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class MisconfiguredError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 500;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 500;
+    super(MisconfiguredError.HTTP_CODE, ...messages);
   }
 }

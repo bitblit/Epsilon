@@ -1,7 +1,9 @@
-export class ForbiddenError extends Error {
+import { SimpleHttpError } from './simple-http-error';
+
+export class ForbiddenError extends SimpleHttpError {
+  public static readonly HTTP_CODE: number = 403;
+
   constructor(...messages: string[]) {
-    super(messages.join(','));
-    this['messages'] = messages;
-    this['statusCode'] = 403;
+    super(ForbiddenError.HTTP_CODE, ...messages);
   }
 }
