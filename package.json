@@ -67,7 +67,8 @@
     "lodash": "^4.17.20",
     "minimist": "1.2.5",
     "object-path": "^0.11.5",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "axios": "^0.21.1"
   },
   "peerDependencies": {
     "@types/aws-lambda": "8.10.70",
