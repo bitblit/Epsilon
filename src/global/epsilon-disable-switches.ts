@@ -1,5 +1,5 @@
 export interface EpsilonDisableSwitches {
-  apiGateway: boolean;
+  http: boolean;
 
   saltMine: boolean;
 

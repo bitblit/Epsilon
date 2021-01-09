@@ -61,7 +61,7 @@ export class EventUtil {
   }
 
   public static extractProtocol(event: APIGatewayEvent): string {
-    // Since API gateway ALWAYS sets this
+    // Since API gateway / ALB ALWAYS sets this
     return MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'X-Forwarded-Proto');
   }
 

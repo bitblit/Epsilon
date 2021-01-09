@@ -48,7 +48,7 @@ export class EpsilonGlobalHandler {
 
   private fetchWebHandler(): WebHandler {
     if (!this.cacheWebHandler) {
-      if (this.config.http && !this.config.disabled.apiGateway) {
+      if (this.config.http && !this.config.disabled.http) {
         this.cacheWebHandler = new WebHandler(this.config.http);
       }
     }
@@ -84,7 +84,7 @@ export class EpsilonGlobalHandler {
         if (wh) {
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
-          Logger.warn('API Gateway event, but no handler or disabled');
+          Logger.warn('ALB / API Gateway event, but no handler or disabled');
         }
       } else if (LambdaEventDetector.isValidSnsEvent(event)) {
         Logger.debug('Epsilon: SNS: %j', event);
