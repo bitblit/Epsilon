@@ -48,6 +48,14 @@ export class BuiltInHandlers {
       }
     }
 
+    let test: string = StringRatchet.trimToNull(evt.queryStringParameters['test']);
+    if (test) {
+      test = test.toLowerCase();
+      if (test === 'null') {
+        return null;
+      }
+    }
+
     return rval;
   }
 

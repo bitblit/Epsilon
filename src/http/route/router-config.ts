@@ -39,6 +39,12 @@ export interface RouterConfig {
   // These will be matched case insensitive
   prefixesToStripBeforeRouteMatch: string[];
 
+  requestIdResponseHeaderName: string;
+  convertNullReturnedObjectsTo404: boolean;
+  allowLiteralStringNullAsPathParameter: boolean;
+  allowLiteralStringNullAsQueryStringParameter: boolean;
+  validateOutboundResponseBody: boolean;
+
   // If set, paths matching this are sent to Apollo for Graphql instead
   apolloRegex?: RegExp;
   apolloServer?: ApolloServer;

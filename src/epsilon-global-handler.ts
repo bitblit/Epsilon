@@ -23,6 +23,8 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
  */
 export class EpsilonGlobalHandler {
   private cacheWebHandler: WebHandler;
+  // This only really works because Node is single-threaded - otherwise need some kind of thread local
+  public static CURRENT_CONTEXT: Context;
 
   constructor(private config: EpsilonConfig) {
     this.validateGlobalConfig(config);
@@ -54,6 +56,7 @@ export class EpsilonGlobalHandler {
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
+    EpsilonGlobalHandler.CURRENT_CONTEXT = context;
     let rval: any = null;
     try {
       if (!this.config) {
@@ -107,12 +110,14 @@ export class EpsilonGlobalHandler {
       } else {
         Logger.warn('Unrecognized event, returning false : %j', event);
       }
-
-      return rval;
     } catch (err) {
       Logger.error('Error slipped out to outer edge.  Logging and returning false : %s', err, err);
-      return false;
+      rval = false;
+    } finally {
+      EpsilonGlobalHandler.CURRENT_CONTEXT = null;
     }
+
+    return rval;
   }
 
   private async processSnsEvent(evt: SNSEvent): Promise<any> {

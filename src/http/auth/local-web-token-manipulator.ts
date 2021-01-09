@@ -1,23 +1,18 @@
 import * as jwt from 'jsonwebtoken';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
-import { APIGatewayEvent, CustomAuthorizerEvent } from 'aws-lambda';
-import { EpsilonConstants } from '../../epsilon-constants';
+import { APIGatewayEvent } from 'aws-lambda';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 import { UnauthorizedError } from '../error/unauthorized-error';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 /**
  * Service for handling jwt tokens
  */
 export class LocalWebTokenManipulator implements WebTokenManipulator {
-  private encryptionKey: string;
-  private issuer: string;
-
-  constructor(encryptionKey: string, issuer: string) {
-    this.encryptionKey = encryptionKey;
-    this.issuer = issuer;
-  }
+  constructor(private encryptionKey: string, private issuer: string, private parseFailureLogLevel: string = 'debug') {}
 
   public refreshJWTString<T>(tokenString: string, expirationSeconds: number): string {
     const now = new Date().getTime();
@@ -44,14 +39,27 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
   }
 
   public parseJWTString<T>(tokenString: string): CommonJwtToken<T> {
-    const payload = jwt.verify(tokenString, this.encryptionKey);
+    let payload: CommonJwtToken<T> = null;
+    try {
+      payload = jwt.verify(tokenString, this.encryptionKey);
+    } catch (err) {
+      if (this.parseFailureLogLevel) {
+        Logger.logByLevel(
+          this.parseFailureLogLevel,
+          'Failed to parse JWT token : %s : %s',
+          ErrorRatchet.safeStringifyErr(err),
+          tokenString
+        );
+      }
+      payload = null;
+    }
 
-    if (payload) {
-      Logger.debug('Got Payload : %j', payload);
-      return payload;
-    } else {
+    if (!payload) {
       throw new UnauthorizedError('Unable to parse a token from this string');
     }
+
+    Logger.debug('Got Payload : %j', payload);
+    return payload;
   }
 
   public createJWTString<T>(

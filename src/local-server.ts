@@ -19,6 +19,7 @@ import { EpsilonConstants } from './epsilon-constants';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EventUtil } from './http/event-util';
+import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -56,10 +57,13 @@ export class LocalServer {
   }
 
   async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {
-    const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request);
     const context: Context = {
       awsRequestId: 'LOCAL-' + StringRatchet.createType4Guid(),
+      getRemainingTimeInMillis(): number {
+        return 300000;
+      },
     } as Context; //TBD
+    const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request, context);
     const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
 
     Logger.logByLevel(logEventLevel, 'Processing event: %j', evt);
@@ -87,7 +91,7 @@ export class LocalServer {
     });
   }
 
-  private async messageToApiGatewayEvent(request: IncomingMessage): Promise<APIGatewayEvent> {
+  private async messageToApiGatewayEvent(request: IncomingMessage, context: Context): Promise<APIGatewayEvent> {
     const bodyString: string = await this.bodyAsBase64String(request);
     const stageIdx: number = request.url.indexOf('/', 1);
     const stage: string = request.url.substring(1, stageIdx);
@@ -120,7 +124,7 @@ export class LocalServer {
         accountId: '123456789012',
         resourceId: '123456',
         stage: stage,
-        requestId: StringRatchet.createType4Guid(),
+        requestId: context.awsRequestId,
         requestTime: formattedTime, // '09/Apr/2015:12:34:56 +0000',
         requestTimeEpoch: reqTime, //1428582896000,
         identity: null,
@@ -199,7 +203,14 @@ export function createSampleRouterConfig(): RouterConfig {
   cfg.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
   cfg.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
 
+  cfg.requestIdResponseHeaderName = 'X-REQUEST-ID';
+  cfg.convertNullReturnedObjectsTo404 = true;
+  cfg.allowLiteralStringNullAsQueryStringParameter = true;
+  cfg.allowLiteralStringNullAsPathParameter = false;
+
   cfg.defaultErrorMessage = 'Internal Server Error';
+
+  cfg.webTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info');
 
   return cfg;
 }

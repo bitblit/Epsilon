@@ -131,8 +131,6 @@ paths:
           type: string
       tags:
       - Meta
-      security:
-      - SampleAuthorizer: []
       responses:
         '200':
           description: Success

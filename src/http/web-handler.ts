@@ -21,6 +21,7 @@ import { RequestTimeoutError } from './error/request-timeout-error';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { NotFoundError } from './error/not-found-error';
 import { EpsilonHttpError } from './error/epsilon-http-error';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -31,11 +32,20 @@ export class WebHandler {
 
   constructor(private routerConfig: RouterConfig) {
     RequireRatchet.notNullOrUndefined(routerConfig);
+
+    // Some cleanup
+    // Validate the response header name, if set
+    if (StringRatchet.trimToNull(this.routerConfig.requestIdResponseHeaderName)) {
+      this.routerConfig.requestIdResponseHeaderName = StringRatchet.trimToEmpty(
+        this.routerConfig.requestIdResponseHeaderName
+      ).toUpperCase();
+      RequireRatchet.true(this.routerConfig.requestIdResponseHeaderName.startsWith('X-')); // Valid new header
+    }
   }
 
   public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
+    let rval: ProxyResult = null;
     try {
-      let rval: ProxyResult = null;
       if (!this.routerConfig) {
         throw new Error('Router config not found');
       }
@@ -48,7 +58,6 @@ export class WebHandler {
       } else {
         rval = await this.openApiLambdaHandler(event, context);
       }
-      return rval;
     } catch (err) {
       // Convert to an epsilon error
       const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
@@ -65,21 +74,35 @@ export class WebHandler {
       }
 
       const errProxy: APIGatewayProxyResult = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null)); //this.routerConfig.defaultErrorMessage));
-      const errWithCORS: ProxyResult = this.addCors(errProxy, event);
+      rval = this.addCors(errProxy, event);
       Logger.setTracePrefix(null); // Just in case it was set
-      return errWithCORS;
     }
+
+    if (rval && this.routerConfig.requestIdResponseHeaderName) {
+      rval.headers = rval.headers || {};
+      rval.headers[this.routerConfig.requestIdResponseHeaderName] = context.awsRequestId;
+    }
+
+    return rval;
   }
 
   public async openApiLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     const handler: Promise<any> = this.findHandler(event, context);
     Logger.debug('Processing event with epsilon: %j', event);
-    const result: any = await handler;
-    if (result instanceof TimeoutToken) {
+    let result: any = await handler;
+    if (TimeoutToken.isTimeoutToken(result)) {
       (result as TimeoutToken).writeToLog();
       throw new RequestTimeoutError('Timed out');
     }
     Logger.debug('Initial return value : %j', result);
+    if (result === null || result === undefined) {
+      if (this.routerConfig.convertNullReturnedObjectsTo404) {
+        throw new NotFoundError('Resource not found');
+      } else {
+        Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
+        result = '';
+      }
+    }
     let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
     const initSize: number = proxyResult.body.length;
     Logger.silly('Proxy result : %j', proxyResult);
@@ -172,6 +195,13 @@ export class WebHandler {
 
       // We extend with the parsed params here in case we are using the AWS any proxy
       event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
+      // Check for literal string null passed
+      if (!this.routerConfig.allowLiteralStringNullAsPathParameter) {
+        this.throwExceptionOnNullStringLiteralInParams(event.pathParameters);
+      }
+      if (!this.routerConfig.allowLiteralStringNullAsQueryStringParameter) {
+        this.throwExceptionOnNullStringLiteralInParams(event.queryStringParameters);
+      }
 
       // Check authentication / authorization
       // Throws an error on failure / misconfiguration
@@ -200,6 +230,19 @@ export class WebHandler {
       throw new NotFoundError('No such endpoint');
     }
     return rval;
+  }
+
+  private throwExceptionOnNullStringLiteralInParams(params: any): void {
+    if (params) {
+      Object.keys(params).forEach((k) => {
+        const v: any = params[k];
+        if (typeof v === 'string') {
+          if (StringRatchet.trimToEmpty(v).toLowerCase() === 'null') {
+            throw new BadRequestError('Literal string null provided for parameter');
+          }
+        }
+      });
+    }
   }
 
   private cleanPath(event: APIGatewayEvent): string {
