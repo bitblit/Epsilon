@@ -44,12 +44,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
       payload = jwt.verify(tokenString, this.encryptionKey);
     } catch (err) {
       if (this.parseFailureLogLevel) {
-        Logger.logByLevel(
-          this.parseFailureLogLevel,
-          'Failed to parse JWT token : %s : %s',
-          ErrorRatchet.safeStringifyErr(err),
-          tokenString
-        );
+        Logger.logByLevel(this.parseFailureLogLevel, 'Failed to parse JWT token : %s : %s', err.message, tokenString);
       }
       payload = null;
     }
