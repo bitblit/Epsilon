@@ -163,6 +163,34 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
+
+  /meta/simple-item:
+    get:
+      description: >
+        Example of an object returned
+      parameters:
+        - name: num
+          in: path
+          description: Number to return in the number value
+          required: false
+          schema:
+            type: number
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SimpleItem'
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Success
+
   /secure/access-token:
     post:
       tags:
@@ -353,6 +381,16 @@ components:
     Empty:
       type: object
       title: Empty Schema
+    SimpleItem:
+      type: object
+      title: Simple Item
+      properties:
+        numberField:
+          type: number
+          maximum: 25
+        stringField:
+          type: string
+
     AccessTokenRequest:
       type: object
       title: Access Token Request

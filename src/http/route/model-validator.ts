@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { BadRequestError } from '../error/bad-request-error';
+import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 /**
  * Helper for validating endpoints
@@ -10,7 +11,7 @@ import { BadRequestError } from '../error/bad-request-error';
 export class ModelValidator {
   constructor(private allModels: any) {
     if (!allModels || Object.keys(allModels).length == 0) {
-      throw new Error('Cannot create model validator, passed models was null/empty : ' + JSON.stringify(allModels));
+      ErrorRatchet.throwFormattedErr('Cannot create model validator, passed models was null/empty : %j', allModels);
     }
   }
 

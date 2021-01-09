@@ -48,8 +48,8 @@ export class EpsilonGlobalHandler {
 
   private fetchWebHandler(): WebHandler {
     if (!this.cacheWebHandler) {
-      if (this.config.apiGateway && !this.config.disabled.apiGateway) {
-        this.cacheWebHandler = new WebHandler(this.config.apiGateway);
+      if (this.config.http && !this.config.disabled.apiGateway) {
+        this.cacheWebHandler = new WebHandler(this.config.http);
       }
     }
     return this.cacheWebHandler;

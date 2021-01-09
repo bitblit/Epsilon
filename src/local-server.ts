@@ -197,6 +197,14 @@ export function createSampleRouterConfig(): RouterConfig {
     err['statusCode'] = NumberRatchet.safeNumber(event.pathParameters['code']);
     throw err;
   });
+  handlers.set('get /meta/simple-item', (event) => {
+    const numberToUse: number = NumberRatchet.safeNumber(event.queryStringParameters['num']) || 5;
+    const rval: any = {
+      numberField: numberToUse,
+      stringField: 'Test-String',
+    };
+    return rval;
+  });
 
   const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
   cfg.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
@@ -207,6 +215,7 @@ export function createSampleRouterConfig(): RouterConfig {
   cfg.convertNullReturnedObjectsTo404 = true;
   cfg.allowLiteralStringNullAsQueryStringParameter = true;
   cfg.allowLiteralStringNullAsPathParameter = false;
+  cfg.validateOutboundResponseBody = true;
 
   cfg.defaultErrorMessage = 'Internal Server Error';
 

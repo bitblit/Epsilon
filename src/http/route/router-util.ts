@@ -114,6 +114,7 @@ export class RouterUtil {
               validation: null,
             } as RouteMapping;
 
+            // Add inbound validation, if available
             if (
               entry['requestBody'] &&
               entry['requestBody']['content'] &&
@@ -132,6 +133,27 @@ export class RouterUtil {
               } as RouteValidatorConfig;
 
               newRoute.validation = validation;
+            }
+
+            // Add outbound validation, if available
+            if (
+              entry['responses'] &&
+              entry['responses']['200'] &&
+              entry['responses']['200']['content'] &&
+              entry['responses']['200']['content']['application/json'] &&
+              entry['responses']['200']['content']['application/json']['schema']
+            ) {
+              // TODO: this is brittle as hell, need to firm up
+              const schema: any = entry['responses']['200']['content'];
+              Logger.silly('Applying schema %j to %s', schema, finder);
+              const modelName = this.findAndValidateModelName(method, path, schema, rval.modelValidator);
+              const validation: RouteValidatorConfig = {
+                extraPropertiesAllowed: false,
+                emptyAllowed: false, // Its a 200 response, must be non-null
+                modelName: modelName,
+              } as RouteValidatorConfig;
+
+              newRoute.outboundValidation = validation;
             }
 
             rval.routes.push(newRoute);

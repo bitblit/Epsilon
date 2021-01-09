@@ -57,22 +57,12 @@
     ts-enum-util "4.0.2"
     yargs "16.2.0"
 
-"@bitblit/ratchet@0.9.15":
-  version "0.9.15"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.9.15.tgz#334a893193ae7cafb36e7ad8552241bbdf36f38d"
-  integrity sha512-zOQruNqfU+KU0Vkjk0CDzc4RPTO+hWyFK/a0Cf87kv/HofVVhwpkrWP2d4IgMDWEC5Lt6/5rQUq0jP4p5GpIQw==
+"@bitblit/saltmine@0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@bitblit/saltmine/-/saltmine-0.5.4.tgz#e713ece45f775545ff8de1e859414fac21bd0266"
+  integrity sha512-0/Ij+zJu9aOG0OZX57/O+vJ+eEgchFdX0teZm1KKBFxdWFBxtz1KJ/RDIN9tYJcDhPinvQfhgZwuvZWbuRJDbA==
   dependencies:
-    moment "2.29.1"
-    moment-timezone "0.5.31"
-    ts-enum-util "4.0.2"
-    yargs "15.4.1"
-
-"@bitblit/saltmine@0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@bitblit/saltmine/-/saltmine-0.5.3.tgz#e9890805fbfc6f664de7bf35623a95a769a1659c"
-  integrity sha512-uHyt4urEJqIirXGISo/d6MeuNecnSJoEbwRq8cGVqKMM+vQh+iuT79LXFYoRII5YcuyZ+jKK5dtxKgCC0tc6dg==
-  dependencies:
-    "@bitblit/ratchet" "0.9.15"
+    "@bitblit/ratchet" "0.10.2"
 
 "@eslint/eslintrc@^0.2.2":
   version "0.2.2"
@@ -927,15 +917,6 @@ cliui@^5.0.0:
     string-width "^3.1.0"
     strip-ansi "^5.2.0"
     wrap-ansi "^5.1.0"
-
-cliui@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.npmjs.org/cliui/-/cliui-6.0.0.tgz#511d702c0c4e41ca156d7d0e96021f23e13225b1"
-  integrity sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==
-  dependencies:
-    string-width "^4.2.0"
-    strip-ansi "^6.0.0"
-    wrap-ansi "^6.2.0"
 
 cliui@^7.0.2:
   version "7.0.4"
@@ -2283,13 +2264,6 @@ mocha@8.2.1:
     yargs-parser "13.1.2"
     yargs-unparser "2.0.0"
 
-moment-timezone@0.5.31:
-  version "0.5.31"
-  resolved "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.31.tgz#9c40d8c5026f0c7ab46eda3d63e49c155148de05"
-  integrity sha512-+GgHNg8xRhMXfEbv81iDtrVeTcWt0kWmTEY1XQK14dICTXnWJnT0dxdlPspwqF3keKMVPXwayEsk1DI0AA/jdA==
-  dependencies:
-    moment ">= 2.9.0"
-
 moment-timezone@0.5.32:
   version "0.5.32"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.32.tgz#db7677cc3cc680fd30303ebd90b0da1ca0dfecc2"
@@ -3255,15 +3229,6 @@ wrap-ansi@^5.1.0:
     string-width "^3.0.0"
     strip-ansi "^5.0.0"
 
-wrap-ansi@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
-  integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
 wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
@@ -3337,14 +3302,6 @@ yargs-parser@13.1.2, yargs-parser@^13.1.2:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
-yargs-parser@^18.1.2:
-  version "18.1.3"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-18.1.3.tgz#be68c4975c6b2abf469236b0c870362fab09a7b0"
-  integrity sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==
-  dependencies:
-    camelcase "^5.0.0"
-    decamelize "^1.2.0"
-
 yargs-parser@^20.2.2:
   version "20.2.4"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.4.tgz#b42890f14566796f85ae8e3a25290d205f154a54"
@@ -3375,23 +3332,6 @@ yargs@13.3.2:
     which-module "^2.0.0"
     y18n "^4.0.0"
     yargs-parser "^13.1.2"
-
-yargs@15.4.1:
-  version "15.4.1"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-15.4.1.tgz#0d87a16de01aee9d8bec2bfbf74f67851730f4f8"
-  integrity sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==
-  dependencies:
-    cliui "^6.0.0"
-    decamelize "^1.2.0"
-    find-up "^4.1.0"
-    get-caller-file "^2.0.1"
-    require-directory "^2.1.1"
-    require-main-filename "^2.0.0"
-    set-blocking "^2.0.0"
-    string-width "^4.2.0"
-    which-module "^2.0.0"
-    y18n "^4.0.0"
-    yargs-parser "^18.1.2"
 
 yargs@16.2.0:
   version "16.2.0"

@@ -87,22 +87,18 @@ export class WebHandler {
   }
 
   public async openApiLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
-    const handler: Promise<any> = this.findHandler(event, context);
+    const rm: RouteAndParse = this.findBestMatchingRoute(event);
+    const handler: Promise<any> = this.findHandler(rm, event, context);
     Logger.debug('Processing event with epsilon: %j', event);
-    let result: any = await handler;
+    const result: any = await handler;
     if (TimeoutToken.isTimeoutToken(result)) {
       (result as TimeoutToken).writeToLog();
       throw new RequestTimeoutError('Timed out');
     }
     Logger.debug('Initial return value : %j', result);
-    if (result === null || result === undefined) {
-      if (this.routerConfig.convertNullReturnedObjectsTo404) {
-        throw new NotFoundError('Resource not found');
-      } else {
-        Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
-        result = '';
-      }
-    }
+    this.optionallyConvertNullReturnedObjectsTo404Error(result);
+    this.optionallyApplyOutboundModelObjectCheck(rm, result);
+
     let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
     const initSize: number = proxyResult.body.length;
     Logger.silly('Proxy result : %j', proxyResult);
@@ -122,6 +118,44 @@ export class WebHandler {
       ).withHttpStatusCode(500);
     }
     return proxyResult;
+  }
+
+  public optionallyApplyOutboundModelObjectCheck(rm: RouteAndParse, result: any): void {
+    if (this.routerConfig.validateOutboundResponseBody) {
+      if (this.routerConfig.modelValidator) {
+        if (rm.mapping.outboundValidation) {
+          Logger.debug('Applying outbound check to %j', result);
+          const errors: string[] = this.routerConfig.modelValidator.validate(
+            rm.mapping.outboundValidation.modelName,
+            result,
+            rm.mapping.outboundValidation.emptyAllowed,
+            rm.mapping.outboundValidation.extraPropertiesAllowed
+          );
+          if (errors.length > 0) {
+            Logger.error('Found outbound errors while validating %s object %j', rm.mapping.outboundValidation.modelName, errors);
+
+            errors.unshift('Server sent object invalid according to spec');
+
+            throw new EpsilonHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(result);
+          }
+        } else {
+          Logger.debug('Not validating - no outbound validator for this endpoint');
+        }
+      } else {
+        throw new MisconfiguredError('Requested outbound validation but supplied no validator');
+      }
+    }
+  }
+
+  public optionallyConvertNullReturnedObjectsTo404Error(result: any): void {
+    if (result === null || result === undefined) {
+      if (this.routerConfig.convertNullReturnedObjectsTo404) {
+        throw new NotFoundError('Resource not found');
+      } else {
+        Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
+        result = '';
+      }
+    }
   }
 
   public async apolloLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
@@ -159,9 +193,8 @@ export class WebHandler {
     return input;
   }
 
-  public async findHandler(event: APIGatewayEvent, context: Context, add404OnMissing: boolean = true): Promise<any> {
-    let rval: Promise<any> = null;
-
+  public findBestMatchingRoute(event: APIGatewayEvent): RouteAndParse {
+    let rval: RouteAndParse = null;
     // See: https://www.npmjs.com/package/route-parser
     const cleanPath: string = this.cleanPath(event);
 
@@ -189,10 +222,24 @@ export class WebHandler {
       return Object.keys(a.parsed).length - Object.keys(b.parsed).length;
     });
 
-    // Execute
-    if (matchRoutes.length > 0) {
-      const rm: RouteAndParse = matchRoutes[0];
+    rval = matchRoutes && matchRoutes.length > 0 ? matchRoutes[0] : null;
 
+    if (!rval) {
+      Logger.debug(
+        'Failed to find handler for %s (cleaned path was %s, strip prefixes were %j)',
+        event.path,
+        cleanPath,
+        this.routerConfig.prefixesToStripBeforeRouteMatch
+      );
+    }
+    return rval;
+  }
+
+  public async findHandler(rm: RouteAndParse, event: APIGatewayEvent, context: Context, add404OnMissing: boolean = true): Promise<any> {
+    let rval: Promise<any> = null;
+
+    // Execute
+    if (rm) {
       // We extend with the parsed params here in case we are using the AWS any proxy
       event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
       // Check for literal string null passed
@@ -218,17 +265,10 @@ export class WebHandler {
         'Timed out after ' + rm.mapping.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
         rm.mapping.timeoutMS
       );
-    }
-
-    if (!rval && add404OnMissing) {
-      Logger.debug(
-        'Failed to find handler for %s (cleaned path was %s, strip prefixes were %j)',
-        event.path,
-        cleanPath,
-        this.routerConfig.prefixesToStripBeforeRouteMatch
-      );
+    } else if (add404OnMissing) {
       throw new NotFoundError('No such endpoint');
     }
+
     return rval;
   }
 

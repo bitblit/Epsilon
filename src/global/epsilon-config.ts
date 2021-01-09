@@ -8,7 +8,7 @@ import { SaltMineHandler } from '@bitblit/saltmine/dist/salt-mine-handler';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
 
 export interface EpsilonConfig {
-  apiGateway: RouterConfig;
+  http: RouterConfig;
 
   saltMine: SaltMineHandler;
 

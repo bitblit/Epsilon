@@ -13,6 +13,9 @@ export interface RouteMapping {
   // If this is set, and fails, then it will 400
   validation: RouteValidatorConfig;
 
+  // If this is set, and fails, then it will 500
+  outboundValidation: RouteValidatorConfig;
+
   // If this is set, then :
   // If there is no token / bad token in the request, this will 401
   // If there is a required role that isnt found it will 403
