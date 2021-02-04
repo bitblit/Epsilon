@@ -141,14 +141,14 @@ export class EpsilonGlobalHandler {
       const isRemoveEvent: boolean = evt.Records[0].eventName && evt.Records[0].eventName.startsWith('ObjectRemoved');
 
       if (isRemoveEvent) {
-        const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(finder, this.config.s3.removeHandlers);
+        const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(finder, this.config.s3.removeHandlers);
         if (handler) {
           rval = await handler(evt);
         } else {
           Logger.info('Found no s3 create handler for : %s', finder);
         }
       } else {
-        const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(finder, this.config.s3.createHandlers);
+        const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(finder, this.config.s3.createHandlers);
         if (handler) {
           rval = await handler(evt);
         } else {

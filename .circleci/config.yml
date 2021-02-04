@@ -9,6 +9,9 @@ defaults: &defaults
 
   docker:
     - image: bitblit/circleci-node-12.8-java-10.0.1-phantomjs-2.1.1
+      auth:
+        username: $BITBLIT_DOCKERHUB_USERNAME
+        password: $BITBLIT_DOCKERHUB_PASSWORD
 
 version: 2
 jobs:
