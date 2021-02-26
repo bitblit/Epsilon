@@ -1,5 +1,5 @@
 import { RouterConfig } from './router-config';
-import * as yaml from 'js-yaml';
+import yaml from 'js-yaml';
 import { MisconfiguredError } from '../error/misconfigured-error';
 import { ModelValidator } from './model-validator';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';

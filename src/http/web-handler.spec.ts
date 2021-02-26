@@ -1,18 +1,17 @@
-import { expect } from 'chai';
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { createSampleRouterConfig } from '../../src/local-server';
-import { RouterConfig } from '../../src/http/route/router-config';
-import { WebHandler } from '../../src/http/web-handler';
+import { createSampleRouterConfig } from '../local-server';
+import { RouterConfig } from './route/router-config';
+import { WebHandler } from './web-handler';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
-describe('#errorToProxyResult', function() {
+describe('#errorToProxyResult', function () {
   /*
     it('should set the default status code to 500', function() {
 
         let err:Error = new BadRequestError('this is a test','a1','a2');
         let res:ProxyResult = ResponseUtil.errorToProxyResult(err);
 
-        expect(res.statusCode).to.equal(400);
+        expect(res.statusCode).toEqual(400);
     });
 
     it('should parse a request body correctly', function() {
@@ -34,9 +33,9 @@ describe('#errorToProxyResult', function() {
         } as APIGatewayEvent;
 
         let body = EventUtil.bodyObject(evt);
-        expect(body).to.not.be.null;
-        expect(body.message).to.equal('this is a test');
-        expect(body.number).to.equal(1);
+        expect(body).toBeTruthy();
+        expect(body.message).toEqual('this is a test');
+        expect(body.number).toEqual(1);
 
     });
 
@@ -59,9 +58,9 @@ describe('#errorToProxyResult', function() {
         } as APIGatewayEvent;
 
         let body = EventUtil.bodyObject(evt);
-        expect(body).to.not.be.null;
-        expect(body.message).to.equal('this is a test');
-        expect(body.number).to.equal(1);
+        expect(body).toBeTruthy();
+        expect(body.message).toEqual('this is a test');
+        expect(body.number).toEqual(1);
     });
     */
 
@@ -69,9 +68,9 @@ describe('#errorToProxyResult', function() {
     const cfg: RouterConfig = createSampleRouterConfig();
     const webHandler: WebHandler = new WebHandler(cfg);
 
-    expect(cfg.modelValidator).to.not.be.null;
+    expect(cfg.modelValidator).toBeTruthy();
 
-    let evt: APIGatewayEvent = {
+    const evt: APIGatewayEvent = {
       httpMethod: 'get',
       multiValueHeaders: {},
       multiValueQueryStringParameters: {},
@@ -83,18 +82,18 @@ describe('#errorToProxyResult', function() {
       resource: '/meta/server',
       headers: {
         'content-type': 'application/json; charset=UTF-8',
-        'accept-encoding': 'gzip, deflate, br'
+        'accept-encoding': 'gzip, deflate, br',
       },
       isBase64Encoded: true,
-      body: null
+      body: null,
     } as APIGatewayEvent;
 
     Logger.setLevelByName('silly');
     const result: ProxyResult = await webHandler.lambdaHandler(evt, {} as Context);
 
-    expect(result).to.not.be.null;
-    expect(result.isBase64Encoded).to.eq(true);
-    expect(result.headers).to.not.be.null;
-    expect(result.headers['Content-Encoding']).to.equal('gzip');
+    expect(result).toBeTruthy();
+    expect(result.isBase64Encoded).toEqual(true);
+    expect(result.headers).toBeTruthy();
+    expect(result.headers['Content-Encoding']).toEqual('gzip');
   });
 });

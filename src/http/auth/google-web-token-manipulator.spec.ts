@@ -1,5 +1,4 @@
-import { expect } from 'chai';
-import { GoogleWebTokenManipulator } from '../../../src/http/auth/google-web-token-manipulator';
+import { GoogleWebTokenManipulator } from './google-web-token-manipulator';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 
 describe('#googleWebTokenManipulator', function () {
@@ -10,6 +9,6 @@ describe('#googleWebTokenManipulator', function () {
     const svc: GoogleWebTokenManipulator = new GoogleWebTokenManipulator(clientId);
     const res: CommonJwtToken<any> = await svc.parseAndValidateGoogleToken<any>(token, false);
 
-    expect(res).to.not.be.null;
+    expect(res).toBeTruthy();
   });
 });

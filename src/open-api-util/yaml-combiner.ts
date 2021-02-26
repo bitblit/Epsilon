@@ -2,9 +2,9 @@
     Functions to combine a set of yaml files
 */
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
-import * as yaml from 'js-yaml';
+import yaml from 'js-yaml';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 export class YamlCombiner {

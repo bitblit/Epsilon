@@ -2,12 +2,12 @@ import { APIGatewayEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import * as jwt from 'jsonwebtoken';
-import * as jwks from 'jwks-rsa';
+import jwt from 'jsonwebtoken';
+import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 import { UnauthorizedError } from '../error/unauthorized-error';
-import * as fetch from 'portable-fetch';
+import fetch from 'portable-fetch';
 
 export class GoogleWebTokenManipulator implements WebTokenManipulator {
   private static readonly GOOGLE_DISCOVERY_DOCUMENT: string = 'https://accounts.google.com/.well-known/openid-configuration';

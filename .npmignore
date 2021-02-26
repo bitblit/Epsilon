@@ -8,3 +8,4 @@ npm-debug.log
 cw-test.ts
 typings
 *.bak
+*.spec.*

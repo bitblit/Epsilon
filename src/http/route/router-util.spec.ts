@@ -1,16 +1,16 @@
-import { expect } from 'chai';
-import { RouterConfig } from '../../src/http/route/router-config';
-import { RouterUtil } from '../../src/http/route/router-util';
-import { RouteAndParse, WebHandler } from '../../src/http/web-handler';
+import { RouterConfig } from './router-config';
+import { RouterUtil } from './router-util';
+import { RouteAndParse, WebHandler } from '../web-handler';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
-import { createSampleRouterConfig } from '../../src/local-server';
+import { createSampleRouterConfig } from '../../local-server';
+import fs from 'fs';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
     const cfg: RouterConfig = createSampleRouterConfig();
 
-    expect(cfg.modelValidator).to.not.be.null;
-    expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).to.not.be.null;
+    expect(cfg.modelValidator).toBeTruthy();
+    expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();
 
     // TODO: move this to its own test
     const evt: APIGatewayEvent = {
@@ -24,13 +24,13 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     cfg.prefixesToStripBeforeRouteMatch = ['v0'];
     const webHandler: WebHandler = new WebHandler(cfg);
     const find: RouteAndParse = await webHandler.findBestMatchingRoute(evt);
-    expect(find).to.not.be.null;
+    expect(find).toBeTruthy();
   });
 
   it('should find the most specific route and the least specific', async () => {
     const cfg: RouterConfig = createSampleRouterConfig();
 
-    expect(cfg.modelValidator).to.not.be.null;
+    expect(cfg.modelValidator).toBeTruthy();
 
     // TODO: move this to its own test
     const evtFixed: APIGatewayEvent = {
@@ -56,15 +56,22 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     const findVariableRP: RouteAndParse = await webHandler.findBestMatchingRoute(evtVar);
     const findFixed: ProxyResult = await webHandler.findHandler(findFixedRP, evtFixed, {} as Context, false);
     const findVariable: ProxyResult = await webHandler.findHandler(findVariableRP, evtVar, {} as Context, false);
-    expect(findFixed).to.not.be.null;
-    expect(findFixed['flag']).to.eq('fixed');
-    expect(findVariable).to.not.be.null;
-    expect(findVariable['flag']).to.eq('variable');
+    expect(findFixed).toBeTruthy();
+    expect(findFixed['flag']).toEqual('fixed');
+    expect(findVariable).toBeTruthy();
+    expect(findVariable['flag']).toEqual('variable');
   });
 
   it('should reformat a path to match the other library', function () {
     const inString: string = '/meta/item/{itemId}';
     const outString: string = RouterUtil.openApiPathToRouteParserPath(inString);
-    expect(outString).to.equal('/meta/item/:itemId');
+    expect(outString).toEqual('/meta/item/:itemId');
+  });
+
+  it('should build default reflective cors handler', async () => {
+    const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
+    const proxy: ProxyResult = RouterUtil.defaultReflectiveCorsOptionsFunction(evt);
+
+    expect(proxy.headers).toBeTruthy();
   });
 });

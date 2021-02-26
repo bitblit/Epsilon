@@ -1,7 +1,7 @@
 import { RouterConfig } from './route/router-config';
 import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, APIGatewayProxyResult, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import * as Route from 'route-parser';
+import Route from 'route-parser';
 import { UnauthorizedError } from './error/unauthorized-error';
 import { ForbiddenError } from './error/forbidden-error';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';

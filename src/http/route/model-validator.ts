@@ -1,6 +1,6 @@
-import * as Validator from 'swagger-model-validator';
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
+import Validator from 'swagger-model-validator';
+import fs from 'fs';
+import yaml from 'js-yaml';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { BadRequestError } from '../error/bad-request-error';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';

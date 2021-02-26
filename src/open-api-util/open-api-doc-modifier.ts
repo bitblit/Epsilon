@@ -1,4 +1,4 @@
-import * as yaml from 'js-yaml';
+import yaml from 'js-yaml';
 import { OpenApiDocModifications } from './open-api-doc-modifications';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 

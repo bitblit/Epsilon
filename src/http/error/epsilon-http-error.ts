@@ -1,4 +1,4 @@
-import * as util from 'util';
+import util from 'util';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 
 export class EpsilonHttpError<T = void> extends Error {

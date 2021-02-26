@@ -5,7 +5,7 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { BadRequestError } from './error/bad-request-error';
 import { EpsilonLoggerConfig } from '../global/epsilon-logger-config';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { ExtendedAuthResponseContext } from './route/extended-auth-response-context';
 import { BasicAuthToken } from './auth/basic-auth-token';
 import { Base64Ratchet } from '@bitblit/ratchet/dist/common/base64-ratchet';

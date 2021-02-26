@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { APIGatewayEvent } from 'aws-lambda';

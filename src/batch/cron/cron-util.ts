@@ -3,7 +3,7 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { ScheduledEvent } from 'aws-lambda';
 import { AbstractCronEntry } from './abstract-cron-entry';
 import { Moment } from 'moment-timezone';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { CronConfig } from './cron-config';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';

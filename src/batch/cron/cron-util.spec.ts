@@ -1,9 +1,8 @@
-import { expect } from 'chai';
 import { APIGatewayEvent, APIGatewayEventRequestContext, ScheduledEvent } from 'aws-lambda';
-import * as fs from 'fs';
-import { AbstractCronEntry } from '../../../src/batch/cron/abstract-cron-entry';
-import { CronConfig } from '../../../src/batch/cron/cron-config';
-import { CronUtil } from '../../../src/batch/cron/cron-util';
+import fs from 'fs';
+import { AbstractCronEntry } from './abstract-cron-entry';
+import { CronConfig } from './cron-config';
+import { CronUtil } from './cron-util';
 
 describe('#cronUtil', function () {
   this.timeout(30000);
@@ -22,27 +21,27 @@ describe('#cronUtil', function () {
     };
 
     const match1: boolean = CronUtil.eventMatchesEntry(sEvent, cron1, cfg);
-    expect(match1).to.be.true;
+    expect(match1).toBeTruthy();
 
     const cron2: AbstractCronEntry = {
       contextMatchFilter: new RegExp('dev'),
     };
 
     const match2: boolean = CronUtil.eventMatchesEntry(sEvent, cron2, cfg);
-    expect(match2).to.be.false;
+    expect(match2).toBeFalsy();
 
     const cron3: AbstractCronEntry = {
       eventFilter: new RegExp('.*MyScheduledRule.*'),
     };
 
     const match3: boolean = CronUtil.eventMatchesEntry(sEvent, cron3, cfg);
-    expect(match3).to.be.true;
+    expect(match3).toBeTruthy();
 
     const cron4: AbstractCronEntry = {
       eventFilter: new RegExp('.*NotMyRule.*'),
     };
 
     const match4: boolean = CronUtil.eventMatchesEntry(sEvent, cron4, cfg);
-    expect(match4).to.be.false;
+    expect(match4).toBeFalsy();
   });
 });
