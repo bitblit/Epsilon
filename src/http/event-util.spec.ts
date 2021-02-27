@@ -2,6 +2,7 @@ import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 import { EventUtil } from './event-util';
 import { BasicAuthToken } from './auth/basic-auth-token';
 import fs from 'fs';
+import path from 'path';
 
 describe('#eventUtil', function () {
   it('should extract pieces', function () {
@@ -147,7 +148,9 @@ describe('#eventUtil', function () {
   });
 
   it('should add a token to an event, along with downstream stuff', function () {
-    const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
+    const evt: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
+    );
     const jwtToken: string =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODg1MzY3NzU4ODcsImlzcyI6Im5lb24uYWRvbW5pLmNvbSIsInN1YiI6ImJpdGJsaXRAZ21haWwuY29tIiwiaWF0IjoxNTg4NTMzMTc1ODg3LCJ1c2VyIjp7ImlkIjo2LCJmaXJzdE5hbWUiOiJDaHJpcyIsImxhc3ROYW1lIjoiV2Vpc3MiLCJjb21wYW55IjoiQWRvbW5pIiwiZW1haWwiOiJiaXRibGl0QGdtYWlsLmNvbSIsImN1c3RvbWVyVHlwZSI6IkFETUlOIn0sImFjdGluZ1VzZXJJZCI6NiwiZ2xvYmFsIjp0cnVlLCJhZG1pbiI6eyJpZCI6NiwiZmlyc3ROYW1lIjoiQ2hyaXMiLCJsYXN0TmFtZSI6IldlaXNzIiwiY29tcGFueSI6IkFkb21uaSIsImVtYWlsIjoiYml0YmxpdEBnbWFpbC5jb20iLCJjdXN0b21lclR5cGUiOiJBRE1JTiJ9LCJzdWJVc2VycyI6W119.mwRSek5GwkvxpN44UTp49W6_9U_ARsFXThAyiqaF-eQ';
     EventUtil.applyTokenToEventForTesting(evt, jwtToken);
@@ -157,8 +160,12 @@ describe('#eventUtil', function () {
   });
 
   it('should check if an event is a graphql introspection', function () {
-    const evt1: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
-    const evt2: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-gql-introspection.json').toString());
+    const evt1: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
+    );
+    const evt2: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-gql-introspection.json')).toString()
+    );
 
     const res1: boolean = EventUtil.eventIsAGraphQLIntrospection(evt1);
     const res2: boolean = EventUtil.eventIsAGraphQLIntrospection(evt2);

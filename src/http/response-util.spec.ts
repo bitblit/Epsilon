@@ -1,11 +1,11 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult } from 'aws-lambda';
 import { ResponseUtil } from './response-util';
+import path from 'path';
 import fs from 'fs';
 import { RouterConfig } from './route/router-config';
 import { EpsilonConstants } from '../epsilon-constants';
 
 describe('#responseUtil', function () {
-  this.timeout(30000);
   it('should correctly combine a redirect url and query params', function () {
     const evt: APIGatewayEvent = {
       httpMethod: 'get',
@@ -39,7 +39,7 @@ describe('#responseUtil', function () {
   });
 
   it('should leave already encoded stuff alone', async () => {
-    const singlePixel: string = fs.readFileSync('test/test.png').toString('base64');
+    const singlePixel: string = fs.readFileSync(path.join(__dirname, '../../test-data/test.png')).toString('base64');
 
     const temp: ProxyResult = {
       body: singlePixel,
@@ -59,7 +59,9 @@ describe('#responseUtil', function () {
   });
 
   it('should add cors to proxy result MATCH 1', async () => {
-    const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
+    const evt: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
+    );
     const proxy: ProxyResult = {} as ProxyResult;
     const config: RouterConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
@@ -76,7 +78,9 @@ describe('#responseUtil', function () {
   });
 
   it('should add cors to proxy result MATCH 2', async () => {
-    const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-2.json').toString());
+    const evt: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
+    );
     const proxy: ProxyResult = {} as ProxyResult;
     const config: RouterConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,

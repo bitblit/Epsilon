@@ -4,6 +4,7 @@ import { RouteAndParse, WebHandler } from '../web-handler';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { createSampleRouterConfig } from '../../local-server';
 import fs from 'fs';
+import path from 'path';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
@@ -69,7 +70,9 @@ describe('#routerUtilApplyOpenApiDoc', function () {
   });
 
   it('should build default reflective cors handler', async () => {
-    const evt: APIGatewayEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-request-1.json').toString());
+    const evt: APIGatewayEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../../test-data/sample-json/sample-request-1.json')).toString()
+    );
     const proxy: ProxyResult = RouterUtil.defaultReflectiveCorsOptionsFunction(evt);
 
     expect(proxy.headers).toBeTruthy();

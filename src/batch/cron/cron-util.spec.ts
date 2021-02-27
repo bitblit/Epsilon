@@ -1,13 +1,15 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, ScheduledEvent } from 'aws-lambda';
 import fs from 'fs';
+import path from 'path';
 import { AbstractCronEntry } from './abstract-cron-entry';
 import { CronConfig } from './cron-config';
 import { CronUtil } from './cron-util';
 
 describe('#cronUtil', function () {
-  this.timeout(30000);
   it('should test matching event to entry', async () => {
-    const sEvent: ScheduledEvent = JSON.parse(fs.readFileSync('test/sample-json/sample-schedule-event-1.json').toString());
+    const sEvent: ScheduledEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+    );
 
     const cfg: CronConfig = {
       context: 'prod',
@@ -43,5 +45,5 @@ describe('#cronUtil', function () {
 
     const match4: boolean = CronUtil.eventMatchesEntry(sEvent, cron4, cfg);
     expect(match4).toBeFalsy();
-  });
+  }, 10000);
 });
