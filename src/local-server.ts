@@ -6,7 +6,7 @@ import { IncomingMessage, Server, ServerResponse } from 'http';
 import { WebHandler } from './http/web-handler';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import moment from 'moment-timezone';
+import { DateTime } from 'luxon';
 import qs from 'querystring';
 import { AuthorizerFunction } from './http/route/authorizer-function';
 import { HandlerFunction } from './http/route/handler-function';
@@ -98,7 +98,7 @@ export class LocalServer {
     const path: string = request.url.substring(stageIdx + 1);
 
     const reqTime: number = new Date().getTime();
-    const formattedTime: string = moment.tz(reqTime, 'UTC').format('DD/MMM/YYYY:hh:mm:ss ZZ');
+    const formattedTime: string = DateTime.utc().toFormat('dd/MMM/yyyy:hh:mm:ss ZZ');
     const queryIdx: number = request.url.indexOf('?');
     const queryStringParams: any = queryIdx > -1 ? qs.parse(request.url.substring(queryIdx + 1)) : {};
     const headers: any = Object.assign({}, request.headers);

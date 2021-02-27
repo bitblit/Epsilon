@@ -45,5 +45,5 @@ describe('#cronUtil', function () {
 
     const match4: boolean = CronUtil.eventMatchesEntry(sEvent, cron4, cfg);
     expect(match4).toBeFalsy();
-  }, 10000);
+  });
 });

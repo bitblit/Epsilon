@@ -2,11 +2,9 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { ScheduledEvent } from 'aws-lambda';
 import { AbstractCronEntry } from './abstract-cron-entry';
-import { Moment } from 'moment-timezone';
-import moment from 'moment-timezone';
+import { DateTime } from 'luxon';
 import { CronConfig } from './cron-config';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 export class CronUtil {
   public static everyNMinuteFilter(n: number): number[] {
@@ -46,13 +44,13 @@ export class CronUtil {
     if (!!event && !!entry && !!cfg.timezone) {
       if (!!event.resources && event.resources.length > 0) {
         const eventSourceName: string = event.resources[0];
-        const nowInTZ: Moment = moment.tz(cfg.timezone);
+        const nowInTZ: DateTime = DateTime.local().setZone(cfg.timezone);
         rval = !entry.eventFilter || entry.eventFilter.test(eventSourceName);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.minute(), entry.minuteFilter);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.hour(), entry.hourFilter);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.day(), entry.dayOfWeekFilter);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.date(), entry.dayOfMonthFilter);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.month() + 1, entry.monthOfYearFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.minute, entry.minuteFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.hour, entry.hourFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.weekday, entry.dayOfWeekFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.day, entry.dayOfMonthFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.month + 1, entry.monthOfYearFilter);
         rval = rval && (!entry.contextMatchFilter || entry.contextMatchFilter.test(StringRatchet.trimToEmpty(cfg.context)));
         rval = rval && (!entry.contextNoMatchFilter || !entry.contextNoMatchFilter.test(StringRatchet.trimToEmpty(cfg.context)));
       }
