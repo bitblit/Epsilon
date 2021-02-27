@@ -33,7 +33,13 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 # Release Notes
 
+## 0.8.x
+
+- Updated core libs
+- Switched to Luxon from Moment to match Ratchet
+
 ## 0.7.x
+
 - Updated core libs
 - Added ContextUtil to get static access to the AWS context object
 - Renamed apiGateway to http in config
@@ -42,7 +48,7 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - Added outbound model validation
 - Added blocking on "null" literal string on query and path params
 - Added request id as outbound header
-- Added better (no longer crashes) handling when a null object returns from a handler 
+- Added better (no longer crashes) handling when a null object returns from a handler
 
 ## 0.6.x
 
