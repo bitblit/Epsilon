@@ -1,6 +1,6 @@
 {
   "name": "@bitblit/epsilon",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "main": "./dist/index",
   "typings": "./dist/index",
@@ -77,10 +77,10 @@
   "devDependencies": {
     "@types/aws-lambda": "8.10.72",
     "@types/js-yaml": "4.0.0",
+    "@types/luxon": "1.26.0",
     "@types/node": "14.14.31",
     "@typescript-eslint/eslint-plugin": "4.15.2",
     "@typescript-eslint/parser": "4.15.2",
-    "@types/luxon": "1.26.0",
     "apollo-server-lambda": "2.19.1",
     "aws-sdk": "2.852.0",
     "eslint": "7.20.0",
