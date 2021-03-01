@@ -352,10 +352,10 @@
     luxon "1.26.0"
     ts-enum-util "4.0.2"
 
-"@bitblit/saltmine@0.14.147":
-  version "0.14.147"
-  resolved "https://registry.yarnpkg.com/@bitblit/saltmine/-/saltmine-0.14.147.tgz#fc7dd64e900165cac635076db510e397921b6b88"
-  integrity sha512-ASpgS5q9Msi+Uauk4NMU2lNYzONyweG3bnNzo7qqe3SdIoV6u3RuAhjxtPXfnskJZj/eHDlS0uUYVFLbTwx2Jw==
+"@bitblit/saltmine@0.14.150":
+  version "0.14.150"
+  resolved "https://registry.yarnpkg.com/@bitblit/saltmine/-/saltmine-0.14.150.tgz#e0fd2878596d4908004a247dd432af82d4271e5d"
+  integrity sha512-LkrrdPm2LX6JEMY6hj5GF68+HYWpPw2Zp++LBXgTC3zLJMlEBiHYeyqs6VEhqTOX6dg7C/kgVLq/PQJuaVSUTA==
   dependencies:
     "@bitblit/ratchet" "0.13.993"
     portable-fetch "3.0.0"
