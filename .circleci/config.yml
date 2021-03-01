@@ -42,12 +42,9 @@ jobs:
           paths:
             - ./node_modules
       # Test
-      - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-SNAPSHOT/$CIRCLE_BUILD_NUM/ {} \;
-      - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-BRANCH/$CIRCLE_BRANCH/ {} \;
-      - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-TAG/$CIRCLE_TAG/ {} \;
-      - run: find . -type f -regex ".*/build-properties\.json" -exec sed -i.bak s/LOCAL-HASH/$CIRCLE_SHA1/ {} \;
-      - run: cp src/static/build-properties.json $CIRCLE_ARTIFACTS
-      - run: yarn run compile
+      - run: yarn run clean-compile
+      - run: yarn run apply-circle
+      - run: cp dist/static/build-properties.json $CIRCLE_ARTIFACTS
       - run: yarn run test
 
       # Teardown
