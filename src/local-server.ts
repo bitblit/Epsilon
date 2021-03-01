@@ -218,6 +218,7 @@ export function createSampleRouterConfig(): RouterConfig {
   cfg.validateOutboundResponseBody = true;
 
   cfg.defaultErrorMessage = 'Internal Server Error';
+  cfg.defaultTimeoutMS = 500;
 
   cfg.webTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info');
 

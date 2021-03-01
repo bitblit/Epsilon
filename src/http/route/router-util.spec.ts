@@ -5,6 +5,7 @@ import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { createSampleRouterConfig } from '../../local-server';
 import fs from 'fs';
 import path from 'path';
+import { Logger } from '@bitblit/ratchet/dist/common';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
@@ -51,6 +52,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     } as APIGatewayEvent;
 
     cfg.prefixesToStripBeforeRouteMatch = ['v0'];
+
     const webHandler: WebHandler = new WebHandler(cfg);
 
     const findFixedRP: RouteAndParse = await webHandler.findBestMatchingRoute(evtFixed);
@@ -61,6 +63,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     expect(findFixed['flag']).toEqual('fixed');
     expect(findVariable).toBeTruthy();
     expect(findVariable['flag']).toEqual('variable');
+    Logger.info('done');
   });
 
   it('should reformat a path to match the other library', function () {

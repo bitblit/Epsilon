@@ -259,12 +259,18 @@ export class WebHandler {
 
       // Check validation (throws error on failure)
       await this.applyBodyObjectValidation(extEvent, rm.mapping);
+      const timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.defaultTimeoutMS;
 
-      rval = PromiseRatchet.timeout(
-        rm.mapping.function(extEvent, context),
-        'Timed out after ' + rm.mapping.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
-        rm.mapping.timeoutMS
-      );
+      if (timeoutMS) {
+        rval = PromiseRatchet.timeout(
+          rm.mapping.function(extEvent, context),
+          'Timed out after ' + rm.mapping.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
+          rm.mapping.timeoutMS
+        );
+      } else {
+        Logger.silly('No timeout set');
+        rval = rm.mapping.function(extEvent, context);
+      }
     } else if (add404OnMissing) {
       throw new NotFoundError('No such endpoint');
     }

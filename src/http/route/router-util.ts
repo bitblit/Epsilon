@@ -33,7 +33,7 @@ export class RouterUtil {
     authorizers: Map<string, AuthorizerFunction>,
     options: OpenApiConvertOptions = RouterUtil.createDefaultOpenApiConvertOptions(),
     errorProcessor: ErrorProcessorFunction = BuiltInHandlers.defaultErrorProcessor,
-    defaultTimeoutMS: number = 30 * 1000,
+    defaultTimeoutMS?: number,
     customTimeouts: Map<string, number> = new Map<string, number>(),
     inCorsHandler: HandlerFunction<any> = null
   ): RouterConfig {
