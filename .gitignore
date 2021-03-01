@@ -6,4 +6,4 @@ dist
 cw-test.ts
 typings
 *.bak
-
+yarn-error.log

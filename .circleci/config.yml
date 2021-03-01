@@ -73,7 +73,7 @@ jobs:
   deploy:
     <<: *defaults
 
-    # CAW 2018-05-09 : This semes redundant but I don't have anything else working yet - still learning Circle V2
+    # CAW 2018-05-09 : This seems redundant but I don't have anything else working yet - still learning Circle V2
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
@@ -85,20 +85,26 @@ jobs:
       - run: git config --global user.name "Chris Weiss"
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: yarn install
-      - run: echo Updating props
-      - run: yarn compile
-      - run: yarn run apply-circle
-      - run: yarn publish --patch --no-git-tag-version
-      - run: echo Pushing tag back to Github
-      - run: git status
-      - run: git checkout master
-      - run: git add package.json
-      - run: git commit -m "Upping version in package.json"
-      - run: git status
-      - run: git push -q https://${GITHUB_PERSONAL_TOKEN}@github.com/bitblit/Epsilon.git HEAD:master --tags
-      - run: git status
+      - run: yarn prepare-to-publish
+      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.9.$CIRCLE_BUILD_NUM
 
-    #- run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+  deploy-alpha:
+    <<: *defaults
+
+    # CAW 2018-05-09 : This seems redundant but I don't have anything else working yet - still learning Circle V2
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ~/bitblit
+      - run: echo Publishing production library
+      - run: export
+      - run: set
+      - run: git config --global user.email "bitblit@gmail.com"
+      - run: git config --global user.name "Chris Weiss"
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - run: yarn install
+      - run: yarn prepare-to-publish
+      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.9.$CIRCLE_BUILD_NUM-alpha
 
 workflows:
   version: 2
@@ -114,5 +120,13 @@ workflows:
           filters:
             tags:
               only: /^release-.*/
+            branches:
+              ignore: /.*/
+      - deploy-alpha:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^alpha-.*/
             branches:
               ignore: /.*/
