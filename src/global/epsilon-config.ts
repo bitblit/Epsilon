@@ -4,7 +4,7 @@ import { DynamoDbConfig } from '../batch/dynamo-db-config';
 import { S3Config } from '../batch/s3-config';
 import { SnsConfig } from '../batch/sns-config';
 import { EpsilonDisableSwitches } from './epsilon-disable-switches';
-import { SaltMineHandler } from '@bitblit/saltmine/dist/salt-mine-handler';
+import { SaltMineHandler } from '@bitblit/saltmine';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
 
 export interface EpsilonConfig {
