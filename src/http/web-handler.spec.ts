@@ -1,8 +1,8 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { createSampleRouterConfig } from '../local-server';
 import { RouterConfig } from './route/router-config';
 import { WebHandler } from './web-handler';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { SampleServerComponents } from '../sample-server-components';
 
 describe('#errorToProxyResult', function () {
   /*
@@ -65,7 +65,7 @@ describe('#errorToProxyResult', function () {
     */
 
   it('should gzip responses correctly', async () => {
-    const cfg: RouterConfig = createSampleRouterConfig();
+    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
     const webHandler: WebHandler = new WebHandler(cfg);
 
     expect(cfg.modelValidator).toBeTruthy();

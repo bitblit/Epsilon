@@ -3,17 +3,18 @@
  * with your own.
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { createSampleRouterConfig, LocalServer } from './local-server';
+import { LocalServer } from './local-server';
+import { SampleServerComponents } from './sample-server-components';
 
 Logger.setLevelByName('debug');
 
-const testServer: LocalServer = new LocalServer(createSampleRouterConfig());
-
-testServer
-  .runServer()
-  .then((res) => {
-    Logger.info('Got res server');
-    process.exit(0);
+SampleServerComponents.createSampleRouterConfig()
+  .then((cfg) => {
+    const testServer: LocalServer = new LocalServer(cfg);
+    testServer.runServer().then((res) => {
+      Logger.info('Got res server');
+      process.exit(0);
+    });
   })
   .catch((err) => {
     Logger.error('Error: %s', err, err);

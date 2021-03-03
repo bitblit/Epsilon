@@ -1,0 +1,13 @@
+schema {
+  query: RootQueryType
+}
+
+type RootQueryType {
+  serverMeta: ServerMeta
+}
+
+type ServerMeta {
+  version: String
+  serverTime: String
+  status: String
+}

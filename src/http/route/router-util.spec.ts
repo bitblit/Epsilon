@@ -2,14 +2,14 @@ import { RouterConfig } from './router-config';
 import { RouterUtil } from './router-util';
 import { RouteAndParse, WebHandler } from '../web-handler';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
-import { createSampleRouterConfig } from '../../local-server';
 import fs from 'fs';
 import path from 'path';
 import { Logger } from '@bitblit/ratchet/dist/common';
+import { SampleServerComponents } from '../../sample-server-components';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
-    const cfg: RouterConfig = createSampleRouterConfig();
+    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
 
     expect(cfg.modelValidator).toBeTruthy();
     expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();
@@ -30,7 +30,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
   });
 
   it('should find the most specific route and the least specific', async () => {
-    const cfg: RouterConfig = createSampleRouterConfig();
+    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
 
     expect(cfg.modelValidator).toBeTruthy();
 

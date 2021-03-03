@@ -6,6 +6,7 @@ export * from './context-util';
 export * from './epsilon-constants';
 export * from './epsilon-global-handler';
 export * from './local-server';
+export * from './sample-server-components';
 export * from './batch/dynamo-db-config';
 export * from './batch/dynamo-db-handler-function';
 export * from './batch/s3-config';

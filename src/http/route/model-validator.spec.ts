@@ -1,9 +1,9 @@
 import { ModelValidator } from './model-validator';
-import { loadSampleOpenApiYaml } from '../../local-server';
+import { SampleServerComponents } from '../../sample-server-components';
 
 describe('#modelValidator', function () {
   it('should list an error', function () {
-    const yamlString: string = loadSampleOpenApiYaml();
+    const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const validator: ModelValidator = ModelValidator.createFromOpenApiYaml(yamlString);
 
     const testOb: any = {
