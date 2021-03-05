@@ -45,7 +45,7 @@ jobs:
       - run: yarn run clean-compile
       - run: yarn run apply-circle
       - run: cp dist/static/build-properties.json $CIRCLE_ARTIFACTS
-      - run: yarn run test
+      - run: yarn run test --maxWorkers=2
 
       # Teardown
       #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
