@@ -46,6 +46,7 @@ export class RouterUtil {
       authorizers: authorizers,
       routes: [],
       errorProcessor: errorProcessor,
+      defaultTimeoutMS: defaultTimeoutMS,
     } as RouterConfig;
 
     let corsHandler: HandlerFunction<any> = inCorsHandler;
