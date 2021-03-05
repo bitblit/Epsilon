@@ -17,7 +17,7 @@ import { EpsilonConstants } from './epsilon-constants';
 import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator';
 import fs from 'fs';
 import path from 'path';
-import { CommonJwtToken, MapRatchet } from '@bitblit/ratchet/dist/common';
+import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -34,6 +34,11 @@ export class SampleServerComponents {
       RootQueryType: {
         serverMeta: async (root) => {
           return { version: 'A1', serverTime: new Date().toISOString() };
+        },
+        forceTimeout: async (root) => {
+          // This will be longer than the max timeout
+          await PromiseRatchet.wait(1000 * 60 * 30);
+          return { placeholder: 'A1' };
         },
       },
     };

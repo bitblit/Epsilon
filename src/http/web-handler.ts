@@ -160,7 +160,8 @@ export class WebHandler {
 
   public async apolloLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     Logger.silly('Processing event with apollo: %j', event);
-    return new Promise<ProxyResult>((res, rej) => {
+    let rval: ProxyResult = null;
+    const apolloPromise: Promise<ProxyResult> = new Promise<ProxyResult>((res, rej) => {
       if (!this.cacheApolloHandler) {
         this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
       }
@@ -184,6 +185,29 @@ export class WebHandler {
         rej(err);
       }
     });
+
+    let timeoutMS: number = this.routerConfig.defaultTimeoutMS;
+    if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
+      // We do this because fully timing out on Lambda is never a good thing
+      Logger.info('No timeout set, using remaining - 500ms (Apollo)');
+      timeoutMS = context.getRemainingTimeInMillis() - 500;
+    }
+
+    let result: any = null;
+    if (timeoutMS) {
+      result = await PromiseRatchet.timeout(apolloPromise, 'Apollo timed out after ' + timeoutMS + ' ms.', timeoutMS);
+    } else {
+      Logger.warn('No timeout set even after defaulting for Apollo');
+      result = await apolloPromise;
+    }
+
+    if (TimeoutToken.isTimeoutToken(result)) {
+      (result as TimeoutToken).writeToLog();
+      throw new RequestTimeoutError('Timed out');
+    }
+    // If we made it here, we didn't time out
+    rval = result;
+    return rval;
   }
 
   // Public so it can be used in auth-web-handler
