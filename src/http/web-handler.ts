@@ -260,7 +260,12 @@ export class WebHandler {
 
       // Check validation (throws error on failure)
       await this.applyBodyObjectValidation(extEvent, rm.mapping);
-      const timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.defaultTimeoutMS;
+      let timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.defaultTimeoutMS;
+      if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
+        // We do this because fully timing out on Lambda is never a good thing
+        Logger.info('No timeout set, using remaining - 500ms (%s)', extEvent.path);
+        timeoutMS = context.getRemainingTimeInMillis() - 500;
+      }
 
       if (timeoutMS) {
         rval = PromiseRatchet.timeout(
@@ -269,7 +274,7 @@ export class WebHandler {
           rm.mapping.timeoutMS
         );
       } else {
-        Logger.silly('No timeout set');
+        Logger.warn('No timeout set even after defaulting');
         rval = rm.mapping.function(extEvent, context);
       }
     } else if (add404OnMissing) {
