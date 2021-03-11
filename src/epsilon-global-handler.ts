@@ -14,6 +14,7 @@ import { CronSaltMineEntry } from './batch/cron/cron-salt-mine-entry';
 import { CronUtil } from './batch/cron/cron-util';
 import { CronDirectEntry } from './batch/cron/cron-direct-entry';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { CronConfig } from './batch/cron/cron-config';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -98,8 +99,11 @@ export class EpsilonGlobalHandler {
         rval = await this.processS3Event(event as S3CreateEvent);
       } else if (LambdaEventDetector.isValidCronEvent(event)) {
         Logger.debug('Epsilon: CRON: %j', event);
-
-        rval = await this.processCronEvent(event as ScheduledEvent);
+        if (this.config.disabled.cron) {
+          Logger.debug('Skipping - CRON disabled');
+        } else {
+          rval = await EpsilonGlobalHandler.processCronEvent(event as ScheduledEvent, this.config.cron, this.config.saltMine);
+        }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
         Logger.debug('Epsilon: DDB: %j', event);
 
@@ -156,29 +160,51 @@ export class EpsilonGlobalHandler {
     return rval;
   }
 
-  private async processCronEvent(evt: ScheduledEvent): Promise<any> {
-    const rval: any = null;
-    if (this.config && this.config.cron && !this.config.disabled.cron && evt && evt.resources[0]) {
+  // Returns either the value if non-function, the result if function, and default if neither
+  public static resolvePotentialFunctionToResult<T>(src: any, def: T): T {
+    let rval: T = def;
+    if (src) {
+      if (typeof src === 'function') {
+        rval = src();
+      } else {
+        rval = src;
+      }
+    }
+    return rval;
+  }
+
+  public static async processCronEvent(evt: ScheduledEvent, cronConfig: CronConfig, saltMine: SaltMineHandler): Promise<boolean> {
+    let rval: boolean = false;
+    if (cronConfig && evt && evt.resources[0]) {
       // Run all the salt mine ones
-      if (!!this.config.cron.saltMineEntries) {
-        if (!!this.config.saltMine) {
-          const saltMineConfig: SaltMineConfig = this.config.saltMine.getConfig();
+      if (!!cronConfig.saltMineEntries) {
+        if (!!saltMine) {
+          const saltMineConfig: SaltMineConfig = saltMine.getConfig();
           const toEnqueue: SaltMineEntry[] = [];
-          for (let i = 0; i < this.config.cron.saltMineEntries.length; i++) {
-            const smCronEntry: CronSaltMineEntry = this.config.cron.saltMineEntries[i];
-            if (CronUtil.eventMatchesEntry(evt, smCronEntry, this.config.cron)) {
+          for (let i = 0; i < cronConfig.saltMineEntries.length; i++) {
+            const smCronEntry: CronSaltMineEntry = cronConfig.saltMineEntries[i];
+            if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
               Logger.info('Firing Salt-Mine cron : %s', CronUtil.cronEntryName(smCronEntry));
 
-              const metadata: any = Object.assign({}, smCronEntry.metadata, { cronDelegate: true, cronSourceEvent: evt });
+              const metadata: any = Object.assign(
+                {},
+                EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.metadata, {}),
+                {
+                  cronDelegate: true,
+                  cronSourceEvent: evt,
+                }
+              );
 
               const saltMineEntry: SaltMineEntry = {
                 type: smCronEntry.saltMineTaskType,
                 created: new Date().getTime(),
-                data: smCronEntry.data || {},
+                data: EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.data, {}),
                 metadata: metadata,
               };
+              Logger.silly('Resolved entry : %j', saltMineEntry);
               if (smCronEntry.fireImmediate) {
                 await SaltMineQueueUtil.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
+                rval = true;
               } else {
                 toEnqueue.push(saltMineEntry);
               }
@@ -186,17 +212,19 @@ export class EpsilonGlobalHandler {
           }
           if (toEnqueue.length > 0) {
             await SaltMineQueueUtil.addEntriesToQueue(saltMineConfig, toEnqueue, true);
+            rval = true;
           }
         } else {
-          Logger.warn('Cron defines salt mine tasks, but no salt mine is set in config');
+          Logger.warn('Cron defines salt mine tasks, but no salt mine provided');
         }
       }
-      if (!!this.config.cron.directEntries) {
-        for (let i = 0; i < this.config.cron.directEntries.length; i++) {
-          const directEntry: CronDirectEntry = this.config.cron.directEntries[i];
-          if (CronUtil.eventMatchesEntry(evt, directEntry, this.config.cron)) {
+      if (!!cronConfig.directEntries) {
+        for (let i = 0; i < cronConfig.directEntries.length; i++) {
+          const directEntry: CronDirectEntry = cronConfig.directEntries[i];
+          if (CronUtil.eventMatchesEntry(evt, directEntry, cronConfig)) {
             Logger.info('Firing direct cron : %s', CronUtil.cronEntryName(directEntry, i));
             await directEntry.directHandler(evt);
+            rval = true;
           }
         }
       }
