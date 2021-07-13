@@ -7,7 +7,7 @@ import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 import { UnauthorizedError } from '../error/unauthorized-error';
-import fetch from 'portable-fetch';
+import fetch from 'isomorphic-fetch';
 
 export class GoogleWebTokenManipulator implements WebTokenManipulator {
   private static readonly GOOGLE_DISCOVERY_DOCUMENT: string = 'https://accounts.google.com/.well-known/openid-configuration';

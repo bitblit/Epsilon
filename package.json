@@ -55,13 +55,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.13.993",
-    "@bitblit/saltmine": "0.14.150",
+    "@bitblit/ratchet": "0.14.1016",
     "js-yaml": "4.0.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "1.12.3",
-    "luxon": "1.26.0",
-    "portable-fetch": "3.0.0",
+    "luxon": "2.0.1",
+    "isomorphic-fetch": "3.0.0",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
     "swagger-model-validator": "3.0.20"
@@ -74,19 +73,20 @@
     "axios": "^0.21.1"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.72",
-    "aws-sdk": "2.853.0"
+    "@types/aws-lambda": "8.10.78",
+    "aws-sdk": "2.944.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.72",
+    "@fluffy-spoon/substitute": "1.208.0",
+    "@types/aws-lambda": "8.10.78",
     "@types/js-yaml": "4.0.0",
-    "@types/luxon": "1.26.0",
+    "@types/luxon": "1.27.1",
     "@types/node": "14.14.31",
     "@typescript-eslint/eslint-plugin": "4.15.2",
     "@typescript-eslint/parser": "4.15.2",
     "apollo-server-lambda": "2.21.0",
     "graphql": "15.5.0",
-    "aws-sdk": "2.852.0",
+    "aws-sdk": "2.944.0",
     "barrelsby": "2.2.0",
     "eslint": "7.20.0",
     "eslint-config-prettier": "8.1.0",

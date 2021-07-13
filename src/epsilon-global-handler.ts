@@ -6,7 +6,6 @@ import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-dete
 import { EpsilonDisableSwitches } from './global/epsilon-disable-switches';
 import { SnsHandlerFunction } from './batch/sns-handler-function';
 import { DynamoDbHandlerFunction } from './batch/dynamo-db-handler-function';
-import { SaltMineHandler, SaltMineEntry, SaltMineQueueUtil, SaltMineConfig } from '@bitblit/saltmine';
 import { S3CreateHandlerFunction } from './batch/s3-create-handler-function';
 import { S3RemoveHandlerFunction } from './batch/s3-remove-handler-function';
 import { EventUtil } from './http/event-util';
@@ -15,6 +14,7 @@ import { CronUtil } from './batch/cron/cron-util';
 import { CronDirectEntry } from './batch/cron/cron-direct-entry';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { CronConfig } from './batch/cron/cron-config';
+import { SaltMineConfig, SaltMineEntry, SaltMineHandler, SaltMineQueueUtil } from './salt-mine';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon

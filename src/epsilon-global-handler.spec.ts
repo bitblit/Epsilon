@@ -1,8 +1,7 @@
 import { ScheduledEvent } from 'aws-lambda';
 import { CronConfig } from './batch/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { SaltMineConfig, SaltMineHandler } from '@bitblit/saltmine';
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { SaltMineConfig, SaltMineHandler } from './salt-mine';
 
 jest.mock('@bitblit/saltmine');
 
@@ -36,7 +35,11 @@ describe('#epsilonGlobalHandler', function () {
         },
       ],
     };
-    const smConfig: SaltMineConfig = { validTypes: ['test'], aws: null, development: { url: 'http://test', queueDelayMS: 4 } };
+    const smConfig: SaltMineConfig = {
+      processes: { test: { description: null, schema: null } },
+      aws: null,
+      development: { url: 'http://test', queueDelayMS: 4 },
+    };
     const saltMine = new SaltMineHandler(null, null);
     saltMine.getConfig = jest.fn(() => smConfig);
 

@@ -24,7 +24,9 @@ export class RouterUtil {
     return rval;
   };
 
-  private constructor() {} // Prevent instantiation
+  // Prevent instantiation
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
 
   // Parses an open api file to create a router config
   public static openApiYamlToRouterConfig(
