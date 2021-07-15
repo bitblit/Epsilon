@@ -1,13 +1,12 @@
-import { Logger } from '@bitblit/ratchet/dist/common';
 import { SaltMineNamedProcessor } from '../salt-mine-named-processor';
 import { SaltMineConfig } from '../salt-mine-config';
 
-export class EchoProcessor implements SaltMineNamedProcessor<any, any> {
+export class NoOpProcessor implements SaltMineNamedProcessor<any, any> {
   public get typeName(): string {
-    return 'SaltMineBuiltInEchoProcessor';
+    return 'NoOpProcessor';
   }
 
   public async handleEvent(data: any, metaData: any, cfg?: SaltMineConfig): Promise<void> {
-    Logger.info('Echo processing : %j : %j', data, metaData);
+    // Does nothing
   }
 }

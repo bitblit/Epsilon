@@ -1,11 +1,12 @@
-import { SaltMineEntry } from './salt-mine-entry';
 import { Logger } from '@bitblit/ratchet/dist/common';
-import { SaltMineProcessor } from './salt-mine-processor';
 import { SaltMineConfig } from './salt-mine-config';
 import { SaltMineQueueUtil } from './salt-mine-queue-util';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
+import { EchoProcessor } from './built-in/echo-processor';
+import { NoOpProcessor } from './built-in/no-op-processor';
+import { SaltMineHandler } from './salt-mine-handler';
 
 describe('#createEntry', function () {
   let mockSqs;
@@ -13,15 +14,15 @@ describe('#createEntry', function () {
   const fakeAccountNumber: string = '123456789012';
   let saltMineConfig: SaltMineConfig;
 
+  const echoProcessor: EchoProcessor = new EchoProcessor();
+  const noOpProcessor: NoOpProcessor = new NoOpProcessor();
+
   beforeEach(() => {
     mockSqs = Substitute.for<AWS.SQS>();
     mockSns = Substitute.for<AWS.SNS>();
 
     saltMineConfig = {
-      processes: {
-        a: {},
-        b: {},
-      },
+      processors: [echoProcessor, noOpProcessor],
       aws: {
         sqs: mockSqs,
         sns: mockSns,
@@ -47,24 +48,10 @@ describe('#createEntry', function () {
   });
 
   it('should make sure a processor exists', async () => {
-    const processors: Map<string, SaltMineProcessor> = new Map<string, SaltMineProcessor>();
-    processors.set(
-      'a',
-      async (entry: SaltMineEntry): Promise<void> => {
-        Logger.info('Called a');
-      }
-    );
-    processors.set(
-      'b',
-      async (entry: SaltMineEntry): Promise<void> => {
-        Logger.info('Called b');
-      }
-    );
+    const mine: SaltMineHandler = new SaltMineHandler(saltMineConfig);
 
-    //const mine: SaltMineHandler = new SaltMineHandler(cfg, processors);
-
-    const resultA = SaltMineQueueUtil.createEntry(saltMineConfig, 'a', {}, {});
-    const resultC = SaltMineQueueUtil.createEntry(saltMineConfig, 'c', {}, {});
+    const resultA = SaltMineQueueUtil.createEntry(saltMineConfig, echoProcessor.typeName, {}, {});
+    const resultC = SaltMineQueueUtil.createEntry(saltMineConfig, 'MissingProcessorXYZ', {}, {});
     expect(resultA.type).toEqual('a');
     expect(resultC).toBeNull();
   });

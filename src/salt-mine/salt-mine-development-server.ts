@@ -3,9 +3,8 @@ import http from 'http';
 import { IncomingMessage, Server, ServerResponse } from 'http';
 import { SaltMineLocalSimulationEntry } from './salt-mine-local-simulation-entry';
 import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineProcessor } from './salt-mine-processor';
 import { SaltMineHandler } from './salt-mine-handler';
-import { SaltMineProcessConfig } from './salt-mine-process-config';
+import { SaltMineNamedProcessor } from './salt-mine-named-processor';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -15,23 +14,9 @@ export class SaltMineDevelopmentServer {
   private aborted: boolean = false;
   private saltMineHandler: SaltMineHandler;
 
-  constructor(
-    private processors: Map<string, SaltMineProcessor | SaltMineProcessor[]>,
-    private port: number = 8124,
-    private queueDelay: number = 500
-  ) {
-    // Create a default non-validated form here
-    const procDef: Record<string, SaltMineProcessConfig> = {};
-    Array.from(processors.keys()).forEach((key) => {
-      const next: SaltMineProcessConfig = {
-        description: 'Default config for ' + key,
-        schema: null,
-      };
-      procDef[key] = next;
-    });
-
+  constructor(private processors: SaltMineNamedProcessor<any, any>[], private port: number = 8124, private queueDelay: number = 500) {
     const cfg: SaltMineConfig = {
-      processes: procDef,
+      processors: processors,
       development: {
         url: 'http://localhost:' + port,
         queueDelayMS: queueDelay,
@@ -39,7 +24,7 @@ export class SaltMineDevelopmentServer {
       aws: null,
     };
 
-    this.saltMineHandler = new SaltMineHandler(cfg, processors);
+    this.saltMineHandler = new SaltMineHandler(cfg);
   }
 
   async runServer(): Promise<boolean> {
@@ -73,7 +58,7 @@ export class SaltMineDevelopmentServer {
       if (evt) {
         Logger.info('Processing local simulation entry : %j', evt);
         if (evt.delayMS) {
-          Logger.debug('Executing simlation delay of %s', evt.delayMS);
+          Logger.debug('Executing simulation delay of %s', evt.delayMS);
           await PromiseRatchet.wait(evt.delayMS);
         }
         Logger.debug('Starting process');

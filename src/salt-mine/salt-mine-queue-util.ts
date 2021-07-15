@@ -21,12 +21,12 @@ export class SaltMineQueueUtil {
   private constructor() {}
 
   public static validType(cfg: SaltMineConfig, type: string): boolean {
-    return !!cfg.processes[type];
+    return SaltMineConfigUtil.processNames(cfg).includes(type);
   }
 
   public static createEntry(cfg: SaltMineConfig, type: string, data: any = {}, metadata: any = {}): SaltMineEntry {
     if (!SaltMineQueueUtil.validType(cfg, type)) {
-      Logger.warn('Tried to create invalid type : %s (Valid are %j)', type, cfg.processes);
+      Logger.warn('Tried to create invalid type : %s (Valid are %j)', type, SaltMineConfigUtil.processNames(cfg));
       return null;
     }
 

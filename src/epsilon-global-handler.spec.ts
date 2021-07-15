@@ -36,7 +36,7 @@ describe('#epsilonGlobalHandler', function () {
       ],
     };
     const smConfig: SaltMineConfig = {
-      processes: { test: { description: null, schema: null } },
+      processors: [],
       aws: null,
       development: { url: 'http://test', queueDelayMS: 4 },
     };

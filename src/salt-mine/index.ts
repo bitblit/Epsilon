@@ -10,7 +10,5 @@ export * from './salt-mine-development-server';
 export * from './salt-mine-entry';
 export * from './salt-mine-handler';
 export * from './salt-mine-local-simulation-entry';
-export * from './salt-mine-process-config';
-export * from './salt-mine-processor';
 export * from './salt-mine-queue-util';
 export * from './built-in/echo-processor';

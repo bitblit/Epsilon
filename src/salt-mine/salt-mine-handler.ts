@@ -2,24 +2,28 @@ import AWS from 'aws-sdk';
 import { Logger, ErrorRatchet, StringRatchet, StopWatch } from '@bitblit/ratchet/dist/common';
 import { SaltMineEntry } from './salt-mine-entry';
 import { Context, SNSEvent } from 'aws-lambda';
-import { SaltMineProcessor } from './salt-mine-processor';
 import { SaltMineConfig } from './salt-mine-config';
 import { SaltMineQueueUtil } from './salt-mine-queue-util';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
+import { SaltMineNamedProcessor } from './salt-mine-named-processor';
+import { ModelValidator } from '../http/route/model-validator';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
  * thing at the same time.
  */
 export class SaltMineHandler {
-  constructor(private cfg: SaltMineConfig, private processors: Map<string, SaltMineProcessor | SaltMineProcessor[]>) {
-    Logger.silly('Starting Salt Mine processor');
-    const cfgErrors: string[] = SaltMineConfigUtil.validateProcessorsAgainstConfig(cfg, processors);
+  private processors: Map<string, SaltMineNamedProcessor<any, any>>;
+
+  constructor(private cfg: SaltMineConfig, private modelValidator?: ModelValidator) {
+    const cfgErrors: string[] = SaltMineConfigUtil.validateConfig(cfg);
     if (cfgErrors.length > 0) {
       ErrorRatchet.throwFormattedErr('Invalid salt mine config : %j : %j', cfgErrors, cfg);
     }
+    Logger.silly('Starting Salt Mine processor, %d processors', cfg.processors.length);
+    this.processors = SaltMineConfigUtil.validateAndMapProcessors(cfg.processors, modelValidator);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -201,21 +205,13 @@ export class SaltMineHandler {
   public async processSingleSaltMineEntry(e: SaltMineEntry): Promise<boolean> {
     let rval: boolean = false;
     try {
-      const processorInput: SaltMineProcessor | SaltMineProcessor[] = this.processors.get(e.type);
+      const processorInput: SaltMineNamedProcessor<any, any> = this.processors.get(e.type);
       if (!processorInput) {
         Logger.warn('Found no processor for salt mine entry : %j (returning false)', e);
       } else {
         const sw: StopWatch = new StopWatch(true);
-        try {
-          const procArr: SaltMineProcessor[] = Array.isArray(processorInput) ? processorInput : [processorInput];
-          for (let i = 0; i < procArr.length; i++) {
-            Logger.info('%s : Step %d of %d', e.type, i + 1, procArr.length);
-            await procArr[i](e, this.cfg);
-          }
-          rval = true;
-        } catch (err) {
-          Logger.warn('Error processing: %s', err, err);
-        }
+        await processorInput.handleEvent(e.data, e.metadata, this.cfg);
+        rval = true;
         sw.stop();
         Logger.info('Processed %j : %s', e, sw.dump());
       }

@@ -1,9 +1,9 @@
 import { SaltMineAwsConfig } from './salt-mine-aws-config';
 import { SaltMineDevelopmentServerConfig } from './salt-mine-development-server-config';
-import { SaltMineProcessConfig } from './salt-mine-process-config';
+import { SaltMineNamedProcessor } from './salt-mine-named-processor';
 
 export interface SaltMineConfig {
   aws: SaltMineAwsConfig;
   development: SaltMineDevelopmentServerConfig;
-  processes: Record<string, SaltMineProcessConfig>;
+  processors: SaltMineNamedProcessor<any, any>[];
 }
