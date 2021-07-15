@@ -1,7 +1,8 @@
 import { ScheduledEvent } from 'aws-lambda';
 import { CronConfig } from './batch/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { SaltMineConfig, SaltMineHandler } from './salt-mine';
+import { SaltMineConfig } from './salt-mine/salt-mine-config';
+import { SaltMineHandler } from './salt-mine/salt-mine-handler';
 
 jest.mock('@bitblit/saltmine');
 

@@ -14,7 +14,10 @@ import { CronUtil } from './batch/cron/cron-util';
 import { CronDirectEntry } from './batch/cron/cron-direct-entry';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { CronConfig } from './batch/cron/cron-config';
-import { SaltMineConfig, SaltMineEntry, SaltMineHandler, SaltMineQueueUtil } from './salt-mine';
+import { SaltMineHandler } from './salt-mine/salt-mine-handler';
+import { SaltMineConfig } from './salt-mine/salt-mine-config';
+import { SaltMineEntry } from './salt-mine/salt-mine-entry';
+import { SaltMineQueueUtil } from './salt-mine/salt-mine-queue-util';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon

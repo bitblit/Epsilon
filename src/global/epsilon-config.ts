@@ -5,7 +5,7 @@ import { S3Config } from '../batch/s3-config';
 import { SnsConfig } from '../batch/sns-config';
 import { EpsilonDisableSwitches } from './epsilon-disable-switches';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
-import { SaltMineHandler } from '../salt-mine';
+import { SaltMineHandler } from '../salt-mine/salt-mine-handler';
 
 export interface EpsilonConfig {
   http: RouterConfig;
