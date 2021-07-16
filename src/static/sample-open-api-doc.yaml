@@ -3,25 +3,25 @@ info:
   version: v0
   title: SampleAPI
 tags:
-- name: CORS
-  description: These endpoints are here to support CORS
-- name: Public
-  description: These endpoints can be called without setting the authorization header
-- name: Secure
-  description: Authentication and authorization of the API
+  - name: CORS
+    description: These endpoints are here to support CORS
+  - name: Public
+    description: These endpoints can be called without setting the authorization header
+  - name: Secure
+    description: Authentication and authorization of the API
 paths:
   /:
     get:
       description: Redirects to the /meta/server endpoint
       tags:
-      - Meta
-      - Public
+        - Meta
+        - Public
       responses:
         '301':
           description: Redirects to the /meta/server endpoint
     options:
       tags:
-      - CORS
+        - CORS
       responses:
         '200':
           description: Standard CORS header response
@@ -33,22 +33,22 @@ paths:
         error query parameter.  Can also be used to process specific named tests
         by passing those names to the test parameter.
       tags:
-      - Public
+        - Public
       parameters:
-      - name: error
-        in: query
-        description: >-
-          If set, throw a specific error for testing (valid are
-          500,400,403,404)
-        required: false
-        schema:
-          type: number
-      - name: test
-        in: query
-        description: Run a specific named test (currently none are publicly available)
-        required: false
-        schema:
-          type: string
+        - name: error
+          in: query
+          description: >-
+            If set, throw a specific error for testing (valid are
+            500,400,403,404)
+          required: false
+          schema:
+            type: number
+        - name: test
+          in: query
+          description: Run a specific named test (currently none are publicly available)
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -78,7 +78,7 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
     options:
       tags:
-      - CORS
+        - CORS
       responses:
         '200':
           description: Standard CORS header response
@@ -90,9 +90,9 @@ paths:
         returned from the "POST /access-token" endpoint through a standard JWT
         token processor.
       tags:
-      - Meta
+        - Meta
       security:
-      - SampleAuthorizer: []
+        - SampleAuthorizer: []
       responses:
         '200':
           description: Success
@@ -108,7 +108,7 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
     options:
       tags:
-      - CORS
+        - CORS
       responses:
         '200':
           description: Success
@@ -123,14 +123,14 @@ paths:
       description: >
         Example of a path param
       parameters:
-      - name: itemId
-        in: path
-        description: A sample item id
-        required: true
-        schema:
-          type: string
+        - name: itemId
+          in: path
+          description: A sample item id
+          required: true
+          schema:
+            type: string
       tags:
-      - Meta
+        - Meta
       responses:
         '200':
           description: Success
@@ -146,14 +146,14 @@ paths:
                 $ref: '#/components/schemas/ApiErrorResponse'
     options:
       tags:
-      - CORS
+        - CORS
       parameters:
-      - name: itemId
-        in: path
-        description: A sample item id
-        required: true
-        schema:
-          type: string
+        - name: itemId
+          in: path
+          description: A sample item id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -194,8 +194,8 @@ paths:
   /secure/access-token:
     post:
       tags:
-      - Secure
-      - Public
+        - Secure
+        - Public
       responses:
         '200':
           description: Success
@@ -222,9 +222,9 @@ paths:
               type: object
               title: Access Token Request
               required:
-              - email
-              - password
-              - scope
+                - email
+                - password
+                - scope
               properties:
                 email:
                   type: string
@@ -238,11 +238,11 @@ paths:
                 scope:
                   type: string
                   enum:
-                  - OWNER
-                  - ADVERTISER
-                  - GLOBAL
-                  - RUN_AS_OWNER
-                  - RUN_AS_ADVERTISER
+                    - OWNER
+                    - ADVERTISER
+                    - GLOBAL
+                    - RUN_AS_OWNER
+                    - RUN_AS_ADVERTISER
                   description: |
                     What style of account to authenticate:
                     * `OWNER` - A device owner account
@@ -264,7 +264,7 @@ paths:
         required: true
     options:
       tags:
-      - CORS
+        - CORS
       responses:
         '200':
           description: Standard CORS header response
@@ -272,13 +272,13 @@ paths:
     get:
       description: Tests path matching from most specific to least (this is most)
       tags:
-      - Public
+        - Public
       responses:
         '200':
           description: Success
     options:
       tags:
-      - CORS
+        - CORS
       responses:
         '200':
           description: Standard CORS header response
@@ -286,27 +286,27 @@ paths:
     get:
       description: Tests path matching from most specific to least (this is least)
       tags:
-      - Public
+        - Public
       parameters:
-      - name: v
-        in: path
-        description: A variable
-        required: true
-        schema:
-          type: string
+        - name: v
+          in: path
+          description: A variable
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success
     options:
       tags:
-      - CORS
+        - CORS
       parameters:
-      - name: v
-        in: path
-        description: A variable
-        required: true
-        schema:
-          type: string
+        - name: v
+          in: path
+          description: A variable
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Standard CORS header response
@@ -340,37 +340,36 @@ paths:
         '200':
           description: Standard CORS header response
 
-
 x-amazon-apigateway-binary-media-types:
-- '*/*'
+  - '*/*'
 x-amazon-apigateway-gateway-responses:
   UNAUTHORIZED:
     statusCode: 401
     responseParameters:
-      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
       application/json: '{"errors":["Unauthorized"], "httpStatusCode": 401}'
   MISSING_AUTHENTICATION_TOKEN:
     statusCode: 404
     responseParameters:
-      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
       application/json: '{"errors":["No such endpoint"], "httpStatusCode": 404}'
   INTEGRATION_TIMEOUT:
     statusCode: 504
     responseParameters:
-      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
       application/json: '{"errors":["Timeout"], "httpStatusCode": 504}'
   DEFAULT_5XX:
     statusCode: 500
     responseParameters:
-      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
       application/json: '{"errors":["Internal Server Error"], "httpStatusCode": 500}'
 
 servers:
-- url: 'https://api.sample.com/dev'
+  - url: 'https://api.sample.com/dev'
 components:
   securitySchemes:
     SampleAuthorizer:
@@ -395,9 +394,9 @@ components:
       type: object
       title: Access Token Request
       required:
-      - email
-      - password
-      - scope
+        - email
+        - password
+        - scope
       properties:
         email:
           type: string
@@ -411,11 +410,11 @@ components:
         scope:
           type: string
           enum:
-          - OWNER
-          - ADVERTISER
-          - GLOBAL
-          - RUN_AS_OWNER
-          - RUN_AS_ADVERTISER
+            - OWNER
+            - ADVERTISER
+            - GLOBAL
+            - RUN_AS_OWNER
+            - RUN_AS_ADVERTISER
           description: |
             What style of account to authenticate:
              * `OWNER` - A device owner account
@@ -437,8 +436,8 @@ components:
       type: object
       title: Access Token Response
       required:
-      - token
-      - expires
+        - token
+        - expires
       properties:
         token:
           type: string
@@ -452,11 +451,11 @@ components:
       title: Access Token Contents
       description: The contents of the JWT token
       required:
-      - exp
-      - iss
-      - sub
-      - iat
-      - user
+        - exp
+        - iss
+        - sub
+        - iat
+        - user
       properties:
         exp:
           type: number
@@ -481,8 +480,8 @@ components:
       type: object
       title: API Error Response
       required:
-      - errors
-      - httpStatusCode
+        - errors
+        - httpStatusCode
       properties:
         errors:
           type: array
@@ -495,3 +494,19 @@ components:
         detailCode:
           type: number
           description: Adomni detail status code for this error
+    SaltMineSampleInputValidatedProcessorData:
+      type: object
+      title: SaltMineSampleInputValidatedProcessorData
+      description: This is used for testing the salt mine validator
+      required:
+        - nameParam
+        - numberParam
+      properties:
+        nameParam:
+          type: string
+          description: A sample name parameter
+          minimum: 0
+          maximum: 10
+        numberParam:
+          type: number
+          description: A sample number parameter
