@@ -4,7 +4,7 @@ import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
 import { SaltMineHandler } from './salt-mine/salt-mine-handler';
 
-jest.mock('@bitblit/saltmine');
+// jest.mock('@bitblit/saltmine');
 
 describe('#epsilonGlobalHandler', function () {
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why

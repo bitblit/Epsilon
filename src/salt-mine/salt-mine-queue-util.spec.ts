@@ -52,7 +52,7 @@ describe('#createEntry', function () {
 
     const resultA = SaltMineQueueUtil.createEntry(saltMineConfig, echoProcessor.typeName, {}, {});
     const resultC = SaltMineQueueUtil.createEntry(saltMineConfig, 'MissingProcessorXYZ', {}, {});
-    expect(resultA.type).toEqual('a');
+    expect(resultA.type).toEqual('SaltMineBuiltInEchoProcessor');
     expect(resultC).toBeNull();
   });
 });
