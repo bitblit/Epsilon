@@ -1,4 +1,4 @@
-import { RouterConfig } from './route/router-config';
+import { EpsilonRouter } from './route/epsilon-router';
 import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, APIGatewayProxyResult, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import Route from 'route-parser';
@@ -30,7 +30,7 @@ export class WebHandler {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
   private cacheApolloHandler: ApolloHandlerFunction;
 
-  constructor(private routerConfig: RouterConfig) {
+  constructor(private routerConfig: EpsilonRouter) {
     RequireRatchet.notNullOrUndefined(routerConfig);
 
     // Some cleanup

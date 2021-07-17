@@ -5,7 +5,7 @@ import { WebTokenManipulator } from '../auth/web-token-manipulator';
 import { ErrorProcessorFunction } from './error-processor-function';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 
-export interface RouterConfig {
+export interface EpsilonRouter {
   routes: RouteMapping[];
 
   authorizers: Map<string, AuthorizerFunction>;
@@ -38,8 +38,8 @@ export interface RouterConfig {
   // Should typically be your stage name, but can be different in weird cases like custom name map
   // These will be matched case insensitive
   prefixesToStripBeforeRouteMatch: string[];
-
   requestIdResponseHeaderName: string;
+
   convertNullReturnedObjectsTo404: boolean;
   allowLiteralStringNullAsPathParameter: boolean;
   allowLiteralStringNullAsQueryStringParameter: boolean;

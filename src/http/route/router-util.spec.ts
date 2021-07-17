@@ -1,4 +1,4 @@
-import { RouterConfig } from './router-config';
+import { EpsilonRouter } from './epsilon-router';
 import { RouterUtil } from './router-util';
 import { RouteAndParse, WebHandler } from '../web-handler';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
@@ -9,7 +9,7 @@ import { SampleServerComponents } from '../../sample-server-components';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
-    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
+    const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
 
     expect(cfg.modelValidator).toBeTruthy();
     expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();
@@ -30,7 +30,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
   });
 
   it('should find the most specific route and the least specific', async () => {
-    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
+    const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
 
     expect(cfg.modelValidator).toBeTruthy();
 

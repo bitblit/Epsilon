@@ -1,7 +1,7 @@
 import { ExtendedAPIGatewayEvent } from './extended-api-gateway-event';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { RouterConfig } from './router-config';
+import { EpsilonRouter } from './epsilon-router';
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from '../error/epsilon-http-error';
@@ -59,7 +59,7 @@ export class BuiltInHandlers {
     return rval;
   }
 
-  public static async defaultErrorProcessor(event: APIGatewayEvent, err: Error, cfg: RouterConfig): Promise<void> {
+  public static async defaultErrorProcessor(event: APIGatewayEvent, err: Error, cfg: EpsilonRouter): Promise<void> {
     Logger.warn('Unhandled error (in promise catch) : %s \nStack was: %s\nEvt was: %j\nConfig was: %j', err.message, err.stack, event, cfg);
   }
 }

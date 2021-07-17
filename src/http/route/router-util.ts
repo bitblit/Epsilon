@@ -1,4 +1,4 @@
-import { RouterConfig } from './router-config';
+import { EpsilonRouter } from './epsilon-router';
 import yaml from 'js-yaml';
 import { MisconfiguredError } from '../error/misconfigured-error';
 import { ModelValidator } from './model-validator';
@@ -38,18 +38,18 @@ export class RouterUtil {
     defaultTimeoutMS?: number,
     customTimeouts: Map<string, number> = new Map<string, number>(),
     inCorsHandler: HandlerFunction<any> = null
-  ): RouterConfig {
+  ): EpsilonRouter {
     if (!yamlString) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
     }
     const doc = yaml.load(yamlString);
 
-    const rval: RouterConfig = {
+    const rval: EpsilonRouter = {
       authorizers: authorizers,
       routes: [],
       errorProcessor: errorProcessor,
       defaultTimeoutMS: defaultTimeoutMS,
-    } as RouterConfig;
+    } as EpsilonRouter;
 
     let corsHandler: HandlerFunction<any> = inCorsHandler;
     if (!corsHandler) {
@@ -233,7 +233,7 @@ export class RouterUtil {
     return rval;
   }
 
-  public static buildCorsResponseForRouterConfig(cfg: RouterConfig): ProxyResult {
+  public static buildCorsResponseForRouterConfig(cfg: EpsilonRouter): ProxyResult {
     return RouterUtil.buildCorsResponse(
       cfg.corsAllowedOrigins || '*',
       cfg.corsAllowedMethods || '*',

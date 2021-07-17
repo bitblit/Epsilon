@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { RouterConfig } from './route/router-config';
+import { EpsilonRouter } from './route/epsilon-router';
 import { WebHandler } from './web-handler';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { SampleServerComponents } from '../sample-server-components';
@@ -65,7 +65,7 @@ describe('#errorToProxyResult', function () {
     */
 
   it('should gzip responses correctly', async () => {
-    const cfg: RouterConfig = await SampleServerComponents.createSampleRouterConfig();
+    const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
     const webHandler: WebHandler = new WebHandler(cfg);
 
     expect(cfg.modelValidator).toBeTruthy();

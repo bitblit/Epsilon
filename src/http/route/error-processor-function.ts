@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from 'aws-lambda';
-import { RouterConfig } from './router-config';
+import { EpsilonRouter } from './epsilon-router';
 
 export interface ErrorProcessorFunction {
-  (event: APIGatewayEvent, err: Error, cfg: RouterConfig): Promise<void>;
+  (event: APIGatewayEvent, err: Error, cfg: EpsilonRouter): Promise<void>;
 }

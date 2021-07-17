@@ -2,7 +2,7 @@ import { APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult } from 'aws
 import { ResponseUtil } from './response-util';
 import path from 'path';
 import fs from 'fs';
-import { RouterConfig } from './route/router-config';
+import { EpsilonRouter } from './route/epsilon-router';
 import { EpsilonConstants } from '../epsilon-constants';
 
 describe('#responseUtil', function () {
@@ -63,11 +63,11 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: RouterConfig = {
+    const config: EpsilonRouter = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as RouterConfig;
+    } as EpsilonRouter;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
 
@@ -82,11 +82,11 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: RouterConfig = {
+    const config: EpsilonRouter = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as RouterConfig;
+    } as EpsilonRouter;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
 

@@ -1,4 +1,4 @@
-import { RouterConfig } from './http/route/router-config';
+import { EpsilonRouter } from './http/route/epsilon-router';
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import http from 'http';
@@ -29,7 +29,7 @@ export class LocalServer {
   private webHandler: WebHandler;
   private aborted: boolean = false;
 
-  constructor(private routerConfig: RouterConfig, private port: number = 8888) {
+  constructor(private routerConfig: EpsilonRouter, private port: number = 8888) {
     this.webHandler = new WebHandler(routerConfig);
   }
 

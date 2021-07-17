@@ -3,9 +3,8 @@
  * with your own.
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { LocalServer } from './local-server';
 import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
-import { RouterConfig } from './http/route/router-config';
+import { EpsilonRouter } from './http/route/epsilon-router';
 import { AuthorizerFunction } from './http/route/authorizer-function';
 import { HandlerFunction } from './http/route/handler-function';
 import { SimpleRoleRouteAuth } from './http/auth/simple-role-route-auth';
@@ -70,7 +69,7 @@ export class SampleServerComponents {
 
   // Functions below here are for using as samples
 
-  public static async createSampleRouterConfig(): Promise<RouterConfig> {
+  public static async createSampleRouterConfig(): Promise<EpsilonRouter> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
@@ -102,7 +101,7 @@ export class SampleServerComponents {
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
-    const cfg: RouterConfig = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
+    const cfg: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
     cfg.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     cfg.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     cfg.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;

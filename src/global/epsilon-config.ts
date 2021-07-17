@@ -1,4 +1,4 @@
-import { RouterConfig } from '../http/route/router-config';
+import { EpsilonRouter } from '../http/route/epsilon-router';
 import { CronConfig } from '../batch/cron/cron-config';
 import { DynamoDbConfig } from '../batch/dynamo-db-config';
 import { S3Config } from '../batch/s3-config';
@@ -8,7 +8,7 @@ import { EpsilonLoggerConfig } from './epsilon-logger-config';
 import { SaltMineHandler } from '../salt-mine/salt-mine-handler';
 
 export interface EpsilonConfig {
-  http: RouterConfig;
+  http: EpsilonRouter;
 
   saltMine: SaltMineHandler;
 
