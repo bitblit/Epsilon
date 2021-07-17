@@ -26,6 +26,8 @@ import { RouterUtil } from './http/route/router-util';
  */
 export class EpsilonGlobalHandler {
   private cacheWebHandler: WebHandler;
+  private cacheSaltMineHandler: SaltMineHandler;
+  private cacheEpsilonRouter: EpsilonRouter;
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
@@ -46,13 +48,26 @@ export class EpsilonGlobalHandler {
   }
 
   private fetchSaltMineHandler(): SaltMineHandler {
-    return this.config.saltMine && !this.config.disabled.saltMine ? this.config.saltMine : null;
+    if (!this.cacheSaltMineHandler) {
+      if (!this.config.disabled.saltMine && this.config.saltMineConfig) {
+        const router: EpsilonRouter = this.fetchEpsilonRouter();
+        this.cacheSaltMineHandler = new SaltMineHandler(this.config.saltMineConfig, router.openApiModelValidator);
+      }
+    }
+    return this.cacheSaltMineHandler;
+  }
+
+  private fetchEpsilonRouter(): EpsilonRouter {
+    if (!this.cacheEpsilonRouter) {
+      this.cacheEpsilonRouter = RouterUtil.openApiYamlToRouterConfig(this.config.openApiYamlString, this.config.httpConfig);
+    }
+    return this.cacheEpsilonRouter;
   }
 
   private fetchWebHandler(): WebHandler {
     if (!this.cacheWebHandler) {
-      if (!this.config.disabled.http && this.config.httpConfig && this.config.openApiYamlString) {
-        const router: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(this.config.openApiYamlString, this.config.httpConfig);
+      if (!this.config.disabled.http) {
+        const router: EpsilonRouter = this.fetchEpsilonRouter();
         this.cacheWebHandler = new WebHandler(router);
       }
     }
@@ -108,7 +123,7 @@ export class EpsilonGlobalHandler {
         if (this.config.disabled.cron) {
           Logger.debug('Skipping - CRON disabled');
         } else {
-          rval = await EpsilonGlobalHandler.processCronEvent(event as ScheduledEvent, this.config.cron, this.config.saltMine);
+          rval = await EpsilonGlobalHandler.processCronEvent(event as ScheduledEvent, this.config.cron, this.fetchSaltMineHandler());
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
         Logger.debug('Epsilon: DDB: %j', event);

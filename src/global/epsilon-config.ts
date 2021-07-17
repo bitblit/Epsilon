@@ -5,14 +5,14 @@ import { S3Config } from '../batch/s3-config';
 import { SnsConfig } from '../batch/sns-config';
 import { EpsilonDisableSwitches } from './epsilon-disable-switches';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
-import { SaltMineHandler } from '../salt-mine/salt-mine-handler';
 import { HttpConfig } from '../http/route/http-config';
+import { SaltMineConfig } from '../salt-mine/salt-mine-config';
 
 export interface EpsilonConfig {
   openApiYamlString: string;
   httpConfig: HttpConfig;
 
-  saltMine: SaltMineHandler;
+  saltMineConfig: SaltMineConfig;
 
   cron: CronConfig;
   dynamoDb: DynamoDbConfig;
