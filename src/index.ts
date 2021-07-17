@@ -53,6 +53,7 @@ export * from './http/route/error-processor-function';
 export * from './http/route/extended-api-gateway-event';
 export * from './http/route/extended-auth-response-context';
 export * from './http/route/handler-function';
+export * from './http/route/http-config';
 export * from './http/route/model-validator';
 export * from './http/route/route-mapping';
 export * from './http/route/route-validator-config';
