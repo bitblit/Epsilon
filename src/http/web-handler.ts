@@ -22,6 +22,7 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { NotFoundError } from './error/not-found-error';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { ModelValidator } from './route/model-validator';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
@@ -35,11 +36,11 @@ export class WebHandler {
 
     // Some cleanup
     // Validate the response header name, if set
-    if (StringRatchet.trimToNull(this.routerConfig.requestIdResponseHeaderName)) {
-      this.routerConfig.requestIdResponseHeaderName = StringRatchet.trimToEmpty(
-        this.routerConfig.requestIdResponseHeaderName
+    if (StringRatchet.trimToNull(this.routerConfig.config.requestIdResponseHeaderName)) {
+      this.routerConfig.config.requestIdResponseHeaderName = StringRatchet.trimToEmpty(
+        this.routerConfig.config.requestIdResponseHeaderName
       ).toUpperCase();
-      RequireRatchet.true(this.routerConfig.requestIdResponseHeaderName.startsWith('X-')); // Valid new header
+      RequireRatchet.true(this.routerConfig.config.requestIdResponseHeaderName.startsWith('X-')); // Valid new header
     }
   }
 
@@ -50,10 +51,10 @@ export class WebHandler {
         throw new Error('Router config not found');
       }
       // Make sure no params of the format amp;(param) are in the event
-      if (this.routerConfig.autoFixStillEncodedQueryParams) {
+      if (!this.routerConfig.config.disableAutoFixStillEncodedQueryParams) {
         EventUtil.fixStillEncodedQueryParams(event);
       }
-      if (!!this.routerConfig.apolloRegex && this.routerConfig.apolloRegex.test(event.path)) {
+      if (!!this.routerConfig.config.apolloRegex && this.routerConfig.config.apolloRegex.test(event.path)) {
         rval = await this.apolloLambdaHandler(event, context);
       } else {
         rval = await this.openApiLambdaHandler(event, context);
@@ -67,7 +68,7 @@ export class WebHandler {
       if (wrapper.isWrappedError()) {
         try {
           // If the source error was not a epsilon error, run error processors if any
-          await this.routerConfig.errorProcessor(event, wrapper, this.routerConfig);
+          await this.routerConfig.config.errorProcessor(event, wrapper, this.routerConfig);
         } catch (err) {
           Logger.error('Really bad - your error processor has an error in it : %s', err, err);
         }
@@ -78,9 +79,9 @@ export class WebHandler {
       Logger.setTracePrefix(null); // Just in case it was set
     }
 
-    if (rval && this.routerConfig.requestIdResponseHeaderName) {
+    if (rval && this.routerConfig.config.requestIdResponseHeaderName) {
       rval.headers = rval.headers || {};
-      rval.headers[this.routerConfig.requestIdResponseHeaderName] = context.awsRequestId;
+      rval.headers[this.routerConfig.config.requestIdResponseHeaderName] = context.awsRequestId;
     }
 
     return rval;
@@ -90,13 +91,13 @@ export class WebHandler {
     const rm: RouteAndParse = this.findBestMatchingRoute(event);
     const handler: Promise<any> = this.findHandler(rm, event, context);
     Logger.debug('Processing event with epsilon: %j', event);
-    const result: any = await handler;
+    let result: any = await handler;
     if (TimeoutToken.isTimeoutToken(result)) {
       (result as TimeoutToken).writeToLog();
       throw new RequestTimeoutError('Timed out');
     }
     Logger.debug('Initial return value : %j', result);
-    this.optionallyConvertNullReturnedObjectsTo404Error(result);
+    result = this.convertNullReturnedObjectsTo404OrEmptyString(result, rm.mapping.disableConvertNullReturnedObjectsTo404);
     this.optionallyApplyOutboundModelObjectCheck(rm, result);
 
     let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
@@ -104,7 +105,7 @@ export class WebHandler {
     Logger.silly('Proxy result : %j', proxyResult);
     proxyResult = this.addCors(proxyResult, event);
     Logger.silly('CORS result : %j', proxyResult);
-    if (!this.routerConfig.disableCompression) {
+    if (!this.routerConfig.config.disableCompression) {
       const encodingHeader: string =
         event && event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
       proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
@@ -120,42 +121,46 @@ export class WebHandler {
     return proxyResult;
   }
 
+  public activeModelValidator(): ModelValidator {
+    return this.routerConfig.config.overrideModelValidator || this.routerConfig.openApiModelValidator;
+  }
+
   public optionallyApplyOutboundModelObjectCheck(rm: RouteAndParse, result: any): void {
-    if (this.routerConfig.validateOutboundResponseBody) {
-      if (this.routerConfig.modelValidator) {
-        if (rm.mapping.outboundValidation) {
-          Logger.debug('Applying outbound check to %j', result);
-          const errors: string[] = this.routerConfig.modelValidator.validate(
-            rm.mapping.outboundValidation.modelName,
-            result,
-            rm.mapping.outboundValidation.emptyAllowed,
-            rm.mapping.outboundValidation.extraPropertiesAllowed
-          );
-          if (errors.length > 0) {
-            Logger.error('Found outbound errors while validating %s object %j', rm.mapping.outboundValidation.modelName, errors);
+    if (rm.mapping.enableValidateOutboundResponseBody) {
+      if (rm.mapping.outboundValidation) {
+        Logger.debug('Applying outbound check to %j', result);
+        const errors: string[] = this.activeModelValidator().validate(
+          rm.mapping.outboundValidation.modelName,
+          result,
+          rm.mapping.outboundValidation.emptyAllowed,
+          rm.mapping.outboundValidation.extraPropertiesAllowed
+        );
+        if (errors.length > 0) {
+          Logger.error('Found outbound errors while validating %s object %j', rm.mapping.outboundValidation.modelName, errors);
 
-            errors.unshift('Server sent object invalid according to spec');
+          errors.unshift('Server sent object invalid according to spec');
 
-            throw new EpsilonHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(result);
-          }
-        } else {
-          Logger.debug('Not validating - no outbound validator for this endpoint');
+          throw new EpsilonHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(result);
         }
       } else {
         throw new MisconfiguredError('Requested outbound validation but supplied no validator');
       }
+    } else {
+      Logger.debug('Not validating - no outbound validator for this endpoint');
     }
   }
 
-  public optionallyConvertNullReturnedObjectsTo404Error(result: any): void {
-    if (result === null || result === undefined) {
-      if (this.routerConfig.convertNullReturnedObjectsTo404) {
+  public convertNullReturnedObjectsTo404OrEmptyString(result: any, disabled: boolean): any {
+    let rval: any = result;
+    if (!disabled) {
+      if (result === null || result === undefined) {
         throw new NotFoundError('Resource not found');
-      } else {
-        Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
-        result = '';
       }
+    } else {
+      Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
+      rval = '';
     }
+    return rval;
   }
 
   public async apolloLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
@@ -163,7 +168,7 @@ export class WebHandler {
     let rval: ProxyResult = null;
     const apolloPromise: Promise<ProxyResult> = new Promise<ProxyResult>((res, rej) => {
       if (!this.cacheApolloHandler) {
-        this.cacheApolloHandler = this.routerConfig.apolloServer.createHandler(this.routerConfig.apolloCreateHandlerOptions);
+        this.cacheApolloHandler = this.routerConfig.config.apolloServer.createHandler(this.routerConfig.config.apolloCreateHandlerOptions);
       }
       try {
         event.httpMethod = event.httpMethod.toUpperCase();
@@ -186,7 +191,7 @@ export class WebHandler {
       }
     });
 
-    let timeoutMS: number = this.routerConfig.defaultTimeoutMS;
+    let timeoutMS: number = this.routerConfig.config.defaultTimeoutMS;
     if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
       // We do this because fully timing out on Lambda is never a good thing
       Logger.info('No timeout set, using remaining - 500ms (Apollo)');
@@ -212,8 +217,8 @@ export class WebHandler {
 
   // Public so it can be used in auth-web-handler
   public addCors(input: ProxyResult, srcEvent: APIGatewayEvent): ProxyResult {
-    if (!this.routerConfig.disableCORS) {
-      ResponseUtil.addCORSToProxyResult(input, this.routerConfig, srcEvent);
+    if (!this.routerConfig.config.disableAutoAddCorsHeadersToResponses) {
+      ResponseUtil.addCORSToProxyResult(input, this.routerConfig.config, srcEvent);
     }
     return input;
   }
@@ -254,7 +259,7 @@ export class WebHandler {
         'Failed to find handler for %s (cleaned path was %s, strip prefixes were %j)',
         event.path,
         cleanPath,
-        this.routerConfig.prefixesToStripBeforeRouteMatch
+        this.routerConfig.config.prefixesToStripBeforeRouteMatch
       );
     }
     return rval;
@@ -268,10 +273,10 @@ export class WebHandler {
       // We extend with the parsed params here in case we are using the AWS any proxy
       event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
       // Check for literal string null passed
-      if (!this.routerConfig.allowLiteralStringNullAsPathParameter) {
+      if (!rm.mapping.allowLiteralStringNullAsPathParameter) {
         this.throwExceptionOnNullStringLiteralInParams(event.pathParameters);
       }
-      if (!this.routerConfig.allowLiteralStringNullAsQueryStringParameter) {
+      if (!rm.mapping.allowLiteralStringNullAsQueryStringParameter) {
         this.throwExceptionOnNullStringLiteralInParams(event.queryStringParameters);
       }
 
@@ -284,7 +289,7 @@ export class WebHandler {
 
       // Check validation (throws error on failure)
       await this.applyBodyObjectValidation(extEvent, rm.mapping);
-      let timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.defaultTimeoutMS;
+      let timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.config.defaultTimeoutMS;
       if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
         // We do this because fully timing out on Lambda is never a good thing
         Logger.info('No timeout set, using remaining - 500ms (%s)', extEvent.path);
@@ -328,8 +333,8 @@ export class WebHandler {
       rval = rval.substring(1);
     }
     // If there are any listed prefixes, strip them
-    if (this.routerConfig.prefixesToStripBeforeRouteMatch) {
-      this.routerConfig.prefixesToStripBeforeRouteMatch.forEach((prefix) => {
+    if (this.routerConfig.config.prefixesToStripBeforeRouteMatch) {
+      this.routerConfig.config.prefixesToStripBeforeRouteMatch.forEach((prefix) => {
         if (rval.toLowerCase().startsWith(prefix.toLowerCase() + '/')) {
           rval = rval.substring(prefix.length);
         }
@@ -371,10 +376,10 @@ export class WebHandler {
     }
 
     if (route.validation) {
-      if (!this.routerConfig.modelValidator) {
+      if (!this.activeModelValidator()) {
         throw new MisconfiguredError('Requested body validation but supplied no validator');
       }
-      const errors: string[] = this.routerConfig.modelValidator.validate(
+      const errors: string[] = this.activeModelValidator().validate(
         route.validation.modelName,
         event.parsedBody,
         route.validation.emptyAllowed,
@@ -395,16 +400,16 @@ export class WebHandler {
     }
 
     if (route.authorizerName) {
-      if (!this.routerConfig.webTokenManipulator) {
+      if (!this.routerConfig.config.webTokenManipulator) {
         throw new MisconfiguredError('Auth is defined, but token manipulator not set');
       }
       // Extract the token
-      const token: CommonJwtToken<any> = await this.routerConfig.webTokenManipulator.extractTokenFromStandardEvent(event);
+      const token: CommonJwtToken<any> = await this.routerConfig.config.webTokenManipulator.extractTokenFromStandardEvent(event);
       if (!token) {
         Logger.info('Failed auth for route : %s - missing/bad token', route.path);
         throw new UnauthorizedError('Missing or bad token');
       } else {
-        const authorizer: AuthorizerFunction = this.routerConfig.authorizers.get(route.authorizerName);
+        const authorizer: AuthorizerFunction = this.routerConfig.config.authorizers.get(route.authorizerName);
         if (!authorizer) {
           throw new MisconfiguredError('Route requires authorizer ' + route.authorizerName + ' but its not in the config');
         }

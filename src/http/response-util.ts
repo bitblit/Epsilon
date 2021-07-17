@@ -6,6 +6,7 @@ import { EpsilonRouter } from './route/epsilon-router';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
+import { HttpConfig } from './route/http-config';
 
 export class ResponseUtil {
   // Prevent instantiation
@@ -124,7 +125,7 @@ export class ResponseUtil {
   }
 
   // Public so it can be used in auth-web-handler
-  public static addCORSToProxyResult(input: ProxyResult, cfg: EpsilonRouter, srcEvent: APIGatewayEvent): ProxyResult {
+  public static addCORSToProxyResult(input: ProxyResult, cfg: HttpConfig, srcEvent: APIGatewayEvent): ProxyResult {
     input.headers = input.headers || {};
     srcEvent.headers = srcEvent.headers || {};
 

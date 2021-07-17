@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { EpsilonRouter } from './route/epsilon-router';
 import { EpsilonConstants } from '../epsilon-constants';
+import { HttpConfig } from './route/http-config';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {
@@ -63,11 +64,11 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: EpsilonRouter = {
+    const config: HttpConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as EpsilonRouter;
+    } as HttpConfig;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
 
@@ -82,11 +83,11 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: EpsilonRouter = {
+    const config: HttpConfig = {
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as EpsilonRouter;
+    } as HttpConfig;
 
     ResponseUtil.addCORSToProxyResult(proxy, config, evt);
 

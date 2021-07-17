@@ -68,7 +68,7 @@ describe('#errorToProxyResult', function () {
     const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
     const webHandler: WebHandler = new WebHandler(cfg);
 
-    expect(cfg.modelValidator).toBeTruthy();
+    expect(cfg.openApiModelValidator).toBeTruthy();
 
     const evt: APIGatewayEvent = {
       httpMethod: 'get',

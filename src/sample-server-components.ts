@@ -17,6 +17,7 @@ import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulato
 import fs from 'fs';
 import path from 'path';
 import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { HttpConfig } from './http/route/http-config';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -101,32 +102,33 @@ export class SampleServerComponents {
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
-    const cfg: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(yamlString, handlers, authorizers);
-    cfg.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
-    cfg.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
-    cfg.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
+    const cfg: HttpConfig = {
+      handlers: handlers,
+      authorizers: authorizers,
+      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+      corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+      corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+      requestIdResponseHeaderName: 'X-REQUEST-ID',
+      defaultErrorMessage: 'Internal Server Error',
+      defaultTimeoutMS: 500,
 
-    cfg.requestIdResponseHeaderName = 'X-REQUEST-ID';
-    cfg.convertNullReturnedObjectsTo404 = true;
-    cfg.allowLiteralStringNullAsQueryStringParameter = true;
-    cfg.allowLiteralStringNullAsPathParameter = false;
-    cfg.validateOutboundResponseBody = true;
+      webTokenManipulator: new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info'),
 
-    cfg.defaultErrorMessage = 'Internal Server Error';
-    cfg.defaultTimeoutMS = 500;
-
-    cfg.webTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info');
-
-    cfg.apolloServer = await SampleServerComponents.createSampleApollo();
-    cfg.apolloCreateHandlerOptions = {
-      cors: {
-        origin: '*',
-        credentials: true,
+      apolloServer: await SampleServerComponents.createSampleApollo(),
+      apolloCreateHandlerOptions: {
+        cors: {
+          origin: '*',
+          credentials: true,
+        },
       },
+      apolloRegex: new RegExp('.*graphql.*'),
     };
-    cfg.apolloRegex = new RegExp('.*graphql.*');
 
-    return cfg;
+    const router: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(yamlString, cfg);
+    // Modify a single route...
+    RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
+
+    return router;
   }
 
   public static loadSampleOpenApiYaml(): string {

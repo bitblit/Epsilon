@@ -25,4 +25,9 @@ export interface RouteMapping {
   disableQueryMapAssure: boolean;
   disableHeaderMapAssure: boolean;
   disablePathMapAssure: boolean;
+
+  disableConvertNullReturnedObjectsTo404: boolean;
+  allowLiteralStringNullAsPathParameter: boolean;
+  allowLiteralStringNullAsQueryStringParameter: boolean;
+  enableValidateOutboundResponseBody: boolean;
 }

@@ -3,16 +3,17 @@ import yaml from 'js-yaml';
 import { MisconfiguredError } from '../error/misconfigured-error';
 import { ModelValidator } from './model-validator';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { AuthorizerFunction } from './authorizer-function';
 import { HandlerFunction } from './handler-function';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import { OpenApiConvertOptions } from './open-api-convert-options';
-import { ErrorProcessorFunction } from './error-processor-function';
-import { BuiltInHandlers } from './built-in-handlers';
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
 import { ResponseUtil } from '../response-util';
+import { HttpConfig } from './http-config';
+import { AuthorizerFunction } from './authorizer-function';
+import { WebTokenManipulator } from '../auth/web-token-manipulator';
+import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
+import { BuiltInHandlers } from './built-in-handlers';
 
 /**
  * Endpoints about the api itself
@@ -28,30 +29,50 @@ export class RouterUtil {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
+  public static assignDefaultsOnHttpConfig(cfg: HttpConfig): HttpConfig {
+    const defaults: HttpConfig = {
+      handlers: new Map<string, HandlerFunction<any>>(),
+      authorizers: new Map<string, AuthorizerFunction>(),
+      errorProcessor: BuiltInHandlers.defaultErrorProcessor,
+      customCorsHandler: null,
+      customTimeouts: new Map<string, number>(),
+      staticContentPaths: [],
+      customExtraHeaders: new Map<string, string>(),
+      defaultErrorMessage: null, // Null because if set, it overrides the outbound even on dev,
+      corsAllowedOrigins: '*',
+      corsAllowedMethods: '*',
+      corsAllowedHeaders: '*',
+      webTokenManipulator: null,
+      overrideModelValidator: null,
+      prefixesToStripBeforeRouteMatch: [],
+      requestIdResponseHeaderName: 'X-REQUEST-ID',
+      disableAutoCORSOptionHandler: false,
+      defaultTimeoutMS: 30_000,
+      disableAutoFixStillEncodedQueryParams: false,
+      disableAutoAddCorsHeadersToResponses: false,
+      disableCompression: false,
+      apolloRegex: null,
+      apolloServer: null,
+      apolloCreateHandlerOptions: null,
+    };
+    const rval: HttpConfig = Object.assign({}, defaults, cfg || {});
+    return rval;
+  }
+
   // Parses an open api file to create a router config
-  public static openApiYamlToRouterConfig(
-    yamlString: string,
-    handlers: Map<string, HandlerFunction<any>>,
-    authorizers: Map<string, AuthorizerFunction>,
-    options: OpenApiConvertOptions = RouterUtil.createDefaultOpenApiConvertOptions(),
-    errorProcessor: ErrorProcessorFunction = BuiltInHandlers.defaultErrorProcessor,
-    defaultTimeoutMS?: number,
-    customTimeouts: Map<string, number> = new Map<string, number>(),
-    inCorsHandler: HandlerFunction<any> = null
-  ): EpsilonRouter {
+  public static openApiYamlToRouterConfig(yamlString: string, httpConfig: HttpConfig): EpsilonRouter {
     if (!yamlString) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
     }
     const doc = yaml.load(yamlString);
 
     const rval: EpsilonRouter = {
-      authorizers: authorizers,
       routes: [],
-      errorProcessor: errorProcessor,
-      defaultTimeoutMS: defaultTimeoutMS,
-    } as EpsilonRouter;
+      openApiModelValidator: null,
+      config: RouterUtil.assignDefaultsOnHttpConfig(httpConfig),
+    };
 
-    let corsHandler: HandlerFunction<any> = inCorsHandler;
+    let corsHandler: HandlerFunction<any> = rval.config.customCorsHandler;
     if (!corsHandler) {
       const corsOb: ProxyResult = RouterUtil.buildCorsResponse();
       corsHandler = async (e) => {
@@ -60,12 +81,12 @@ export class RouterUtil {
     }
 
     if (doc['components'] && doc['components']['schemas']) {
-      rval.modelValidator = ModelValidator.createFromParsedOpenApiObject(doc);
+      rval.openApiModelValidator = ModelValidator.createFromParsedOpenApiObject(doc);
     }
     if (doc['components'] && doc['components']['securitySchemes']) {
       // Just validation, nothing to wire here
       Object.keys(doc['components']['securitySchemes']).forEach((sk) => {
-        if (!authorizers || !authorizers.get(sk)) {
+        if (!rval.config.authorizers || !rval.config.authorizers.get(sk)) {
           throw new MisconfiguredError('Doc requires authorizer ' + sk + ' but not found in map');
         }
       });
@@ -78,7 +99,7 @@ export class RouterUtil {
         Object.keys(doc['paths'][path]).forEach((method) => {
           const convertedPath: string = RouterUtil.openApiPathToRouteParserPath(path);
 
-          if (method.toLowerCase() === 'options' && options.autoCORSOptionHandler) {
+          if (method.toLowerCase() === 'options' && !rval.config.disableAutoCORSOptionHandler) {
             rval.routes.push({
               path: convertedPath,
               method: method,
@@ -90,11 +111,16 @@ export class RouterUtil {
               disablePathMapAssure: true,
               timeoutMS: 10000, // short timeouts for auto-generated CORS since its constant
               validation: null,
-            } as RouteMapping);
+              outboundValidation: null,
+              disableConvertNullReturnedObjectsTo404: false,
+              allowLiteralStringNullAsQueryStringParameter: false,
+              allowLiteralStringNullAsPathParameter: false,
+              enableValidateOutboundResponseBody: false,
+            });
           } else {
             const finder: string = method + ' ' + path;
             const entry: any = doc['paths'][path][method];
-            if (!handlers || !handlers.get(finder)) {
+            if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
               missingPaths.push(finder);
             }
             if (entry && entry['security'] && entry['security'].length > 1) {
@@ -102,20 +128,25 @@ export class RouterUtil {
             }
             const authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
 
-            const timeoutMS: number = customTimeouts.get(finder) || defaultTimeoutMS;
+            const timeoutMS: number = rval.config.customTimeouts.get(finder) || rval.config.defaultTimeoutMS;
 
             const newRoute: RouteMapping = {
               path: convertedPath,
               method: method,
-              function: handlers.get(finder),
+              function: rval.config.handlers.get(finder),
               authorizerName: authorizerName,
-              disableAutomaticBodyParse: options.disableAutomaticBodyParse,
-              disableQueryMapAssure: options.disableQueryMapAssure,
-              disableHeaderMapAssure: options.disableHeaderMapAssure,
-              disablePathMapAssure: options.disablePathMapAssure,
+              disableAutomaticBodyParse: false,
+              disableQueryMapAssure: false,
+              disableHeaderMapAssure: false,
+              disablePathMapAssure: false,
               timeoutMS: timeoutMS,
               validation: null,
-            } as RouteMapping;
+              disableConvertNullReturnedObjectsTo404: false,
+              allowLiteralStringNullAsPathParameter: false,
+              allowLiteralStringNullAsQueryStringParameter: false,
+              enableValidateOutboundResponseBody: false,
+              outboundValidation: null,
+            };
 
             // Add inbound validation, if available
             if (
@@ -127,7 +158,12 @@ export class RouterUtil {
               // TODO: this is brittle as hell, need to firm up
               const schema: any = entry['requestBody']['content'];
               Logger.silly('Applying schema %j to %s', schema, finder);
-              const modelName = this.findAndValidateModelName(method, path, schema, rval.modelValidator);
+              const modelName = this.findAndValidateModelName(
+                method,
+                path,
+                schema,
+                rval.config.overrideModelValidator || rval.openApiModelValidator
+              );
               const required: boolean = BooleanRatchet.parseBool(entry['requestBody']['required']);
               const validation: RouteValidatorConfig = {
                 extraPropertiesAllowed: true,
@@ -149,7 +185,12 @@ export class RouterUtil {
               // TODO: this is brittle as hell, need to firm up
               const schema: any = entry['responses']['200']['content'];
               Logger.silly('Applying schema %j to %s', schema, finder);
-              const modelName = this.findAndValidateModelName(method, path, schema, rval.modelValidator);
+              const modelName = this.findAndValidateModelName(
+                method,
+                path,
+                schema,
+                rval.config.overrideModelValidator || rval.openApiModelValidator
+              );
               const validation: RouteValidatorConfig = {
                 extraPropertiesAllowed: false,
                 emptyAllowed: false, // Its a 200 response, must be non-null
@@ -204,16 +245,6 @@ export class RouterUtil {
     return rval;
   }
 
-  public static createDefaultOpenApiConvertOptions(): OpenApiConvertOptions {
-    return {
-      autoCORSOptionHandler: true,
-      disableAutomaticBodyParse: false,
-      disableQueryMapAssure: false,
-      disableHeaderMapAssure: false,
-      disablePathMapAssure: false,
-    } as OpenApiConvertOptions;
-  }
-
   public static buildCorsResponse(
     allowedOrigins: string = '*',
     allowedMethods: string = '*',
@@ -235,9 +266,9 @@ export class RouterUtil {
 
   public static buildCorsResponseForRouterConfig(cfg: EpsilonRouter): ProxyResult {
     return RouterUtil.buildCorsResponse(
-      cfg.corsAllowedOrigins || '*',
-      cfg.corsAllowedMethods || '*',
-      cfg.corsAllowedHeaders || '*',
+      cfg.config.corsAllowedOrigins,
+      cfg.config.corsAllowedMethods,
+      cfg.config.corsAllowedHeaders,
       '{"cors":true}',
       200
     );
@@ -252,5 +283,9 @@ export class RouterUtil {
       204
     );
     return corsResponse;
+  }
+
+  public static findRoute(router: EpsilonRouter, routeMethod: string, routePath: string): RouteMapping {
+    return (router?.routes || []).find((r) => r.path === routePath && r.method === routeMethod);
   }
 }

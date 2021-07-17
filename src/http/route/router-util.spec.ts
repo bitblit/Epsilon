@@ -11,8 +11,8 @@ describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
     const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
 
-    expect(cfg.modelValidator).toBeTruthy();
-    expect(cfg.modelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();
+    expect(cfg.openApiModelValidator).toBeTruthy();
+    expect(cfg.openApiModelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();
 
     // TODO: move this to its own test
     const evt: APIGatewayEvent = {
@@ -23,7 +23,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
       },
     } as APIGatewayEvent;
 
-    cfg.prefixesToStripBeforeRouteMatch = ['v0'];
+    cfg.config.prefixesToStripBeforeRouteMatch = ['v0'];
     const webHandler: WebHandler = new WebHandler(cfg);
     const find: RouteAndParse = await webHandler.findBestMatchingRoute(evt);
     expect(find).toBeTruthy();
@@ -32,7 +32,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
   it('should find the most specific route and the least specific', async () => {
     const cfg: EpsilonRouter = await SampleServerComponents.createSampleRouterConfig();
 
-    expect(cfg.modelValidator).toBeTruthy();
+    expect(cfg.openApiModelValidator).toBeTruthy();
 
     // TODO: move this to its own test
     const evtFixed: APIGatewayEvent = {
@@ -51,7 +51,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
       },
     } as APIGatewayEvent;
 
-    cfg.prefixesToStripBeforeRouteMatch = ['v0'];
+    cfg.config.prefixesToStripBeforeRouteMatch = ['v0'];
 
     const webHandler: WebHandler = new WebHandler(cfg);
 
