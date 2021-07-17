@@ -6,9 +6,11 @@ import { SnsConfig } from '../batch/sns-config';
 import { EpsilonDisableSwitches } from './epsilon-disable-switches';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
 import { SaltMineHandler } from '../salt-mine/salt-mine-handler';
+import { HttpConfig } from '../http/route/http-config';
 
 export interface EpsilonConfig {
-  http: EpsilonRouter;
+  openApiYamlString: string;
+  httpConfig: HttpConfig;
 
   saltMine: SaltMineHandler;
 

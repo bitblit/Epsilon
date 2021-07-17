@@ -18,6 +18,8 @@ import { SaltMineHandler } from './salt-mine/salt-mine-handler';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
 import { SaltMineEntry } from './salt-mine/salt-mine-entry';
 import { SaltMineQueueUtil } from './salt-mine/salt-mine-queue-util';
+import { EpsilonRouter } from './http/route/epsilon-router';
+import { RouterUtil } from './http/route/router-util';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -49,8 +51,9 @@ export class EpsilonGlobalHandler {
 
   private fetchWebHandler(): WebHandler {
     if (!this.cacheWebHandler) {
-      if (this.config.http && !this.config.disabled.http) {
-        this.cacheWebHandler = new WebHandler(this.config.http);
+      if (!this.config.disabled.http && this.config.httpConfig && this.config.openApiYamlString) {
+        const router: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(this.config.openApiYamlString, this.config.httpConfig);
+        this.cacheWebHandler = new WebHandler(router);
       }
     }
     return this.cacheWebHandler;
