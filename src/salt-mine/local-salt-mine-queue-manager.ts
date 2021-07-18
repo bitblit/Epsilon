@@ -1,10 +1,5 @@
-import AWS from 'aws-sdk';
 import { SaltMineEntry } from './salt-mine-entry';
-import { GetQueueAttributesRequest, GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
-import { NumberRatchet, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { EpsilonConstants } from '../epsilon-constants';
-import { SaltMineAwsConfig } from './salt-mine-aws-config';
-import { SaltMineQueueUtil } from '../../dist';
+import { Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { SaltMineQueueManager } from './salt-mine-queue-manager';
 import { SaltMineHandler } from './salt-mine-handler';
 
@@ -47,7 +42,7 @@ export class LocalSaltMineQueueManager implements SaltMineQueueManager {
   }
 
   public async addEntriesToQueue(entries: SaltMineEntry[], fireStartMessage?: boolean): Promise<string[]> {
-    let rval: string[] = [];
+    const rval: string[] = [];
     for (let i = 0; i < entries.length; i++) {
       try {
         const tmp: string = await this.addEntryToQueue(entries[i]);
@@ -69,7 +64,7 @@ export class LocalSaltMineQueueManager implements SaltMineQueueManager {
     return 'NO-OP';
   }
 
-  public async fetchQueueApproximateNumberOfQueueEntries(): Promise<number> {
+  public async fetchApproximateNumberOfQueueEntries(): Promise<number> {
     return 0; // No queue when running locally
   }
 }

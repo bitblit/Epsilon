@@ -17,12 +17,12 @@ import { CronConfig } from './batch/cron/cron-config';
 import { SaltMineHandler } from './salt-mine/salt-mine-handler';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
 import { SaltMineEntry } from './salt-mine/salt-mine-entry';
-import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-util';
 import { EpsilonRouter } from './http/route/epsilon-router';
 import { RouterUtil } from './http/route/router-util';
 import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
 import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-manager';
 import { SaltMineConfigUtil } from './salt-mine/salt-mine-config-util';
+import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -126,7 +126,14 @@ export class EpsilonGlobalHandler {
         // If salt mine is here, it takes precedence
         const sm: SaltMineHandler = this.fetchSaltMineHandler();
         if (sm && sm.isSaltMineSNSEvent(event)) {
-          rval = await sm.processSaltMineSNSEvent(event, context);
+          const procd: number = await sm.processSaltMineSNSEvent(event, context);
+          rval = procd;
+          if (procd > 0) {
+            Logger.info('Processed %d entries - refiring');
+            await this.backgroundManager.fireStartProcessingRequest();
+          } else {
+            Logger.info('Queue is now empty, stopping');
+          }
         } else {
           rval = await this.processSnsEvent(event as SNSEvent);
         }
@@ -139,7 +146,12 @@ export class EpsilonGlobalHandler {
         if (this.config.disabled.cron) {
           Logger.debug('Skipping - CRON disabled');
         } else {
-          rval = await EpsilonGlobalHandler.processCronEvent(event as ScheduledEvent, this.config.cron, this.fetchSaltMineHandler());
+          rval = await EpsilonGlobalHandler.processCronEvent(
+            event as ScheduledEvent,
+            this.config.cron,
+            this.backgroundManager,
+            this.fetchSaltMineHandler()
+          );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
         Logger.debug('Epsilon: DDB: %j', event);
@@ -210,7 +222,12 @@ export class EpsilonGlobalHandler {
     return rval;
   }
 
-  public static async processCronEvent(evt: ScheduledEvent, cronConfig: CronConfig, saltMine: SaltMineHandler): Promise<boolean> {
+  public static async processCronEvent(
+    evt: ScheduledEvent,
+    cronConfig: CronConfig,
+    backgroundManager: SaltMineQueueManager,
+    saltMine: SaltMineHandler
+  ): Promise<boolean> {
     let rval: boolean = false;
     if (cronConfig && evt && evt.resources[0]) {
       // Run all the salt mine ones
@@ -240,7 +257,7 @@ export class EpsilonGlobalHandler {
               };
               Logger.silly('Resolved entry : %j', saltMineEntry);
               if (smCronEntry.fireImmediate) {
-                await SaltMineQueueManager.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
+                await backgroundManager.fireImmediateProcessRequest(saltMineEntry);
                 rval = true;
               } else {
                 toEnqueue.push(saltMineEntry);
@@ -248,7 +265,7 @@ export class EpsilonGlobalHandler {
             }
           }
           if (toEnqueue.length > 0) {
-            await SaltMineQueueManager.addEntriesToQueue(saltMineConfig, toEnqueue, true);
+            await backgroundManager.addEntriesToQueue(toEnqueue, true);
             rval = true;
           }
         } else {

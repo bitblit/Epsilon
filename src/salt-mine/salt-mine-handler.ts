@@ -3,7 +3,6 @@ import { Logger, ErrorRatchet, StringRatchet, StopWatch } from '@bitblit/ratchet
 import { SaltMineEntry } from './salt-mine-entry';
 import { Context, SNSEvent } from 'aws-lambda';
 import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineQueueManager } from './salt-mine-queue-util';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
@@ -105,30 +104,19 @@ export class SaltMineHandler {
 
   // Either trigger a pull of the SQS queue, or process immediately
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
-  public async processSaltMineSNSEvent(event: any, context: Context): Promise<boolean> {
-    let rval: boolean = false;
+  public async processSaltMineSNSEvent(event: any, context: Context): Promise<number> {
+    let rval: number = null;
     if (!this.isSaltMineStartSnsEvent(event)) {
       const saltMineEntry: SaltMineEntry = this.parseImmediateFireSaltMineEntry(event);
       if (!!saltMineEntry) {
         Logger.silly('Processing immediate fire event : %j', saltMineEntry);
         const result: boolean = await this.processSingleSaltMineEntry(saltMineEntry);
-        return result;
+        rval = 1; // Process a single entry
       } else {
         Logger.warn('Tried to process non-salt mine start / immediate event : %j returning false', event);
-        rval = false;
       }
     } else {
-      const results: boolean[] = await this.takeAndProcessSingleSaltMineSQSMessage();
-      rval = true;
-      results.forEach((b) => (rval = rval && b)); // True if all succeed or empty
-
-      if (results.length === 0) {
-        Logger.info('Salt mine queue now empty - stopping');
-      } else {
-        Logger.info('Still have work to do - re-firing');
-        const reFireResult: string = await SaltMineQueueManager.fireStartProcessingRequest(this.cfg);
-        Logger.silly('ReFire Result : %s', reFireResult);
-      }
+      rval = await this.takeAndProcessSingleSaltMineSQSMessage();
     }
     return rval;
   }
@@ -178,8 +166,8 @@ export class SaltMineHandler {
     return rval;
   }
 
-  private async takeAndProcessSingleSaltMineSQSMessage(): Promise<boolean[]> {
-    const rval: boolean[] = [];
+  private async takeAndProcessSingleSaltMineSQSMessage(): Promise<number> {
+    let rval: number = null;
     const entries: SaltMineEntry[] = await this.takeEntryFromSaltMineQueue();
 
     // Do them one at a time since SaltMine is meant to throttle.  Also, it should really
@@ -187,13 +175,7 @@ export class SaltMineHandler {
     for (let i = 0; i < entries.length; i++) {
       const e: SaltMineEntry = entries[i];
       const result: boolean = await this.processSingleSaltMineEntry(e);
-      rval.push(result);
-    }
-
-    // If we processed, immediately reFire
-    if (entries.length > 0) {
-      const reFireResult: string = await SaltMineQueueManager.fireStartProcessingRequest(this.cfg);
-      Logger.silly('ReFire Result : %s', reFireResult);
+      rval += result ? 1 : 0;
     }
 
     return rval;

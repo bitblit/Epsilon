@@ -11,5 +11,5 @@ export interface SaltMineQueueManager {
   addEntriesToQueue(entries: SaltMineEntry[], fireStartMessage?: boolean): Promise<string[]>;
   fireImmediateProcessRequest(entry: SaltMineEntry): Promise<string>;
   fireStartProcessingRequest(): Promise<string>;
-  fetchQueueApproximateNumberOfQueueEntries(): Promise<number>;
+  fetchApproximateNumberOfQueueEntries(): Promise<number>;
 }

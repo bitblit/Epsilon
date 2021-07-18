@@ -1,16 +1,18 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineQueueManager } from './salt-mine-queue-util';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
 import { EchoProcessor } from './built-in/echo-processor';
 import { NoOpProcessor } from './built-in/no-op-processor';
 import { SaltMineHandler } from './salt-mine-handler';
+import { RemoteSaltMineQueueManager } from './remote-salt-mine-queue-manager';
+import { SaltMineConfigUtil } from './salt-mine-config-util';
 
 describe('#createEntry', function () {
   let mockSqs;
   let mockSns;
+  let queueMgr: RemoteSaltMineQueueManager;
   const fakeAccountNumber: string = '123456789012';
   let saltMineConfig: SaltMineConfig;
 
@@ -29,8 +31,9 @@ describe('#createEntry', function () {
         queueUrl: 'https://fake-sqs.fake-availability-zone.test.com/' + fakeAccountNumber + '/fakeQueue.fifo',
         notificationArn: 'arn:aws:sns:fake-availability-zone:' + fakeAccountNumber + ':fakeSnsTopicName',
       },
-      development: null,
     };
+
+    queueMgr = new RemoteSaltMineQueueManager(saltMineConfig.aws, SaltMineConfigUtil.processNames(saltMineConfig));
   });
 
   it('Should return queue attributes', async () => {
@@ -39,8 +42,8 @@ describe('#createEntry', function () {
       .promise()
       .resolves({ Attributes: { ApproximateNumberOfMessages: 1 } });
 
-    const queueAttr: GetQueueAttributesResult = await SaltMineQueueManager.fetchCurrentQueueAttributes(saltMineConfig);
-    const msgCount: number = await SaltMineQueueManager.fetchQueueApproximateNumberOfMessages(saltMineConfig);
+    const queueAttr: GetQueueAttributesResult = await queueMgr.fetchCurrentQueueAttributes();
+    const msgCount: number = await queueMgr.fetchApproximateNumberOfQueueEntries();
     Logger.info('Got : %j', queueAttr);
     Logger.info('Msg: %d', msgCount);
     expect(queueAttr).toBeTruthy();
@@ -50,8 +53,8 @@ describe('#createEntry', function () {
   it('should make sure a processor exists', async () => {
     const mine: SaltMineHandler = new SaltMineHandler(saltMineConfig);
 
-    const resultA = SaltMineQueueManager.createEntry(saltMineConfig, echoProcessor.typeName, {}, {});
-    const resultC = SaltMineQueueManager.createEntry(saltMineConfig, 'MissingProcessorXYZ', {}, {});
+    const resultA = queueMgr.createEntry(echoProcessor.typeName, {}, {});
+    const resultC = queueMgr.createEntry('MissingProcessorXYZ', {}, {});
     expect(resultA.type).toEqual('SaltMineBuiltInEchoProcessor');
     expect(resultC).toBeNull();
   });

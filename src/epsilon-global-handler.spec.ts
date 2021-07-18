@@ -3,6 +3,8 @@ import { CronConfig } from './batch/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
 import { SaltMineHandler } from './salt-mine/salt-mine-handler';
+import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
+import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
 
 // jest.mock('@bitblit/saltmine');
 
@@ -43,7 +45,9 @@ describe('#epsilonGlobalHandler', function () {
     const saltMine = new SaltMineHandler(null, null);
     saltMine.getConfig = jest.fn(() => smConfig);
 
-    const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, saltMine);
+    const backgroundManager: SaltMineQueueManager = new LocalSaltMineQueueManager(null, null);
+
+    const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, saltMine);
     expect(res).toBeTruthy();
   }, 500);
 });

@@ -12,10 +12,6 @@ export class SaltMineConfigUtil {
     return cfg && cfg.processors ? cfg.processors.map((p) => p.typeName) : null;
   }
 
-  public static developmentConfig(cfg: SaltMineConfig): boolean {
-    return !!cfg && !!cfg.development;
-  }
-
   public static awsConfig(cfg: SaltMineConfig): boolean {
     return !!cfg && !!cfg.aws;
   }
@@ -77,13 +73,9 @@ export class SaltMineConfigUtil {
       if (!cfg.processors || cfg.processors.length === 0) {
         rval.push('No processes specified');
       }
-      if (!cfg.development && !cfg.aws) {
-        rval.push('Neither AWS nor development server configured');
-      }
-      if (cfg.aws && cfg.development) {
-        rval.push('Both AWS AND development server configured');
-      }
-      if (cfg.aws) {
+      if (!cfg.aws) {
+        rval.push('AWS config not defined');
+      } else {
         if (!cfg.aws.notificationArn) {
           rval.push('AWS config missing notificationArn');
         }
@@ -95,11 +87,6 @@ export class SaltMineConfigUtil {
         }
         if (!cfg.aws.sqs) {
           rval.push('AWS config missing sqs');
-        }
-      }
-      if (cfg.development) {
-        if (!cfg.development.url) {
-          rval.push('Development config missing url');
         }
       }
     }

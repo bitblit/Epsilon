@@ -121,7 +121,7 @@ export class RemoteSaltMineQueueManager implements SaltMineQueueManager {
     return rval;
   }
 
-  public async fetchQueueApproximateNumberOfQueueEntries(): Promise<number> {
+  public async fetchApproximateNumberOfQueueEntries(): Promise<number> {
     let rval: number = 0;
     const all: GetQueueAttributesResult = await this.fetchCurrentQueueAttributes();
     rval = NumberRatchet.safeNumber(all.Attributes['ApproximateNumberOfMessages']);

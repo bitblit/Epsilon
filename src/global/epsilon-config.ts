@@ -14,11 +14,11 @@ export interface EpsilonConfig {
 
   saltMineConfig: SaltMineConfig;
 
-  cron: CronConfig;
-  dynamoDb: DynamoDbConfig;
-  s3: S3Config;
-  sns: SnsConfig;
+  cron?: CronConfig;
+  dynamoDb?: DynamoDbConfig;
+  s3?: S3Config;
+  sns?: SnsConfig;
 
-  disabled: EpsilonDisableSwitches;
-  loggerConfig: EpsilonLoggerConfig;
+  disabled?: EpsilonDisableSwitches;
+  loggerConfig?: EpsilonLoggerConfig;
 }

@@ -28,7 +28,7 @@
     "compile": "tsc && yarn copy-static-files",
     "watch": "tsc-watch",
     "remove-compiled-tests": "rimraf ./lib/**/*.spec.d.ts && rimraf ./lib/**/*.spec.js && rimraf ./lib/**/*.spec.js.map",
-    "clean": "shx rm -Rf lib bundles temp",
+    "clean": "shx rm -Rf dist",
     "compile-test": "yarn compile && yarn test",
     "test": "jest",
     "apply-circle": "node node_modules/@bitblit/ratchet/dist/node-only/circleci/apply-circle-ci-env-variables-to-files dist/static/build-properties.json",
