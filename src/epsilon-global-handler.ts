@@ -23,6 +23,7 @@ import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-man
 import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-manager';
 import { SaltMineConfigUtil } from './salt-mine/salt-mine-config-util';
 import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
+import { SaltMineEntryValidator } from './salt-mine/salt-mine-entry-validator';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -32,6 +33,7 @@ export class EpsilonGlobalHandler {
   private cacheSaltMineHandler: SaltMineHandler;
   private cacheEpsilonRouter: EpsilonRouter;
   private backgroundManager: SaltMineQueueManager;
+  private backgroundEntryValidator: SaltMineEntryValidator;
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
@@ -40,17 +42,13 @@ export class EpsilonGlobalHandler {
     if (!config.disabled) {
       config.disabled = {} as EpsilonDisableSwitches;
     }
+    this.backgroundEntryValidator = new SaltMineEntryValidator(this.config.saltMineConfig, this.fetchEpsilonRouter().openApiModelValidator);
+
     if (localMode) {
       Logger.info('Local mode specified, using local queue manager');
-      this.backgroundManager = new LocalSaltMineQueueManager(
-        SaltMineConfigUtil.processNames(this.config.saltMineConfig),
-        this.fetchSaltMineHandler()
-      );
+      this.backgroundManager = new LocalSaltMineQueueManager(this.backgroundEntryValidator, this.fetchSaltMineHandler());
     } else {
-      this.backgroundManager = new RemoteSaltMineQueueManager(
-        this.config.saltMineConfig.aws,
-        SaltMineConfigUtil.processNames(this.config.saltMineConfig)
-      );
+      this.backgroundManager = new RemoteSaltMineQueueManager(this.config.saltMineConfig.aws, this.backgroundEntryValidator);
     }
   }
 

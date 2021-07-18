@@ -21,7 +21,7 @@ export class SampleInputValidatedProcessor
     return 'SaltMineSampleInputValidatedProcessorData';
   }
 
-  public async validateMetaData(input: SampleInputValidatedProcessorMetaData): Promise<string[]> {
+  public validateMetaData(input: SampleInputValidatedProcessorMetaData): string[] {
     const rval: string[] = [];
     if (!input) {
       rval.push('Metadata is required');

@@ -37,4 +37,7 @@ export interface HttpConfig {
   apolloRegex?: RegExp;
   apolloServer?: ApolloServer;
   apolloCreateHandlerOptions?: CreateHandlerOptions;
+
+  saltMineSubmissionHandlerPath?: string;
+  saltMineSubmissionAuthorizerName?: AuthorizerFunction;
 }

@@ -8,11 +8,14 @@ import { NoOpProcessor } from './built-in/no-op-processor';
 import { SaltMineHandler } from './salt-mine-handler';
 import { RemoteSaltMineQueueManager } from './remote-salt-mine-queue-manager';
 import { SaltMineConfigUtil } from './salt-mine-config-util';
+import { SaltMineEntryValidator } from './salt-mine-entry-validator';
+import { ModelValidator } from '../http/route/model-validator';
 
 describe('#createEntry', function () {
   let mockSqs;
   let mockSns;
   let queueMgr: RemoteSaltMineQueueManager;
+  let validator: SaltMineEntryValidator;
   const fakeAccountNumber: string = '123456789012';
   let saltMineConfig: SaltMineConfig;
 
@@ -33,7 +36,8 @@ describe('#createEntry', function () {
       },
     };
 
-    queueMgr = new RemoteSaltMineQueueManager(saltMineConfig.aws, SaltMineConfigUtil.processNames(saltMineConfig));
+    validator = new SaltMineEntryValidator(saltMineConfig, {} as ModelValidator);
+    queueMgr = new RemoteSaltMineQueueManager(saltMineConfig.aws, validator);
   });
 
   it('Should return queue attributes', async () => {
@@ -53,8 +57,8 @@ describe('#createEntry', function () {
   it('should make sure a processor exists', async () => {
     const mine: SaltMineHandler = new SaltMineHandler(saltMineConfig);
 
-    const resultA = queueMgr.createEntry(echoProcessor.typeName, {}, {});
-    const resultC = queueMgr.createEntry('MissingProcessorXYZ', {}, {});
+    const resultA = validator.createEntry(echoProcessor.typeName, {}, {});
+    const resultC = validator.createEntry('MissingProcessorXYZ', {}, {}, true);
     expect(resultA.type).toEqual('SaltMineBuiltInEchoProcessor');
     expect(resultC).toBeNull();
   });

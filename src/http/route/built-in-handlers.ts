@@ -6,8 +6,45 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from '../error/epsilon-http-error';
 import { BadRequestError } from '../error/bad-request-error';
+import { SaltMineQueueManager } from '../../salt-mine/salt-mine-queue-manager';
+import { SaltMineEntry } from '../../salt-mine/salt-mine-entry';
+import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 
 export class BuiltInHandlers {
+  public static async handleSaltMineSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: SaltMineQueueManager): Promise<any> {
+    Logger.info('handleSaltMineSubmission : %j', evt.body);
+
+    const parsed: SaltMineEntry = evt.parsedBody;
+    const immediate: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['immediate']);
+    const startProcessor: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['startProcessor']);
+
+    // We do this manually since the OpenAPI doc will be supplied by the epsilon user
+    if (!parsed) {
+      throw new BadRequestError('Cannot submit null entry');
+    }
+    if (!parsed.type) {
+      throw new BadRequestError('Cannot submit entry with no type field');
+    }
+    const errors: string[] = backgroundManager.validator().validateEntry(parsed);
+    if (errors.length > 0) {
+      throw new EpsilonHttpError<string[]>('Salt mine entry invalid').withDetails(errors).withHttpStatusCode(400);
+    }
+    let result: string = null;
+    if (immediate) {
+      result = await backgroundManager.fireImmediateProcessRequest(parsed);
+    } else {
+      result = await backgroundManager.addEntryToQueue(parsed, startProcessor);
+    }
+
+    const rval: any = {
+      time: new Date().toLocaleString(),
+      path: evt.path,
+      message: result,
+    };
+
+    return rval;
+  }
+
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
     Logger.info('A request was made to %s with body %j - not yet implemented', evt.path, evt.body);
 
