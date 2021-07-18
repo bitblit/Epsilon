@@ -66,6 +66,7 @@ export * from './salt-mine/remote-salt-mine-queue-manager';
 export * from './salt-mine/salt-mine-aws-config';
 export * from './salt-mine/salt-mine-config-util';
 export * from './salt-mine/salt-mine-config';
+export * from './salt-mine/salt-mine-entry-validator';
 export * from './salt-mine/salt-mine-entry';
 export * from './salt-mine/salt-mine-handler';
 export * from './salt-mine/salt-mine-local-simulation-entry';
