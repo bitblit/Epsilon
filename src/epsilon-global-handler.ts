@@ -17,9 +17,12 @@ import { CronConfig } from './batch/cron/cron-config';
 import { SaltMineHandler } from './salt-mine/salt-mine-handler';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
 import { SaltMineEntry } from './salt-mine/salt-mine-entry';
-import { SaltMineQueueUtil } from './salt-mine/salt-mine-queue-util';
+import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-util';
 import { EpsilonRouter } from './http/route/epsilon-router';
 import { RouterUtil } from './http/route/router-util';
+import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
+import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-manager';
+import { SaltMineConfigUtil } from './salt-mine/salt-mine-config-util';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -28,13 +31,26 @@ export class EpsilonGlobalHandler {
   private cacheWebHandler: WebHandler;
   private cacheSaltMineHandler: SaltMineHandler;
   private cacheEpsilonRouter: EpsilonRouter;
+  private backgroundManager: SaltMineQueueManager;
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
-  constructor(private config: EpsilonConfig) {
+  constructor(private config: EpsilonConfig, localMode?: boolean) {
     this.validateGlobalConfig(config);
     if (!config.disabled) {
       config.disabled = {} as EpsilonDisableSwitches;
+    }
+    if (localMode) {
+      Logger.info('Local mode specified, using local queue manager');
+      this.backgroundManager = new LocalSaltMineQueueManager(
+        SaltMineConfigUtil.processNames(this.config.saltMineConfig),
+        this.fetchSaltMineHandler()
+      );
+    } else {
+      this.backgroundManager = new RemoteSaltMineQueueManager(
+        this.config.saltMineConfig.aws,
+        SaltMineConfigUtil.processNames(this.config.saltMineConfig)
+      );
     }
   }
 
@@ -224,7 +240,7 @@ export class EpsilonGlobalHandler {
               };
               Logger.silly('Resolved entry : %j', saltMineEntry);
               if (smCronEntry.fireImmediate) {
-                await SaltMineQueueUtil.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
+                await SaltMineQueueManager.fireImmediateProcessRequest(saltMineConfig, saltMineEntry);
                 rval = true;
               } else {
                 toEnqueue.push(saltMineEntry);
@@ -232,7 +248,7 @@ export class EpsilonGlobalHandler {
             }
           }
           if (toEnqueue.length > 0) {
-            await SaltMineQueueUtil.addEntriesToQueue(saltMineConfig, toEnqueue, true);
+            await SaltMineQueueManager.addEntriesToQueue(saltMineConfig, toEnqueue, true);
             rval = true;
           }
         } else {

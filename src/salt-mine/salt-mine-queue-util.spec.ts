@@ -1,6 +1,6 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineQueueUtil } from './salt-mine-queue-util';
+import { SaltMineQueueManager } from './salt-mine-queue-util';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
@@ -39,8 +39,8 @@ describe('#createEntry', function () {
       .promise()
       .resolves({ Attributes: { ApproximateNumberOfMessages: 1 } });
 
-    const queueAttr: GetQueueAttributesResult = await SaltMineQueueUtil.fetchCurrentQueueAttributes(saltMineConfig);
-    const msgCount: number = await SaltMineQueueUtil.fetchQueueApproximateNumberOfMessages(saltMineConfig);
+    const queueAttr: GetQueueAttributesResult = await SaltMineQueueManager.fetchCurrentQueueAttributes(saltMineConfig);
+    const msgCount: number = await SaltMineQueueManager.fetchQueueApproximateNumberOfMessages(saltMineConfig);
     Logger.info('Got : %j', queueAttr);
     Logger.info('Msg: %d', msgCount);
     expect(queueAttr).toBeTruthy();
@@ -50,8 +50,8 @@ describe('#createEntry', function () {
   it('should make sure a processor exists', async () => {
     const mine: SaltMineHandler = new SaltMineHandler(saltMineConfig);
 
-    const resultA = SaltMineQueueUtil.createEntry(saltMineConfig, echoProcessor.typeName, {}, {});
-    const resultC = SaltMineQueueUtil.createEntry(saltMineConfig, 'MissingProcessorXYZ', {}, {});
+    const resultA = SaltMineQueueManager.createEntry(saltMineConfig, echoProcessor.typeName, {}, {});
+    const resultC = SaltMineQueueManager.createEntry(saltMineConfig, 'MissingProcessorXYZ', {}, {});
     expect(resultA.type).toEqual('SaltMineBuiltInEchoProcessor');
     expect(resultC).toBeNull();
   });

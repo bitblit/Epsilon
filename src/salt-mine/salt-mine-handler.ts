@@ -3,7 +3,7 @@ import { Logger, ErrorRatchet, StringRatchet, StopWatch } from '@bitblit/ratchet
 import { SaltMineEntry } from './salt-mine-entry';
 import { Context, SNSEvent } from 'aws-lambda';
 import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineQueueUtil } from './salt-mine-queue-util';
+import { SaltMineQueueManager } from './salt-mine-queue-util';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
@@ -126,7 +126,7 @@ export class SaltMineHandler {
         Logger.info('Salt mine queue now empty - stopping');
       } else {
         Logger.info('Still have work to do - re-firing');
-        const reFireResult: string = await SaltMineQueueUtil.fireStartProcessingRequest(this.cfg);
+        const reFireResult: string = await SaltMineQueueManager.fireStartProcessingRequest(this.cfg);
         Logger.silly('ReFire Result : %s', reFireResult);
       }
     }
@@ -192,7 +192,7 @@ export class SaltMineHandler {
 
     // If we processed, immediately reFire
     if (entries.length > 0) {
-      const reFireResult: string = await SaltMineQueueUtil.fireStartProcessingRequest(this.cfg);
+      const reFireResult: string = await SaltMineQueueManager.fireStartProcessingRequest(this.cfg);
       Logger.silly('ReFire Result : %s', reFireResult);
     }
 

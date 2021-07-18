@@ -39,7 +39,6 @@ describe('#epsilonGlobalHandler', function () {
     const smConfig: SaltMineConfig = {
       processors: [],
       aws: null,
-      development: { url: 'http://test', queueDelayMS: 4 },
     };
     const saltMine = new SaltMineHandler(null, null);
     saltMine.getConfig = jest.fn(() => smConfig);
