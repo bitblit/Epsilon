@@ -3,6 +3,7 @@
  */
 
 export * from './context-util';
+export * from './epsilon-config-parser';
 export * from './epsilon-constants';
 export * from './epsilon-global-handler';
 export * from './local-server';
@@ -22,7 +23,12 @@ export * from './batch/cron/cron-salt-mine-entry';
 export * from './batch/cron/cron-util';
 export * from './global/epsilon-config';
 export * from './global/epsilon-disable-switches';
+export * from './global/epsilon-instance';
 export * from './global/epsilon-logger-config';
+export * from './global/model-validator';
+export * from './global/open-api/open-api-document-components';
+export * from './global/open-api/open-api-document-path';
+export * from './global/open-api/open-api-document';
 export * from './http/event-util';
 export * from './http/response-util';
 export * from './http/web-handler';
@@ -54,7 +60,6 @@ export * from './http/route/extended-api-gateway-event';
 export * from './http/route/extended-auth-response-context';
 export * from './http/route/handler-function';
 export * from './http/route/http-config';
-export * from './http/route/model-validator';
 export * from './http/route/route-mapping';
 export * from './http/route/route-validator-config';
 export * from './http/route/router-util';

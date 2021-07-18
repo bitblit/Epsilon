@@ -1,7 +1,6 @@
 import { EpsilonRouter } from './epsilon-router';
 import yaml from 'js-yaml';
 import { MisconfiguredError } from '../error/misconfigured-error';
-import { ModelValidator } from './model-validator';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { HandlerFunction } from './handler-function';
 import { RouteMapping } from './route-mapping';
@@ -11,9 +10,10 @@ import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
 import { ResponseUtil } from '../response-util';
 import { HttpConfig } from './http-config';
 import { AuthorizerFunction } from './authorizer-function';
-import { WebTokenManipulator } from '../auth/web-token-manipulator';
-import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 import { BuiltInHandlers } from './built-in-handlers';
+import { OpenApiDocument } from '../../global/open-api/open-api-document';
+import { ModelValidator } from '../../global/model-validator';
+import { SaltMineQueueManager } from '../../salt-mine/salt-mine-queue-manager';
 
 /**
  * Endpoints about the api itself
@@ -60,15 +60,18 @@ export class RouterUtil {
   }
 
   // Parses an open api file to create a router config
-  public static openApiYamlToRouterConfig(yamlString: string, httpConfig: HttpConfig): EpsilonRouter {
-    if (!yamlString) {
+  public static openApiYamlToRouterConfig(
+    httpConfig: HttpConfig,
+    openApiDoc: OpenApiDocument,
+    modelValidator: ModelValidator,
+    backgroundManager: SaltMineQueueManager
+  ): EpsilonRouter {
+    if (!openApiDoc || !httpConfig) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
     }
-    const doc = yaml.load(yamlString);
-
     const rval: EpsilonRouter = {
       routes: [],
-      openApiModelValidator: null,
+      openApiModelValidator: modelValidator,
       config: RouterUtil.assignDefaultsOnHttpConfig(httpConfig),
     };
 
@@ -80,12 +83,9 @@ export class RouterUtil {
       };
     }
 
-    if (doc['components'] && doc['components']['schemas']) {
-      rval.openApiModelValidator = ModelValidator.createFromParsedOpenApiObject(doc);
-    }
-    if (doc['components'] && doc['components']['securitySchemes']) {
+    if (openApiDoc?.components?.securitySchemes) {
       // Just validation, nothing to wire here
-      Object.keys(doc['components']['securitySchemes']).forEach((sk) => {
+      Object.keys(openApiDoc.components.securitySchemes).forEach((sk) => {
         if (!rval.config.authorizers || !rval.config.authorizers.get(sk)) {
           throw new MisconfiguredError('Doc requires authorizer ' + sk + ' but not found in map');
         }
@@ -94,9 +94,9 @@ export class RouterUtil {
 
     const missingPaths: string[] = [];
 
-    if (doc['paths']) {
-      Object.keys(doc['paths']).forEach((path) => {
-        Object.keys(doc['paths'][path]).forEach((method) => {
+    if (openApiDoc?.paths) {
+      Object.keys(openApiDoc.paths).forEach((path) => {
+        Object.keys(openApiDoc.paths[path]).forEach((method) => {
           const convertedPath: string = RouterUtil.openApiPathToRouteParserPath(path);
 
           if (method.toLowerCase() === 'options' && !rval.config.disableAutoCORSOptionHandler) {
@@ -119,7 +119,7 @@ export class RouterUtil {
             });
           } else {
             const finder: string = method + ' ' + path;
-            const entry: any = doc['paths'][path][method];
+            const entry: any = openApiDoc.paths[path][method];
             if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
               missingPaths.push(finder);
             }
@@ -204,6 +204,36 @@ export class RouterUtil {
           }
         });
       });
+    }
+
+    if (httpConfig.saltMineSubmissionHandlerPath) {
+      Logger.debug('Adding salt mine mapped to %s', httpConfig.saltMineSubmissionHandlerPath);
+      let routeMapping: RouteMapping = rval.routes.find((rm) => rm.path === httpConfig.saltMineSubmissionHandlerPath);
+
+      if (!routeMapping) {
+        // Define one on-the-fly
+        routeMapping = {
+          path: httpConfig.saltMineSubmissionHandlerPath,
+          method: 'POST',
+          function: (evt) => BuiltInHandlers.handleSaltMineSubmission(evt, backgroundManager),
+          authorizerName: null,
+          disableAutomaticBodyParse: false,
+          disableQueryMapAssure: false,
+          disableHeaderMapAssure: false,
+          disablePathMapAssure: false,
+          timeoutMS: httpConfig.defaultTimeoutMS,
+          validation: null,
+          disableConvertNullReturnedObjectsTo404: false,
+          allowLiteralStringNullAsPathParameter: false,
+          allowLiteralStringNullAsQueryStringParameter: false,
+          enableValidateOutboundResponseBody: false,
+          outboundValidation: null,
+        };
+        rval.routes.push(routeMapping);
+      }
+      if (httpConfig.saltMineSubmissionAuthorizerName) {
+        routeMapping.authorizerName = httpConfig.saltMineSubmissionAuthorizerName;
+      }
     }
 
     if (missingPaths.length > 0) {

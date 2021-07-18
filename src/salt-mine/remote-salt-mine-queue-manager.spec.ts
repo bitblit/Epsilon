@@ -7,9 +7,8 @@ import { EchoProcessor } from './built-in/echo-processor';
 import { NoOpProcessor } from './built-in/no-op-processor';
 import { SaltMineHandler } from './salt-mine-handler';
 import { RemoteSaltMineQueueManager } from './remote-salt-mine-queue-manager';
-import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { SaltMineEntryValidator } from './salt-mine-entry-validator';
-import { ModelValidator } from '../http/route/model-validator';
+import { ModelValidator } from '../global/model-validator';
 
 describe('#createEntry', function () {
   let mockSqs;

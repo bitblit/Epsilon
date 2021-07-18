@@ -1,6 +1,6 @@
 import { RouteMapping } from './route-mapping';
-import { ModelValidator } from './model-validator';
 import { HttpConfig } from './http-config';
+import { ModelValidator } from '../../global/model-validator';
 
 export interface EpsilonRouter {
   routes: RouteMapping[];

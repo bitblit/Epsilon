@@ -24,68 +24,19 @@ import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-m
 import { SaltMineConfigUtil } from './salt-mine/salt-mine-config-util';
 import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
 import { SaltMineEntryValidator } from './salt-mine/salt-mine-entry-validator';
+import { EpsilonInstance } from './global/epsilon-instance';
+import { EpsilonConfigParser } from './epsilon-config-parser';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
  */
 export class EpsilonGlobalHandler {
-  private cacheWebHandler: WebHandler;
-  private cacheSaltMineHandler: SaltMineHandler;
-  private cacheEpsilonRouter: EpsilonRouter;
-  private backgroundManager: SaltMineQueueManager;
-  private backgroundEntryValidator: SaltMineEntryValidator;
+  private epsilonInstance: EpsilonInstance;
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
   constructor(private config: EpsilonConfig, localMode?: boolean) {
-    this.validateGlobalConfig(config);
-    if (!config.disabled) {
-      config.disabled = {} as EpsilonDisableSwitches;
-    }
-    this.backgroundEntryValidator = new SaltMineEntryValidator(this.config.saltMineConfig, this.fetchEpsilonRouter().openApiModelValidator);
-
-    if (localMode) {
-      Logger.info('Local mode specified, using local queue manager');
-      this.backgroundManager = new LocalSaltMineQueueManager(this.backgroundEntryValidator, this.fetchSaltMineHandler());
-    } else {
-      this.backgroundManager = new RemoteSaltMineQueueManager(this.config.saltMineConfig.aws, this.backgroundEntryValidator);
-    }
-  }
-
-  private validateGlobalConfig(config: EpsilonConfig) {
-    if (!config) {
-      ErrorRatchet.throwFormattedErr('Config may not be null');
-    }
-    if (!!config.cron && !config.cron.timezone) {
-      ErrorRatchet.throwFormattedErr('Cron is defined, but timezone is not set');
-    }
-  }
-
-  private fetchSaltMineHandler(): SaltMineHandler {
-    if (!this.cacheSaltMineHandler) {
-      if (!this.config.disabled.saltMine && this.config.saltMineConfig) {
-        const router: EpsilonRouter = this.fetchEpsilonRouter();
-        this.cacheSaltMineHandler = new SaltMineHandler(this.config.saltMineConfig, router.openApiModelValidator);
-      }
-    }
-    return this.cacheSaltMineHandler;
-  }
-
-  private fetchEpsilonRouter(): EpsilonRouter {
-    if (!this.cacheEpsilonRouter) {
-      this.cacheEpsilonRouter = RouterUtil.openApiYamlToRouterConfig(this.config.openApiYamlString, this.config.httpConfig);
-    }
-    return this.cacheEpsilonRouter;
-  }
-
-  private fetchWebHandler(): WebHandler {
-    if (!this.cacheWebHandler) {
-      if (!this.config.disabled.http) {
-        const router: EpsilonRouter = this.fetchEpsilonRouter();
-        this.cacheWebHandler = new WebHandler(router);
-      }
-    }
-    return this.cacheWebHandler;
+    this.epsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(config, localMode);
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
@@ -113,7 +64,7 @@ export class EpsilonGlobalHandler {
 
       if (LambdaEventDetector.isValidApiGatewayEvent(event)) {
         Logger.debug('Epsilon: APIG: %j', event);
-        const wh: WebHandler = this.fetchWebHandler();
+        const wh: WebHandler = this.epsilonInstance.webHandler;
         if (wh) {
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
@@ -122,13 +73,13 @@ export class EpsilonGlobalHandler {
       } else if (LambdaEventDetector.isValidSnsEvent(event)) {
         Logger.debug('Epsilon: SNS: %j', event);
         // If salt mine is here, it takes precedence
-        const sm: SaltMineHandler = this.fetchSaltMineHandler();
+        const sm: SaltMineHandler = this.epsilonInstance.saltMineHandler;
         if (sm && sm.isSaltMineSNSEvent(event)) {
           const procd: number = await sm.processSaltMineSNSEvent(event, context);
           rval = procd;
           if (procd > 0) {
             Logger.info('Processed %d entries - refiring');
-            await this.backgroundManager.fireStartProcessingRequest();
+            await this.epsilonInstance.backgroundManager.fireStartProcessingRequest();
           } else {
             Logger.info('Queue is now empty, stopping');
           }
@@ -147,8 +98,8 @@ export class EpsilonGlobalHandler {
           rval = await EpsilonGlobalHandler.processCronEvent(
             event as ScheduledEvent,
             this.config.cron,
-            this.backgroundManager,
-            this.fetchSaltMineHandler()
+            this.epsilonInstance.backgroundManager,
+            this.epsilonInstance.saltMineHandler
           );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {

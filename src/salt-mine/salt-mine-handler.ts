@@ -7,7 +7,7 @@ import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
 import { SaltMineNamedProcessor } from './salt-mine-named-processor';
-import { ModelValidator } from '../http/route/model-validator';
+import { ModelValidator } from '../global/model-validator';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same

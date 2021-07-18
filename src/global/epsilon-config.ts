@@ -1,4 +1,3 @@
-import { EpsilonRouter } from '../http/route/epsilon-router';
 import { CronConfig } from '../batch/cron/cron-config';
 import { DynamoDbConfig } from '../batch/dynamo-db-config';
 import { S3Config } from '../batch/s3-config';
@@ -10,9 +9,9 @@ import { SaltMineConfig } from '../salt-mine/salt-mine-config';
 
 export interface EpsilonConfig {
   openApiYamlString: string;
-  httpConfig: HttpConfig;
+  httpConfig?: HttpConfig;
 
-  saltMineConfig: SaltMineConfig;
+  saltMineConfig?: SaltMineConfig;
 
   cron?: CronConfig;
   dynamoDb?: DynamoDbConfig;

@@ -1,5 +1,5 @@
 import { ModelValidator } from './model-validator';
-import { SampleServerComponents } from '../../sample-server-components';
+import { SampleServerComponents } from '../sample-server-components';
 
 describe('#modelValidator', function () {
   it('should list an error', function () {

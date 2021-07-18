@@ -1,7 +1,7 @@
 import { SaltMineConfig } from './salt-mine-config';
 import { ErrorRatchet, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { ModelValidator } from '../http/route/model-validator';
 import { SaltMineNamedProcessor } from './salt-mine-named-processor';
+import { ModelValidator } from '../global/model-validator';
 
 export class SaltMineConfigUtil {
   // Prevent instantiation

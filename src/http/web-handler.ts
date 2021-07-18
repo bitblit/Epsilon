@@ -22,7 +22,7 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { NotFoundError } from './error/not-found-error';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { ModelValidator } from './route/model-validator';
+import { ModelValidator } from '../global/model-validator';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon

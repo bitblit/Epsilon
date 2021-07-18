@@ -2,8 +2,8 @@ import Validator from 'swagger-model-validator';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { BadRequestError } from '../error/bad-request-error';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { BadRequestError } from '../http/error/bad-request-error';
 
 /**
  * Helper for validating endpoints
@@ -69,7 +69,7 @@ export class ModelValidator {
     return rval;
   }
 
-  public validateBody(
+  public validateBodyAndThrowHttpException(
     modelName: string,
     modelObject: any,
     emptyAllowed: boolean = false,

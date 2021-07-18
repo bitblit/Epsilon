@@ -5,7 +5,7 @@ import { SaltMineConfigUtil } from './salt-mine-config-util';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { SaltMineNamedProcessor } from './salt-mine-named-processor';
-import { ModelValidator } from '../http/route/model-validator';
+import { ModelValidator } from '../global/model-validator';
 
 /**
  * This interface defines the things the salt mine queue manager can do

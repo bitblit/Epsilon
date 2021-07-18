@@ -18,6 +18,15 @@ import fs from 'fs';
 import path from 'path';
 import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 import { HttpConfig } from './http/route/http-config';
+import { EpsilonInstance } from './global/epsilon-instance';
+import { EpsilonConfigParser } from './epsilon-config-parser';
+import { SaltMineConfig } from './salt-mine/salt-mine-config';
+import { CronConfig } from './batch/cron/cron-config';
+import { DynamoDbConfig } from './batch/dynamo-db-config';
+import { S3Config } from './batch/s3-config';
+import { SnsConfig } from './batch/sns-config';
+import { EpsilonDisableSwitches } from './global/epsilon-disable-switches';
+import { EpsilonLoggerConfig } from './global/epsilon-logger-config';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -124,7 +133,15 @@ export class SampleServerComponents {
       apolloRegex: new RegExp('.*graphql.*'),
     };
 
-    const router: EpsilonRouter = RouterUtil.openApiYamlToRouterConfig(yamlString, cfg);
+    const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(
+      {
+        openApiYamlString: yamlString,
+        httpConfig: cfg,
+      },
+      true
+    );
+
+    const router: EpsilonRouter = epsilonInstance.epsilonRouter;
     // Modify a single route...
     RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
 

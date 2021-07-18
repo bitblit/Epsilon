@@ -2,8 +2,8 @@ import { HandlerFunction } from './handler-function';
 import { AuthorizerFunction } from './authorizer-function';
 import { ErrorProcessorFunction } from './error-processor-function';
 import { WebTokenManipulator } from '../auth/web-token-manipulator';
-import { ModelValidator } from './model-validator';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
+import { ModelValidator } from '../../global/model-validator';
 
 export interface HttpConfig {
   handlers: Map<string, HandlerFunction<any>>;
@@ -39,5 +39,5 @@ export interface HttpConfig {
   apolloCreateHandlerOptions?: CreateHandlerOptions;
 
   saltMineSubmissionHandlerPath?: string;
-  saltMineSubmissionAuthorizerName?: AuthorizerFunction;
+  saltMineSubmissionAuthorizerName?: string;
 }
