@@ -8,7 +8,7 @@ export class SampleDelayProcessor implements SaltMineNamedProcessor<any, any> {
   }
 
   public async handleEvent(data: any, metaData: any, cfg?: SaltMineConfig): Promise<void> {
-    const delayMS: number = Math.floor(Math.random() * 1500);
+    const delayMS: number = Math.floor(Math.random() * 5000);
     Logger.info('Running sample processor for %d', delayMS);
     await PromiseRatchet.wait(delayMS);
     Logger.info('Sample processor complete');

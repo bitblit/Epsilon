@@ -14,7 +14,8 @@ export class SaltMineEntryValidator {
   constructor(private cfg: SaltMineConfig, private modelValidator: ModelValidator) {}
 
   public validTypes(): string[] {
-    return SaltMineConfigUtil.processNames(this.cfg);
+    const rval: string[] = SaltMineConfigUtil.processNames(this.cfg);
+    return rval;
   }
 
   public validType(type: string): boolean {

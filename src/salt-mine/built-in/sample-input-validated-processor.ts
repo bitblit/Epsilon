@@ -25,9 +25,10 @@ export class SampleInputValidatedProcessor
     const rval: string[] = [];
     if (!input) {
       rval.push('Metadata is required');
-    }
-    if (!input.metaFieldString || input.metaFieldString.length < 4) {
-      rval.push('metaFieldString must exist and be longer than 4 characters');
+    } else {
+      if (!input.metaFieldString || input.metaFieldString.length < 4) {
+        rval.push('metaFieldString must exist and be longer than 4 characters');
+      }
     }
     return rval;
   }

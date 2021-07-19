@@ -28,6 +28,7 @@ import { EchoProcessor } from './salt-mine/built-in/echo-processor';
 import { NoOpProcessor } from './salt-mine/built-in/no-op-processor';
 import { SampleDelayProcessor } from './salt-mine/built-in/sample-delay-processor';
 import { SampleInputValidatedProcessor } from './salt-mine/built-in/sample-input-validated-processor';
+import { SimpleLoggedInAuth } from './http/auth/simple-logged-in-auth';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -83,6 +84,9 @@ export class SampleServerComponents {
   public static async createSampleRouterConfig(): Promise<EpsilonRouter> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
+    const validTokenAuth: SimpleLoggedInAuth = new SimpleLoggedInAuth();
+    authorizers.set('SALTMINE', (token, event, route) => validTokenAuth.handler(token, event, route));
+
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
     const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'], []);
     authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
@@ -120,7 +124,7 @@ export class SampleServerComponents {
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       requestIdResponseHeaderName: 'X-REQUEST-ID',
       defaultErrorMessage: 'Internal Server Error',
-      defaultTimeoutMS: 500,
+      defaultTimeoutMS: 10_000,
 
       webTokenManipulator: new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info'),
 
@@ -132,6 +136,8 @@ export class SampleServerComponents {
         },
       },
       apolloRegex: new RegExp('.*graphql.*'),
+      saltMineSubmissionHandlerPath: '/background',
+      // saltMineSubmissionAuthorizerName: 'SALTMINE'
     };
 
     const saltMine: SaltMineConfig = {

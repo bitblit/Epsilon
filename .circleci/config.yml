@@ -83,7 +83,7 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: yarn install
       - run: yarn prepare-to-publish
-      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.9.$CIRCLE_BUILD_NUM
+      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.10.$CIRCLE_BUILD_NUM
 
   deploy-alpha:
     <<: *defaults
@@ -101,7 +101,7 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: yarn install
       - run: yarn prepare-to-publish
-      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.9.$CIRCLE_BUILD_NUM-alpha
+      - run: yarn publish --no-git-tag-version --non-interactive --new-version 0.10.$CIRCLE_BUILD_NUM-alpha
 
 workflows:
   version: 2
