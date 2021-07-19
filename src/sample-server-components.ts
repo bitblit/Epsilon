@@ -21,12 +21,13 @@ import { HttpConfig } from './http/route/http-config';
 import { EpsilonInstance } from './global/epsilon-instance';
 import { EpsilonConfigParser } from './epsilon-config-parser';
 import { SaltMineConfig } from './salt-mine/salt-mine-config';
-import { CronConfig } from './batch/cron/cron-config';
-import { DynamoDbConfig } from './batch/dynamo-db-config';
-import { S3Config } from './batch/s3-config';
-import { SnsConfig } from './batch/sns-config';
-import { EpsilonDisableSwitches } from './global/epsilon-disable-switches';
-import { EpsilonLoggerConfig } from './global/epsilon-logger-config';
+import { SaltMineAwsConfig } from './salt-mine/salt-mine-aws-config';
+import { SaltMineNamedProcessor } from './salt-mine/salt-mine-named-processor';
+import AWS from 'aws-sdk';
+import { EchoProcessor } from './salt-mine/built-in/echo-processor';
+import { NoOpProcessor } from './salt-mine/built-in/no-op-processor';
+import { SampleDelayProcessor } from './salt-mine/built-in/sample-delay-processor';
+import { SampleInputValidatedProcessor } from './salt-mine/built-in/sample-input-validated-processor';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -133,10 +134,21 @@ export class SampleServerComponents {
       apolloRegex: new RegExp('.*graphql.*'),
     };
 
+    const saltMine: SaltMineConfig = {
+      aws: {
+        queueUrl: 'FAKE-LOCAL',
+        notificationArn: 'FAKE-LOCAL',
+        sqs: {} as AWS.SQS,
+        sns: {} as AWS.SNS,
+      },
+      processors: [new EchoProcessor(), new NoOpProcessor(), new SampleDelayProcessor(), new SampleInputValidatedProcessor()],
+    };
+
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(
       {
         openApiYamlString: yamlString,
         httpConfig: cfg,
+        saltMineConfig: saltMine,
       },
       true
     );
