@@ -31,6 +31,10 @@ export class EpsilonGlobalHandler {
     this.epsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(config, localMode);
   }
 
+  public get epsilon(): EpsilonInstance {
+    return this.epsilonInstance;
+  }
+
   public async lambdaHandler(event: any, context: Context): Promise<any> {
     EpsilonGlobalHandler.CURRENT_CONTEXT = context;
     let rval: any = null;
