@@ -1,32 +1,32 @@
-import { SaltMineEntry } from './salt-mine-entry';
+import { BackgroundEntry } from './background-entry';
 import { Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { SaltMineQueueManager } from './salt-mine-queue-manager';
-import { SaltMineHandler } from './salt-mine-handler';
-import { SaltMineEntryValidator } from './salt-mine-entry-validator';
+import { BackgroundQueueManager } from './background-queue-manager';
+import { BackgroundHandler } from './background-handler';
+import { BackgroundEntryValidator } from './background-entry-validator';
 
 /**
- * This class just validates and puts items into the salt mine queue - it does not do
+ * This class just validates and puts items into the background queue - it does not do
  * any processing.  It also does NOT start queue processing.  This is to prevent circular
- * dependencies - the SaltMineConfig holds references to all the processor functions, but
+ * dependencies - the BackgroundConfig holds references to all the processor functions, but
  * none of the processor functions hold references back, so they can make calls to the
  * adder or starter if necessary.
  */
-export class LocalSaltMineQueueManager implements SaltMineQueueManager {
-  constructor(private inValidator: SaltMineEntryValidator, private saltMineHandler: SaltMineHandler) {}
+export class LocalBackgroundQueueManager implements BackgroundQueueManager {
+  constructor(private inValidator: BackgroundEntryValidator, private backgroundHandler: BackgroundHandler) {}
 
-  public validator(): SaltMineEntryValidator {
+  public validator(): BackgroundEntryValidator {
     return this.inValidator;
   }
 
-  public async addEntryToQueue(entry: SaltMineEntry, fireStartMessage?: boolean): Promise<string> {
+  public async addEntryToQueue(entry: BackgroundEntry, fireStartMessage?: boolean): Promise<string> {
     // Guard against bad entries up front
     this.inValidator.validateEntryAndThrowException(entry);
 
-    const rval: boolean = await this.saltMineHandler.processSingleSaltMineEntry(entry);
+    const rval: boolean = await this.backgroundHandler.processSingleBackgroundEntry(entry);
     return 'addEntryToQueue' + new Date().toISOString() + StringRatchet.safeString(rval);
   }
 
-  public async addEntriesToQueue(entries: SaltMineEntry[], fireStartMessage?: boolean): Promise<string[]> {
+  public async addEntriesToQueue(entries: BackgroundEntry[], fireStartMessage?: boolean): Promise<string[]> {
     const rval: string[] = [];
     for (let i = 0; i < entries.length; i++) {
       try {
@@ -40,10 +40,10 @@ export class LocalSaltMineQueueManager implements SaltMineQueueManager {
     return rval;
   }
 
-  public async fireImmediateProcessRequest(entry: SaltMineEntry): Promise<string> {
+  public async fireImmediateProcessRequest(entry: BackgroundEntry): Promise<string> {
     // Guard against bad entries up front
     this.inValidator.validateEntryAndThrowException(entry);
-    const rval: boolean = await this.saltMineHandler.processSingleSaltMineEntry(entry);
+    const rval: boolean = await this.backgroundHandler.processSingleBackgroundEntry(entry);
     return 'fireImmediateProcessRequest' + new Date().toISOString() + StringRatchet.safeString(rval);
   }
 

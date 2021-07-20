@@ -1,6 +1,6 @@
 export interface EpsilonDisableSwitches {
   http: boolean;
-  saltMine: boolean;
+  background: boolean;
   cron: boolean;
   dynamoDb: boolean;
   s3: boolean;

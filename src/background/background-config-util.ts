@@ -1,26 +1,26 @@
-import { SaltMineConfig } from './salt-mine-config';
+import { BackgroundConfig } from './background-config';
 import { ErrorRatchet, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { SaltMineNamedProcessor } from './salt-mine-named-processor';
+import { BackgroundProcessor } from './background-processor';
 import { ModelValidator } from '../global/model-validator';
 
-export class SaltMineConfigUtil {
+export class BackgroundConfigUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static processNames(cfg: SaltMineConfig): string[] {
+  public static processNames(cfg: BackgroundConfig): string[] {
     return cfg && cfg.processors ? cfg.processors.map((p) => p.typeName) : null;
   }
 
-  public static awsConfig(cfg: SaltMineConfig): boolean {
+  public static awsConfig(cfg: BackgroundConfig): boolean {
     return !!cfg && !!cfg.aws;
   }
 
   public static validateAndMapProcessors(
-    processorInput: SaltMineNamedProcessor<any, any>[],
+    processorInput: BackgroundProcessor<any, any>[],
     modelValidator: ModelValidator
-  ): Map<string, SaltMineNamedProcessor<any, any>> {
-    const rval: Map<string, SaltMineNamedProcessor<any, any>> = new Map<string, SaltMineNamedProcessor<any, any>>();
+  ): Map<string, BackgroundProcessor<any, any>> {
+    const rval: Map<string, BackgroundProcessor<any, any>> = new Map<string, BackgroundProcessor<any, any>>();
     processorInput.forEach((p, idx) => {
       if (!p) {
         ErrorRatchet.throwFormattedErr('Null processor provided at index %d', idx);
@@ -65,7 +65,7 @@ export class SaltMineConfigUtil {
     return rval;
   }
 
-  public static validateConfig(cfg: SaltMineConfig): string[] {
+  public static validateConfig(cfg: BackgroundConfig): string[] {
     const rval: string[] = [];
     if (!cfg) {
       rval.push('Null config');

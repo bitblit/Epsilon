@@ -15,7 +15,7 @@ describe('#cronUtil', function () {
       context: 'prod',
       timezone: 'America/Los_Angeles',
       directEntries: [],
-      saltMineEntries: [], // only works since this isn't checked
+      backgroundEntries: [], // only works since this isn't checked
     };
 
     const cron1: AbstractCronEntry = {

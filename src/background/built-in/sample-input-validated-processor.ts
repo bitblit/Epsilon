@@ -1,24 +1,24 @@
 import { Logger, PromiseRatchet } from '@bitblit/ratchet/dist/common';
-import { SaltMineConfig } from '../salt-mine-config';
-import { SaltMineNamedProcessor } from '../salt-mine-named-processor';
+import { BackgroundConfig } from '../background-config';
+import { BackgroundProcessor } from '../background-processor';
 
 export class SampleInputValidatedProcessor
-  implements SaltMineNamedProcessor<SampleInputValidatedProcessorData, SampleInputValidatedProcessorMetaData>
+  implements BackgroundProcessor<SampleInputValidatedProcessorData, SampleInputValidatedProcessorMetaData>
 {
   public get typeName(): string {
-    return 'SaltMineBuiltInSampleInputValidatedProcessor';
+    return 'BackgroundBuiltInSampleInputValidatedProcessor';
   }
 
   public async handleEvent(
     data: SampleInputValidatedProcessorData,
     metaData: SampleInputValidatedProcessorMetaData,
-    cfg?: SaltMineConfig
+    cfg?: BackgroundConfig
   ): Promise<void> {
     Logger.info('Running SampleInputValidatedProcessor, data was : %j, meta was: %j', data, metaData);
   }
 
   public get dataSchema(): string {
-    return 'SaltMineSampleInputValidatedProcessorData';
+    return 'BackgroundSampleInputValidatedProcessorData';
   }
 
   public validateMetaData(input: SampleInputValidatedProcessorMetaData): string[] {

@@ -494,10 +494,10 @@ components:
         detailCode:
           type: number
           description: Adomni detail status code for this error
-    SaltMineSampleInputValidatedProcessorData:
+    BackgroundSampleInputValidatedProcessorData:
       type: object
-      title: SaltMineSampleInputValidatedProcessorData
-      description: This is used for testing the salt mine validator
+      title: BackgroundSampleInputValidatedProcessorData
+      description: This is used for testing the background validator
       required:
         - nameParam
         - numberParam

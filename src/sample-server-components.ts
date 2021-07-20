@@ -20,14 +20,14 @@ import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dis
 import { HttpConfig } from './http/route/http-config';
 import { EpsilonInstance } from './global/epsilon-instance';
 import { EpsilonConfigParser } from './epsilon-config-parser';
-import { SaltMineConfig } from './salt-mine/salt-mine-config';
-import { SaltMineAwsConfig } from './salt-mine/salt-mine-aws-config';
-import { SaltMineNamedProcessor } from './salt-mine/salt-mine-named-processor';
+import { BackgroundConfig } from './background/background-config';
+import { BackgroundAwsConfig } from './background/background-aws-config';
+import { BackgroundProcessor } from './background/background-processor';
 import AWS from 'aws-sdk';
-import { EchoProcessor } from './salt-mine/built-in/echo-processor';
-import { NoOpProcessor } from './salt-mine/built-in/no-op-processor';
-import { SampleDelayProcessor } from './salt-mine/built-in/sample-delay-processor';
-import { SampleInputValidatedProcessor } from './salt-mine/built-in/sample-input-validated-processor';
+import { EchoProcessor } from './background/built-in/echo-processor';
+import { NoOpProcessor } from './background/built-in/no-op-processor';
+import { SampleDelayProcessor } from './background/built-in/sample-delay-processor';
+import { SampleInputValidatedProcessor } from './background/built-in/sample-input-validated-processor';
 import { SimpleLoggedInAuth } from './http/auth/simple-logged-in-auth';
 
 export class SampleServerComponents {
@@ -85,7 +85,7 @@ export class SampleServerComponents {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const validTokenAuth: SimpleLoggedInAuth = new SimpleLoggedInAuth();
-    authorizers.set('SALTMINE', (token, event, route) => validTokenAuth.handler(token, event, route));
+    authorizers.set('BACKGROUND', (token, event, route) => validTokenAuth.handler(token, event, route));
 
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
     const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'], []);
@@ -136,11 +136,11 @@ export class SampleServerComponents {
         },
       },
       apolloRegex: new RegExp('.*graphql.*'),
-      saltMineSubmissionHandlerPath: '/background',
-      // saltMineSubmissionAuthorizerName: 'SALTMINE'
+      backgroundSubmissionHandlerPath: '/background',
+      // backgroundSubmissionAuthorizerName: 'BACKGROUND'
     };
 
-    const saltMine: SaltMineConfig = {
+    const background: BackgroundConfig = {
       aws: {
         queueUrl: 'FAKE-LOCAL',
         notificationArn: 'FAKE-LOCAL',
@@ -154,7 +154,7 @@ export class SampleServerComponents {
       {
         openApiYamlString: yamlString,
         httpConfig: cfg,
-        saltMineConfig: saltMine,
+        backgroundConfig: background,
       },
       true
     );

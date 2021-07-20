@@ -1,22 +1,22 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
-import { SaltMineConfig } from './salt-mine-config';
+import { BackgroundConfig } from './background-config';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
 import { EchoProcessor } from './built-in/echo-processor';
 import { NoOpProcessor } from './built-in/no-op-processor';
-import { SaltMineHandler } from './salt-mine-handler';
-import { RemoteSaltMineQueueManager } from './remote-salt-mine-queue-manager';
-import { SaltMineEntryValidator } from './salt-mine-entry-validator';
+import { BackgroundHandler } from './background-handler';
+import { RemoteBackgroundQueueManager } from './remote-background-queue-manager';
+import { BackgroundEntryValidator } from './background-entry-validator';
 import { ModelValidator } from '../global/model-validator';
 
 describe('#createEntry', function () {
   let mockSqs;
   let mockSns;
-  let queueMgr: RemoteSaltMineQueueManager;
-  let validator: SaltMineEntryValidator;
+  let queueMgr: RemoteBackgroundQueueManager;
+  let validator: BackgroundEntryValidator;
   const fakeAccountNumber: string = '123456789012';
-  let saltMineConfig: SaltMineConfig;
+  let backgroundConfig: BackgroundConfig;
 
   const echoProcessor: EchoProcessor = new EchoProcessor();
   const noOpProcessor: NoOpProcessor = new NoOpProcessor();
@@ -25,7 +25,7 @@ describe('#createEntry', function () {
     mockSqs = Substitute.for<AWS.SQS>();
     mockSns = Substitute.for<AWS.SNS>();
 
-    saltMineConfig = {
+    backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],
       aws: {
         sqs: mockSqs,
@@ -35,13 +35,13 @@ describe('#createEntry', function () {
       },
     };
 
-    validator = new SaltMineEntryValidator(saltMineConfig, {} as ModelValidator);
-    queueMgr = new RemoteSaltMineQueueManager(saltMineConfig.aws, validator);
+    validator = new BackgroundEntryValidator(backgroundConfig, {} as ModelValidator);
+    queueMgr = new RemoteBackgroundQueueManager(backgroundConfig.aws, validator);
   });
 
   it('Should return queue attributes', async () => {
     mockSqs
-      .getQueueAttributes({ AttributeNames: ['All'], QueueUrl: saltMineConfig.aws.queueUrl })
+      .getQueueAttributes({ AttributeNames: ['All'], QueueUrl: backgroundConfig.aws.queueUrl })
       .promise()
       .resolves({ Attributes: { ApproximateNumberOfMessages: 1 } });
 
@@ -54,11 +54,11 @@ describe('#createEntry', function () {
   });
 
   it('should make sure a processor exists', async () => {
-    const mine: SaltMineHandler = new SaltMineHandler(saltMineConfig);
+    const mine: BackgroundHandler = new BackgroundHandler(backgroundConfig);
 
     const resultA = validator.createEntry(echoProcessor.typeName, {}, {});
     const resultC = validator.createEntry('MissingProcessorXYZ', {}, {}, true);
-    expect(resultA.type).toEqual('SaltMineBuiltInEchoProcessor');
+    expect(resultA.type).toEqual('BackgroundBuiltInEchoProcessor');
     expect(resultC).toBeNull();
   });
 });

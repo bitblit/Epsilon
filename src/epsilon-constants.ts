@@ -17,9 +17,9 @@ export class EpsilonConstants {
 
   public static readonly CORS_MATCH_REQUEST_FLAG: string = 'MATCH';
 
-  public static readonly SALT_MINE_SQS_TYPE_FIELD = 'SALT_MINE_TYPE';
-  public static readonly SALT_MINE_SNS_START_MARKER = 'SALT_MINE_START_MARKER';
-  public static readonly SALT_MINE_SNS_IMMEDIATE_RUN_FLAG = 'SALT_MINE_IMMEDIATE_RUN_FLAG';
+  public static readonly BACKGROUND_SQS_TYPE_FIELD = 'BACKGROUND_TYPE';
+  public static readonly BACKGROUND_SNS_START_MARKER = 'BACKGROUND_START_MARKER';
+  public static readonly BACKGROUND_SNS_IMMEDIATE_RUN_FLAG = 'BACKGROUND_IMMEDIATE_RUN_FLAG';
 
   // Prevent instantiation
   private constructor() {}

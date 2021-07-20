@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 
-export interface SaltMineAwsConfig {
+export interface BackgroundAwsConfig {
   queueUrl: string;
   notificationArn: string;
   sqs: AWS.SQS;

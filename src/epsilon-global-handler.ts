@@ -3,27 +3,19 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { EpsilonConfig } from './global/epsilon-config';
 import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
-import { EpsilonDisableSwitches } from './global/epsilon-disable-switches';
-import { SnsHandlerFunction } from './batch/sns-handler-function';
-import { DynamoDbHandlerFunction } from './batch/dynamo-db-handler-function';
-import { S3CreateHandlerFunction } from './batch/s3-create-handler-function';
-import { S3RemoveHandlerFunction } from './batch/s3-remove-handler-function';
+import { SnsHandlerFunction } from './non-http/sns-handler-function';
+import { DynamoDbHandlerFunction } from './non-http/dynamo-db-handler-function';
+import { S3CreateHandlerFunction } from './non-http/s3-create-handler-function';
+import { S3RemoveHandlerFunction } from './non-http/s3-remove-handler-function';
 import { EventUtil } from './http/event-util';
-import { CronSaltMineEntry } from './batch/cron/cron-salt-mine-entry';
-import { CronUtil } from './batch/cron/cron-util';
-import { CronDirectEntry } from './batch/cron/cron-direct-entry';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
-import { CronConfig } from './batch/cron/cron-config';
-import { SaltMineHandler } from './salt-mine/salt-mine-handler';
-import { SaltMineConfig } from './salt-mine/salt-mine-config';
-import { SaltMineEntry } from './salt-mine/salt-mine-entry';
-import { EpsilonRouter } from './http/route/epsilon-router';
-import { RouterUtil } from './http/route/router-util';
-import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
-import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-manager';
-import { SaltMineConfigUtil } from './salt-mine/salt-mine-config-util';
-import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
-import { SaltMineEntryValidator } from './salt-mine/salt-mine-entry-validator';
+import { CronBackgroundEntry } from './background/cron/cron-background-entry';
+import { CronUtil } from './background/cron/cron-util';
+import { CronDirectEntry } from './background/cron/cron-direct-entry';
+import { CronConfig } from './background/cron/cron-config';
+import { BackgroundHandler } from './background/background-handler';
+import { BackgroundConfig } from './background/background-config';
+import { BackgroundEntry } from './background/background-entry';
+import { BackgroundQueueManager } from './background/background-queue-manager';
 import { EpsilonInstance } from './global/epsilon-instance';
 import { EpsilonConfigParser } from './epsilon-config-parser';
 
@@ -72,10 +64,10 @@ export class EpsilonGlobalHandler {
         }
       } else if (LambdaEventDetector.isValidSnsEvent(event)) {
         Logger.debug('Epsilon: SNS: %j', event);
-        // If salt mine is here, it takes precedence
-        const sm: SaltMineHandler = this.epsilonInstance.saltMineHandler;
-        if (sm && sm.isSaltMineSNSEvent(event)) {
-          const procd: number = await sm.processSaltMineSNSEvent(event, context);
+        // If background processing is here, it takes precedence
+        const sm: BackgroundHandler = this.epsilonInstance.backgroundHandler;
+        if (sm && sm.isBackgroundSNSEvent(event)) {
+          const procd: number = await sm.processBackgroundSNSEvent(event, context);
           rval = procd;
           if (procd > 0) {
             Logger.info('Processed %d entries - refiring');
@@ -99,7 +91,7 @@ export class EpsilonGlobalHandler {
             event as ScheduledEvent,
             this.config.cron,
             this.epsilonInstance.backgroundManager,
-            this.epsilonInstance.saltMineHandler
+            this.epsilonInstance.backgroundHandler
           );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
@@ -174,20 +166,20 @@ export class EpsilonGlobalHandler {
   public static async processCronEvent(
     evt: ScheduledEvent,
     cronConfig: CronConfig,
-    backgroundManager: SaltMineQueueManager,
-    saltMine: SaltMineHandler
+    backgroundManager: BackgroundQueueManager,
+    background: BackgroundHandler
   ): Promise<boolean> {
     let rval: boolean = false;
     if (cronConfig && evt && evt.resources[0]) {
-      // Run all the salt mine ones
-      if (!!cronConfig.saltMineEntries) {
-        if (!!saltMine) {
-          const saltMineConfig: SaltMineConfig = saltMine.getConfig();
-          const toEnqueue: SaltMineEntry[] = [];
-          for (let i = 0; i < cronConfig.saltMineEntries.length; i++) {
-            const smCronEntry: CronSaltMineEntry = cronConfig.saltMineEntries[i];
+      // Run all the background ones
+      if (!!cronConfig.backgroundEntries) {
+        if (!!background) {
+          const backgroundConfig: BackgroundConfig = background.getConfig();
+          const toEnqueue: BackgroundEntry[] = [];
+          for (let i = 0; i < cronConfig.backgroundEntries.length; i++) {
+            const smCronEntry: CronBackgroundEntry = cronConfig.backgroundEntries[i];
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
-              Logger.info('Firing Salt-Mine cron : %s', CronUtil.cronEntryName(smCronEntry));
+              Logger.info('Firing Background cron : %s', CronUtil.cronEntryName(smCronEntry));
 
               const metadata: any = Object.assign(
                 {},
@@ -198,18 +190,18 @@ export class EpsilonGlobalHandler {
                 }
               );
 
-              const saltMineEntry: SaltMineEntry = {
-                type: smCronEntry.saltMineTaskType,
+              const backgroundEntry: BackgroundEntry = {
+                type: smCronEntry.backgroundTaskType,
                 created: new Date().getTime(),
                 data: EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.data, {}),
                 metadata: metadata,
               };
-              Logger.silly('Resolved entry : %j', saltMineEntry);
+              Logger.silly('Resolved entry : %j', backgroundEntry);
               if (smCronEntry.fireImmediate) {
-                await backgroundManager.fireImmediateProcessRequest(saltMineEntry);
+                await backgroundManager.fireImmediateProcessRequest(backgroundEntry);
                 rval = true;
               } else {
-                toEnqueue.push(saltMineEntry);
+                toEnqueue.push(backgroundEntry);
               }
             }
           }
@@ -218,7 +210,7 @@ export class EpsilonGlobalHandler {
             rval = true;
           }
         } else {
-          Logger.warn('Cron defines salt mine tasks, but no salt mine provided');
+          Logger.warn('Cron defines background tasks, but no background manager provided');
         }
       }
       if (!!cronConfig.directEntries) {

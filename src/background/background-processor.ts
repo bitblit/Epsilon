@@ -1,6 +1,6 @@
-import { SaltMineConfig } from './salt-mine-config';
+import { BackgroundConfig } from './background-config';
 
-export interface SaltMineNamedProcessor<T, R> {
+export interface BackgroundProcessor<T, R> {
   typeName: string; // The name for this processor
   dataSchema?: string; // If set, the data object will be validated against this schema from the OpenAPI doc
   metaDataSchema?: string; // If set, the metadata object will be validated against this schema from the OpenAPI doc
@@ -8,5 +8,5 @@ export interface SaltMineNamedProcessor<T, R> {
   validateMetaData?(input: R): string[]; // If defined, validates the incoming metadata object with this instead of the OpenAPI doc
 
   // Returns void since you can't use the result anyway
-  handleEvent(data: T, metaData: R, cfg: SaltMineConfig): Promise<void>;
+  handleEvent(data: T, metaData: R, cfg: BackgroundConfig): Promise<void>;
 }

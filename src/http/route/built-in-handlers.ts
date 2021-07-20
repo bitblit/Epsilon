@@ -6,15 +6,15 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from '../error/epsilon-http-error';
 import { BadRequestError } from '../error/bad-request-error';
-import { SaltMineQueueManager } from '../../salt-mine/salt-mine-queue-manager';
-import { SaltMineEntry } from '../../salt-mine/salt-mine-entry';
+import { BackgroundQueueManager } from '../../background/background-queue-manager';
+import { BackgroundEntry } from '../../background/background-entry';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 
 export class BuiltInHandlers {
-  public static async handleSaltMineSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: SaltMineQueueManager): Promise<any> {
-    Logger.info('handleSaltMineSubmission : %j', evt.body);
+  public static async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: BackgroundQueueManager): Promise<any> {
+    Logger.info('handleBackgroundSubmission : %j', evt.body);
 
-    const parsed: SaltMineEntry = evt.parsedBody;
+    const parsed: BackgroundEntry = evt.parsedBody;
     const immediate: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['immediate']);
     const startProcessor: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['startProcessor']);
 
@@ -27,7 +27,7 @@ export class BuiltInHandlers {
     }
     const errors: string[] = backgroundManager.validator().validateEntry(parsed);
     if (errors.length > 0) {
-      throw new EpsilonHttpError<string[]>('Salt mine entry invalid').withDetails(errors).withHttpStatusCode(400);
+      throw new EpsilonHttpError<string[]>('Background entry invalid').withDetails(errors).withHttpStatusCode(400);
     }
     let result: string = null;
     if (immediate) {

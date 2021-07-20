@@ -1,12 +1,12 @@
 import { ScheduledEvent } from 'aws-lambda';
-import { CronConfig } from './batch/cron/cron-config';
+import { CronConfig } from './background/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { SaltMineConfig } from './salt-mine/salt-mine-config';
-import { SaltMineHandler } from './salt-mine/salt-mine-handler';
-import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
-import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
+import { BackgroundConfig } from './background/background-config';
+import { BackgroundHandler } from './background/background-handler';
+import { BackgroundQueueManager } from './background/background-queue-manager';
+import { LocalBackgroundQueueManager } from './background/local-background-queue-manager';
 
-// jest.mock('@bitblit/saltmine');
+// jest.mock('@bitblit/background');
 
 describe('#epsilonGlobalHandler', function () {
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why
@@ -27,9 +27,9 @@ describe('#epsilonGlobalHandler', function () {
       timezone: 'America/Los_Angeles',
       directEntries: [],
       context: 'Test',
-      saltMineEntries: [
+      backgroundEntries: [
         {
-          saltMineTaskType: 'test',
+          backgroundTaskType: 'test',
           fireImmediate: true,
           data: () => {
             return { curDate: new Date().toISOString(), fixed: 'abc' };
@@ -38,16 +38,16 @@ describe('#epsilonGlobalHandler', function () {
         },
       ],
     };
-    const smConfig: SaltMineConfig = {
+    const smConfig: BackgroundConfig = {
       processors: [],
       aws: null,
     };
-    const saltMine = new SaltMineHandler(null, null);
-    saltMine.getConfig = jest.fn(() => smConfig);
+    const background = new BackgroundHandler(null, null);
+    background.getConfig = jest.fn(() => smConfig);
 
-    const backgroundManager: SaltMineQueueManager = new LocalSaltMineQueueManager(null, null);
+    const backgroundManager: BackgroundQueueManager = new LocalBackgroundQueueManager(null, null);
 
-    const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, saltMine);
+    const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();
   }, 500);
 });

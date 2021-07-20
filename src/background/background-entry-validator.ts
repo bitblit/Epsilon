@@ -1,20 +1,20 @@
-import { SaltMineEntry } from './salt-mine-entry';
+import { BackgroundEntry } from './background-entry';
 import { Logger } from '@bitblit/ratchet/dist/common';
-import { SaltMineConfig } from './salt-mine-config';
-import { SaltMineConfigUtil } from './salt-mine-config-util';
+import { BackgroundConfig } from './background-config';
+import { BackgroundConfigUtil } from './background-config-util';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { SaltMineNamedProcessor } from './salt-mine-named-processor';
+import { BackgroundProcessor } from './background-processor';
 import { ModelValidator } from '../global/model-validator';
 
 /**
- * This interface defines the things the salt mine queue manager can do
+ * This interface defines the things the background queue manager can do
  */
-export class SaltMineEntryValidator {
-  constructor(private cfg: SaltMineConfig, private modelValidator: ModelValidator) {}
+export class BackgroundEntryValidator {
+  constructor(private cfg: BackgroundConfig, private modelValidator: ModelValidator) {}
 
   public validTypes(): string[] {
-    const rval: string[] = SaltMineConfigUtil.processNames(this.cfg);
+    const rval: string[] = BackgroundConfigUtil.processNames(this.cfg);
     return rval;
   }
 
@@ -22,13 +22,13 @@ export class SaltMineEntryValidator {
     return this.validTypes().includes(type);
   }
 
-  public createEntry(type: string, data: any = {}, metadata: any = {}, returnNullOnInvalid: boolean = false): SaltMineEntry {
+  public createEntry(type: string, data: any = {}, metadata: any = {}, returnNullOnInvalid: boolean = false): BackgroundEntry {
     if (!this.validType(type)) {
       Logger.warn('Tried to create invalid type : %s (Valid are %j)', type, this.validTypes);
       return null;
     }
 
-    let rval: SaltMineEntry = {
+    let rval: BackgroundEntry = {
       created: new Date().getTime(),
       type: type,
       data: data,
@@ -48,7 +48,7 @@ export class SaltMineEntryValidator {
     return rval;
   }
 
-  public validateEntry(entry: SaltMineEntry): string[] {
+  public validateEntry(entry: BackgroundEntry): string[] {
     let rval: string[] = [];
     if (!entry) {
       rval.push('Entry is null');
@@ -57,7 +57,7 @@ export class SaltMineEntryValidator {
     } else if (!this.validType(entry.type)) {
       rval.push('Entry type is invalid');
     } else {
-      const proc: SaltMineNamedProcessor<any, any> = this.cfg.processors.find((s) => s.typeName === entry.type);
+      const proc: BackgroundProcessor<any, any> = this.cfg.processors.find((s) => s.typeName === entry.type);
       if (proc.validateData) {
         rval = rval.concat(proc.validateData(entry.data) || []);
       } else if (proc.dataSchema) {
@@ -72,7 +72,7 @@ export class SaltMineEntryValidator {
     return rval;
   }
 
-  public validateEntryAndThrowException(entry: SaltMineEntry): void {
+  public validateEntryAndThrowException(entry: BackgroundEntry): void {
     const errors: string[] = this.validateEntry(entry);
     if (errors.length > 0) {
       Logger.warn('Invalid entry %j : errors : %j', entry, errors);

@@ -2,17 +2,17 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { EpsilonConfig } from './global/epsilon-config';
 import { WebHandler } from './http/web-handler';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
-import { SaltMineHandler } from './salt-mine/salt-mine-handler';
+import { BackgroundHandler } from './background/background-handler';
 import { EpsilonRouter } from './http/route/epsilon-router';
 import { RouterUtil } from './http/route/router-util';
 import { EpsilonInstance } from './global/epsilon-instance';
 import { MisconfiguredError } from './http/error/misconfigured-error';
 import yaml from 'js-yaml';
 import { OpenApiDocument } from './global/open-api/open-api-document';
-import { SaltMineQueueManager } from './salt-mine/salt-mine-queue-manager';
-import { SaltMineEntryValidator } from './salt-mine/salt-mine-entry-validator';
-import { LocalSaltMineQueueManager } from './salt-mine/local-salt-mine-queue-manager';
-import { RemoteSaltMineQueueManager } from './salt-mine/remote-salt-mine-queue-manager';
+import { BackgroundQueueManager } from './background/background-queue-manager';
+import { BackgroundEntryValidator } from './background/background-entry-validator';
+import { LocalBackgroundQueueManager } from './background/local-background-queue-manager';
+import { RemoteBackgroundQueueManager } from './background/remote-background-queue-manager';
 import { ModelValidator } from './global/model-validator';
 import { HttpConfig } from './http/route/http-config';
 
@@ -26,14 +26,16 @@ export class EpsilonConfigParser {
     Logger.info('Creating epsilon : Local mode : %s', localMode);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
-    const saltMineHandler: SaltMineHandler = config.saltMineConfig ? new SaltMineHandler(config.saltMineConfig, modelValidator) : null;
-    const backgroundEntryValidator: SaltMineEntryValidator = saltMineHandler
-      ? new SaltMineEntryValidator(config.saltMineConfig, modelValidator)
+    const backgroundHandler: BackgroundHandler = config.backgroundConfig
+      ? new BackgroundHandler(config.backgroundConfig, modelValidator)
+      : null;
+    const backgroundEntryValidator: BackgroundEntryValidator = backgroundHandler
+      ? new BackgroundEntryValidator(config.backgroundConfig, modelValidator)
       : null;
 
-    const backgroundManager: SaltMineQueueManager = localMode
-      ? new LocalSaltMineQueueManager(backgroundEntryValidator, saltMineHandler)
-      : new RemoteSaltMineQueueManager(config.saltMineConfig.aws, backgroundEntryValidator);
+    const backgroundManager: BackgroundQueueManager = localMode
+      ? new LocalBackgroundQueueManager(backgroundEntryValidator, backgroundHandler)
+      : new RemoteBackgroundQueueManager(config.backgroundConfig.aws, backgroundEntryValidator);
 
     // TODO: refactor me
     const epsilonRouter: EpsilonRouter = config.httpConfig
@@ -46,7 +48,7 @@ export class EpsilonConfigParser {
       parsedOpenApiDoc: parsed,
       modelValidator: modelValidator,
       webHandler: webHandler,
-      saltMineHandler: saltMineHandler,
+      backgroundHandler: backgroundHandler,
       epsilonRouter: epsilonRouter,
       backgroundManager: backgroundManager,
       backgroundEntryValidator: backgroundEntryValidator,

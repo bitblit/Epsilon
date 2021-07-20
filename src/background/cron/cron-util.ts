@@ -64,7 +64,7 @@ export class CronUtil {
     let rval: string = null;
     if (!!entry) {
       rval = entry.name;
-      rval = rval || entry['saltMineTaskType'];
+      rval = rval || entry['backgroundTaskType'];
       if (!rval && !!entry['directHandler']) {
         if (!!idx) {
           rval = 'Direct Entry ' + idx;

@@ -13,7 +13,7 @@ import { AuthorizerFunction } from './authorizer-function';
 import { BuiltInHandlers } from './built-in-handlers';
 import { OpenApiDocument } from '../../global/open-api/open-api-document';
 import { ModelValidator } from '../../global/model-validator';
-import { SaltMineQueueManager } from '../../salt-mine/salt-mine-queue-manager';
+import { BackgroundQueueManager } from '../../background/background-queue-manager';
 
 /**
  * Endpoints about the api itself
@@ -64,7 +64,7 @@ export class RouterUtil {
     httpConfig: HttpConfig,
     openApiDoc: OpenApiDocument,
     modelValidator: ModelValidator,
-    backgroundManager: SaltMineQueueManager
+    backgroundManager: BackgroundQueueManager
   ): EpsilonRouter {
     if (!openApiDoc || !httpConfig) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
@@ -206,16 +206,16 @@ export class RouterUtil {
       });
     }
 
-    if (httpConfig.saltMineSubmissionHandlerPath) {
-      Logger.debug('Adding salt mine mapped to %s', httpConfig.saltMineSubmissionHandlerPath);
-      let routeMapping: RouteMapping = rval.routes.find((rm) => rm.path === httpConfig.saltMineSubmissionHandlerPath);
+    if (httpConfig.backgroundSubmissionHandlerPath) {
+      Logger.debug('Adding background mapped to %s', httpConfig.backgroundSubmissionHandlerPath);
+      let routeMapping: RouteMapping = rval.routes.find((rm) => rm.path === httpConfig.backgroundSubmissionHandlerPath);
 
       if (!routeMapping) {
         // Define one on-the-fly
         routeMapping = {
-          path: httpConfig.saltMineSubmissionHandlerPath,
+          path: httpConfig.backgroundSubmissionHandlerPath,
           method: 'POST',
-          function: (evt) => BuiltInHandlers.handleSaltMineSubmission(evt, backgroundManager),
+          function: (evt) => BuiltInHandlers.handleBackgroundSubmission(evt, backgroundManager),
           authorizerName: null,
           disableAutomaticBodyParse: false,
           disableQueryMapAssure: false,
@@ -231,8 +231,8 @@ export class RouterUtil {
         };
         rval.routes.push(routeMapping);
       }
-      if (httpConfig.saltMineSubmissionAuthorizerName) {
-        routeMapping.authorizerName = httpConfig.saltMineSubmissionAuthorizerName;
+      if (httpConfig.backgroundSubmissionAuthorizerName) {
+        routeMapping.authorizerName = httpConfig.backgroundSubmissionAuthorizerName;
       }
     }
 

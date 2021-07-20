@@ -38,6 +38,6 @@ export interface HttpConfig {
   apolloServer?: ApolloServer;
   apolloCreateHandlerOptions?: CreateHandlerOptions;
 
-  saltMineSubmissionHandlerPath?: string;
-  saltMineSubmissionAuthorizerName?: string;
+  backgroundSubmissionHandlerPath?: string;
+  backgroundSubmissionAuthorizerName?: string;
 }

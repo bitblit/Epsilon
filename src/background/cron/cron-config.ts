@@ -1,5 +1,5 @@
 import { CronDirectEntry } from './cron-direct-entry';
-import { CronSaltMineEntry } from './cron-salt-mine-entry';
+import { CronBackgroundEntry } from './cron-background-entry';
 
 export interface CronConfig {
   // Timezone used to evaluate date and time (defaults to etc/gmt)
@@ -8,5 +8,5 @@ export interface CronConfig {
   context: string;
 
   directEntries: CronDirectEntry[];
-  saltMineEntries: CronSaltMineEntry[];
+  backgroundEntries: CronBackgroundEntry[];
 }
