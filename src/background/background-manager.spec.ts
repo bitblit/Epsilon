@@ -16,7 +16,7 @@ describe('#createEntry', function () {
   let backgroundMgr: BackgroundManager;
   const fakeAccountNumber: string = '123456789012';
   let backgroundConfig: BackgroundConfig;
-  const fakeModelValidator: ModelValidator = new ModelValidator({});
+  const fakeModelValidator: ModelValidator = new ModelValidator({ BackgroundBuiltInSampleInputValidatedProcessor: {} });
 
   const echoProcessor: EchoProcessor = new EchoProcessor();
   const noOpProcessor: NoOpProcessor = new NoOpProcessor();
@@ -35,7 +35,7 @@ describe('#createEntry', function () {
       },
     };
 
-    backgroundMgr = BackgroundConfigUtil.backgroundConfigToBackgroundManager(backgroundConfig, fakeModelValidator, true);
+    backgroundMgr = BackgroundConfigUtil.backgroundConfigToBackgroundManager(backgroundConfig, fakeModelValidator, false);
   });
 
   it('Should return queue attributes', async () => {

@@ -64,7 +64,7 @@ export class EpsilonConfigParser {
   public static openApiDocToValidator(doc: OpenApiDocument): ModelValidator {
     let rval: ModelValidator = null;
     if (doc?.components?.schemas) {
-      rval = ModelValidator.createFromParsedObject(doc);
+      rval = ModelValidator.createFromParsedObject(doc.components.schemas);
     }
     return rval;
   }
