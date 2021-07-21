@@ -26,6 +26,8 @@ export class EpsilonContainer {
         const rval: boolean = await this._epsilonInstance.backgroundHandler.processSingleBackgroundEntry(evt);
         Logger.info('Processor returned %s', rval);
       });
+    } else {
+      Logger.info('Using AWS for background');
     }
   }
 
