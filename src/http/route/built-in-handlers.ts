@@ -6,12 +6,12 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from '../error/epsilon-http-error';
 import { BadRequestError } from '../error/bad-request-error';
-import { BackgroundQueueManager } from '../../background/background-queue-manager';
 import { BackgroundEntry } from '../../background/background-entry';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
+import { BackgroundManager } from '../../background/background-manager';
 
 export class BuiltInHandlers {
-  public static async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: BackgroundQueueManager): Promise<any> {
+  public static async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: BackgroundManager): Promise<any> {
     Logger.info('handleBackgroundSubmission : %j', evt.body);
 
     const parsed: BackgroundEntry = evt.parsedBody;
@@ -25,7 +25,7 @@ export class BuiltInHandlers {
     if (!parsed.type) {
       throw new BadRequestError('Cannot submit entry with no type field');
     }
-    const errors: string[] = backgroundManager.validator().validateEntry(parsed);
+    const errors: string[] = backgroundManager.validateEntry(parsed);
     if (errors.length > 0) {
       throw new EpsilonHttpError<string[]>('Background entry invalid').withDetails(errors).withHttpStatusCode(400);
     }

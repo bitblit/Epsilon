@@ -9,19 +9,19 @@ import { EpsilonInstance } from './global/epsilon-instance';
 import { MisconfiguredError } from './http/error/misconfigured-error';
 import yaml from 'js-yaml';
 import { OpenApiDocument } from './global/open-api/open-api-document';
-import { BackgroundQueueManager } from './background/background-queue-manager';
-import { BackgroundEntryValidator } from './background/background-entry-validator';
-import { LocalBackgroundQueueManager } from './background/local-background-queue-manager';
-import { RemoteBackgroundQueueManager } from './background/remote-background-queue-manager';
 import { ModelValidator } from './global/model-validator';
-import { HttpConfig } from './http/route/http-config';
+import { BackgroundConfigUtil } from './background/background-config-util';
+import { BackgroundManager } from './background/background-manager';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, localMode: boolean): EpsilonInstance {
+  public static epsilonConfigToEpsilonInstanceAndBackgroundManager(
+    config: EpsilonConfig,
+    localMode: boolean
+  ): [EpsilonInstance, BackgroundManager] {
     this.validateGlobalConfig(config);
     Logger.info('Creating epsilon : Local mode : %s', localMode);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
@@ -29,13 +29,11 @@ export class EpsilonConfigParser {
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
       ? new BackgroundHandler(config.backgroundConfig, modelValidator)
       : null;
-    const backgroundEntryValidator: BackgroundEntryValidator = backgroundHandler
-      ? new BackgroundEntryValidator(config.backgroundConfig, modelValidator)
-      : null;
-
-    const backgroundManager: BackgroundQueueManager = localMode
-      ? new LocalBackgroundQueueManager(backgroundEntryValidator, backgroundHandler)
-      : new RemoteBackgroundQueueManager(config.backgroundConfig.aws, backgroundEntryValidator);
+    const backgroundManager: BackgroundManager = BackgroundConfigUtil.backgroundConfigToBackgroundManager(
+      config.backgroundConfig,
+      modelValidator,
+      localMode
+    );
 
     // TODO: refactor me
     const epsilonRouter: EpsilonRouter = config.httpConfig
@@ -43,18 +41,16 @@ export class EpsilonConfigParser {
       : null;
     const webHandler: WebHandler = epsilonRouter ? new WebHandler(epsilonRouter) : null;
 
-    const rval: EpsilonInstance = {
+    const inst: EpsilonInstance = {
       config: config,
       parsedOpenApiDoc: parsed,
       modelValidator: modelValidator,
       webHandler: webHandler,
       backgroundHandler: backgroundHandler,
       epsilonRouter: epsilonRouter,
-      backgroundManager: backgroundManager,
-      backgroundEntryValidator: backgroundEntryValidator,
     };
 
-    return rval;
+    return [inst, backgroundManager];
   }
 
   public static parseOpenApiDocument(yamlString: string): OpenApiDocument {

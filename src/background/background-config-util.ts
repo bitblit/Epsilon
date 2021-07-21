@@ -2,14 +2,35 @@ import { BackgroundConfig } from './background-config';
 import { ErrorRatchet, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundProcessor } from './background-processor';
 import { ModelValidator } from '../global/model-validator';
+import { BackgroundManager } from './background-manager';
 
 export class BackgroundConfigUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static processNames(cfg: BackgroundConfig): string[] {
+  public static extractValidTypes(cfg: BackgroundConfig): string[] {
     return cfg && cfg.processors ? cfg.processors.map((p) => p.typeName) : null;
+  }
+
+  public static extractDataSchemaMap(cfg: BackgroundConfig): Map<string, string> {
+    const rval: Map<string, string> = new Map<string, string>();
+    cfg.processors.forEach((e) => {
+      if (e.dataSchema) {
+        rval.set(e.typeName, e.dataSchema);
+      }
+    });
+    return rval;
+  }
+
+  public static extractMetaDataSchemaMap(cfg: BackgroundConfig): Map<string, string> {
+    const rval: Map<string, string> = new Map<string, string>();
+    cfg.processors.forEach((e) => {
+      if (e.metaDataSchema) {
+        rval.set(e.typeName, e.metaDataSchema);
+      }
+    });
+    return rval;
   }
 
   public static awsConfig(cfg: BackgroundConfig): boolean {
@@ -39,9 +60,6 @@ export class BackgroundConfigUtil {
         if (!modelValidator.fetchModel(p.dataSchema)) {
           ErrorRatchet.throwFormattedErr('%s defines a data schema %s but model validator does not contain it', p.typeName, p.dataSchema);
         }
-        if (p.dataSchema && p.validateData) {
-          ErrorRatchet.throwFormattedErr('%s defines a data schema %s and also a validation function', p.typeName, p.dataSchema);
-        }
       }
 
       if (StringRatchet.trimToNull(p.metaDataSchema)) {
@@ -54,9 +72,6 @@ export class BackgroundConfigUtil {
             p.typeName,
             p.metaDataSchema
           );
-        }
-        if (p.metaDataSchema && p.validateMetaData) {
-          ErrorRatchet.throwFormattedErr('%s defines a metaData schema %s and also a validation function', p.typeName, p.metaDataSchema);
         }
       }
 
@@ -91,5 +106,21 @@ export class BackgroundConfigUtil {
       }
     }
     return rval;
+  }
+
+  public static backgroundConfigToBackgroundManager(
+    cfg: BackgroundConfig,
+    validator: ModelValidator,
+    localMode: boolean
+  ): BackgroundManager {
+    const backgroundMgr: BackgroundManager = new BackgroundManager(
+      BackgroundConfigUtil.extractValidTypes(cfg),
+      cfg.aws,
+      validator,
+      BackgroundConfigUtil.extractDataSchemaMap(cfg),
+      BackgroundConfigUtil.extractMetaDataSchemaMap(cfg),
+      localMode
+    );
+    return backgroundMgr;
   }
 }

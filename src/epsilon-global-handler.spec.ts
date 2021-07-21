@@ -3,8 +3,9 @@ import { CronConfig } from './background/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { BackgroundConfig } from './background/background-config';
 import { BackgroundHandler } from './background/background-handler';
-import { BackgroundQueueManager } from './background/background-queue-manager';
-import { LocalBackgroundQueueManager } from './background/local-background-queue-manager';
+import { BackgroundConfigUtil } from './background/background-config-util';
+import { BackgroundManager } from './background/background-manager';
+import { ModelValidator } from './global/model-validator';
 
 // jest.mock('@bitblit/background');
 
@@ -45,7 +46,11 @@ describe('#epsilonGlobalHandler', function () {
     const background = new BackgroundHandler(null, null);
     background.getConfig = jest.fn(() => smConfig);
 
-    const backgroundManager: BackgroundQueueManager = new LocalBackgroundQueueManager(null, null);
+    const backgroundManager: BackgroundManager = BackgroundConfigUtil.backgroundConfigToBackgroundManager(
+      smConfig,
+      {} as ModelValidator,
+      true
+    );
 
     const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();

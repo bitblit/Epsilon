@@ -13,7 +13,7 @@ import { AuthorizerFunction } from './authorizer-function';
 import { BuiltInHandlers } from './built-in-handlers';
 import { OpenApiDocument } from '../../global/open-api/open-api-document';
 import { ModelValidator } from '../../global/model-validator';
-import { BackgroundQueueManager } from '../../background/background-queue-manager';
+import { BackgroundManager } from '../../background/background-manager';
 
 /**
  * Endpoints about the api itself
@@ -64,7 +64,7 @@ export class RouterUtil {
     httpConfig: HttpConfig,
     openApiDoc: OpenApiDocument,
     modelValidator: ModelValidator,
-    backgroundManager: BackgroundQueueManager
+    backgroundManager: BackgroundManager
   ): EpsilonRouter {
     if (!openApiDoc || !httpConfig) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');

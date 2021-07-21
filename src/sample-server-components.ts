@@ -29,6 +29,7 @@ import { NoOpProcessor } from './background/built-in/no-op-processor';
 import { SampleDelayProcessor } from './background/built-in/sample-delay-processor';
 import { SampleInputValidatedProcessor } from './background/built-in/sample-input-validated-processor';
 import { SimpleLoggedInAuth } from './http/auth/simple-logged-in-auth';
+import { EpsilonContainer } from './epsilon-container';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -150,7 +151,7 @@ export class SampleServerComponents {
       processors: [new EchoProcessor(), new NoOpProcessor(), new SampleDelayProcessor(), new SampleInputValidatedProcessor()],
     };
 
-    const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(
+    const epsilonContainer: EpsilonContainer = new EpsilonContainer(
       {
         openApiYamlString: yamlString,
         httpConfig: cfg,
@@ -159,7 +160,7 @@ export class SampleServerComponents {
       true
     );
 
-    const router: EpsilonRouter = epsilonInstance.epsilonRouter;
+    const router: EpsilonRouter = epsilonContainer.epsilonInstance.epsilonRouter;
     // Modify a single route...
     RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
 

@@ -63,7 +63,8 @@
     "isomorphic-fetch": "3.0.0",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
-    "swagger-model-validator": "3.0.20"
+    "swagger-model-validator": "3.0.20",
+    "rxjs": "7.2.0"
   },
   "resolutions": {
     "lodash": "^4.17.21",
