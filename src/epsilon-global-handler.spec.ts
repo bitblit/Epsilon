@@ -5,7 +5,7 @@ import { BackgroundConfig } from './background/background-config';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundConfigUtil } from './background/background-config-util';
 import { BackgroundManager } from './background/background-manager';
-import { ModelValidator } from './global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 // jest.mock('@bitblit/background');
 

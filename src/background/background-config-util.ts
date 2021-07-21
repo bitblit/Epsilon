@@ -1,7 +1,7 @@
 import { BackgroundConfig } from './background-config';
 import { ErrorRatchet, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundProcessor } from './background-processor';
-import { ModelValidator } from '../global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
 
 export class BackgroundConfigUtil {

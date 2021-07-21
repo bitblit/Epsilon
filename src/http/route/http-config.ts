@@ -3,7 +3,7 @@ import { AuthorizerFunction } from './authorizer-function';
 import { ErrorProcessorFunction } from './error-processor-function';
 import { WebTokenManipulator } from '../auth/web-token-manipulator';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
-import { ModelValidator } from '../../global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 export interface HttpConfig {
   handlers: Map<string, HandlerFunction<any>>;

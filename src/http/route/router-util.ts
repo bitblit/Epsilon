@@ -12,8 +12,9 @@ import { HttpConfig } from './http-config';
 import { AuthorizerFunction } from './authorizer-function';
 import { BuiltInHandlers } from './built-in-handlers';
 import { OpenApiDocument } from '../../global/open-api/open-api-document';
-import { ModelValidator } from '../../global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from '../../background/background-manager';
+import { BadRequestError } from '../error/bad-request-error';
 
 /**
  * Endpoints about the api itself
@@ -317,5 +318,25 @@ export class RouterUtil {
 
   public static findRoute(router: EpsilonRouter, routeMethod: string, routePath: string): RouteMapping {
     return (router?.routes || []).find((r) => r.path === routePath && r.method === routeMethod);
+  }
+
+  public static validateBodyAndThrowHttpException(
+    validator: ModelValidator,
+    modelName: string,
+    modelObject: any,
+    emptyAllowed: boolean = false,
+    extraPropertiesAllowed: boolean = true
+  ): Promise<any> {
+    const errors: any[] = validator.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
+    if (errors.length > 0) {
+      const errorStrings: string[] = errors.map((x) => {
+        return String(x);
+      });
+      Logger.info('Found errors while validating %s object %j', modelName, errorStrings);
+      const newError: BadRequestError = new BadRequestError(...errorStrings);
+      throw newError;
+    } else {
+      return Promise.resolve(modelObject);
+    }
   }
 }

@@ -7,7 +7,7 @@ import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { BackgroundConfigUtil } from './background-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
 import { BackgroundProcessor } from './background-processor';
-import { ModelValidator } from '../global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same

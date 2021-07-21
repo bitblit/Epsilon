@@ -9,9 +9,9 @@ import { EpsilonInstance } from './global/epsilon-instance';
 import { MisconfiguredError } from './http/error/misconfigured-error';
 import yaml from 'js-yaml';
 import { OpenApiDocument } from './global/open-api/open-api-document';
-import { ModelValidator } from './global/model-validator';
 import { BackgroundConfigUtil } from './background/background-config-util';
 import { BackgroundManager } from './background/background-manager';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
@@ -64,7 +64,7 @@ export class EpsilonConfigParser {
   public static openApiDocToValidator(doc: OpenApiDocument): ModelValidator {
     let rval: ModelValidator = null;
     if (doc?.components?.schemas) {
-      rval = ModelValidator.createFromParsedOpenApiObject(doc);
+      rval = ModelValidator.createFromParsedObject(doc);
     }
     return rval;
   }

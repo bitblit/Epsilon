@@ -1,6 +1,6 @@
 import { RouteMapping } from './route-mapping';
 import { HttpConfig } from './http-config';
-import { ModelValidator } from '../../global/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 export interface EpsilonRouter {
   routes: RouteMapping[];

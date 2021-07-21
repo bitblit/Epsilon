@@ -30,7 +30,6 @@ export * from './global/epsilon-config';
 export * from './global/epsilon-disable-switches';
 export * from './global/epsilon-instance';
 export * from './global/epsilon-logger-config';
-export * from './global/model-validator';
 export * from './global/open-api/open-api-document-components';
 export * from './global/open-api/open-api-document-path';
 export * from './global/open-api/open-api-document';
