@@ -91,6 +91,20 @@ export class BackgroundManager {
     }
   }
 
+  public async addEntryToQueueByParts(
+    type: string,
+    data: any = {},
+    metadata: any = {},
+    returnNullOnInvalid: boolean = false
+  ): Promise<string> {
+    let rval: string = null;
+    const entry: BackgroundEntry = this.createEntry(type, data, metadata, returnNullOnInvalid);
+    if (entry) {
+      rval = await this.addEntryToQueue(entry);
+    }
+    return rval;
+  }
+
   public async addEntryToQueue(entry: BackgroundEntry, fireStartMessage?: boolean): Promise<string> {
     // Guard against bad entries up front
     this.validateEntryAndThrowException(entry);
@@ -130,6 +144,20 @@ export class BackgroundManager {
         Logger.error('Error processing %j : %s', entries[i], err);
         rval.push(err.message);
       }
+    }
+    return rval;
+  }
+
+  public async fireImmediateProcessRequestByParts(
+    type: string,
+    data: any = {},
+    metadata: any = {},
+    returnNullOnInvalid: boolean = false
+  ): Promise<string> {
+    let rval: string = null;
+    const entry: BackgroundEntry = this.createEntry(type, data, metadata, returnNullOnInvalid);
+    if (entry) {
+      rval = await this.fireImmediateProcessRequest(entry);
     }
     return rval;
   }
