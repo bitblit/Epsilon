@@ -50,11 +50,4 @@ describe('#createEntry', function () {
     expect(queueAttr).toBeTruthy();
     expect(msgCount).toEqual(1);
   });
-
-  it('should make sure a processor exists', async () => {
-    const mine: BackgroundHandler = new BackgroundHandler(backgroundConfig);
-
-    const resultA = backgroundMgr.createEntry(echoProcessor.typeName, {}, {});
-    expect(resultA.type).toEqual('BackgroundBuiltInEchoProcessor');
-  });
 });

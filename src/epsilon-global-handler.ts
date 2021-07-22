@@ -25,23 +25,10 @@ export class EpsilonGlobalHandler {
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
-  constructor(private _epsilon: EpsilonInstance) {
-    if (_epsilon.backgroundManager) {
-      this.attachLocalBackgroundManager(_epsilon.backgroundManager);
-    }
-  }
+  constructor(private _epsilon: EpsilonInstance) {}
 
   public get epsilon(): EpsilonInstance {
     return this.epsilon;
-  }
-
-  public attachLocalBackgroundManager(bm: BackgroundManager): void {
-    Logger.info('Attaching local-mode background manager bus');
-    bm.localBus().subscribe(async (evt) => {
-      Logger.debug('Processing local background entry : %j', evt);
-      const rval: boolean = await this._epsilon.backgroundHandler.processSingleBackgroundEntry(evt);
-      Logger.info('Processor returned %s', rval);
-    });
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {

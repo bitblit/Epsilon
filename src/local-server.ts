@@ -17,7 +17,6 @@ import { BackgroundManager } from './background/background-manager';
  */
 export class LocalServer {
   private server: Server;
-  private epsilonInstance: EpsilonInstance;
   private aborted: boolean = false;
 
   constructor(private instance: EpsilonInstance, private port: number = 8888) {}
@@ -61,7 +60,7 @@ export class LocalServer {
       this.aborted = true;
       return true;
     } else {
-      const result: ProxyResult = await this.epsilonInstance.webHandler.lambdaHandler(evt, context);
+      const result: ProxyResult = await this.instance.webHandler.lambdaHandler(evt, context);
       const written: boolean = await this.writeProxyResultToServerResponse(result, response);
       return written;
     }

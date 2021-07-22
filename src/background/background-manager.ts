@@ -17,7 +17,11 @@ import { EpsilonConstants } from '../epsilon-constants';
 export class BackgroundManager {
   private _localBus: Subject<BackgroundEntry> = new Subject<BackgroundEntry>();
 
-  constructor(private awsConfig: BackgroundAwsConfig, private localMode: boolean) {}
+  constructor(private awsConfig: BackgroundAwsConfig, private _localMode: boolean) {}
+
+  public get localMode(): boolean {
+    return this._localMode;
+  }
 
   public localBus(): Subject<BackgroundEntry> {
     return this._localBus;

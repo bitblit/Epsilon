@@ -1,4 +1,5 @@
 import { BackgroundConfig } from './background-config';
+import { BackgroundManager } from './background-manager';
 
 export interface BackgroundProcessor<T, R> {
   typeName: string; // The name for this processor
@@ -9,5 +10,5 @@ export interface BackgroundProcessor<T, R> {
   validateMetaData?(input: R): string[];
 
   // Returns void since you can't use the result anyway
-  handleEvent(data: T, metaData: R, cfg: BackgroundConfig): Promise<void>;
+  handleEvent(data: T, metaData: R, mgr: BackgroundManager): Promise<void>;
 }

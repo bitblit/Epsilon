@@ -29,6 +29,7 @@ import { EpsilonConfig } from './global/epsilon-config';
 import { EpsilonInstance } from './global/epsilon-instance';
 import { BackgroundManager } from './background/background-manager';
 import { RouterUtil } from './http/route/router-util';
+import { LogAndEnqueueEchoProcessor } from './background/built-in/log-and-enqueue-echo-processor';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -148,7 +149,13 @@ export class SampleServerComponents {
         sqs: {} as AWS.SQS,
         sns: {} as AWS.SNS,
       },
-      processors: [new EchoProcessor(), new NoOpProcessor(), new SampleDelayProcessor(), new SampleInputValidatedProcessor()],
+      processors: [
+        new EchoProcessor(),
+        new NoOpProcessor(),
+        new SampleDelayProcessor(),
+        new SampleInputValidatedProcessor(),
+        new LogAndEnqueueEchoProcessor(),
+      ],
     };
 
     const epsilonConfig: EpsilonConfig = {

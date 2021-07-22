@@ -18,7 +18,7 @@ export class BackgroundHandler {
   private processors: Map<string, BackgroundProcessor<any, any>>;
   private validator: BackgroundValidator;
 
-  constructor(private cfg: BackgroundConfig, private modelValidator?: ModelValidator) {
+  constructor(private cfg: BackgroundConfig, private mgr: BackgroundManager, private modelValidator?: ModelValidator) {
     const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);
     if (cfgErrors.length > 0) {
       ErrorRatchet.throwFormattedErr('Invalid background config : %j : %j', cfgErrors, cfg);
@@ -26,6 +26,15 @@ export class BackgroundHandler {
     Logger.silly('Starting Background processor, %d processors', cfg.processors.length);
     this.validator = new BackgroundValidator(cfg, modelValidator);
     this.processors = BackgroundValidator.validateAndMapProcessors(cfg.processors, modelValidator);
+
+    if (mgr && mgr.localMode) {
+      Logger.info('Attaching local-mode background manager bus');
+      mgr.localBus().subscribe(async (evt) => {
+        Logger.debug('Processing local background entry : %j', evt);
+        const rval: boolean = await this.processSingleBackgroundEntry(evt);
+        Logger.info('Processor returned %s', rval);
+      });
+    }
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -190,7 +199,7 @@ export class BackgroundHandler {
         Logger.warn('Found no processor for background entry : %j (returning false)', e);
       } else {
         const sw: StopWatch = new StopWatch(true);
-        await processorInput.handleEvent(e.data, e.metadata, this.cfg);
+        await processorInput.handleEvent(e.data, e.metadata, this.mgr);
         rval = true;
         sw.stop();
         Logger.info('Processed %j : %s', e, sw.dump());

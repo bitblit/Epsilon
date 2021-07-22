@@ -1,6 +1,7 @@
 import { Logger, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundConfig } from '../background-config';
 import { BackgroundProcessor } from '../background-processor';
+import { BackgroundManager } from '../background-manager';
 
 export class SampleInputValidatedProcessor
   implements BackgroundProcessor<SampleInputValidatedProcessorData, SampleInputValidatedProcessorMetaData>
@@ -12,7 +13,7 @@ export class SampleInputValidatedProcessor
   public async handleEvent(
     data: SampleInputValidatedProcessorData,
     metaData: SampleInputValidatedProcessorMetaData,
-    cfg?: BackgroundConfig
+    mgr?: BackgroundManager
   ): Promise<void> {
     Logger.info('Running SampleInputValidatedProcessor, data was : %j, meta was: %j', data, metaData);
   }

@@ -23,7 +23,7 @@ export class EpsilonConfigParser {
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
-      ? new BackgroundHandler(config.backgroundConfig, modelValidator)
+      ? new BackgroundHandler(config.backgroundConfig, backgroundManager, modelValidator)
       : null;
 
     // TODO: refactor me
