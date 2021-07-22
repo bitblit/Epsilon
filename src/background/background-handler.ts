@@ -4,10 +4,11 @@ import { BackgroundEntry } from './background-entry';
 import { Context, SNSEvent } from 'aws-lambda';
 import { BackgroundConfig } from './background-config';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
-import { BackgroundConfigUtil } from './background-config-util';
 import { EpsilonConstants } from '../epsilon-constants';
 import { BackgroundProcessor } from './background-processor';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { BackgroundManager } from './background-manager';
+import { BackgroundValidator } from './background-validator';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -15,14 +16,16 @@ import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
  */
 export class BackgroundHandler {
   private processors: Map<string, BackgroundProcessor<any, any>>;
+  private validator: BackgroundValidator;
 
   constructor(private cfg: BackgroundConfig, private modelValidator?: ModelValidator) {
-    const cfgErrors: string[] = BackgroundConfigUtil.validateConfig(cfg);
+    const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);
     if (cfgErrors.length > 0) {
       ErrorRatchet.throwFormattedErr('Invalid background config : %j : %j', cfgErrors, cfg);
     }
     Logger.silly('Starting Background processor, %d processors', cfg.processors.length);
-    this.processors = BackgroundConfigUtil.validateAndMapProcessors(cfg.processors, modelValidator);
+    this.validator = new BackgroundValidator(cfg, modelValidator);
+    this.processors = BackgroundValidator.validateAndMapProcessors(cfg.processors, modelValidator);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -122,45 +125,40 @@ export class BackgroundHandler {
   }
 
   private async takeEntryFromBackgroundQueue(): Promise<BackgroundEntry[]> {
-    let rval: BackgroundEntry[] = [];
+    const rval: BackgroundEntry[] = [];
 
-    if (BackgroundConfigUtil.awsConfig(this.cfg)) {
-      const params = {
-        MaxNumberOfMessages: 1,
-        QueueUrl: this.cfg.aws.queueUrl,
-        VisibilityTimeout: 300,
-        WaitTimeSeconds: 0,
-      };
+    const params = {
+      MaxNumberOfMessages: 1,
+      QueueUrl: this.cfg.aws.queueUrl,
+      VisibilityTimeout: 300,
+      WaitTimeSeconds: 0,
+    };
 
-      const message: AWS.SQS.ReceiveMessageResult = await this.cfg.aws.sqs.receiveMessage(params).promise();
-      if (message && message.Messages && message.Messages.length > 0) {
-        for (let i = 0; i < message.Messages.length; i++) {
-          const m: AWS.SQS.Message = message.Messages[i];
-          try {
-            const parsedBody: BackgroundEntry = JSON.parse(m.Body);
-            if (!parsedBody.type) {
-              Logger.warn('Dropping invalid background entry : %j', parsedBody);
-            } else {
-              rval.push(parsedBody);
-            }
-
-            Logger.debug('Removing message from queue');
-            const delParams = {
-              QueueUrl: this.cfg.aws.queueUrl,
-              ReceiptHandle: m.ReceiptHandle,
-            };
-            const delResult: any = await this.cfg.aws.sqs.deleteMessage(delParams).promise();
-            Logger.silly('Delete result : %j', delResult);
-          } catch (err) {
-            Logger.warn('Error parsing message, dropping : %j', m);
+    const message: AWS.SQS.ReceiveMessageResult = await this.cfg.aws.sqs.receiveMessage(params).promise();
+    if (message && message.Messages && message.Messages.length > 0) {
+      for (let i = 0; i < message.Messages.length; i++) {
+        const m: AWS.SQS.Message = message.Messages[i];
+        try {
+          const parsedBody: BackgroundEntry = JSON.parse(m.Body);
+          if (!parsedBody.type) {
+            Logger.warn('Dropping invalid background entry : %j', parsedBody);
+          } else {
+            rval.push(parsedBody);
           }
+
+          Logger.debug('Removing message from queue');
+          const delParams = {
+            QueueUrl: this.cfg.aws.queueUrl,
+            ReceiptHandle: m.ReceiptHandle,
+          };
+          const delResult: any = await this.cfg.aws.sqs.deleteMessage(delParams).promise();
+          Logger.silly('Delete result : %j', delResult);
+        } catch (err) {
+          Logger.warn('Error parsing message, dropping : %j', m);
         }
-      } else {
-        Logger.debug('No messages found (likely end of recursion)');
       }
     } else {
-      Logger.debug('Running local - no queue');
-      rval = [];
+      Logger.debug('No messages found (likely end of recursion)');
     }
 
     return rval;

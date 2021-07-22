@@ -9,7 +9,6 @@ import { EpsilonInstance } from './global/epsilon-instance';
 import { MisconfiguredError } from './http/error/misconfigured-error';
 import yaml from 'js-yaml';
 import { OpenApiDocument } from './global/open-api/open-api-document';
-import { BackgroundConfigUtil } from './background/background-config-util';
 import { BackgroundManager } from './background/background-manager';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
@@ -18,22 +17,14 @@ export class EpsilonConfigParser {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  public static epsilonConfigToEpsilonInstanceAndBackgroundManager(
-    config: EpsilonConfig,
-    localMode: boolean
-  ): [EpsilonInstance, BackgroundManager] {
+  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonInstance {
     this.validateGlobalConfig(config);
-    Logger.info('Creating epsilon : Local mode : %s', localMode);
+    Logger.info('Creating epsilon : BM : %J', backgroundManager);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
       ? new BackgroundHandler(config.backgroundConfig, modelValidator)
       : null;
-    const backgroundManager: BackgroundManager = BackgroundConfigUtil.backgroundConfigToBackgroundManager(
-      config.backgroundConfig,
-      modelValidator,
-      localMode
-    );
 
     // TODO: refactor me
     const epsilonRouter: EpsilonRouter = config.httpConfig
@@ -48,9 +39,10 @@ export class EpsilonConfigParser {
       webHandler: webHandler,
       backgroundHandler: backgroundHandler,
       epsilonRouter: epsilonRouter,
+      backgroundManager: backgroundManager,
     };
 
-    return [inst, backgroundManager];
+    return inst;
   }
 
   public static parseOpenApiDocument(yamlString: string): OpenApiDocument {

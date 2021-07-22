@@ -11,25 +11,24 @@ import { SimpleRoleRouteAuth } from './http/auth/simple-role-route-auth';
 import { BuiltInHandlers } from './http/route/built-in-handlers';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
-import { RouterUtil } from './http/route/router-util';
 import { EpsilonConstants } from './epsilon-constants';
 import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator';
 import fs from 'fs';
 import path from 'path';
 import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 import { HttpConfig } from './http/route/http-config';
-import { EpsilonInstance } from './global/epsilon-instance';
 import { EpsilonConfigParser } from './epsilon-config-parser';
 import { BackgroundConfig } from './background/background-config';
-import { BackgroundAwsConfig } from './background/background-aws-config';
-import { BackgroundProcessor } from './background/background-processor';
 import AWS from 'aws-sdk';
 import { EchoProcessor } from './background/built-in/echo-processor';
 import { NoOpProcessor } from './background/built-in/no-op-processor';
 import { SampleDelayProcessor } from './background/built-in/sample-delay-processor';
 import { SampleInputValidatedProcessor } from './background/built-in/sample-input-validated-processor';
 import { SimpleLoggedInAuth } from './http/auth/simple-logged-in-auth';
-import { EpsilonContainer } from './epsilon-container';
+import { EpsilonConfig } from './global/epsilon-config';
+import { EpsilonInstance } from './global/epsilon-instance';
+import { BackgroundManager } from './background/background-manager';
+import { RouterUtil } from './http/route/router-util';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -82,7 +81,7 @@ export class SampleServerComponents {
 
   // Functions below here are for using as samples
 
-  public static async createSampleRouterConfig(): Promise<EpsilonRouter> {
+  public static async createSampleEpsilonInstance(): Promise<EpsilonInstance> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const validTokenAuth: SimpleLoggedInAuth = new SimpleLoggedInAuth();
@@ -138,6 +137,7 @@ export class SampleServerComponents {
       },
       apolloRegex: new RegExp('.*graphql.*'),
       backgroundSubmissionHandlerPath: '/background',
+      prefixesToStripBeforeRouteMatch: ['v0'],
       // backgroundSubmissionAuthorizerName: 'BACKGROUND'
     };
 
@@ -151,20 +151,20 @@ export class SampleServerComponents {
       processors: [new EchoProcessor(), new NoOpProcessor(), new SampleDelayProcessor(), new SampleInputValidatedProcessor()],
     };
 
-    const epsilonContainer: EpsilonContainer = new EpsilonContainer(
-      {
-        openApiYamlString: yamlString,
-        httpConfig: cfg,
-        backgroundConfig: background,
-      },
-      true
-    );
+    const epsilonConfig: EpsilonConfig = {
+      openApiYamlString: yamlString,
+      httpConfig: cfg,
+      backgroundConfig: background,
+    };
 
-    const router: EpsilonRouter = epsilonContainer.epsilonInstance.epsilonRouter;
+    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, true);
+    const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
+
+    const router: EpsilonRouter = epsilonInstance.epsilonRouter;
     // Modify a single route...
     RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
 
-    return router;
+    return epsilonInstance;
   }
 
   public static loadSampleOpenApiYaml(): string {

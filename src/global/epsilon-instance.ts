@@ -4,6 +4,7 @@ import { BackgroundHandler } from '../background/background-handler';
 import { EpsilonRouter } from '../http/route/epsilon-router';
 import { OpenApiDocument } from './open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { BackgroundManager } from '../background/background-manager';
 
 export interface EpsilonInstance {
   config: EpsilonConfig;
@@ -12,4 +13,5 @@ export interface EpsilonInstance {
   webHandler: WebHandler;
   backgroundHandler: BackgroundHandler;
   epsilonRouter: EpsilonRouter;
+  backgroundManager: BackgroundManager;
 }

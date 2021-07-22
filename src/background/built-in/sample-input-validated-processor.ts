@@ -20,6 +20,16 @@ export class SampleInputValidatedProcessor
   public get dataSchema(): string {
     return 'BackgroundSampleInputValidatedProcessorData';
   }
+
+  validateMetaData(input: SampleInputValidatedProcessorMetaData): string[] {
+    const rval: string[] = [];
+    if (!input) {
+      rval.push('No metadata');
+    } else if (!input.metaFieldString || input.metaFieldString.length < 4) {
+      rval.push('metaFieldString must be set and at least 4 characters');
+    }
+    return rval;
+  }
 }
 
 export interface SampleInputValidatedProcessorData {

@@ -8,7 +8,7 @@ import { SampleServerComponents } from './sample-server-components';
 
 Logger.setLevelByName('debug');
 
-SampleServerComponents.createSampleRouterConfig()
+SampleServerComponents.createSampleEpsilonInstance()
   .then((cfg) => {
     const testServer: LocalServer = new LocalServer(cfg);
     testServer.runServer().then((res) => {

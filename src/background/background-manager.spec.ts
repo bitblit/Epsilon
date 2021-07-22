@@ -8,7 +8,6 @@ import { NoOpProcessor } from './built-in/no-op-processor';
 import { BackgroundHandler } from './background-handler';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
-import { BackgroundConfigUtil } from './background-config-util';
 
 describe('#createEntry', function () {
   let mockSqs;
@@ -35,7 +34,7 @@ describe('#createEntry', function () {
       },
     };
 
-    backgroundMgr = BackgroundConfigUtil.backgroundConfigToBackgroundManager(backgroundConfig, fakeModelValidator, false);
+    backgroundMgr = new BackgroundManager(backgroundConfig.aws, false);
   });
 
   it('Should return queue attributes', async () => {
@@ -56,8 +55,6 @@ describe('#createEntry', function () {
     const mine: BackgroundHandler = new BackgroundHandler(backgroundConfig);
 
     const resultA = backgroundMgr.createEntry(echoProcessor.typeName, {}, {});
-    const resultC = backgroundMgr.createEntry('MissingProcessorXYZ', {}, {}, true);
     expect(resultA.type).toEqual('BackgroundBuiltInEchoProcessor');
-    expect(resultC).toBeNull();
   });
 });

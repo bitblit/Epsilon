@@ -1,9 +1,7 @@
 import { BackgroundEntry } from './background-entry';
 import { BackgroundAwsConfig } from './background-aws-config';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { Subject } from 'rxjs';
 import { Logger, NumberRatchet } from '@bitblit/ratchet/dist/common';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { GetQueueAttributesRequest, GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import AWS from 'aws-sdk';
@@ -12,93 +10,32 @@ import { EpsilonConstants } from '../epsilon-constants';
 /**
  * Handles all submission of work to the background processing system.
  *
- * IMPORTANT NOTE!!!  This may NOT reference BackgroundConfig (and its processors)
- * in ANY way.  If it does, it will cause a circular reference.  That's why the constructor
- * has all those broke-out maps
+ * Note that this does NOT validate the input, it just passes it along.  This is
+ * because it creates a circular reference to the processors if we try since they
+ * define the type and validation.
  */
 export class BackgroundManager {
   private _localBus: Subject<BackgroundEntry> = new Subject<BackgroundEntry>();
 
-  constructor(
-    private validTypes: string[],
-    private awsConfig: BackgroundAwsConfig,
-    private modelValidator: ModelValidator,
-    private dataValidators: Map<string, string>,
-    private metaDataValidators: Map<string, string>,
-    private localMode: boolean
-  ) {}
+  constructor(private awsConfig: BackgroundAwsConfig, private localMode: boolean) {}
 
   public localBus(): Subject<BackgroundEntry> {
     return this._localBus;
   }
 
-  public validType(type: string): boolean {
-    return this.validTypes.includes(type);
-  }
-
-  public createEntry(type: string, data: any = {}, metadata: any = {}, returnNullOnInvalid: boolean = false): BackgroundEntry {
-    if (!this.validType(type)) {
-      Logger.warn('Tried to create invalid type : %s (Valid are %j)', type, this.validTypes);
-      return null;
-    }
-
-    let rval: BackgroundEntry = {
+  public createEntry(type: string, data: any = {}, metadata: any = {}): BackgroundEntry {
+    const rval: BackgroundEntry = {
       created: new Date().getTime(),
       type: type,
       data: data,
       metadata: metadata,
     };
-
-    const errors: string[] = this.validateEntry(rval);
-    if (errors.length > 0) {
-      if (returnNullOnInvalid) {
-        Logger.warn('Supplied entry data was invalid, returning null');
-        rval = null;
-      } else {
-        ErrorRatchet.throwFormattedErr('Cannot create entry %j : errors : %j', rval, errors);
-      }
-    }
-
     return rval;
   }
 
-  public validateEntry(entry: BackgroundEntry): string[] {
-    let rval: string[] = [];
-    if (!entry) {
-      rval.push('Entry is null');
-    } else if (!StringRatchet.trimToNull(entry.type)) {
-      rval.push('Entry type is null or empty');
-    } else if (!this.validType(entry.type)) {
-      rval.push('Entry type is invalid');
-    } else {
-      const dataSchema: string = this.dataValidators.get(entry.type);
-      if (dataSchema) {
-        rval = rval.concat(this.modelValidator.validate(dataSchema, entry.data) || []);
-      }
-      const metaDataSchema: string = this.metaDataValidators.get(entry.type);
-      if (metaDataSchema) {
-        rval = rval.concat(this.modelValidator.validate(metaDataSchema, entry.metadata) || []);
-      }
-    }
-    return rval;
-  }
-
-  public validateEntryAndThrowException(entry: BackgroundEntry): void {
-    const errors: string[] = this.validateEntry(entry);
-    if (errors.length > 0) {
-      Logger.warn('Invalid entry %j : errors : %j', entry, errors);
-      ErrorRatchet.throwFormattedErr('Invalid entry %j : errors : %j', entry, errors);
-    }
-  }
-
-  public async addEntryToQueueByParts(
-    type: string,
-    data: any = {},
-    metadata: any = {},
-    returnNullOnInvalid: boolean = false
-  ): Promise<string> {
+  public async addEntryToQueueByParts(type: string, data: any = {}, metadata: any = {}): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data, metadata, returnNullOnInvalid);
+    const entry: BackgroundEntry = this.createEntry(type, data, metadata);
     if (entry) {
       rval = await this.addEntryToQueue(entry);
     }
@@ -106,8 +43,6 @@ export class BackgroundManager {
   }
 
   public async addEntryToQueue(entry: BackgroundEntry, fireStartMessage?: boolean): Promise<string> {
-    // Guard against bad entries up front
-    this.validateEntryAndThrowException(entry);
     let rval: string = null;
     if (this.localMode) {
       this._localBus.next(entry);
@@ -138,11 +73,17 @@ export class BackgroundManager {
     const rval: string[] = [];
     for (let i = 0; i < entries.length; i++) {
       try {
-        const tmp: string = await this.addEntryToQueue(entries[i]);
+        // Always defer the fire to after the last enqueue
+        const tmp: string = await this.addEntryToQueue(entries[i], false);
         rval.push(tmp);
       } catch (err) {
         Logger.error('Error processing %j : %s', entries[i], err);
         rval.push(err.message);
+      }
+
+      if (fireStartMessage) {
+        const fireResult: string = await this.fireStartProcessingRequest();
+        Logger.silly('FireResult : %s', fireResult);
       }
     }
     return rval;
@@ -155,7 +96,7 @@ export class BackgroundManager {
     returnNullOnInvalid: boolean = false
   ): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data, metadata, returnNullOnInvalid);
+    const entry: BackgroundEntry = this.createEntry(type, data, metadata);
     if (entry) {
       rval = await this.fireImmediateProcessRequest(entry);
     }
@@ -164,8 +105,6 @@ export class BackgroundManager {
 
   public async fireImmediateProcessRequest(entry: BackgroundEntry): Promise<string> {
     let rval: string = null;
-    // Guard against bad entries up front
-    this.validateEntryAndThrowException(entry);
     if (this.localMode) {
       this.localBus().next(entry);
       rval = 'fireImmediateProcessRequest' + new Date().toISOString() + StringRatchet.safeString(rval);

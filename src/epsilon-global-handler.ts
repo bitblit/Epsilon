@@ -15,9 +15,8 @@ import { CronConfig } from './background/cron/cron-config';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundConfig } from './background/background-config';
 import { BackgroundEntry } from './background/background-entry';
-import { EpsilonInstance } from './global/epsilon-instance';
-import { EpsilonContainer } from './epsilon-container';
 import { BackgroundManager } from './background/background-manager';
+import { EpsilonInstance } from './global/epsilon-instance';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -26,10 +25,23 @@ export class EpsilonGlobalHandler {
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
-  constructor(private _epsilon: EpsilonContainer) {}
+  constructor(private _epsilon: EpsilonInstance) {
+    if (_epsilon.backgroundManager) {
+      this.attachLocalBackgroundManager(_epsilon.backgroundManager);
+    }
+  }
 
-  public get epsilon(): EpsilonContainer {
+  public get epsilon(): EpsilonInstance {
     return this.epsilon;
+  }
+
+  public attachLocalBackgroundManager(bm: BackgroundManager): void {
+    Logger.info('Attaching local-mode background manager bus');
+    bm.localBus().subscribe(async (evt) => {
+      Logger.debug('Processing local background entry : %j', evt);
+      const rval: boolean = await this._epsilon.backgroundHandler.processSingleBackgroundEntry(evt);
+      Logger.info('Processor returned %s', rval);
+    });
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
@@ -42,29 +54,22 @@ export class EpsilonGlobalHandler {
       }
 
       // Setup logging
-      const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(
-        Logger.getLevel(),
-        event,
-        this._epsilon.epsilonInstance.config.loggerConfig
-      );
+      const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this._epsilon.config.loggerConfig);
       Logger.setLevelByName(logLevel);
 
       if (
-        this._epsilon.epsilonInstance.config.loggerConfig &&
-        this._epsilon.epsilonInstance.config.loggerConfig.queryParamTracePrefixName &&
+        this._epsilon.config.loggerConfig &&
+        this._epsilon.config.loggerConfig.queryParamTracePrefixName &&
         event.queryStringParameters &&
-        event.queryStringParameters[this._epsilon.epsilonInstance.config.loggerConfig.queryParamTracePrefixName]
+        event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]
       ) {
-        Logger.info(
-          'Setting trace prefix to %s',
-          event.queryStringParameters[this._epsilon.epsilonInstance.config.loggerConfig.queryParamTracePrefixName]
-        );
-        Logger.setTracePrefix(event.queryStringParameters[this._epsilon.epsilonInstance.config.loggerConfig.queryParamTracePrefixName]);
+        Logger.info('Setting trace prefix to %s', event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]);
+        Logger.setTracePrefix(event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]);
       }
 
       if (LambdaEventDetector.isValidApiGatewayEvent(event)) {
         Logger.debug('Epsilon: APIG: %j', event);
-        const wh: WebHandler = this._epsilon.epsilonInstance.webHandler;
+        const wh: WebHandler = this._epsilon.webHandler;
         if (wh) {
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
@@ -73,7 +78,7 @@ export class EpsilonGlobalHandler {
       } else if (LambdaEventDetector.isValidSnsEvent(event)) {
         Logger.debug('Epsilon: SNS: %j', event);
         // If background processing is here, it takes precedence
-        const sm: BackgroundHandler = this._epsilon.epsilonInstance.backgroundHandler;
+        const sm: BackgroundHandler = this._epsilon.backgroundHandler;
         if (sm && sm.isBackgroundSNSEvent(event)) {
           const procd: number = await sm.processBackgroundSNSEvent(event, context);
           rval = procd;
@@ -92,14 +97,14 @@ export class EpsilonGlobalHandler {
         rval = await this.processS3Event(event as S3CreateEvent);
       } else if (LambdaEventDetector.isValidCronEvent(event)) {
         Logger.debug('Epsilon: CRON: %j', event);
-        if (this._epsilon.epsilonInstance.config.disabled.cron) {
+        if (this._epsilon.config.disabled.cron) {
           Logger.debug('Skipping - CRON disabled');
         } else {
           rval = await EpsilonGlobalHandler.processCronEvent(
             event as ScheduledEvent,
-            this._epsilon.epsilonInstance.config.cron,
+            this._epsilon.config.cron,
             this._epsilon.backgroundManager,
-            this._epsilon.epsilonInstance.backgroundHandler
+            this._epsilon.backgroundHandler
           );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
@@ -121,15 +126,9 @@ export class EpsilonGlobalHandler {
 
   private async processSnsEvent(evt: SNSEvent): Promise<any> {
     let rval: any = null;
-    if (
-      this._epsilon.epsilonInstance.config &&
-      this._epsilon.epsilonInstance.config.sns &&
-      !this._epsilon.epsilonInstance.config.disabled.sns &&
-      evt &&
-      evt.Records.length > 0
-    ) {
+    if (this._epsilon.config && this._epsilon.config.sns && !this._epsilon.config.disabled.sns && evt && evt.Records.length > 0) {
       const finder: string = evt.Records[0].Sns.TopicArn;
-      const handler: SnsHandlerFunction = this.findInMap<SnsHandlerFunction>(finder, this._epsilon.epsilonInstance.config.sns.handlers);
+      const handler: SnsHandlerFunction = this.findInMap<SnsHandlerFunction>(finder, this._epsilon.config.sns.handlers);
       if (handler) {
         rval = await handler(evt);
       } else {
@@ -141,31 +140,19 @@ export class EpsilonGlobalHandler {
 
   private async processS3Event(evt: S3Event): Promise<any> {
     let rval: any = null;
-    if (
-      this._epsilon.epsilonInstance.config &&
-      this._epsilon.epsilonInstance.config.s3 &&
-      !this._epsilon.epsilonInstance.config.disabled.s3 &&
-      evt &&
-      evt.Records.length > 0
-    ) {
+    if (this._epsilon.config && this._epsilon.config.s3 && !this._epsilon.config.disabled.s3 && evt && evt.Records.length > 0) {
       const finder: string = evt.Records[0].s3.bucket.name + '/' + evt.Records[0].s3.object.key;
       const isRemoveEvent: boolean = evt.Records[0].eventName && evt.Records[0].eventName.startsWith('ObjectRemoved');
 
       if (isRemoveEvent) {
-        const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(
-          finder,
-          this._epsilon.epsilonInstance.config.s3.removeHandlers
-        );
+        const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(finder, this._epsilon.config.s3.removeHandlers);
         if (handler) {
           rval = await handler(evt);
         } else {
           Logger.info('Found no s3 create handler for : %s', finder);
         }
       } else {
-        const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(
-          finder,
-          this._epsilon.epsilonInstance.config.s3.createHandlers
-        );
+        const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(finder, this._epsilon.config.s3.createHandlers);
         if (handler) {
           rval = await handler(evt);
         } else {
@@ -256,18 +243,15 @@ export class EpsilonGlobalHandler {
   private async processDynamoDbEvent(evt: DynamoDBStreamEvent): Promise<any> {
     let rval: any = null;
     if (
-      this._epsilon.epsilonInstance.config &&
-      this._epsilon.epsilonInstance.config.dynamoDb &&
-      !this._epsilon.epsilonInstance.config.disabled.dynamoDb &&
+      this._epsilon.config &&
+      this._epsilon.config.dynamoDb &&
+      !this._epsilon.config.disabled.dynamoDb &&
       evt &&
       evt.Records &&
       evt.Records.length > 0
     ) {
       const finder: string = evt.Records[0].eventSourceARN;
-      const handler: DynamoDbHandlerFunction = this.findInMap<DynamoDbHandlerFunction>(
-        finder,
-        this._epsilon.epsilonInstance.config.dynamoDb.handlers
-      );
+      const handler: DynamoDbHandlerFunction = this.findInMap<DynamoDbHandlerFunction>(finder, this._epsilon.config.dynamoDb.handlers);
       if (handler) {
         rval = await handler(evt);
       } else {

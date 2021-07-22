@@ -906,10 +906,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/aws-lambda@8.10.79":
-  version "8.10.79"
-  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.79.tgz#c87fcc10500d0524f583b7fd7828025d8aa834fd"
-  integrity sha512-YgpllvHcDrPfzyf8/a2+ScRoEtJQjAP0pSgIneWcVpfqHGmiAaS2oMO3e4y3InJMgrMyuxGPde72CBZS/X8vJA==
+"@types/aws-lambda@8.10.80":
+  version "8.10.80"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.80.tgz#2b9f97ff2291383ee3e22c34a60ddd526caaba13"
+  integrity sha512-Vnz/FxDSjxNPAyBf+1qMDNnFhuHp/aKwp0EDdfSLj0W9UIQBXt16Rd4uZCpGnP2Dlmg5VyUCR2031ykPGQyNNQ==
 
 "@types/aws-lambda@^8.10.31":
   version "8.10.40"
@@ -1631,10 +1631,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@2.946.0:
-  version "2.946.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.946.0.tgz#74d8748c6fd4ae6edb35e6fa04c0023c34674d47"
-  integrity sha512-d0fbVNHdpoeszGUcxOV8m+/kLNxUfKP5QsGwaRjcQfvEokFmvdKsvw87LhepFOa00NaI4J3jt8AbsX4mvmcChg==
+aws-sdk@2.951.0:
+  version "2.951.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.951.0.tgz#3cd8c0a4610407623ae8f1724f431fd328441033"
+  integrity sha512-YPqhdESUzd4+pSuGJcfMnG1qNVbmZjnmsa85Z9jofR1ilIpuV31onIiFHv8iubM59ETok/+zy3QOmxRSLYzFmQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"

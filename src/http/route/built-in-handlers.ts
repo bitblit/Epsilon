@@ -25,10 +25,6 @@ export class BuiltInHandlers {
     if (!parsed.type) {
       throw new BadRequestError('Cannot submit entry with no type field');
     }
-    const errors: string[] = backgroundManager.validateEntry(parsed);
-    if (errors.length > 0) {
-      throw new EpsilonHttpError<string[]>('Background entry invalid').withDetails(errors).withHttpStatusCode(400);
-    }
     let result: string = null;
     if (immediate) {
       result = await backgroundManager.fireImmediateProcessRequest(parsed);

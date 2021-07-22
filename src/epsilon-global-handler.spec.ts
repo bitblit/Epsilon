@@ -3,7 +3,6 @@ import { CronConfig } from './background/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { BackgroundConfig } from './background/background-config';
 import { BackgroundHandler } from './background/background-handler';
-import { BackgroundConfigUtil } from './background/background-config-util';
 import { BackgroundManager } from './background/background-manager';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
@@ -46,11 +45,7 @@ describe('#epsilonGlobalHandler', function () {
     const background = new BackgroundHandler(null, null);
     background.getConfig = jest.fn(() => smConfig);
 
-    const backgroundManager: BackgroundManager = BackgroundConfigUtil.backgroundConfigToBackgroundManager(
-      smConfig,
-      {} as ModelValidator,
-      true
-    );
+    const backgroundManager: BackgroundManager = new BackgroundManager(smConfig.aws, true);
 
     const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();

@@ -74,12 +74,12 @@
     "axios": "^0.21.1"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.79",
-    "aws-sdk": "2.946.0"
+    "@types/aws-lambda": "8.10.80",
+    "aws-sdk": "2.951.0"
   },
   "devDependencies": {
     "@fluffy-spoon/substitute": "1.208.0",
-    "@types/aws-lambda": "8.10.79",
+    "@types/aws-lambda": "8.10.80",
     "@types/js-yaml": "4.0.2",
     "@types/luxon": "1.27.1",
     "@types/node": "14.14.31",
@@ -88,7 +88,7 @@
     "@typescript-eslint/parser": "4.28.3",
     "apollo-server-lambda": "2.21.0",
     "graphql": "15.5.0",
-    "aws-sdk": "2.946.0",
+    "aws-sdk": "2.951.0",
     "barrelsby": "2.2.0",
     "eslint": "7.30.0",
     "eslint-config-prettier": "8.3.0",
