@@ -1,6 +1,5 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { BackgroundProcessor } from '../background-processor';
-import { BackgroundConfig } from '../background-config';
 import { BackgroundManager } from '../background-manager';
 
 export class EchoProcessor implements BackgroundProcessor<any, any> {
