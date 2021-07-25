@@ -5,7 +5,6 @@ import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
 import { EchoProcessor } from './built-in/echo-processor';
 import { NoOpProcessor } from './built-in/no-op-processor';
-import { BackgroundHandler } from './background-handler';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
 

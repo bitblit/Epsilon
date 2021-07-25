@@ -1,5 +1,4 @@
 import { EpsilonRouter } from './epsilon-router';
-import yaml from 'js-yaml';
 import { MisconfiguredError } from '../error/misconfigured-error';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { HandlerFunction } from './handler-function';

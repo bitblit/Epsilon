@@ -1,4 +1,3 @@
-import { BackgroundConfig } from './background-config';
 import { BackgroundManager } from './background-manager';
 
 export interface BackgroundProcessor<T, R> {

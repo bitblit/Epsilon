@@ -1,4 +1,3 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import fs from 'fs';
 import path from 'path';
 import { OpenApiDocModifications } from './open-api-doc-modifications';

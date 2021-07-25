@@ -2,7 +2,6 @@ import { APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult } from 'aws
 import { ResponseUtil } from './response-util';
 import path from 'path';
 import fs from 'fs';
-import { EpsilonRouter } from './route/epsilon-router';
 import { EpsilonConstants } from '../epsilon-constants';
 import { HttpConfig } from './route/http-config';
 

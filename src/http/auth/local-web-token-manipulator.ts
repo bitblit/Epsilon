@@ -5,8 +5,6 @@ import { APIGatewayEvent } from 'aws-lambda';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 import { UnauthorizedError } from '../error/unauthorized-error';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 /**
  * Service for handling jwt tokens

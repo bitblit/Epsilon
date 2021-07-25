@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk';
-import { Logger, ErrorRatchet, StringRatchet, StopWatch } from '@bitblit/ratchet/dist/common';
+import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from './background-entry';
 import { Context, SNSEvent } from 'aws-lambda';
 import { BackgroundConfig } from './background-config';

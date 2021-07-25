@@ -1,5 +1,5 @@
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
-import { APIGatewayEvent, CustomAuthorizerEvent } from 'aws-lambda';
+import { APIGatewayEvent } from 'aws-lambda';
 
 /**
  * Service for handling jwt tokens

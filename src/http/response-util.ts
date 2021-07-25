@@ -2,7 +2,6 @@ import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
 import zlib from 'zlib';
-import { EpsilonRouter } from './route/epsilon-router';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';

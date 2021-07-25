@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayEventRequestContext, ScheduledEvent } from 'aws-lambda';
+import { ScheduledEvent } from 'aws-lambda';
 import fs from 'fs';
 import path from 'path';
 import { AbstractCronEntry } from './abstract-cron-entry';

@@ -4,7 +4,6 @@ import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { BackgroundConfig } from './background/background-config';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundManager } from './background/background-manager';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 // jest.mock('@bitblit/background');
 

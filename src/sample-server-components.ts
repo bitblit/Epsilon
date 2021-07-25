@@ -3,7 +3,7 @@
  * with your own.
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
+import { ApolloServer, gql } from 'apollo-server-lambda';
 import { EpsilonRouter } from './http/route/epsilon-router';
 import { AuthorizerFunction } from './http/route/authorizer-function';
 import { HandlerFunction } from './http/route/handler-function';

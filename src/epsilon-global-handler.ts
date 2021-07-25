@@ -1,6 +1,5 @@
 import { APIGatewayEvent, Context, DynamoDBStreamEvent, S3CreateEvent, S3Event, ScheduledEvent, SNSEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { EpsilonConfig } from './global/epsilon-config';
 import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
 import { SnsHandlerFunction } from './non-http/sns-handler-function';

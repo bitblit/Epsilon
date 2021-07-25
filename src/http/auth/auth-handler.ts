@@ -1,6 +1,5 @@
 import { AuthResponse, AuthResponseContext, Callback, Context, CustomAuthorizerEvent, PolicyDocument } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { WebTokenManipulator } from './web-token-manipulator';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { LocalWebTokenManipulator } from './local-web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
