@@ -124,7 +124,7 @@ export class RouterUtil {
             const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
             // Auto-assign the background handler
             if (isBackgroundEndpoint) {
-              rval.config.handlers.set(path, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
+              rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
             }
 
             if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
