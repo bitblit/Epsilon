@@ -37,7 +37,4 @@ export interface HttpConfig {
   apolloRegex?: RegExp;
   apolloServer?: ApolloServer;
   apolloCreateHandlerOptions?: CreateHandlerOptions;
-
-  backgroundSubmissionHandlerPath?: string;
-  backgroundSubmissionAuthorizerName?: string;
 }

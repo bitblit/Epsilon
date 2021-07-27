@@ -12,8 +12,8 @@ import { BackgroundProcessor } from './background-processor';
 export class BackgroundValidator {
   constructor(private cfg: BackgroundConfig, private modelValidator: ModelValidator) {}
 
-  public findProcessor(typeName: string): BackgroundProcessor<any, any> {
-    const rval: BackgroundProcessor<any, any> = this.cfg.processors.find((s) => s.typeName === typeName);
+  public findProcessor(typeName: string): BackgroundProcessor<any> {
+    const rval: BackgroundProcessor<any> = this.cfg.processors.find((s) => s.typeName === typeName);
     return rval;
   }
 
@@ -27,7 +27,7 @@ export class BackgroundValidator {
       rval.push('Entry is null');
     } else if (!StringRatchet.trimToNull(entry.type)) {
       rval.push('Entry type is null or empty');
-      const proc: BackgroundProcessor<any, any> = this.findProcessor(entry.type);
+      const proc: BackgroundProcessor<any> = this.findProcessor(entry.type);
 
       if (!proc) {
         rval.push('Entry type is invalid');
@@ -36,11 +36,6 @@ export class BackgroundValidator {
           rval = rval.concat(proc.validateData(entry.data));
         } else if (proc.dataSchema) {
           rval = rval.concat(this.modelValidator.validate(proc.dataSchema, entry.data) || []);
-        }
-        if (proc.validateMetaData) {
-          rval = rval.concat(proc.validateMetaData(entry.metadata));
-        } else if (proc.metaDataSchema) {
-          rval = rval.concat(this.modelValidator.validate(proc.metaDataSchema, entry.metadata) || []);
         }
       }
     }
@@ -56,10 +51,10 @@ export class BackgroundValidator {
   }
 
   public static validateAndMapProcessors(
-    processorInput: BackgroundProcessor<any, any>[],
+    processorInput: BackgroundProcessor<any>[],
     modelValidator: ModelValidator
-  ): Map<string, BackgroundProcessor<any, any>> {
-    const rval: Map<string, BackgroundProcessor<any, any>> = new Map<string, BackgroundProcessor<any, any>>();
+  ): Map<string, BackgroundProcessor<any>> {
+    const rval: Map<string, BackgroundProcessor<any>> = new Map<string, BackgroundProcessor<any>>();
     processorInput.forEach((p, idx) => {
       if (!p) {
         ErrorRatchet.throwFormattedErr('Null processor provided at index %d', idx);
@@ -80,22 +75,6 @@ export class BackgroundValidator {
         }
         if (!modelValidator.fetchModel(p.dataSchema)) {
           ErrorRatchet.throwFormattedErr('%s defines a data schema %s but model validator does not contain it', p.typeName, p.dataSchema);
-        }
-      }
-
-      if (StringRatchet.trimToNull(p.metaDataSchema)) {
-        if (p.validateMetaData) {
-          ErrorRatchet.throwFormattedErr('%s defines both a metadata schema and a metadata validator', p.typeName);
-        }
-        if (!modelValidator) {
-          ErrorRatchet.throwFormattedErr('%s defines a metaData schema but model validator not set', p.typeName);
-        }
-        if (!modelValidator.fetchModel(p.metaDataSchema)) {
-          ErrorRatchet.throwFormattedErr(
-            '%s defines a metaData schema %s but model validator does not contain it',
-            p.typeName,
-            p.metaDataSchema
-          );
         }
       }
 

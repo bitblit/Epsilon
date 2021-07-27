@@ -11,36 +11,6 @@ import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { BackgroundManager } from '../../background/background-manager';
 
 export class BuiltInHandlers {
-  public static async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, backgroundManager: BackgroundManager): Promise<any> {
-    Logger.info('handleBackgroundSubmission : %j', evt.body);
-
-    const parsed: BackgroundEntry = evt.parsedBody;
-    const immediate: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['immediate']);
-    const startProcessor: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['startProcessor']);
-
-    // We do this manually since the OpenAPI doc will be supplied by the epsilon user
-    if (!parsed) {
-      throw new BadRequestError('Cannot submit null entry');
-    }
-    if (!parsed.type) {
-      throw new BadRequestError('Cannot submit entry with no type field');
-    }
-    let result: string = null;
-    if (immediate) {
-      result = await backgroundManager.fireImmediateProcessRequest(parsed);
-    } else {
-      result = await backgroundManager.addEntryToQueue(parsed, startProcessor);
-    }
-
-    const rval: any = {
-      time: new Date().toLocaleString(),
-      path: evt.path,
-      message: result,
-    };
-
-    return rval;
-  }
-
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
     Logger.info('A request was made to %s with body %j - not yet implemented', evt.path, evt.body);
 

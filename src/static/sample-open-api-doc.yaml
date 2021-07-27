@@ -219,48 +219,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              title: Access Token Request
-              required:
-                - email
-                - password
-                - scope
-              properties:
-                email:
-                  type: string
-                  description: Email address of the account to authenticate
-                  format: email
-                  minLength: 7
-                password:
-                  type: string
-                  description: Password of the account to authenticate
-                  minLength: 6
-                scope:
-                  type: string
-                  enum:
-                    - OWNER
-                    - ADVERTISER
-                    - GLOBAL
-                    - RUN_AS_OWNER
-                    - RUN_AS_ADVERTISER
-                  description: |
-                    What style of account to authenticate:
-                    * `OWNER` - A device owner account
-                    * `ADVERTISER` - A advertising account
-                    * `GLOBAL` - Used by Adomni customer service
-                    * `RUN_AS_OWNER` - Used by Adomni customer service
-                    * `RUN_AS_ADVERTISER` - Used by Adomni customer service
-                  default: OWNER
-                runAs:
-                  type: string
-                  description: Used by Adomni customer service
-                  format: email
-                expirationSeconds:
-                  type: number
-                  minimum: 10
-                  maximum: 3600
-                  default: 3600
-        description: Request for the access token
+              $ref: '#/components/schemas/AccessTokenRequest'
+        description: Request to refresh the access token or change active user
         required: true
     options:
       tags:
@@ -336,6 +296,174 @@ paths:
           required: true
           schema:
             type: number
+      responses:
+        '200':
+          description: Standard CORS header response
+
+  /background/echo:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundQueueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Empty'
+        description: Content to echo
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
+  /background/log-and-enqueue-echo:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundQueueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Empty'
+        description: Content to echo
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
+  /background/no-op:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundQueueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
+  /background/sample-delay:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundQueueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Empty'
+        description: Content to echo
+        required: true
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
+  /background/sample-input-validated:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundQueueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackgroundSampleInputValidatedProcessorData'
+        description: Content to echo
+        required: true
+    options:
+      tags:
+        - CORS
       responses:
         '200':
           description: Standard CORS header response
@@ -494,6 +622,21 @@ components:
         detailCode:
           type: number
           description: Adomni detail status code for this error
+    BackgroundQueueResponse:
+      type: object
+      title: Background Queue Response
+      description: When any of the background endpoints are hit, this is what will be returned
+      required:
+        - nameParam
+        - numberParam
+      properties:
+        processHandling:
+          type: string
+          enum: ['Queued', 'Immediate']
+        success:
+          type: boolean
+        resultId:
+          type: string
     BackgroundSampleInputValidatedProcessorData:
       type: object
       title: BackgroundSampleInputValidatedProcessorData

@@ -137,9 +137,7 @@ export class SampleServerComponents {
         },
       },
       apolloRegex: new RegExp('.*graphql.*'),
-      backgroundSubmissionHandlerPath: '/background',
       prefixesToStripBeforeRouteMatch: ['v0'],
-      // backgroundSubmissionAuthorizerName: 'BACKGROUND'
     };
 
     const background: BackgroundConfig = {
@@ -149,6 +147,8 @@ export class SampleServerComponents {
         sqs: {} as AWS.SQS,
         sns: {} as AWS.SNS,
       },
+      // backgroundHttpEndpointAuthorizorName 'BACKGROUND',
+      backgroundHttpEndpointPrefix: '/background/',
       processors: [
         new EchoProcessor(),
         new NoOpProcessor(),

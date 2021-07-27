@@ -11,6 +11,7 @@ import yaml from 'js-yaml';
 import { OpenApiDocument } from './global/open-api/open-api-document';
 import { BackgroundManager } from './background/background-manager';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { BackgroundHttpAdapterHandler } from './background/background-http-adapter-handler';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
@@ -22,13 +23,14 @@ export class EpsilonConfigParser {
     Logger.info('Creating epsilon : BM : %J', backgroundManager);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
+    const backgroundHttpAdapter: BackgroundHttpAdapterHandler = new BackgroundHttpAdapterHandler(config.backgroundConfig);
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
       ? new BackgroundHandler(config.backgroundConfig, backgroundManager, modelValidator)
       : null;
 
     // TODO: refactor me
     const epsilonRouter: EpsilonRouter = config.httpConfig
-      ? RouterUtil.openApiYamlToRouterConfig(config.httpConfig, parsed, modelValidator, backgroundManager)
+      ? RouterUtil.openApiYamlToRouterConfig(config.httpConfig, parsed, modelValidator, backgroundHttpAdapter)
       : null;
     const webHandler: WebHandler = epsilonRouter ? new WebHandler(epsilonRouter) : null;
 

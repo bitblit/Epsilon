@@ -14,6 +14,7 @@ import { OpenApiDocument } from '../../global/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from '../../background/background-manager';
 import { BadRequestError } from '../error/bad-request-error';
+import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
 
 /**
  * Endpoints about the api itself
@@ -64,7 +65,7 @@ export class RouterUtil {
     httpConfig: HttpConfig,
     openApiDoc: OpenApiDocument,
     modelValidator: ModelValidator,
-    backgroundManager: BackgroundManager
+    backgroundHttpAdapterHandler: BackgroundHttpAdapterHandler
   ): EpsilonRouter {
     if (!openApiDoc || !httpConfig) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
@@ -120,13 +121,22 @@ export class RouterUtil {
           } else {
             const finder: string = method + ' ' + path;
             const entry: any = openApiDoc.paths[path][method];
+            const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
+            // Auto-assign the background handler
+            if (isBackgroundEndpoint) {
+              rval.config.handlers.set(path, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
+            }
+
             if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
               missingPaths.push(finder);
             }
             if (entry && entry['security'] && entry['security'].length > 1) {
               throw new MisconfiguredError('Epsilon does not currently support multiple security (path was ' + finder + ')');
             }
-            const authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
+            let authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
+            if (isBackgroundEndpoint && backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName) {
+              authorizerName = backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName;
+            }
 
             const timeoutMS: number = rval.config.customTimeouts.get(finder) || rval.config.defaultTimeoutMS;
 
@@ -204,36 +214,6 @@ export class RouterUtil {
           }
         });
       });
-    }
-
-    if (httpConfig.backgroundSubmissionHandlerPath) {
-      Logger.debug('Adding background mapped to %s', httpConfig.backgroundSubmissionHandlerPath);
-      let routeMapping: RouteMapping = rval.routes.find((rm) => rm.path === httpConfig.backgroundSubmissionHandlerPath);
-
-      if (!routeMapping) {
-        // Define one on-the-fly
-        routeMapping = {
-          path: httpConfig.backgroundSubmissionHandlerPath,
-          method: 'POST',
-          function: (evt) => BuiltInHandlers.handleBackgroundSubmission(evt, backgroundManager),
-          authorizerName: null,
-          disableAutomaticBodyParse: false,
-          disableQueryMapAssure: false,
-          disableHeaderMapAssure: false,
-          disablePathMapAssure: false,
-          timeoutMS: httpConfig.defaultTimeoutMS,
-          validation: null,
-          disableConvertNullReturnedObjectsTo404: false,
-          allowLiteralStringNullAsPathParameter: false,
-          allowLiteralStringNullAsQueryStringParameter: false,
-          enableValidateOutboundResponseBody: false,
-          outboundValidation: null,
-        };
-        rval.routes.push(routeMapping);
-      }
-      if (httpConfig.backgroundSubmissionAuthorizerName) {
-        routeMapping.authorizerName = httpConfig.backgroundSubmissionAuthorizerName;
-      }
     }
 
     if (missingPaths.length > 0) {

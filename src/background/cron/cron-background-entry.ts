@@ -15,5 +15,4 @@ export interface CronBackgroundEntry extends AbstractCronEntry {
   fireImmediate: boolean;
 
   data?: any;
-  metadata?: any;
 }

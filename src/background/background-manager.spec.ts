@@ -25,6 +25,8 @@ describe('#createEntry', function () {
 
     backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],
+      backgroundHttpEndpointPrefix: '/background/',
+      backgroundHttpEndpointAuthorizerName: 'BackgroundAuthorizer',
       aws: {
         sqs: mockSqs,
         sns: mockSns,

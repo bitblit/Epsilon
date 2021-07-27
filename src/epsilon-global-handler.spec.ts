@@ -33,12 +33,13 @@ describe('#epsilonGlobalHandler', function () {
           data: () => {
             return { curDate: new Date().toISOString(), fixed: 'abc' };
           },
-          metadata: { a: 'b' },
         },
       ],
     };
     const smConfig: BackgroundConfig = {
       processors: [],
+      backgroundHttpEndpointPrefix: '/background/',
+      backgroundHttpEndpointAuthorizerName: 'BackgroundAuthorizer',
       aws: null,
     };
     const background = new BackgroundHandler(null, null);

@@ -15,7 +15,7 @@ import { BackgroundValidator } from './background-validator';
  * thing at the same time.
  */
 export class BackgroundHandler {
-  private processors: Map<string, BackgroundProcessor<any, any>>;
+  private processors: Map<string, BackgroundProcessor<any>>;
   private validator: BackgroundValidator;
 
   constructor(private cfg: BackgroundConfig, private mgr: BackgroundManager, private modelValidator?: ModelValidator) {
@@ -194,12 +194,12 @@ export class BackgroundHandler {
   public async processSingleBackgroundEntry(e: BackgroundEntry): Promise<boolean> {
     let rval: boolean = false;
     try {
-      const processorInput: BackgroundProcessor<any, any> = this.processors.get(e.type);
+      const processorInput: BackgroundProcessor<any> = this.processors.get(e.type);
       if (!processorInput) {
         Logger.warn('Found no processor for background entry : %j (returning false)', e);
       } else {
         const sw: StopWatch = new StopWatch(true);
-        await processorInput.handleEvent(e.data, e.metadata, this.mgr);
+        await processorInput.handleEvent(e.data, this.mgr);
         rval = true;
         sw.stop();
         Logger.info('Processed %j : %s', e, sw.dump());

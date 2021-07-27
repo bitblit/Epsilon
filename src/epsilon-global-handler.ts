@@ -180,20 +180,10 @@ export class EpsilonGlobalHandler {
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
               Logger.info('Firing Background cron : %s', CronUtil.cronEntryName(smCronEntry));
 
-              const metadata: any = Object.assign(
-                {},
-                EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.metadata, {}),
-                {
-                  cronDelegate: true,
-                  cronSourceEvent: evt,
-                }
-              );
-
               const backgroundEntry: BackgroundEntry = {
                 type: smCronEntry.backgroundTaskType,
                 created: new Date().getTime(),
                 data: EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.data, {}),
-                metadata: metadata,
               };
               Logger.silly('Resolved entry : %j', backgroundEntry);
               if (smCronEntry.fireImmediate) {

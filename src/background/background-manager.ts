@@ -27,19 +27,18 @@ export class BackgroundManager {
     return this._localBus;
   }
 
-  public createEntry(type: string, data: any = {}, metadata: any = {}): BackgroundEntry {
+  public createEntry(type: string, data: any = {}): BackgroundEntry {
     const rval: BackgroundEntry = {
       created: new Date().getTime(),
       type: type,
       data: data,
-      metadata: metadata,
     };
     return rval;
   }
 
-  public async addEntryToQueueByParts(type: string, data: any = {}, metadata: any = {}): Promise<string> {
+  public async addEntryToQueueByParts(type: string, data: any = {}): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data, metadata);
+    const entry: BackgroundEntry = this.createEntry(type, data);
     if (entry) {
       rval = await this.addEntryToQueue(entry);
     }
@@ -93,14 +92,9 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async fireImmediateProcessRequestByParts(
-    type: string,
-    data: any = {},
-    metadata: any = {},
-    returnNullOnInvalid: boolean = false
-  ): Promise<string> {
+  public async fireImmediateProcessRequestByParts(type: string, data: any = {}, returnNullOnInvalid: boolean = false): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data, metadata);
+    const entry: BackgroundEntry = this.createEntry(type, data);
     if (entry) {
       rval = await this.fireImmediateProcessRequest(entry);
     }
