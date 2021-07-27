@@ -23,7 +23,10 @@ export class EpsilonConfigParser {
     Logger.info('Creating epsilon : BM : %J', backgroundManager);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
-    const backgroundHttpAdapter: BackgroundHttpAdapterHandler = new BackgroundHttpAdapterHandler(config.backgroundConfig);
+    const backgroundHttpAdapter: BackgroundHttpAdapterHandler = new BackgroundHttpAdapterHandler(
+      config.backgroundConfig,
+      backgroundManager
+    );
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
       ? new BackgroundHandler(config.backgroundConfig, backgroundManager, modelValidator)
       : null;

@@ -14,11 +14,7 @@ import { BackgroundConfig } from './background-config';
  * thing at the same time.
  */
 export class BackgroundHttpAdapterHandler {
-  private backgroundManager: BackgroundManager;
-
-  constructor(private backgroundConfig: BackgroundConfig) {
-    this.backgroundManager = new BackgroundManager(this.backgroundConfig.aws, true);
-  }
+  constructor(private backgroundConfig: BackgroundConfig, private backgroundManager: BackgroundManager) {}
 
   public get backgroundHttpEndpointPrefix(): string {
     return this.backgroundConfig.backgroundHttpEndpointPrefix;
