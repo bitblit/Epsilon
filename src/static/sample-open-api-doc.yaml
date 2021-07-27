@@ -300,7 +300,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/echo:
+  /background/epsilon-echo:
     post:
       responses:
         '200':
@@ -335,7 +335,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/log-and-enqueue-echo:
+  /background/epsilon-log-and-enqueue-echo:
     post:
       responses:
         '200':
@@ -370,7 +370,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/no-op:
+  /background/epsilon-no-op:
     post:
       responses:
         '200':
@@ -398,7 +398,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/sample-delay:
+  /background/epsilon-sample-delay:
     post:
       responses:
         '200':
@@ -433,7 +433,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/sample-input-validated:
+  /background/epsilon-sample-input-validated:
     post:
       responses:
         '200':

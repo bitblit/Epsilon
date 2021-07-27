@@ -5,7 +5,7 @@ import { EchoProcessor } from './echo-processor';
 
 export class LogAndEnqueueEchoProcessor implements BackgroundProcessor<any> {
   public get typeName(): string {
-    return 'BackgroundBuiltInLogAndEnqueueEchoProcessor';
+    return 'EpsilonLogAndEnqueueEcho';
   }
 
   public async handleEvent(data: any, cfg: BackgroundManager): Promise<void> {

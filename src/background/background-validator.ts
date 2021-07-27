@@ -22,7 +22,7 @@ export class BackgroundValidator {
   }
 
   public validateEntry(entry: BackgroundEntry): string[] {
-    let rval: string[] = [];
+    const rval: string[] = [];
     if (!entry) {
       rval.push('Entry is null');
     } else if (!StringRatchet.trimToNull(entry.type)) {
@@ -31,12 +31,6 @@ export class BackgroundValidator {
 
       if (!proc) {
         rval.push('Entry type is invalid');
-      } else {
-        if (proc.validateData) {
-          rval = rval.concat(proc.validateData(entry.data));
-        } else if (proc.dataSchema) {
-          rval = rval.concat(this.modelValidator.validate(proc.dataSchema, entry.data) || []);
-        }
       }
     }
     return rval;
@@ -65,17 +59,6 @@ export class BackgroundValidator {
 
       if (rval.has(p.typeName)) {
         ErrorRatchet.throwFormattedErr('More than one processor defined for type %s', p.typeName);
-      }
-      if (StringRatchet.trimToNull(p.dataSchema)) {
-        if (p.validateData) {
-          ErrorRatchet.throwFormattedErr('%s defines both a data schema and a data validator', p.typeName);
-        }
-        if (!modelValidator) {
-          ErrorRatchet.throwFormattedErr('%s defines a data schema but model validator not set', p.typeName);
-        }
-        if (!modelValidator.fetchModel(p.dataSchema)) {
-          ErrorRatchet.throwFormattedErr('%s defines a data schema %s but model validator does not contain it', p.typeName, p.dataSchema);
-        }
       }
 
       rval.set(p.typeName, p);

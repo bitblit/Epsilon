@@ -4,7 +4,7 @@ import { BackgroundManager } from '../background-manager';
 
 export class SampleInputValidatedProcessor implements BackgroundProcessor<SampleInputValidatedProcessorData> {
   public get typeName(): string {
-    return 'BackgroundBuiltInSampleInputValidatedProcessor';
+    return 'EpsilonSampleInputValidated';
   }
 
   public async handleEvent(data: SampleInputValidatedProcessorData, mgr?: BackgroundManager): Promise<void> {

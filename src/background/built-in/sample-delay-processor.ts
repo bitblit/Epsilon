@@ -4,7 +4,7 @@ import { BackgroundManager } from '../background-manager';
 
 export class SampleDelayProcessor implements BackgroundProcessor<any> {
   public get typeName(): string {
-    return 'BackgroundBuiltInSampleDelayProcessor';
+    return 'EpsilonSampleDelay';
   }
 
   public async handleEvent(data: any, mgr?: BackgroundManager): Promise<void> {

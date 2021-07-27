@@ -3,7 +3,7 @@ import { BackgroundManager } from '../background-manager';
 
 export class NoOpProcessor implements BackgroundProcessor<any> {
   public get typeName(): string {
-    return 'NoOpProcessor';
+    return 'EpsilonNoOp';
   }
 
   public async handleEvent(data: any, mgr?: BackgroundManager): Promise<void> {
