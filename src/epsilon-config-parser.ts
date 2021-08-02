@@ -43,7 +43,6 @@ export class EpsilonConfigParser {
       modelValidator: modelValidator,
       webHandler: webHandler,
       backgroundHandler: backgroundHandler,
-      epsilonRouter: epsilonRouter,
       backgroundManager: backgroundManager,
     };
 

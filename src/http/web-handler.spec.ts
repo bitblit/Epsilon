@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { SampleServerComponents } from '../sample-server-components';
-import { EpsilonInstance } from '../global/epsilon-instance';
+import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 
 describe('#errorToProxyResult', function () {
   /*
@@ -64,9 +64,9 @@ describe('#errorToProxyResult', function () {
     */
 
   it('should gzip responses correctly', async () => {
-    const inst: EpsilonInstance = await SampleServerComponents.createSampleEpsilonInstance();
+    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler();
 
-    expect(inst.modelValidator).toBeTruthy();
+    expect(inst.epsilon.modelValidator).toBeTruthy();
 
     const evt: APIGatewayEvent = {
       httpMethod: 'get',
@@ -87,7 +87,7 @@ describe('#errorToProxyResult', function () {
     } as APIGatewayEvent;
 
     Logger.setLevelByName('silly');
-    const result: ProxyResult = await inst.webHandler.lambdaHandler(evt, {} as Context);
+    const result: ProxyResult = await inst.epsilon.webHandler.lambdaHandler(evt, {} as Context);
 
     expect(result).toBeTruthy();
     expect(result.isBase64Encoded).toEqual(true);

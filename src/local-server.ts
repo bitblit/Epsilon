@@ -6,7 +6,7 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { DateTime } from 'luxon';
 import qs from 'querystring';
 import { EventUtil } from './http/event-util';
-import { EpsilonInstance } from './global/epsilon-instance';
+import { EpsilonGlobalHandler } from './epsilon-global-handler';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -15,7 +15,7 @@ export class LocalServer {
   private server: Server;
   private aborted: boolean = false;
 
-  constructor(private instance: EpsilonInstance, private port: number = 8888) {}
+  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888) {}
 
   async runServer(): Promise<boolean> {
     Logger.info('Starting Epsilon server on port %d', this.port);
@@ -56,7 +56,7 @@ export class LocalServer {
       this.aborted = true;
       return true;
     } else {
-      const result: ProxyResult = await this.instance.webHandler.lambdaHandler(evt, context);
+      const result: ProxyResult = await this.globalHandler.lambdaHandler(evt, context);
       const written: boolean = await this.writeProxyResultToServerResponse(result, response);
       return written;
     }

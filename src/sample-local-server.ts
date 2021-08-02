@@ -8,9 +8,9 @@ import { SampleServerComponents } from './sample-server-components';
 
 Logger.setLevelByName('debug');
 
-SampleServerComponents.createSampleEpsilonInstance()
-  .then((cfg) => {
-    const testServer: LocalServer = new LocalServer(cfg);
+SampleServerComponents.createSampleEpsilonGlobalHandler()
+  .then((handler) => {
+    const testServer: LocalServer = new LocalServer(handler);
     testServer.runServer().then((res) => {
       Logger.info('Got res server');
       process.exit(0);

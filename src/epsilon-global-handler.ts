@@ -27,7 +27,7 @@ export class EpsilonGlobalHandler {
   constructor(private _epsilon: EpsilonInstance) {}
 
   public get epsilon(): EpsilonInstance {
-    return this.epsilon;
+    return this._epsilon;
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {

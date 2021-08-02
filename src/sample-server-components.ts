@@ -30,6 +30,7 @@ import { EpsilonInstance } from './global/epsilon-instance';
 import { BackgroundManager } from './background/background-manager';
 import { RouterUtil } from './http/route/router-util';
 import { LogAndEnqueueEchoProcessor } from './background/built-in/log-and-enqueue-echo-processor';
+import { EpsilonGlobalHandler } from './epsilon-global-handler';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -82,7 +83,7 @@ export class SampleServerComponents {
 
   // Functions below here are for using as samples
 
-  public static async createSampleEpsilonInstance(): Promise<EpsilonInstance> {
+  public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     const validTokenAuth: SimpleLoggedInAuth = new SimpleLoggedInAuth();
@@ -167,11 +168,12 @@ export class SampleServerComponents {
     const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, true);
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
 
-    const router: EpsilonRouter = epsilonInstance.epsilonRouter;
+    const router: EpsilonRouter = epsilonInstance.webHandler.router;
     // Modify a single route...
     RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
 
-    return epsilonInstance;
+    const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
+    return rval;
   }
 
   public static loadSampleOpenApiYaml(): string {

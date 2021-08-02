@@ -44,6 +44,10 @@ export class WebHandler {
     }
   }
 
+  public get router(): EpsilonRouter {
+    return this.routerConfig;
+  }
+
   public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     let rval: ProxyResult = null;
     try {
