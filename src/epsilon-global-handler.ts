@@ -83,7 +83,7 @@ export class EpsilonGlobalHandler {
         rval = await this.processS3Event(event as S3CreateEvent);
       } else if (LambdaEventDetector.isValidCronEvent(event)) {
         Logger.debug('Epsilon: CRON: %j', event);
-        if (this._epsilon.config.disabled.cron) {
+        if (!this._epsilon.config.cron) {
           Logger.debug('Skipping - CRON disabled');
         } else {
           rval = await EpsilonGlobalHandler.processCronEvent(
@@ -112,7 +112,7 @@ export class EpsilonGlobalHandler {
 
   private async processSnsEvent(evt: SNSEvent): Promise<any> {
     let rval: any = null;
-    if (this._epsilon.config && this._epsilon.config.sns && !this._epsilon.config.disabled.sns && evt && evt.Records.length > 0) {
+    if (this._epsilon.config && this._epsilon.config.sns && evt && evt.Records.length > 0) {
       const finder: string = evt.Records[0].Sns.TopicArn;
       const handler: SnsHandlerFunction = this.findInMap<SnsHandlerFunction>(finder, this._epsilon.config.sns.handlers);
       if (handler) {
@@ -126,7 +126,7 @@ export class EpsilonGlobalHandler {
 
   private async processS3Event(evt: S3Event): Promise<any> {
     let rval: any = null;
-    if (this._epsilon.config && this._epsilon.config.s3 && !this._epsilon.config.disabled.s3 && evt && evt.Records.length > 0) {
+    if (this._epsilon.config && this._epsilon.config.s3 && evt && evt.Records.length > 0) {
       const finder: string = evt.Records[0].s3.bucket.name + '/' + evt.Records[0].s3.object.key;
       const isRemoveEvent: boolean = evt.Records[0].eventName && evt.Records[0].eventName.startsWith('ObjectRemoved');
 
@@ -218,14 +218,7 @@ export class EpsilonGlobalHandler {
 
   private async processDynamoDbEvent(evt: DynamoDBStreamEvent): Promise<any> {
     let rval: any = null;
-    if (
-      this._epsilon.config &&
-      this._epsilon.config.dynamoDb &&
-      !this._epsilon.config.disabled.dynamoDb &&
-      evt &&
-      evt.Records &&
-      evt.Records.length > 0
-    ) {
+    if (this._epsilon.config && this._epsilon.config.dynamoDb && evt && evt.Records && evt.Records.length > 0) {
       const finder: string = evt.Records[0].eventSourceARN;
       const handler: DynamoDbHandlerFunction = this.findInMap<DynamoDbHandlerFunction>(finder, this._epsilon.config.dynamoDb.handlers);
       if (handler) {
