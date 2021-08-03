@@ -165,7 +165,8 @@ export class SampleServerComponents {
       backgroundConfig: background,
     };
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, true);
+    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws);
+    backgroundManager.localMode = true;
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
 
     const router: EpsilonRouter = epsilonInstance.webHandler.router;

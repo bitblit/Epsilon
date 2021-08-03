@@ -35,7 +35,7 @@ describe('#createEntry', function () {
       },
     };
 
-    backgroundMgr = new BackgroundManager(backgroundConfig.aws, false);
+    backgroundMgr = new BackgroundManager(backgroundConfig.aws);
   });
 
   it('Should return queue attributes', async () => {

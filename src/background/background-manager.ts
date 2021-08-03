@@ -16,8 +16,9 @@ import { EpsilonConstants } from '../epsilon-constants';
  */
 export class BackgroundManager {
   private _localBus: Subject<BackgroundEntry> = new Subject<BackgroundEntry>();
+  private _localMode: boolean = false;
 
-  constructor(private _awsConfig: BackgroundAwsConfig, private _localMode: boolean) {}
+  constructor(private _awsConfig: BackgroundAwsConfig) {}
 
   public get awsConfig(): BackgroundAwsConfig {
     return this._awsConfig;
@@ -25,6 +26,11 @@ export class BackgroundManager {
 
   public get localMode(): boolean {
     return this._localMode;
+  }
+
+  public set localMode(newVal: boolean) {
+    Logger.info('Setting localmode for background processing to : %s', newVal);
+    this._localMode = newVal;
   }
 
   public localBus(): Subject<BackgroundEntry> {

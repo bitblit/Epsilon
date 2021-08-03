@@ -45,7 +45,8 @@ describe('#epsilonGlobalHandler', function () {
     const background = new BackgroundHandler(null, null);
     background.getConfig = jest.fn(() => smConfig);
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(smConfig.aws, true);
+    const backgroundManager: BackgroundManager = new BackgroundManager(smConfig.aws);
+    backgroundManager.localMode = true;
 
     const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();

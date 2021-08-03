@@ -9,6 +9,6 @@ export class EchoProcessor implements BackgroundProcessor<any> {
   }
 
   public async handleEvent(data: any, mgr?: BackgroundManager): Promise<void> {
-    Logger.info('Echo processing : %j : %j', data);
+    Logger.info('Echo processing : %j', data);
   }
 }

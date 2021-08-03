@@ -25,7 +25,7 @@ export class BackgroundHttpAdapterHandler {
   }
 
   public async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundQueueResponseInternal> {
-    Logger.info('handleBackgroundSubmission : %j', evt.body);
+    Logger.info('handleBackgroundSubmission : %j', evt.parsedBody);
 
     let rval: BackgroundQueueResponseInternal = null;
 

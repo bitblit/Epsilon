@@ -8,7 +8,7 @@ export class SampleInputValidatedProcessor implements BackgroundProcessor<Sample
   }
 
   public async handleEvent(data: SampleInputValidatedProcessorData, mgr?: BackgroundManager): Promise<void> {
-    Logger.info('Running SampleInputValidatedProcessor, data was : %j, meta was: %j', data);
+    Logger.info('Running SampleInputValidatedProcessor, data was : %j', data);
   }
 
   public get dataSchema(): string {
