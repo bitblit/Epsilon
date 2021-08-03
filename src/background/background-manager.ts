@@ -57,27 +57,31 @@ export class BackgroundManager {
 
   public async addEntryToQueue(entry: BackgroundEntry, fireStartMessage?: boolean): Promise<string> {
     let rval: string = null;
-    if (this.localMode) {
-      this._localBus.next(entry);
-      rval = 'addEntryToQueue' + new Date().toISOString() + StringRatchet.safeString(rval);
-    } else {
-      // Guard against bad entries up front
-      const params = {
-        DelaySeconds: 0,
-        MessageBody: JSON.stringify(entry),
-        MessageGroupId: entry.type,
-        QueueUrl: this.awsConfig.queueUrl,
-      };
+    try {
+      if (this.localMode) {
+        this._localBus.next(entry);
+        rval = 'addEntryToQueue' + new Date().toISOString() + StringRatchet.safeString(rval);
+      } else {
+        // Guard against bad entries up front
+        const params = {
+          DelaySeconds: 0,
+          MessageBody: JSON.stringify(entry),
+          MessageGroupId: entry.type,
+          QueueUrl: this.awsConfig.queueUrl,
+        };
 
-      Logger.debug('Adding %j to queue', entry);
-      const result: AWS.SQS.SendMessageResult = await this.awsConfig.sqs.sendMessage(params).promise();
+        Logger.debug('Adding %j to queue', entry);
+        const result: AWS.SQS.SendMessageResult = await this.awsConfig.sqs.sendMessage(params).promise();
 
-      if (fireStartMessage) {
-        const fireResult: string = await this.fireStartProcessingRequest();
-        Logger.silly('FireResult : %s', fireResult);
+        if (fireStartMessage) {
+          const fireResult: string = await this.fireStartProcessingRequest();
+          Logger.silly('FireResult : %s', fireResult);
+        }
+
+        rval = result.MessageId;
       }
-
-      rval = result.MessageId;
+    } catch (err) {
+      Logger.error('Failed to add entry to queue: %s', err, err);
     }
     return rval;
   }
@@ -117,15 +121,19 @@ export class BackgroundManager {
       this.localBus().next(entry);
       rval = 'fireImmediateProcessRequest' + new Date().toISOString() + StringRatchet.safeString(rval);
     } else {
-      // Guard against bad entries up front
-      Logger.debug('Immediately processing %j', entry);
-      const toWrite: any = {
-        type: EpsilonConstants.BACKGROUND_SNS_IMMEDIATE_RUN_FLAG,
-        backgroundEntry: entry,
-      };
-      const msg: string = JSON.stringify(toWrite);
-      rval = await this.writeMessageToSnsTopic(msg);
-      Logger.debug('Wrote message : %s : %s', msg, rval);
+      try {
+        // Guard against bad entries up front
+        Logger.debug('Immediately processing %j', entry);
+        const toWrite: any = {
+          type: EpsilonConstants.BACKGROUND_SNS_IMMEDIATE_RUN_FLAG,
+          backgroundEntry: entry,
+        };
+        const msg: string = JSON.stringify(toWrite);
+        rval = await this.writeMessageToSnsTopic(msg);
+        Logger.debug('Wrote message : %s : %s', msg, rval);
+      } catch (err) {
+        Logger.error('Failed to fireImmediateProcessRequest : %s', err, err);
+      }
     }
     return rval;
   }
@@ -135,7 +143,11 @@ export class BackgroundManager {
     if (this.localMode) {
       rval = 'NO-OP';
     } else {
-      rval = await this.writeMessageToSnsTopic(EpsilonConstants.BACKGROUND_SNS_START_MARKER);
+      try {
+        rval = await this.writeMessageToSnsTopic(EpsilonConstants.BACKGROUND_SNS_START_MARKER);
+      } catch (err) {
+        Logger.error('Failed to fireStartProcessingRequest : %s', err, err);
+      }
     }
     return rval;
   }
