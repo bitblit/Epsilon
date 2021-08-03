@@ -1,0 +1,103 @@
+@startuml
+
+object LocalServer #lightgrey
+object Lambda #lightgrey
+
+object EpsilonGlobalHandler
+object EpsilonInstance {
+  config: EpsilonConfig
+  parsedOpenApiDoc: OpenApiDocument
+  modelValidator: ModelValidator
+  webHandler: WebHandler
+  backgroundHandler: BackgroundHandler
+  backgroundManager: BackgroundManager
+}
+
+object EpsilonConfigParser
+object EpsilonConfig {
+  openApiYamlString: string;
+  httpConfig?: HttpConfig;
+  backgroundConfig?: BackgroundConfig;
+  cron?: CronConfig;
+  dynamoDb?: DynamoDbConfig;
+  s3?: S3Config;
+  sns?: SnsConfig;
+  loggerConfig?: EpsilonLoggerConfig;
+}
+object HttpConfig
+object BackgroundConfig {
+  aws: BackgroundAwsConfig;
+  backgroundHttpEndpointPrefix: string;
+  backgroundHttpEndpointAuthorizerName?: string;
+  processors: BackgroundProcessor<any>[];
+}
+object BackgroundAwsConfig {
+  queueUrl: string;
+  notificationArn: string;
+  sendNotificationOnBackgroundError?: boolean;
+  sendNotificationOnBackgroundValidationFailure?: boolean;
+  backgroundProcessFailureSnsArn?: string;
+  sqs: AWS.SQS;
+  sns: AWS.SNS;
+}
+object CronConfig
+object DynamoDbConfig
+object S3Config
+object SnsConfig
+object EpsilonLoggerConfig
+
+object BackgroundProcessor
+
+object HttpProcessor01
+object HttpProcessor02
+
+object HttpAuthFn01
+object HttpAuthFn02
+
+object BackgroundManager
+object ModelValidator
+object WebHandler
+object BackgroundHandler
+object EpsilonRouter
+object OpenApiDocument
+
+LocalServer --> EpsilonGlobalHandler
+Lambda --> EpsilonGlobalHandler
+
+EpsilonGlobalHandler --> EpsilonInstance
+EpsilonConfigParser --> EpsilonInstance
+
+EpsilonConfigParser --> EpsilonConfig
+EpsilonConfigParser --> BackgroundManager
+
+EpsilonConfig --> HttpConfig
+HttpConfig --> HttpProcessor01
+HttpConfig --> HttpProcessor02
+HttpConfig --> HttpAuthFn01
+HttpConfig --> HttpAuthFn02
+
+WebHandler --> EpsilonRouter
+
+EpsilonConfig --> BackgroundConfig
+BackgroundConfig --> BackgroundAwsConfig
+BackgroundConfig "1" -- "n" BackgroundProcessor
+EpsilonConfig --> CronConfig
+EpsilonConfig --> DynamoDbConfig
+EpsilonConfig --> S3Config
+EpsilonConfig --> SnsConfig
+EpsilonConfig --> EpsilonLoggerConfig
+
+BackgroundManager --> BackgroundAwsConfig
+
+BackgroundProcessor --> BackgroundManager
+
+EpsilonInstance --> EpsilonConfig
+EpsilonInstance --> OpenApiDocument
+EpsilonInstance --> ModelValidator
+EpsilonInstance --> WebHandler
+EpsilonInstance --> BackgroundHandler
+EpsilonInstance --> EpsilonRouter
+EpsilonInstance --> BackgroundManager
+
+
+@enduml
