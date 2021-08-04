@@ -8,6 +8,7 @@ import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from './background-config';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -29,7 +30,8 @@ export class BackgroundHttpAdapterHandler {
 
     let rval: BackgroundQueueResponseInternal = null;
 
-    let testPath: string = evt.path.substring(this.backgroundHttpEndpointPrefix.length).split('-').join('').toLowerCase();
+    const startIdx: number = evt.path.indexOf(this.backgroundHttpEndpointPrefix) + this.backgroundHttpEndpointPrefix.length;
+    let testPath: string = evt.path.substring(startIdx).split('-').join('').toLowerCase();
     if (testPath.includes('?')) {
       testPath = testPath.substring(0, testPath.indexOf('?'));
     }
@@ -61,6 +63,7 @@ export class BackgroundHttpAdapterHandler {
         error: null,
       };
     } else {
+      Logger.error('Could not find target background processor : %s', testPath);
       rval = {
         processHandling: immediate ? BackgroundProcessHandling.Immediate : BackgroundProcessHandling.Queued,
         startProcessorRequested: startProcessor,
