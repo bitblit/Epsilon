@@ -55,6 +55,7 @@ export class BackgroundHttpAdapterHandler {
         startProcessorRequested: startProcessor,
         success: true,
         resultId: result,
+        error: null,
       };
     } else {
       rval = {
@@ -62,6 +63,7 @@ export class BackgroundHttpAdapterHandler {
         startProcessorRequested: startProcessor,
         success: false,
         resultId: null,
+        error: 'Processor not found',
       };
     }
 

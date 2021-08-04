@@ -5,4 +5,5 @@ export interface BackgroundQueueResponseInternal {
   startProcessorRequested: boolean;
   success: boolean;
   resultId: string;
+  error: string;
 }

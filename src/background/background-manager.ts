@@ -29,7 +29,7 @@ export class BackgroundManager {
   }
 
   public set localMode(newVal: boolean) {
-    Logger.info('Setting localmode for background processing to : %s', newVal);
+    Logger.info('Setting local-mode for background processing to : %s', newVal);
     this._localMode = newVal;
   }
 
@@ -59,6 +59,7 @@ export class BackgroundManager {
     let rval: string = null;
     try {
       if (this.localMode) {
+        Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
         this._localBus.next(entry);
         rval = 'addEntryToQueue' + new Date().toISOString() + StringRatchet.safeString(rval);
       } else {
@@ -70,7 +71,7 @@ export class BackgroundManager {
           QueueUrl: this.awsConfig.queueUrl,
         };
 
-        Logger.debug('Adding %j to queue', entry);
+        Logger.info('Add entry to queue (remote) : %j : Start : %s', params, fireStartMessage);
         const result: AWS.SQS.SendMessageResult = await this.awsConfig.sqs.sendMessage(params).promise();
 
         if (fireStartMessage) {
@@ -118,12 +119,13 @@ export class BackgroundManager {
   public async fireImmediateProcessRequest(entry: BackgroundEntry): Promise<string> {
     let rval: string = null;
     if (this.localMode) {
+      Logger.info('Fire immediately (local) : %j ', entry);
       this.localBus().next(entry);
       rval = 'fireImmediateProcessRequest' + new Date().toISOString() + StringRatchet.safeString(rval);
     } else {
       try {
         // Guard against bad entries up front
-        Logger.debug('Immediately processing %j', entry);
+        Logger.info('Fire immediately (remote) : %j ', entry);
         const toWrite: any = {
           type: EpsilonConstants.BACKGROUND_SNS_IMMEDIATE_RUN_FLAG,
           backgroundEntry: entry,
@@ -141,9 +143,11 @@ export class BackgroundManager {
   public async fireStartProcessingRequest(): Promise<string> {
     let rval: string = null;
     if (this.localMode) {
+      Logger.info('Fire start processing request (local, ignored)');
       rval = 'NO-OP';
     } else {
       try {
+        Logger.info('Fire start processing request (remote)');
         rval = await this.writeMessageToSnsTopic(EpsilonConstants.BACKGROUND_SNS_START_MARKER);
       } catch (err) {
         Logger.error('Failed to fireStartProcessingRequest : %s', err, err);
@@ -181,6 +185,7 @@ export class BackgroundManager {
       TopicArn: this.awsConfig.notificationArn,
     };
 
+    Logger.debug('Writing message to SNS topic : j', params);
     const result: AWS.SNS.Types.PublishResponse = await this.awsConfig.sns.publish(params).promise();
     rval = result.MessageId;
     return rval;
