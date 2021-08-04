@@ -29,7 +29,7 @@ export class BackgroundHttpAdapterHandler {
 
     let rval: BackgroundQueueResponseInternal = null;
 
-    const testPath: string = evt.path.substring(this.backgroundHttpEndpointPrefix.length).split('-').join('').toLowerCase();
+    let testPath: string = evt.path.substring(this.backgroundHttpEndpointPrefix.length).split('-').join('').toLowerCase();
     if (testPath.includes('?')) {
       testPath = testPath.substring(0, testPath.indexOf('?'));
     }
