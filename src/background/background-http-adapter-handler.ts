@@ -30,6 +30,9 @@ export class BackgroundHttpAdapterHandler {
     let rval: BackgroundQueueResponseInternal = null;
 
     const testPath: string = evt.path.substring(this.backgroundHttpEndpointPrefix.length).split('-').join('').toLowerCase();
+    if (testPath.includes('?')) {
+      testPath = testPath.substring(0, testPath.indexOf('?'));
+    }
     const foundProc: BackgroundProcessor<any> = this.backgroundConfig.processors.find((s) => s.typeName.toLowerCase() === testPath);
     const immediate: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['immediate']);
     const startProcessor: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['startProcessor']);
