@@ -22,5 +22,6 @@ export class EpsilonConstants {
   public static readonly BACKGROUND_SNS_IMMEDIATE_RUN_FLAG = 'BACKGROUND_IMMEDIATE_RUN_FLAG';
 
   // Prevent instantiation
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 }
