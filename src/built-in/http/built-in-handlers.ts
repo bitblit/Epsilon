@@ -1,11 +1,11 @@
-import { ExtendedAPIGatewayEvent } from './extended-api-gateway-event';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { EpsilonRouter } from './epsilon-router';
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
-import { EpsilonHttpError } from '../error/epsilon-http-error';
-import { BadRequestError } from '../error/bad-request-error';
+import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
+import { BadRequestError } from '../../http/error/bad-request-error';
+import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
+import { EpsilonRouter } from '../../http/route/epsilon-router';
 
 export class BuiltInHandlers {
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {

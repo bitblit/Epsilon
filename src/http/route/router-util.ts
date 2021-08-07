@@ -1,19 +1,19 @@
 import { EpsilonRouter } from './epsilon-router';
 import { MisconfiguredError } from '../error/misconfigured-error';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { HandlerFunction } from './handler-function';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
 import { ResponseUtil } from '../response-util';
-import { HttpConfig } from './http-config';
-import { AuthorizerFunction } from './authorizer-function';
-import { BuiltInHandlers } from './built-in-handlers';
-import { OpenApiDocument } from '../../global/open-api/open-api-document';
+import { OpenApiDocument } from '../../config/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BadRequestError } from '../error/bad-request-error';
 import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
+import { HandlerFunction } from '../../config/http/handler-function';
+import { HttpConfig } from '../../config/http/http-config';
+import { AuthorizerFunction } from '../../config/http/authorizer-function';
+import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 
 /**
  * Endpoints about the api itself

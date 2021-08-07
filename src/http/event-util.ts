@@ -3,7 +3,7 @@ import { UnauthorizedError } from './error/unauthorized-error';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { BadRequestError } from './error/bad-request-error';
-import { EpsilonLoggerConfig } from '../global/epsilon-logger-config';
+import { EpsilonLoggerConfig } from '../config/epsilon-logger-config';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
 import jwt from 'jsonwebtoken';
 import { ExtendedAuthResponseContext } from './route/extended-auth-response-context';

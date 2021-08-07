@@ -3,7 +3,7 @@ import { ResponseUtil } from './response-util';
 import path from 'path';
 import fs from 'fs';
 import { EpsilonConstants } from '../epsilon-constants';
-import { HttpConfig } from './route/http-config';
+import { HttpConfig } from '../config/http/http-config';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {

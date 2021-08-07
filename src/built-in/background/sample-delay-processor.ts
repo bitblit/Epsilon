@@ -1,6 +1,6 @@
 import { Logger, PromiseRatchet } from '@bitblit/ratchet/dist/common';
-import { BackgroundProcessor } from '../background-processor';
-import { BackgroundManager } from '../background-manager';
+import { BackgroundProcessor } from '../../config/background-processor';
+import { BackgroundManager } from '../../background/background-manager';
 
 export class SampleDelayProcessor implements BackgroundProcessor<any> {
   public get typeName(): string {

@@ -3,9 +3,10 @@ import { APIGatewayEvent, CustomAuthorizerEvent } from 'aws-lambda';
 import { EpsilonConstants } from '../../epsilon-constants';
 
 /**
- * Util for commont jwt handling
+ * Util for common jwt handling
  */
 export class WebTokenManipulatorUtil {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   // Prevent instantiation
   private constructor() {}
 

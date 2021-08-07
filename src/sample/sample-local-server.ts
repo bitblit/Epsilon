@@ -3,8 +3,8 @@
  * with your own.
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { LocalServer } from './local-server';
 import { SampleServerComponents } from './sample-server-components';
+import { LocalServer } from '../local-server';
 
 Logger.setLevelByName('debug');
 

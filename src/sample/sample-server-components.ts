@@ -4,33 +4,33 @@
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { ApolloServer, gql } from 'apollo-server-lambda';
-import { EpsilonRouter } from './http/route/epsilon-router';
-import { AuthorizerFunction } from './http/route/authorizer-function';
-import { HandlerFunction } from './http/route/handler-function';
-import { SimpleRoleRouteAuth } from './http/auth/simple-role-route-auth';
-import { BuiltInHandlers } from './http/route/built-in-handlers';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
-import { EpsilonConstants } from './epsilon-constants';
-import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator';
 import fs from 'fs';
 import path from 'path';
 import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
-import { HttpConfig } from './http/route/http-config';
-import { EpsilonConfigParser } from './epsilon-config-parser';
-import { BackgroundConfig } from './background/background-config';
 import AWS from 'aws-sdk';
-import { EchoProcessor } from './background/built-in/echo-processor';
-import { NoOpProcessor } from './background/built-in/no-op-processor';
-import { SampleDelayProcessor } from './background/built-in/sample-delay-processor';
-import { SampleInputValidatedProcessor } from './background/built-in/sample-input-validated-processor';
-import { SimpleLoggedInAuth } from './http/auth/simple-logged-in-auth';
-import { EpsilonConfig } from './global/epsilon-config';
-import { EpsilonInstance } from './global/epsilon-instance';
-import { BackgroundManager } from './background/background-manager';
-import { RouterUtil } from './http/route/router-util';
-import { LogAndEnqueueEchoProcessor } from './background/built-in/log-and-enqueue-echo-processor';
-import { EpsilonGlobalHandler } from './epsilon-global-handler';
+import { EpsilonGlobalHandler } from '../epsilon-global-handler';
+import { AuthorizerFunction } from '../config/http/authorizer-function';
+import { SimpleLoggedInAuth } from '../http/auth/simple-logged-in-auth';
+import { HandlerFunction } from '../config/http/handler-function';
+import { SimpleRoleRouteAuth } from '../http/auth/simple-role-route-auth';
+import { BuiltInHandlers } from '../built-in/http/built-in-handlers';
+import { HttpConfig } from '../config/http/http-config';
+import { EpsilonConstants } from '../epsilon-constants';
+import { LocalWebTokenManipulator } from '../http/auth/local-web-token-manipulator';
+import { BackgroundConfig } from '../config/background/background-config';
+import { EchoProcessor } from '../built-in/background/echo-processor';
+import { NoOpProcessor } from '../built-in/background/no-op-processor';
+import { SampleDelayProcessor } from '../built-in/background/sample-delay-processor';
+import { LogAndEnqueueEchoProcessor } from '../built-in/background/log-and-enqueue-echo-processor';
+import { EpsilonConfig } from '../config/epsilon-config';
+import { BackgroundManager } from '../background/background-manager';
+import { EpsilonInstance } from '../config/epsilon-instance';
+import { EpsilonConfigParser } from '../util/epsilon-config-parser';
+import { EpsilonRouter } from '../http/route/epsilon-router';
+import { RouterUtil } from '../http/route/router-util';
+import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -178,12 +178,12 @@ export class SampleServerComponents {
   }
 
   public static loadSampleOpenApiYaml(): string {
-    const yamlString: string = fs.readFileSync(path.join(__dirname, 'static', 'sample-open-api-doc.yaml')).toString();
+    const yamlString: string = fs.readFileSync(path.join(__dirname, '..', 'static', 'sample-open-api-doc.yaml')).toString();
     return yamlString;
   }
 
   public static loadSampleServerGQL(): string {
-    const yamlString: string = fs.readFileSync(path.join(__dirname, 'static', 'sample-server.gql')).toString();
+    const yamlString: string = fs.readFileSync(path.join(__dirname, '..', 'static', 'sample-server.gql')).toString();
     return yamlString;
   }
 }

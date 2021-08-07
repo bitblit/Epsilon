@@ -1,17 +1,17 @@
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { EpsilonConfig } from './global/epsilon-config';
-import { WebHandler } from './http/web-handler';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
-import { BackgroundHandler } from './background/background-handler';
-import { EpsilonRouter } from './http/route/epsilon-router';
-import { RouterUtil } from './http/route/router-util';
-import { EpsilonInstance } from './global/epsilon-instance';
-import { MisconfiguredError } from './http/error/misconfigured-error';
 import yaml from 'js-yaml';
-import { OpenApiDocument } from './global/open-api/open-api-document';
-import { BackgroundManager } from './background/background-manager';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { BackgroundHttpAdapterHandler } from './background/background-http-adapter-handler';
+import { BackgroundHttpAdapterHandler } from '../background/background-http-adapter-handler';
+import { OpenApiDocument } from '../config/open-api/open-api-document';
+import { EpsilonConfig } from '../config/epsilon-config';
+import { EpsilonInstance } from '../config/epsilon-instance';
+import { BackgroundManager } from '../background/background-manager';
+import { BackgroundHandler } from '../background/background-handler';
+import { EpsilonRouter } from '../http/route/epsilon-router';
+import { RouterUtil } from '../http/route/router-util';
+import { WebHandler } from '../http/web-handler';
+import { MisconfiguredError } from '../http/error/misconfigured-error';
 
 export class EpsilonConfigParser {
   // Prevent instantiation

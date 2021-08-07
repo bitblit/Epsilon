@@ -1,5 +1,5 @@
 import { Context } from 'aws-lambda';
-import { EpsilonGlobalHandler } from './epsilon-global-handler';
+import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 
 // This class serves as a static holder for the AWS Lambda context, and also adds some
 // simple helper functions

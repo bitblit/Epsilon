@@ -1,5 +1,5 @@
 import { BackgroundAwsConfig } from './background-aws-config';
-import { BackgroundProcessor } from './background-processor';
+import { BackgroundProcessor } from '../background-processor';
 
 export interface BackgroundConfig {
   aws: BackgroundAwsConfig;

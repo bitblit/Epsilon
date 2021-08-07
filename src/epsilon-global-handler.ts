@@ -2,20 +2,20 @@ import { APIGatewayEvent, Context, DynamoDBStreamEvent, S3CreateEvent, S3Event, 
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
-import { SnsHandlerFunction } from './non-http/sns-handler-function';
-import { DynamoDbHandlerFunction } from './non-http/dynamo-db-handler-function';
-import { S3CreateHandlerFunction } from './non-http/s3-create-handler-function';
-import { S3RemoveHandlerFunction } from './non-http/s3-remove-handler-function';
 import { EventUtil } from './http/event-util';
-import { CronBackgroundEntry } from './background/cron/cron-background-entry';
-import { CronUtil } from './background/cron/cron-util';
-import { CronDirectEntry } from './background/cron/cron-direct-entry';
-import { CronConfig } from './background/cron/cron-config';
 import { BackgroundHandler } from './background/background-handler';
-import { BackgroundConfig } from './background/background-config';
 import { BackgroundEntry } from './background/background-entry';
 import { BackgroundManager } from './background/background-manager';
-import { EpsilonInstance } from './global/epsilon-instance';
+import { EpsilonInstance } from './config/epsilon-instance';
+import { SnsHandlerFunction } from './config/sns-handler-function';
+import { S3RemoveHandlerFunction } from './config/s3-remove-handler-function';
+import { S3CreateHandlerFunction } from './config/s3-create-handler-function';
+import { CronConfig } from './config/cron/cron-config';
+import { BackgroundConfig } from './config/background/background-config';
+import { CronBackgroundEntry } from './config/cron/cron-background-entry';
+import { CronUtil } from './util/cron-util';
+import { CronDirectEntry } from './config/cron/cron-direct-entry';
+import { DynamoDbHandlerFunction } from './config/dynamo-db-handler-function';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon

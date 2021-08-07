@@ -12,7 +12,6 @@ import { ResponseUtil } from './response-util';
 import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
 import { EventUtil } from './event-util';
 import { ExtendedAuthResponseContext } from './route/extended-auth-response-context';
-import { AuthorizerFunction } from './route/authorizer-function';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
 import { WebTokenManipulatorUtil } from './auth/web-token-manipulator-util';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
@@ -23,6 +22,7 @@ import { NotFoundError } from './error/not-found-error';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { AuthorizerFunction } from '../config/http/authorizer-function';
 
 /**
  * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon

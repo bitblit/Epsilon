@@ -1,14 +1,14 @@
 import { ScheduledEvent } from 'aws-lambda';
 import fs from 'fs';
 import path from 'path';
-import { AbstractCronEntry } from './abstract-cron-entry';
-import { CronConfig } from './cron-config';
 import { CronUtil } from './cron-util';
+import { CronConfig } from '../config/cron/cron-config';
+import { AbstractCronEntry } from '../config/cron/abstract-cron-entry';
 
 describe('#cronUtil', function () {
   it('should test matching event to entry', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
     );
 
     const cfg: CronConfig = {

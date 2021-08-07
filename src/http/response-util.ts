@@ -5,7 +5,7 @@ import zlib from 'zlib';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
-import { HttpConfig } from './route/http-config';
+import { HttpConfig } from '../config/http/http-config';
 
 export class ResponseUtil {
   // Prevent instantiation

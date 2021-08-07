@@ -4,8 +4,8 @@ import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import fs from 'fs';
 import path from 'path';
 import { Logger } from '@bitblit/ratchet/dist/common';
-import { SampleServerComponents } from '../../sample-server-components';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
+import { SampleServerComponents } from '../../sample/sample-server-components';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {

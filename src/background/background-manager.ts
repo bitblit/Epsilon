@@ -1,11 +1,11 @@
 import { BackgroundEntry } from './background-entry';
-import { BackgroundAwsConfig } from './background-aws-config';
 import { Subject } from 'rxjs';
 import { Logger, NumberRatchet } from '@bitblit/ratchet/dist/common';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { GetQueueAttributesRequest, GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import AWS from 'aws-sdk';
 import { EpsilonConstants } from '../epsilon-constants';
+import { BackgroundAwsConfig } from '../config/background/background-aws-config';
 
 /**
  * Handles all submission of work to the background processing system.

@@ -1,10 +1,10 @@
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { ScheduledEvent } from 'aws-lambda';
-import { AbstractCronEntry } from './abstract-cron-entry';
 import { DateTime } from 'luxon';
-import { CronConfig } from './cron-config';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { AbstractCronEntry } from '../config/cron/abstract-cron-entry';
+import { CronConfig } from '../config/cron/cron-config';
 
 export class CronUtil {
   public static everyNMinuteFilter(n: number): number[] {

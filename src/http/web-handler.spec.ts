@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { SampleServerComponents } from '../sample-server-components';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
+import { SampleServerComponents } from '../sample/sample-server-components';
 
 describe('#errorToProxyResult', function () {
   /*

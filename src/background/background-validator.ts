@@ -1,10 +1,10 @@
-import { BackgroundEntry } from './background-entry';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { BackgroundConfig } from './background-config';
-import { BackgroundProcessor } from './background-processor';
+import { BackgroundConfig } from '../config/background/background-config';
+import { BackgroundProcessor } from '../config/background-processor';
+import { BackgroundEntry } from './background-entry';
 
 /**
  * Handles all submission of work to the background processing system.

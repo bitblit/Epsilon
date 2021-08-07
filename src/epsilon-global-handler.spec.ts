@@ -1,9 +1,9 @@
 import { ScheduledEvent } from 'aws-lambda';
-import { CronConfig } from './background/cron/cron-config';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { BackgroundConfig } from './background/background-config';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundManager } from './background/background-manager';
+import { CronConfig } from './config/cron/cron-config';
+import { BackgroundConfig } from './config/background/background-config';
 
 // jest.mock('@bitblit/background');
 

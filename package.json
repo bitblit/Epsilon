@@ -34,7 +34,7 @@
     "apply-circle": "node node_modules/@bitblit/ratchet/dist/node-only/circleci/apply-circle-ci-env-variables-to-files dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample-local-server.*",
+    "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
     "run-sample-server": "yarn compile && node dist/sample-local-server.js"
   },
   "repository": {

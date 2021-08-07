@@ -1,5 +1,5 @@
 import { RouteValidatorConfig } from './route-validator-config';
-import { HandlerFunction } from './handler-function';
+import { HandlerFunction } from '../../config/http/handler-function';
 
 export interface RouteMapping {
   method: string;
