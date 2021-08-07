@@ -8,7 +8,6 @@ import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from './background-config';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same

@@ -12,7 +12,6 @@ import { AuthorizerFunction } from './authorizer-function';
 import { BuiltInHandlers } from './built-in-handlers';
 import { OpenApiDocument } from '../../global/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { BackgroundManager } from '../../background/background-manager';
 import { BadRequestError } from '../error/bad-request-error';
 import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
 

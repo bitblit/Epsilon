@@ -6,9 +6,6 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import { EpsilonHttpError } from '../error/epsilon-http-error';
 import { BadRequestError } from '../error/bad-request-error';
-import { BackgroundEntry } from '../../background/background-entry';
-import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import { BackgroundManager } from '../../background/background-manager';
 
 export class BuiltInHandlers {
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {

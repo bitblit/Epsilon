@@ -1,6 +1,5 @@
 import { Context } from 'aws-lambda';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { Logger } from '@bitblit/ratchet/dist/common';
 
 // This class serves as a static holder for the AWS Lambda context, and also adds some
 // simple helper functions

@@ -5,7 +5,6 @@ import fs from 'fs';
 import path from 'path';
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { SampleServerComponents } from '../../sample-server-components';
-import { EpsilonInstance } from '../../global/epsilon-instance';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
