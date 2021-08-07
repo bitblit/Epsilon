@@ -1,7 +1,7 @@
 import { ScheduledEvent } from 'aws-lambda';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { BackgroundHandler } from './background/background-handler';
-import { BackgroundManager } from './background/background-manager';
+import { BackgroundManager } from './background-manager';
 import { CronConfig } from './config/cron/cron-config';
 import { BackgroundConfig } from './config/background/background-config';
 

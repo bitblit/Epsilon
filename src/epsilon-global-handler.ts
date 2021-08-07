@@ -5,7 +5,7 @@ import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-dete
 import { EventUtil } from './http/event-util';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundEntry } from './background/background-entry';
-import { BackgroundManager } from './background/background-manager';
+import { BackgroundManager } from './background-manager';
 import { EpsilonInstance } from './config/epsilon-instance';
 import { SnsHandlerFunction } from './config/sns-handler-function';
 import { S3RemoveHandlerFunction } from './config/s3-remove-handler-function';

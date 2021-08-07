@@ -5,7 +5,7 @@ import { Context, SNSEvent } from 'aws-lambda';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { EpsilonConstants } from '../epsilon-constants';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { BackgroundManager } from './background-manager';
+import { BackgroundManager } from '../background-manager';
 import { BackgroundValidator } from './background-validator';
 import { BackgroundProcessor } from '../config/background-processor';
 import { BackgroundConfig } from '../config/background/background-config';

@@ -25,12 +25,12 @@ import { NoOpProcessor } from '../built-in/background/no-op-processor';
 import { SampleDelayProcessor } from '../built-in/background/sample-delay-processor';
 import { LogAndEnqueueEchoProcessor } from '../built-in/background/log-and-enqueue-echo-processor';
 import { EpsilonConfig } from '../config/epsilon-config';
-import { BackgroundManager } from '../background/background-manager';
 import { EpsilonInstance } from '../config/epsilon-instance';
 import { EpsilonConfigParser } from '../util/epsilon-config-parser';
 import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
+import { BackgroundManager } from '../background-manager';
 
 export class SampleServerComponents {
   // Prevent instantiation

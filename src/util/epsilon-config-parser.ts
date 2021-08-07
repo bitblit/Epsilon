@@ -6,12 +6,12 @@ import { BackgroundHttpAdapterHandler } from '../background/background-http-adap
 import { OpenApiDocument } from '../config/open-api/open-api-document';
 import { EpsilonConfig } from '../config/epsilon-config';
 import { EpsilonInstance } from '../config/epsilon-instance';
-import { BackgroundManager } from '../background/background-manager';
 import { BackgroundHandler } from '../background/background-handler';
 import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { WebHandler } from '../http/web-handler';
 import { MisconfiguredError } from '../http/error/misconfigured-error';
+import { BackgroundManager } from '../background-manager';
 
 export class EpsilonConfigParser {
   // Prevent instantiation

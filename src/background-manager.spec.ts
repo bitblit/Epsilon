@@ -4,9 +4,9 @@ import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { Substitute } from '@fluffy-spoon/substitute';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
-import { BackgroundConfig } from '../config/background/background-config';
-import { EchoProcessor } from '../built-in/background/echo-processor';
-import { NoOpProcessor } from '../built-in/background/no-op-processor';
+import { BackgroundConfig } from './config/background/background-config';
+import { EchoProcessor } from './built-in/background/echo-processor';
+import { NoOpProcessor } from './built-in/background/no-op-processor';
 
 describe('#createEntry', function () {
   let mockSqs;

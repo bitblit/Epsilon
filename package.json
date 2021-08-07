@@ -35,7 +35,7 @@
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
     "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
-    "run-sample-server": "yarn compile && node dist/sample-local-server.js"
+    "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js"
   },
   "repository": {
     "type": "git",

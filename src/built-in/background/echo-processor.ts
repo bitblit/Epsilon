@@ -1,6 +1,6 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { BackgroundProcessor } from '../../config/background-processor';
-import { BackgroundManager } from '../../background/background-manager';
+import { BackgroundManager } from '../../background-manager';
 
 export class EchoProcessor implements BackgroundProcessor<any> {
   public static TYPE_NAME: string = 'EpsilonEcho';

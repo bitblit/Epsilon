@@ -1,13 +1,13 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from './background-entry';
 import { Context } from 'aws-lambda';
-import { BackgroundManager } from './background-manager';
 import { ExtendedAPIGatewayEvent } from '../http/route/extended-api-gateway-event';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundProcessor } from '../config/background-processor';
+import { BackgroundManager } from '../background-manager';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
