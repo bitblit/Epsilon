@@ -23,9 +23,11 @@ import { EpsilonHttpError } from './error/epsilon-http-error';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
+import { NullReturnedObjectHandling } from '../config/http/null-returned-object-handling';
+import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 /**
- * This class functions as the adapter from a default lamda function to the handlers exposed via Epsilon
+ * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
  */
 export class WebHandler {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -54,11 +56,7 @@ export class WebHandler {
       if (!this.routerConfig) {
         throw new Error('Router config not found');
       }
-      // Make sure no params of the format amp;(param) are in the event
-      if (!this.routerConfig.config.disableAutoFixStillEncodedQueryParams) {
-        EventUtil.fixStillEncodedQueryParams(event);
-      }
-      if (!!this.routerConfig.config.apolloRegex && this.routerConfig.config.apolloRegex.test(event.path)) {
+      if (this?.routerConfig?.config?.apolloConfig?.pathRegex && this.routerConfig.config.apolloConfig.pathRegex.test(event.path)) {
         rval = await this.apolloLambdaHandler(event, context);
       } else {
         rval = await this.openApiLambdaHandler(event, context);
@@ -79,7 +77,8 @@ export class WebHandler {
       }
 
       const errProxy: APIGatewayProxyResult = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null)); //this.routerConfig.defaultErrorMessage));
-      rval = this.addCors(errProxy, event);
+      // Errors always use the default meta handling
+      rval = this.addCors(errProxy, this.routerConfig.config.defaultMetaHandling, event);
       Logger.setTracePrefix(null); // Just in case it was set
     }
 
@@ -93,6 +92,10 @@ export class WebHandler {
 
   public async openApiLambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     const rm: RouteAndParse = this.findBestMatchingRoute(event);
+    // Make sure no params of the format amp;(param) are in the event
+    if (!rm?.mapping?.metaProcessingConfig?.disableAutoFixStillEncodedQueryParams) {
+      EventUtil.fixStillEncodedQueryParams(event);
+    }
     const handler: Promise<any> = this.findHandler(rm, event, context);
     Logger.debug('Processing event with epsilon: %j', event);
     let result: any = await handler;
@@ -101,15 +104,15 @@ export class WebHandler {
       throw new RequestTimeoutError('Timed out');
     }
     Logger.debug('Initial return value : %j', result);
-    result = this.convertNullReturnedObjectsTo404OrEmptyString(result, rm.mapping.disableConvertNullReturnedObjectsTo404);
+    result = this.applyNullReturnedObjectHandling(result, rm.mapping.metaProcessingConfig.nullReturnedObjectHandling);
     this.optionallyApplyOutboundModelObjectCheck(rm, result);
 
     let proxyResult: ProxyResult = ResponseUtil.coerceToProxyResult(result);
     const initSize: number = proxyResult.body.length;
     Logger.silly('Proxy result : %j', proxyResult);
-    proxyResult = this.addCors(proxyResult, event);
+    proxyResult = this.addCors(proxyResult, rm.mapping.metaProcessingConfig, event);
     Logger.silly('CORS result : %j', proxyResult);
-    if (!this.routerConfig.config.disableCompression) {
+    if (!rm?.mapping?.metaProcessingConfig?.disableCompression) {
       const encodingHeader: string =
         event && event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
       proxyResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, proxyResult);
@@ -130,7 +133,7 @@ export class WebHandler {
   }
 
   public optionallyApplyOutboundModelObjectCheck(rm: RouteAndParse, result: any): void {
-    if (rm.mapping.enableValidateOutboundResponseBody) {
+    if (rm.mapping.metaProcessingConfig.enableValidateOutboundResponseBody) {
       if (rm.mapping.outboundValidation) {
         Logger.debug('Applying outbound check to %j', result);
         const errors: string[] = this.activeModelValidator().validate(
@@ -154,15 +157,20 @@ export class WebHandler {
     }
   }
 
-  public convertNullReturnedObjectsTo404OrEmptyString(result: any, disabled: boolean): any {
+  public applyNullReturnedObjectHandling(result: any, handling: NullReturnedObjectHandling): any {
     let rval: any = result;
-    if (!disabled) {
-      if (result === null || result === undefined) {
+    if (result === null || result === undefined) {
+      if (handling === NullReturnedObjectHandling.Error) {
+        Logger.error('Null object returned and Error specified, throwing 500');
+        throw new EpsilonHttpError('Null object').withHttpStatusCode(500);
+      } else if (handling === NullReturnedObjectHandling.Return404NotFoundResponse) {
         throw new NotFoundError('Resource not found');
+      } else if (handling === NullReturnedObjectHandling.ConvertToEmptyString) {
+        Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
+        rval = '';
+      } else {
+        throw new EpsilonHttpError('Cant happen - failed enum check').withHttpStatusCode(500);
       }
-    } else {
-      Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
-      rval = '';
     }
     return rval;
   }
@@ -172,7 +180,9 @@ export class WebHandler {
     let rval: ProxyResult = null;
     const apolloPromise: Promise<ProxyResult> = new Promise<ProxyResult>((res, rej) => {
       if (!this.cacheApolloHandler) {
-        this.cacheApolloHandler = this.routerConfig.config.apolloServer.createHandler(this.routerConfig.config.apolloCreateHandlerOptions);
+        this.cacheApolloHandler = this.routerConfig.config.apolloConfig.apolloServer.createHandler(
+          this.routerConfig.config.apolloConfig.createHandlerOptions
+        );
       }
       try {
         event.httpMethod = event.httpMethod.toUpperCase();
@@ -195,12 +205,8 @@ export class WebHandler {
       }
     });
 
-    let timeoutMS: number = this.routerConfig.config.defaultTimeoutMS;
-    if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
-      // We do this because fully timing out on Lambda is never a good thing
-      Logger.info('No timeout set, using remaining - 500ms (Apollo)');
-      timeoutMS = context.getRemainingTimeInMillis() - 500;
-    }
+    // We do this because fully timing out on Lambda is never a good thing
+    const timeoutMS: number = context.getRemainingTimeInMillis() - 500;
 
     let result: any = null;
     if (timeoutMS) {
@@ -220,9 +226,9 @@ export class WebHandler {
   }
 
   // Public so it can be used in auth-web-handler
-  public addCors(input: ProxyResult, srcEvent: APIGatewayEvent): ProxyResult {
-    if (!this.routerConfig.config.disableAutoAddCorsHeadersToResponses) {
-      ResponseUtil.addCORSToProxyResult(input, this.routerConfig.config, srcEvent);
+  public addCors(input: ProxyResult, meta: HttpMetaProcessingConfig, srcEvent: APIGatewayEvent): ProxyResult {
+    if (!meta.disableAutoAddCorsHeadersToResponses) {
+      ResponseUtil.addCORSToProxyResult(input, meta, srcEvent);
     }
     return input;
   }
@@ -277,10 +283,10 @@ export class WebHandler {
       // We extend with the parsed params here in case we are using the AWS any proxy
       event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
       // Check for literal string null passed
-      if (!rm.mapping.allowLiteralStringNullAsPathParameter) {
+      if (!rm.mapping.metaProcessingConfig.allowLiteralStringNullAsPathParameter) {
         this.throwExceptionOnNullStringLiteralInParams(event.pathParameters);
       }
-      if (!rm.mapping.allowLiteralStringNullAsQueryStringParameter) {
+      if (!rm.mapping.metaProcessingConfig.allowLiteralStringNullAsQueryStringParameter) {
         this.throwExceptionOnNullStringLiteralInParams(event.queryStringParameters);
       }
 
@@ -293,7 +299,7 @@ export class WebHandler {
 
       // Check validation (throws error on failure)
       await this.applyBodyObjectValidation(extEvent, rm.mapping);
-      let timeoutMS: number = rm.mapping.timeoutMS || this.routerConfig.config.defaultTimeoutMS;
+      let timeoutMS: number = rm.mapping.metaProcessingConfig.timeoutMS;
       if (!timeoutMS && context && context.getRemainingTimeInMillis()) {
         // We do this because fully timing out on Lambda is never a good thing
         Logger.info('No timeout set, using remaining - 500ms (%s)', extEvent.path);
@@ -303,8 +309,8 @@ export class WebHandler {
       if (timeoutMS) {
         rval = PromiseRatchet.timeout(
           rm.mapping.function(extEvent, context),
-          'Timed out after ' + rm.mapping.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
-          rm.mapping.timeoutMS
+          'Timed out after ' + rm.mapping.metaProcessingConfig.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
+          rm.mapping.metaProcessingConfig.timeoutMS
         );
       } else {
         Logger.warn('No timeout set even after defaulting');
@@ -358,16 +364,12 @@ export class WebHandler {
   private extendApiGatewayEvent(event: APIGatewayEvent, routeMap: RouteMapping): ExtendedAPIGatewayEvent {
     const rval: ExtendedAPIGatewayEvent = Object.assign({}, event) as ExtendedAPIGatewayEvent;
     // Default all the key maps
-    if (!rval.queryStringParameters && !routeMap.disableQueryMapAssure) {
-      rval.queryStringParameters = {};
+    if (!routeMap.metaProcessingConfig.disableParameterMapAssure) {
+      rval.queryStringParameters = rval.queryStringParameters || {};
+      rval.headers = rval.headers || {};
+      rval.pathParameters = rval.pathParameters || {};
     }
-    if (!rval.headers && !routeMap.disableHeaderMapAssure) {
-      rval.headers = {};
-    }
-    if (!rval.pathParameters && !routeMap.disablePathMapAssure) {
-      rval.pathParameters = {};
-    }
-    if (event.body && !routeMap.disableAutomaticBodyParse) {
+    if (event.body && !routeMap.metaProcessingConfig.disableAutomaticBodyParse) {
       rval.parsedBody = EventUtil.bodyObject(rval);
     }
 

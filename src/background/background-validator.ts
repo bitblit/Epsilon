@@ -83,12 +83,6 @@ export class BackgroundValidator {
         if (!cfg.aws.queueUrl) {
           rval.push('AWS config missing queueUrl');
         }
-        if (!cfg.aws.sns) {
-          rval.push('AWS config missing sns');
-        }
-        if (!cfg.aws.sqs) {
-          rval.push('AWS config missing sqs');
-        }
         if (
           (cfg.aws.sendNotificationOnBackgroundError || cfg.aws.sendNotificationOnBackgroundValidationFailure) &&
           !cfg.aws.backgroundProcessFailureSnsArn

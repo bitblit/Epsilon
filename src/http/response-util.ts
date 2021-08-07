@@ -5,7 +5,7 @@ import zlib from 'zlib';
 import { EpsilonConstants } from '../epsilon-constants';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
-import { HttpConfig } from '../config/http/http-config';
+import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 export class ResponseUtil {
   // Prevent instantiation
@@ -124,7 +124,7 @@ export class ResponseUtil {
   }
 
   // Public so it can be used in auth-web-handler
-  public static addCORSToProxyResult(input: ProxyResult, cfg: HttpConfig, srcEvent: APIGatewayEvent): ProxyResult {
+  public static addCORSToProxyResult(input: ProxyResult, cfg: HttpMetaProcessingConfig, srcEvent: APIGatewayEvent): ProxyResult {
     input.headers = input.headers || {};
     srcEvent.headers = srcEvent.headers || {};
 

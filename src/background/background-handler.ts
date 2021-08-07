@@ -143,7 +143,7 @@ export class BackgroundHandler {
       WaitTimeSeconds: 0,
     };
 
-    const message: AWS.SQS.ReceiveMessageResult = await this.cfg.aws.sqs.receiveMessage(params).promise();
+    const message: AWS.SQS.ReceiveMessageResult = await this.mgr.sqs.receiveMessage(params).promise();
     if (message && message.Messages && message.Messages.length > 0) {
       for (let i = 0; i < message.Messages.length; i++) {
         const m: AWS.SQS.Message = message.Messages[i];
@@ -160,7 +160,7 @@ export class BackgroundHandler {
             QueueUrl: this.cfg.aws.queueUrl,
             ReceiptHandle: m.ReceiptHandle,
           };
-          const delResult: any = await this.cfg.aws.sqs.deleteMessage(delParams).promise();
+          const delResult: any = await this.mgr.sqs.deleteMessage(delParams).promise();
           Logger.silly('Delete result : %j', delResult);
         } catch (err) {
           Logger.warn('Error parsing message, dropping : %j', m);

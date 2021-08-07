@@ -1,5 +1,6 @@
-import { DynamoDbHandlerFunction } from './dynamo-db-handler-function';
+import { GenericAwsEventHandlerFunction } from './generic-aws-event-handler-function';
+import { DynamoDBStreamEvent } from 'aws-lambda';
 
 export interface DynamoDbConfig {
-  handlers: Map<string, DynamoDbHandlerFunction>;
+  handlers: Map<string, GenericAwsEventHandlerFunction<DynamoDBStreamEvent>>;
 }

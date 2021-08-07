@@ -1,40 +1,36 @@
 import { HandlerFunction } from './handler-function';
 import { AuthorizerFunction } from './authorizer-function';
-import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { ErrorProcessorFunction } from '../../http/route/error-processor-function';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
+import { HttpMetaProcessingConfig } from './http-meta-processing-config';
+import { ApolloGraphqlConfig } from './apollo-graphql-config';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 export interface HttpConfig {
+  // This is used for meta handling for any route not overridden by overrideMetaHandling
+  defaultMetaHandling: HttpMetaProcessingConfig;
+  // Allows setting meta handling for any specific route
+  overrideModelValidator?: ModelValidator;
+  // Maps routes to handlers
   handlers: Map<string, HandlerFunction<any>>;
+  // Maps names to authorization functions
   authorizers?: Map<string, AuthorizerFunction>;
+  // If set, the processor is called before returning a 50x response
   errorProcessor?: ErrorProcessorFunction;
-  customCorsHandler?: HandlerFunction<any>;
-  customTimeouts?: Map<string, number>;
-  staticContentPaths?: string[]; // TODO: Implement
-  customExtraHeaders?: Map<string, string>; // TODO: Implement
-  // Allows you to define an error message for errors that escape all the way to epsilon,
-  // preventing information leakage
-  defaultErrorMessage?: string;
-  corsAllowedOrigins?: string;
-  corsAllowedMethods?: string;
-  corsAllowedHeaders?: string;
+  // If set, this handler will be used for all OPTIONS (CORS) requests
+  customOptionsRequestHandler?: HandlerFunction<any>;
+  // If set, paths matching the key will be dereferenced to paths on the server matching the value - use with care
+  // TODO: Implement
+  staticContentRoutes?: Record<string, string>;
   // If you set a web token manipulator, epsilon will auto-parse the Authorization header
   webTokenManipulator?: WebTokenManipulator;
-  overrideModelValidator?: ModelValidator; // If set, overrides the one auto-created from yaml
   // Should typically be your stage name, but can be different in weird cases like custom name map
   // These will be matched case insensitive
   prefixesToStripBeforeRouteMatch?: string[];
+  // If set, the AWS request ID will be returned in this header for easier debugging
   requestIdResponseHeaderName?: string;
-
-  disableAutoCORSOptionHandler?: boolean;
-  defaultTimeoutMS?: number;
-  // See EventUtil.fixStillEncodedQueryParams for an explanation here
-  disableAutoFixStillEncodedQueryParams?: boolean;
-  disableAutoAddCorsHeadersToResponses?: boolean;
-  disableCompression?: boolean;
-  // If set, paths matching this are sent to Apollo for Graphql instead
-  apolloRegex?: RegExp;
-  apolloServer?: ApolloServer;
-  apolloCreateHandlerOptions?: CreateHandlerOptions;
+  // If set, Apollo GraphQL will be used to process matching requests
+  apolloConfig?: ApolloGraphqlConfig;
+  overrideMetaHandling?: Map<string, HttpMetaProcessingConfig>;
+  // If set, the system will use this model validator instead of the OpenAPI one (Uncommon)
 }

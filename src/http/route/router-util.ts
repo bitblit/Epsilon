@@ -14,6 +14,8 @@ import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
+import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
+import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
 
 /**
  * Endpoints about the api itself
@@ -29,34 +31,50 @@ export class RouterUtil {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
+  public static defaultHttpMetaProcessingConfig(): HttpMetaProcessingConfig {
+    const defaults: HttpMetaProcessingConfig = {
+      configName: 'EpsilonDefaultHttpMetaProcessingConfig',
+      timeoutMS: 30_000,
+      overrideAuthorizerName: null,
+      customExtraHeaders: {},
+      defaultErrorMessage: 'Internal server error',
+      corsAllowedOrigins: '*',
+      corsAllowedMethods: '*',
+      corsAllowedHeaders: '*',
+      disableAutoFixStillEncodedQueryParams: false,
+      disableAutoAddCorsHeadersToResponses: false,
+      disableCompression: false,
+      disableValidateInboundRequestBody: false,
+      disableValidateInboundQueryParameters: false,
+      enableValidateOutboundResponseBody: false,
+      disableAutomaticBodyParse: false,
+      disableParameterMapAssure: false,
+      nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
+      allowLiteralStringNullAsPathParameter: false,
+      allowLiteralStringNullAsQueryStringParameter: false,
+    };
+    return defaults;
+  }
+
   public static assignDefaultsOnHttpConfig(cfg: HttpConfig): HttpConfig {
     const defaults: HttpConfig = {
       handlers: new Map<string, HandlerFunction<any>>(),
       authorizers: new Map<string, AuthorizerFunction>(),
       errorProcessor: BuiltInHandlers.defaultErrorProcessor,
-      customCorsHandler: null,
-      customTimeouts: new Map<string, number>(),
-      staticContentPaths: [],
-      customExtraHeaders: new Map<string, string>(),
-      defaultErrorMessage: null, // Null because if set, it overrides the outbound even on dev,
-      corsAllowedOrigins: '*',
-      corsAllowedMethods: '*',
-      corsAllowedHeaders: '*',
+      defaultMetaHandling: this.defaultHttpMetaProcessingConfig(),
+      staticContentRoutes: {},
       webTokenManipulator: null,
-      overrideModelValidator: null,
       prefixesToStripBeforeRouteMatch: [],
       requestIdResponseHeaderName: 'X-REQUEST-ID',
-      disableAutoCORSOptionHandler: false,
-      defaultTimeoutMS: 30_000,
-      disableAutoFixStillEncodedQueryParams: false,
-      disableAutoAddCorsHeadersToResponses: false,
-      disableCompression: false,
-      apolloRegex: null,
-      apolloServer: null,
-      apolloCreateHandlerOptions: null,
+      apolloConfig: null,
     };
     const rval: HttpConfig = Object.assign({}, defaults, cfg || {});
     return rval;
+  }
+
+  public static findApplicableMeta(httpConfig: HttpConfig, path: string): HttpMetaProcessingConfig {
+    // TODO: IMplement
+    return RouterUtil.defaultHttpMetaProcessingConfig();
   }
 
   // Parses an open api file to create a router config
@@ -75,7 +93,7 @@ export class RouterUtil {
       config: RouterUtil.assignDefaultsOnHttpConfig(httpConfig),
     };
 
-    let corsHandler: HandlerFunction<any> = rval.config.customCorsHandler;
+    let corsHandler: HandlerFunction<any> = rval.config.customOptionsRequestHandler;
     if (!corsHandler) {
       const corsOb: ProxyResult = RouterUtil.buildCorsResponse();
       corsHandler = async (e) => {
@@ -98,27 +116,21 @@ export class RouterUtil {
       Object.keys(openApiDoc.paths).forEach((path) => {
         Object.keys(openApiDoc.paths[path]).forEach((method) => {
           const convertedPath: string = RouterUtil.openApiPathToRouteParserPath(path);
+          const finder: string = method + ' ' + path;
+          const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, finder);
 
-          if (method.toLowerCase() === 'options' && !rval.config.disableAutoCORSOptionHandler) {
+          if (method.toLowerCase() === 'options') {
+            applicableMeta.timeoutMS = 10_000; // Options calls get really short timeouts since they are constant
             rval.routes.push({
               path: convertedPath,
               method: method,
               function: corsHandler,
               authorizerName: null,
-              disableAutomaticBodyParse: true,
-              disableQueryMapAssure: true,
-              disableHeaderMapAssure: true,
-              disablePathMapAssure: true,
-              timeoutMS: 10000, // short timeouts for auto-generated CORS since its constant
+              metaProcessingConfig: applicableMeta,
               validation: null,
               outboundValidation: null,
-              disableConvertNullReturnedObjectsTo404: false,
-              allowLiteralStringNullAsQueryStringParameter: false,
-              allowLiteralStringNullAsPathParameter: false,
-              enableValidateOutboundResponseBody: false,
             });
           } else {
-            const finder: string = method + ' ' + path;
             const entry: any = openApiDoc.paths[path][method];
             const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
             // Auto-assign the background handler
@@ -137,23 +149,13 @@ export class RouterUtil {
               authorizerName = backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName;
             }
 
-            const timeoutMS: number = rval.config.customTimeouts.get(finder) || rval.config.defaultTimeoutMS;
-
             const newRoute: RouteMapping = {
               path: convertedPath,
               method: method,
               function: rval.config.handlers.get(finder),
-              authorizerName: authorizerName,
-              disableAutomaticBodyParse: false,
-              disableQueryMapAssure: false,
-              disableHeaderMapAssure: false,
-              disablePathMapAssure: false,
-              timeoutMS: timeoutMS,
+              authorizerName: applicableMeta.overrideAuthorizerName || authorizerName,
+              metaProcessingConfig: applicableMeta,
               validation: null,
-              disableConvertNullReturnedObjectsTo404: false,
-              allowLiteralStringNullAsPathParameter: false,
-              allowLiteralStringNullAsQueryStringParameter: false,
-              enableValidateOutboundResponseBody: false,
               outboundValidation: null,
             };
 
@@ -167,6 +169,7 @@ export class RouterUtil {
               // TODO: this is brittle as hell, need to firm up
               const schema: any = entry['requestBody']['content'];
               Logger.silly('Applying schema %j to %s', schema, finder);
+
               const modelName = this.findAndValidateModelName(
                 method,
                 path,
@@ -273,11 +276,11 @@ export class RouterUtil {
     return rval;
   }
 
-  public static buildCorsResponseForRouterConfig(cfg: EpsilonRouter): ProxyResult {
+  public static buildCorsResponseForRouterConfig(config: HttpMetaProcessingConfig): ProxyResult {
     return RouterUtil.buildCorsResponse(
-      cfg.config.corsAllowedOrigins,
-      cfg.config.corsAllowedMethods,
-      cfg.config.corsAllowedHeaders,
+      config.corsAllowedOrigins,
+      config.corsAllowedMethods,
+      config.corsAllowedHeaders,
       '{"cors":true}',
       200
     );

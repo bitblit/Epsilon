@@ -1,33 +1,20 @@
 import { RouteValidatorConfig } from './route-validator-config';
 import { HandlerFunction } from '../../config/http/handler-function';
+import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
 
 export interface RouteMapping {
   method: string;
   path: string;
   function: HandlerFunction<any>;
 
-  // If set, then epsilon will auto-timeout with a 504
-  // Mostly useful for when you want variable timeouts (APIGateway/Lambda only set one)
-  timeoutMS: number;
-
+  metaProcessingConfig: HttpMetaProcessingConfig;
   // If this is set, and fails, then it will 400
   validation: RouteValidatorConfig;
-
-  // If this is set, and fails, then it will 500
+  // If this is set, enabled, and fails, then it will 500
   outboundValidation: RouteValidatorConfig;
 
   // If this is set, then :
   // If there is no token / bad token in the request, this will 401
-  // If there is a required role that isnt found it will 403
+  // If there is a required role that isn't found it will 403
   authorizerName: string;
-
-  disableAutomaticBodyParse: boolean;
-  disableQueryMapAssure: boolean;
-  disableHeaderMapAssure: boolean;
-  disablePathMapAssure: boolean;
-
-  disableConvertNullReturnedObjectsTo404: boolean;
-  allowLiteralStringNullAsPathParameter: boolean;
-  allowLiteralStringNullAsQueryStringParameter: boolean;
-  enableValidateOutboundResponseBody: boolean;
 }

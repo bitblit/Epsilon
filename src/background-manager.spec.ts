@@ -28,14 +28,12 @@ describe('#createEntry', function () {
       backgroundHttpEndpointPrefix: '/background/',
       backgroundHttpEndpointAuthorizerName: 'BackgroundAuthorizer',
       aws: {
-        sqs: mockSqs,
-        sns: mockSns,
         queueUrl: 'https://fake-sqs.fake-availability-zone.test.com/' + fakeAccountNumber + '/fakeQueue.fifo',
         notificationArn: 'arn:aws:sns:fake-availability-zone:' + fakeAccountNumber + ':fakeSnsTopicName',
       },
     };
 
-    backgroundMgr = new BackgroundManager(backgroundConfig.aws);
+    backgroundMgr = new BackgroundManager(backgroundConfig.aws, mockSqs, mockSns);
   });
 
   it('Should return queue attributes', async () => {

@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { EpsilonConstants } from '../epsilon-constants';
 import { HttpConfig } from '../config/http/http-config';
+import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {
@@ -63,13 +64,14 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: HttpConfig = {
+    const metaConf: HttpMetaProcessingConfig = {
+      timeoutMS: 20_000,
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as HttpConfig;
+    };
 
-    ResponseUtil.addCORSToProxyResult(proxy, config, evt);
+    ResponseUtil.addCORSToProxyResult(proxy, metaConf, evt);
 
     expect(proxy.headers).toBeTruthy();
     expect(proxy.headers['Access-Control-Allow-Origin']).toEqual('http://localhost:4200');
@@ -82,13 +84,14 @@ describe('#responseUtil', function () {
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const config: HttpConfig = {
+    const metaConf: HttpMetaProcessingConfig = {
+      timeoutMS: 20_000,
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    } as HttpConfig;
+    };
 
-    ResponseUtil.addCORSToProxyResult(proxy, config, evt);
+    ResponseUtil.addCORSToProxyResult(proxy, metaConf, evt);
 
     expect(proxy.headers).toBeTruthy();
   });

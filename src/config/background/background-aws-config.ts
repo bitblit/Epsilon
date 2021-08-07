@@ -7,6 +7,4 @@ export interface BackgroundAwsConfig {
   sendNotificationOnBackgroundValidationFailure?: boolean;
   // If either of the above are set to true, notifications will be sent here
   backgroundProcessFailureSnsArn?: string;
-  sqs: AWS.SQS;
-  sns: AWS.SNS;
 }

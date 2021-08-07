@@ -18,10 +18,18 @@ export class BackgroundManager {
   private _localBus: Subject<BackgroundEntry> = new Subject<BackgroundEntry>();
   private _localMode: boolean = false;
 
-  constructor(private _awsConfig: BackgroundAwsConfig) {}
+  constructor(private _awsConfig: BackgroundAwsConfig, private _sqs: AWS.SQS, private _sns: AWS.SNS) {}
 
   public get awsConfig(): BackgroundAwsConfig {
     return this._awsConfig;
+  }
+
+  public get sqs(): AWS.SQS {
+    return this._sqs;
+  }
+
+  public get sns(): AWS.SNS {
+    return this._sns;
   }
 
   public get localMode(): boolean {
@@ -72,7 +80,7 @@ export class BackgroundManager {
         };
 
         Logger.info('Add entry to queue (remote) : %j : Start : %s', params, fireStartMessage);
-        const result: AWS.SQS.SendMessageResult = await this.awsConfig.sqs.sendMessage(params).promise();
+        const result: AWS.SQS.SendMessageResult = await this.sqs.sendMessage(params).promise();
 
         if (fireStartMessage) {
           const fireResult: string = await this.fireStartProcessingRequest();
@@ -174,7 +182,7 @@ export class BackgroundManager {
       QueueUrl: this.awsConfig.queueUrl,
     };
 
-    rval = await this.awsConfig.sqs.getQueueAttributes(req).promise();
+    rval = await this.sqs.getQueueAttributes(req).promise();
     return rval;
   }
 
@@ -186,7 +194,7 @@ export class BackgroundManager {
     };
 
     Logger.debug('Writing message to SNS topic : j', params);
-    const result: AWS.SNS.Types.PublishResponse = await this.awsConfig.sns.publish(params).promise();
+    const result: AWS.SNS.Types.PublishResponse = await this.sns.publish(params).promise();
     rval = result.MessageId;
     return rval;
   }

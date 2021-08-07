@@ -31,6 +31,7 @@ import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 import { BackgroundManager } from '../background-manager';
+import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -118,26 +119,29 @@ export class SampleServerComponents {
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
-    const cfg: HttpConfig = {
-      handlers: handlers,
-      authorizers: authorizers,
+    const meta: HttpMetaProcessingConfig = {
+      timeoutMS: 10_000,
       corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
       corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+    };
+
+    const cfg: HttpConfig = {
+      defaultMetaHandling: meta,
+      handlers: handlers,
+      authorizers: authorizers,
       requestIdResponseHeaderName: 'X-REQUEST-ID',
-      defaultErrorMessage: 'Internal Server Error',
-      defaultTimeoutMS: 10_000,
-
       webTokenManipulator: new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info'),
-
-      apolloServer: await SampleServerComponents.createSampleApollo(),
-      apolloCreateHandlerOptions: {
-        cors: {
-          origin: '*',
-          credentials: true,
+      apolloConfig: {
+        apolloServer: await SampleServerComponents.createSampleApollo(),
+        createHandlerOptions: {
+          cors: {
+            origin: '*',
+            credentials: true,
+          },
         },
+        pathRegex: new RegExp('.*graphql.*'),
       },
-      apolloRegex: new RegExp('.*graphql.*'),
       prefixesToStripBeforeRouteMatch: ['v0'],
     };
 
@@ -145,10 +149,7 @@ export class SampleServerComponents {
       aws: {
         queueUrl: 'FAKE-LOCAL',
         notificationArn: 'FAKE-LOCAL',
-        sqs: {} as AWS.SQS,
-        sns: {} as AWS.SNS,
       },
-      // backgroundHttpEndpointAuthorizorName 'BACKGROUND',
       backgroundHttpEndpointPrefix: '/background/',
       processors: [
         new EchoProcessor(),
@@ -165,13 +166,13 @@ export class SampleServerComponents {
       backgroundConfig: background,
     };
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws);
+    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
     backgroundManager.localMode = true;
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
 
     const router: EpsilonRouter = epsilonInstance.webHandler.router;
     // Modify a single route...
-    RouterUtil.findRoute(router, 'get', '/meta/server').allowLiteralStringNullAsQueryStringParameter = true;
+    RouterUtil.findRoute(router, 'get', '/meta/server').metaProcessingConfig.allowLiteralStringNullAsQueryStringParameter = true;
 
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;

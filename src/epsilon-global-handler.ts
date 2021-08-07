@@ -7,15 +7,12 @@ import { BackgroundHandler } from './background/background-handler';
 import { BackgroundEntry } from './background/background-entry';
 import { BackgroundManager } from './background-manager';
 import { EpsilonInstance } from './config/epsilon-instance';
-import { SnsHandlerFunction } from './config/sns-handler-function';
-import { S3RemoveHandlerFunction } from './config/s3-remove-handler-function';
-import { S3CreateHandlerFunction } from './config/s3-create-handler-function';
 import { CronConfig } from './config/cron/cron-config';
 import { BackgroundConfig } from './config/background/background-config';
 import { CronBackgroundEntry } from './config/cron/cron-background-entry';
 import { CronUtil } from './util/cron-util';
 import { CronDirectEntry } from './config/cron/cron-direct-entry';
-import { DynamoDbHandlerFunction } from './config/dynamo-db-handler-function';
+import { GenericAwsEventHandlerFunction } from './config/generic-aws-event-handler-function';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -114,7 +111,10 @@ export class EpsilonGlobalHandler {
     let rval: any = null;
     if (this._epsilon.config && this._epsilon.config.sns && evt && evt.Records.length > 0) {
       const finder: string = evt.Records[0].Sns.TopicArn;
-      const handler: SnsHandlerFunction = this.findInMap<SnsHandlerFunction>(finder, this._epsilon.config.sns.handlers);
+      const handler: GenericAwsEventHandlerFunction<SNSEvent> = this.findInMap<GenericAwsEventHandlerFunction<SNSEvent>>(
+        finder,
+        this._epsilon.config.sns.handlers
+      );
       if (handler) {
         rval = await handler(evt);
       } else {
@@ -131,14 +131,20 @@ export class EpsilonGlobalHandler {
       const isRemoveEvent: boolean = evt.Records[0].eventName && evt.Records[0].eventName.startsWith('ObjectRemoved');
 
       if (isRemoveEvent) {
-        const handler: S3RemoveHandlerFunction = this.findInMap<S3RemoveHandlerFunction>(finder, this._epsilon.config.s3.removeHandlers);
+        const handler: GenericAwsEventHandlerFunction<S3Event> = this.findInMap<GenericAwsEventHandlerFunction<S3Event>>(
+          finder,
+          this._epsilon.config.s3.removeHandlers
+        );
         if (handler) {
           rval = await handler(evt);
         } else {
           Logger.info('Found no s3 create handler for : %s', finder);
         }
       } else {
-        const handler: S3CreateHandlerFunction = this.findInMap<S3CreateHandlerFunction>(finder, this._epsilon.config.s3.createHandlers);
+        const handler: GenericAwsEventHandlerFunction<S3Event> = this.findInMap<GenericAwsEventHandlerFunction<S3Event>>(
+          finder,
+          this._epsilon.config.s3.createHandlers
+        );
         if (handler) {
           rval = await handler(evt);
         } else {
@@ -220,7 +226,9 @@ export class EpsilonGlobalHandler {
     let rval: any = null;
     if (this._epsilon.config && this._epsilon.config.dynamoDb && evt && evt.Records && evt.Records.length > 0) {
       const finder: string = evt.Records[0].eventSourceARN;
-      const handler: DynamoDbHandlerFunction = this.findInMap<DynamoDbHandlerFunction>(finder, this._epsilon.config.dynamoDb.handlers);
+      const handler: GenericAwsEventHandlerFunction<DynamoDBStreamEvent> = this.findInMap<
+        GenericAwsEventHandlerFunction<DynamoDBStreamEvent>
+      >(finder, this._epsilon.config.dynamoDb.handlers);
       if (handler) {
         rval = await handler(evt);
       } else {
