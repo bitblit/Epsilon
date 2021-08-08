@@ -1,9 +1,8 @@
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
-import { APIGatewayEvent } from 'aws-lambda';
 
 /**
- * Service for handling jwt tokens
+ * Service for handling auth tokens
  */
 export interface WebTokenManipulator {
-  extractTokenFromStandardEvent<T>(event: APIGatewayEvent): Promise<CommonJwtToken<T>>;
+  extractTokenFromAuthorizationHeader<T>(header: string): Promise<CommonJwtToken<T>>;
 }

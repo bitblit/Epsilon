@@ -31,8 +31,8 @@ export interface HttpMetaProcessingConfig {
   disableValidateInboundRequestBody?: boolean;
   // If set, inbound query string parameters will not be validated
   disableValidateInboundQueryParameters?: boolean; // TODO: Implement
-  // If set, outbound objects will also be validated
-  enableValidateOutboundResponseBody?: boolean;
+  // If set, outbound objects will not be validated
+  disableValidateOutboundResponseBody?: boolean;
   // If set, the body won't be parsed by epsilon (uncommon)
   disableAutomaticBodyParse?: boolean;
   // If set, epsilon won't guarantee that the query/path/header maps are non-null (uncommon)

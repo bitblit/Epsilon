@@ -18,6 +18,7 @@ import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
 import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-meta-processing-config';
 import { BuiltInFilters } from '../../built-in/http/built-in-filters';
+import { WebTokenManipulator } from '../auth/web-token-manipulator';
 
 /**
  * Endpoints about the api itself
@@ -32,6 +33,34 @@ export class RouterUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
+
+  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): HttpMetaProcessingConfig {
+    const defaults: HttpMetaProcessingConfig = {
+      configName: 'EpsilonDefaultHttpMetaProcessingConfig',
+      timeoutMS: 30_000,
+      overrideAuthorizerName: null,
+      preFilters: BuiltInFilters.defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator),
+      postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
+      errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
+      customExtraHeaders: {},
+      defaultErrorMessage: 'Internal server error',
+      corsAllowedOrigins: '*',
+      corsAllowedMethods: '*',
+      corsAllowedHeaders: '*',
+      disableAutoFixStillEncodedQueryParams: false,
+      disableAutoAddCorsHeadersToResponses: false,
+      disableCompression: false,
+      disableValidateInboundRequestBody: false,
+      disableValidateInboundQueryParameters: false,
+      disableValidateOutboundResponseBody: false,
+      disableAutomaticBodyParse: false,
+      disableParameterMapAssure: false,
+      nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
+      allowLiteralStringNullAsPathParameter: false,
+      allowLiteralStringNullAsQueryStringParameter: false,
+    };
+    return defaults;
+  }
 
   public static defaultHttpMetaProcessingConfig(): HttpMetaProcessingConfig {
     const defaults: HttpMetaProcessingConfig = {
@@ -51,7 +80,7 @@ export class RouterUtil {
       disableCompression: false,
       disableValidateInboundRequestBody: false,
       disableValidateInboundQueryParameters: false,
-      enableValidateOutboundResponseBody: false,
+      disableValidateOutboundResponseBody: false,
       disableAutomaticBodyParse: false,
       disableParameterMapAssure: false,
       nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,

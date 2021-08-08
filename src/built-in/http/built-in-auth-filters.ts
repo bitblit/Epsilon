@@ -11,6 +11,9 @@ import { MisconfiguredError } from '../../http/error/misconfigured-error';
 import jwt from 'jsonwebtoken';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
+import { ForbiddenError } from '../../http/error/forbidden-error';
+import { AuthorizerFunction } from '../../config/http/authorizer-function';
+import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 
 export class BuiltInAuthFilters {
   public static async requireAllRolesInCommonJwt(fCtx: FilterChainContext, requiredRoleAllOf: string[]): Promise<boolean> {
@@ -63,39 +66,53 @@ export class BuiltInAuthFilters {
     return true;
   }
 
-  public static async parseJwtBasedAuthorizationHeader(
-    fCtx: FilterChainContext,
-    encryptionKey: string,
-    parseFailureLogLevel: string = 'debug'
-  ): Promise<boolean> {
-    if (!event || !encryptionKey) {
+  public static async parseAuthorizationHeader(fCtx: FilterChainContext, webTokenManipulator: WebTokenManipulator): Promise<boolean> {
+    if (!fCtx?.event || !webTokenManipulator) {
       throw new MisconfiguredError('Cannot continue - missing event or encryption');
-    } else if (!fCtx.event.headers || !fCtx.event.headers['Authorization']) {
-      throw new UnauthorizedError('Missing Authorization header');
-    } else if (!fCtx.event.headers['Authorization'].toLowerCase().startsWith('bearer ')) {
-      throw new UnauthorizedError('Authorization header malformed - does not start with the word Bearer');
     } else {
-      const tokenString: string = fCtx.event.headers['Authorization'].substring(7); // Cut off Bearer
+      // We dont throw errors if no token - just just decodes, it DOESNT enforce having tokens
+      const tokenString: string = StringRatchet.trimToEmpty(fCtx?.event?.headers['Authorization']);
       try {
-        const payload: any = jwt.verify(tokenString, encryptionKey);
+        // We include the prefix (like 'bearer') in case the token wants to code more than one type
+        const token: CommonJwtToken<any> = await webTokenManipulator.extractTokenFromAuthorizationHeader(tokenString);
         fCtx.event.authorization = {
           raw: tokenString,
-          auth: payload,
+          auth: token,
           error: null,
         };
       } catch (err) {
-        if (parseFailureLogLevel) {
-          Logger.logByLevel(parseFailureLogLevel, 'Failed to parse JWT token : %s : %s', err.message, tokenString);
-        }
         fCtx.event.authorization = {
           raw: tokenString,
           auth: null,
           error: err.message,
         };
       }
-      if (!fCtx.event?.authorization?.auth) {
-        throw new UnauthorizedError('Unable to parse a token from this string');
+    }
+    return true;
+  }
+
+  public static async applyOpenApiAuthorization(fCtx: FilterChainContext): Promise<boolean> {
+    // Check if this endpoint requires authorization
+    // Use !== true below because commonly it just wont be spec'd
+    if (StringRatchet.trimToNull(fCtx?.rawResult && fCtx?.routeAndParse?.mapping?.authorizerName)) {
+      const authorizer: AuthorizerFunction = fCtx?.authenticators?.get(fCtx.routeAndParse.mapping.authorizerName);
+      if (authorizer) {
+        if (!fCtx?.event?.authorization?.auth) {
+          const allowed: boolean = await authorizer(fCtx.event.authorization, fCtx.event, fCtx.routeAndParse.mapping);
+          if (!allowed) {
+            throw new ForbiddenError('You lack privileges to see this reo');
+          }
+        } else {
+          throw new UnauthorizedError('You need to supply credentials for this endpoint');
+        }
+      } else {
+        throw new MisconfiguredError().withFormattedErrorMessage(
+          'Authorizer %s requested but not found',
+          fCtx.routeAndParse.mapping.authorizerName
+        );
       }
+    } else {
+      // Do nothing (unauthenticated endpoint)
     }
     return true;
   }

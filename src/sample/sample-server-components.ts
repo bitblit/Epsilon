@@ -31,7 +31,6 @@ import { SampleInputValidatedProcessor } from '../built-in/background/sample-inp
 import { BackgroundManager } from '../background-manager';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
-import { BypassWebTokenManipulator } from '../http/auth/bypass-web-token-manipulator';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
@@ -90,8 +89,8 @@ export class SampleServerComponents {
   public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
-    authorizers.set('BackgroundAuthorizer', (token, event, route) => BuiltInAuthorizers.simpleLogAccessAuth(token, event, route));
-    authorizers.set('SampleAuthorizer', (token, evt, route) => BuiltInAuthorizers.simpleRoleRouteAuth(token, evt, route, ['USER'], []));
+    authorizers.set('SampleAuthorizer', (token, evt) => BuiltInAuthorizers.simpleLoggedInAuth(token, evt));
+    authorizers.set('LogAuthorizer', (token, evt) => BuiltInAuthorizers.simpleNoAuthenticationLogAccess(token, evt));
 
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
     handlers.set('get /', (event, context) => BuiltInHandlers.sample(event, null, context));
@@ -128,12 +127,12 @@ export class SampleServerComponents {
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
-    const meta: HttpMetaProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfig();
+    const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
+    const meta: HttpMetaProcessingConfig = RouterUtil.defaultAuthenticationHeaderParsingEpsilonPreFilters(tokenManipulator);
     meta.timeoutMS = 10_000;
     meta.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
-    meta.enableValidateOutboundResponseBody = true;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
         origin: '*',
@@ -150,10 +149,10 @@ export class SampleServerComponents {
         {
           pathRegex: '/background',
           methods: null,
-          config: Object.assign({}, meta, { overrideAuthorizerName: 'BackgroundAuthorizer' }),
+          config: Object.assign({}, meta, { overrideAuthorizerName: 'LogAuthorizer' }),
         },
       ],
-      webTokenManipulator: new BypassWebTokenManipulator(),
+      webTokenManipulator: tokenManipulator,
       apolloConfig: {
         apolloServer: await SampleServerComponents.createSampleApollo(),
         createHandlerOptions: {

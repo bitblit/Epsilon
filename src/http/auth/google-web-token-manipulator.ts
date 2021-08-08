@@ -5,8 +5,6 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import jwt from 'jsonwebtoken';
 import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';
-import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
-import { UnauthorizedError } from '../error/unauthorized-error';
 import fetch from 'cross-fetch';
 
 export class GoogleWebTokenManipulator implements WebTokenManipulator {
@@ -16,15 +14,13 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator {
 
   constructor(private clientId: string) {}
 
-  public async extractTokenFromStandardEvent<T>(event: APIGatewayEvent): Promise<CommonJwtToken<T>> {
-    try {
-      const tokenString: string = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
-      const validated: any = !!tokenString ? await this.parseAndValidateGoogleToken(tokenString, false) : null;
-      return validated as CommonJwtToken<T>;
-    } catch (err) {
-      Logger.warn('Authentication of token failed : %s', err, err);
-      throw new UnauthorizedError('Failed to extract google token : ' + String(err));
+  public async extractTokenFromAuthorizationHeader<T>(authHeader: string): Promise<CommonJwtToken<T>> {
+    let tokenString: string = StringRatchet.trimToEmpty(authHeader);
+    if (tokenString.toLowerCase().startsWith('bearer ')) {
+      tokenString = tokenString.substring(7);
     }
+    const validated: any = !!tokenString ? await this.parseAndValidateGoogleToken(tokenString, false) : null;
+    return validated as CommonJwtToken<T>;
   }
 
   public async parseAndValidateGoogleToken<T>(googleToken: string, allowExpired: boolean = false): Promise<CommonJwtToken<T>> {

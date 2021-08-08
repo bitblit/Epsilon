@@ -11,6 +11,8 @@ import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { MisconfiguredError } from '../../http/error/misconfigured-error';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { BuiltInAuthFilters } from './built-in-auth-filters';
+import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 
 export class BuiltInFilters {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -145,7 +147,8 @@ export class BuiltInFilters {
   }
 
   public static async validateOutboundResponse(fCtx: FilterChainContext): Promise<boolean> {
-    if (fCtx?.rawResult && fCtx?.routeAndParse?.mapping?.metaProcessingConfig?.enableValidateOutboundResponseBody) {
+    // Use !== true below because commonly it just wont be spec'd
+    if (fCtx?.rawResult && fCtx?.routeAndParse?.mapping?.metaProcessingConfig?.disableValidateOutboundResponseBody !== true) {
       if (fCtx.routeAndParse.mapping.outboundValidation) {
         Logger.debug('Applying outbound check to %j', fCtx.rawResult);
         const errors: string[] = fCtx.modelValidator.validate(
@@ -183,6 +186,13 @@ export class BuiltInFilters {
     } else {
       return true;
     }
+  }
+
+  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): FilterFunction[] {
+    return [
+      (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
+      (fCtx) => BuiltInAuthFilters.applyOpenApiAuthorization(fCtx),
+    ].concat(BuiltInFilters.defaultEpsilonPreFilters());
   }
 
   public static defaultEpsilonPreFilters(): FilterFunction[] {

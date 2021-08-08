@@ -5,6 +5,7 @@ import { APIGatewayEvent } from 'aws-lambda';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 import { UnauthorizedError } from '../error/unauthorized-error';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 /**
  * Service for handling jwt tokens
@@ -82,8 +83,12 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
     return token;
   }
 
-  public async extractTokenFromStandardEvent<T>(event: APIGatewayEvent): Promise<CommonJwtToken<T>> {
-    const tokenString: string = WebTokenManipulatorUtil.extractTokenStringFromStandardEvent(event);
-    return tokenString ? this.parseAndValidateJWTString(tokenString) : null;
+  public async extractTokenFromAuthorizationHeader<T>(header: string): Promise<CommonJwtToken<T>> {
+    let tokenString: string = StringRatchet.trimToEmpty(header);
+    if (tokenString.toLowerCase().startsWith('bearer ')) {
+      tokenString = tokenString.substring(7);
+    }
+    const validated: any = !!tokenString ? await this.parseAndValidateJWTString(tokenString) : null;
+    return validated as CommonJwtToken<T>;
   }
 }

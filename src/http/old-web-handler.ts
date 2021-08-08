@@ -27,6 +27,7 @@ import { NullReturnedObjectHandling } from '../config/http/null-returned-object-
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 import { RouteAndParse } from './web-handler';
 import { ApolloHandlerFunction } from '../built-in/http/apollo-filter';
+import { EpsilonAuthorizationContext } from './route/epsilon-authorization-context';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -135,7 +136,7 @@ export class OldWebHandler {
   }
 
   public optionallyApplyOutboundModelObjectCheck(rm: RouteAndParse, result: any): void {
-    if (rm.mapping.metaProcessingConfig.enableValidateOutboundResponseBody) {
+    if (!rm.mapping.metaProcessingConfig.disableValidateOutboundResponseBody) {
       if (rm.mapping.outboundValidation) {
         Logger.debug('Applying outbound check to %j', result);
         const errors: string[] = this.activeModelValidator().validate(
@@ -412,7 +413,9 @@ export class OldWebHandler {
         throw new MisconfiguredError('Auth is defined, but token manipulator not set');
       }
       // Extract the token
-      const token: CommonJwtToken<any> = await this.routerConfig.config.webTokenManipulator.extractTokenFromStandardEvent(event);
+      const token: CommonJwtToken<any> = await this.routerConfig.config.webTokenManipulator.extractTokenFromAuthorizationHeader(
+        event?.headers['Authorization']
+      );
       if (!token) {
         Logger.info('Failed auth for route : %s - missing/bad token', route.path);
         throw new UnauthorizedError('Missing or bad token');
@@ -423,7 +426,12 @@ export class OldWebHandler {
         }
 
         if (authorizer) {
-          const passes: boolean = await authorizer(token, event, route);
+          const authContext: EpsilonAuthorizationContext<any> = {
+            auth: token,
+            raw: null,
+            error: null,
+          };
+          const passes: boolean = await authorizer(authContext, event, route);
           if (!passes) {
             throw new ForbiddenError('Failed authorization');
           }

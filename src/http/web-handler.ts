@@ -55,6 +55,7 @@ export class WebHandler {
       rawResult: null,
       routeAndParse: rm,
       modelValidator: this.routerConfig.config.overrideModelValidator || this.routerConfig.openApiModelValidator,
+      authenticators: this.routerConfig.config.authorizers,
     };
 
     try {
