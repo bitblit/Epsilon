@@ -34,9 +34,8 @@ describe('#epsilonGlobalHandler', function () {
     };
     const cronConfig: CronConfig = {
       timezone: 'America/Los_Angeles',
-      directEntries: [],
       context: 'Test',
-      backgroundEntries: [
+      entries: [
         {
           backgroundTaskType: 'test',
           fireImmediate: true,

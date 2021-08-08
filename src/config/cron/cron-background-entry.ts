@@ -7,8 +7,7 @@ import { AbstractCronEntry } from './abstract-cron-entry';
  * gets the full 15 minutes if necessary)
  *
  * This simplifies doing that - you can basically just configure the set of
- * constraints, and the background task to fire off if the constraints match.  It
- * doesn't allow setting of data, since for CRON there is nothing but the event anyway.
+ * constraints, and the background task to fire off if the constraints match.
  */
 export interface CronBackgroundEntry extends AbstractCronEntry {
   backgroundTaskType: string;

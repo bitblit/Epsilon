@@ -14,8 +14,7 @@ describe('#cronUtil', function () {
     const cfg: CronConfig = {
       context: 'prod',
       timezone: 'America/Los_Angeles',
-      directEntries: [],
-      backgroundEntries: [], // only works since this isn't checked
+      entries: [], // only works since this isn't checked
     };
 
     const cron1: AbstractCronEntry = {

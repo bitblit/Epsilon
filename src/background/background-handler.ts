@@ -9,7 +9,6 @@ import { BackgroundValidator } from './background-validator';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { InternalBackgroundEntry } from './internal-background-entry';
-import { BadRequestError } from '../http/error/bad-request-error';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same

@@ -11,7 +11,6 @@ import { CronConfig } from './config/cron/cron-config';
 import { BackgroundConfig } from './config/background/background-config';
 import { CronBackgroundEntry } from './config/cron/cron-background-entry';
 import { CronUtil } from './util/cron-util';
-import { CronDirectEntry } from './config/cron/cron-direct-entry';
 import { GenericAwsEventHandlerFunction } from './config/generic-aws-event-handler-function';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
@@ -204,12 +203,11 @@ export class EpsilonGlobalHandler {
     let rval: boolean = false;
     if (cronConfig && evt && evt.resources[0]) {
       // Run all the background ones
-      if (!!cronConfig.backgroundEntries) {
+      if (!!cronConfig.entries) {
         if (!!background) {
-          const backgroundConfig: BackgroundConfig = background.getConfig();
           const toEnqueue: BackgroundEntry<any>[] = [];
-          for (let i = 0; i < cronConfig.backgroundEntries.length; i++) {
-            const smCronEntry: CronBackgroundEntry = cronConfig.backgroundEntries[i];
+          for (let i = 0; i < cronConfig.entries.length; i++) {
+            const smCronEntry: CronBackgroundEntry = cronConfig.entries[i];
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
               Logger.info('Firing Background cron : %s', CronUtil.cronEntryName(smCronEntry));
 
@@ -232,16 +230,6 @@ export class EpsilonGlobalHandler {
           }
         } else {
           Logger.warn('Cron defines background tasks, but no background manager provided');
-        }
-      }
-      if (!!cronConfig.directEntries) {
-        for (let i = 0; i < cronConfig.directEntries.length; i++) {
-          const directEntry: CronDirectEntry = cronConfig.directEntries[i];
-          if (CronUtil.eventMatchesEntry(evt, directEntry, cronConfig)) {
-            Logger.info('Firing direct cron : %s', CronUtil.cronEntryName(directEntry, i));
-            await directEntry.directHandler(evt);
-            rval = true;
-          }
         }
       }
     }

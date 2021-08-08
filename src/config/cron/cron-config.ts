@@ -1,4 +1,3 @@
-import { CronDirectEntry } from './cron-direct-entry';
 import { CronBackgroundEntry } from './cron-background-entry';
 
 export interface CronConfig {
@@ -7,6 +6,5 @@ export interface CronConfig {
   // Define the current context of this cron executor (typically used to switch prod/qa/dev, etc)
   context: string;
 
-  directEntries: CronDirectEntry[];
-  backgroundEntries: CronBackgroundEntry[];
+  entries: CronBackgroundEntry[];
 }
