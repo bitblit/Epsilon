@@ -32,24 +32,8 @@ export class WebHandler {
     if (!this.routerConfig) {
       throw new Error('Router config not found');
     }
-    let rval: ProxyResult = null;
     const asExtended: ExtendedAPIGatewayEvent = Object.assign({}, { parsedBody: null, authorization: null }, event);
-    if (this.routerConfig.config.disableLastResortTimeout || !context || !context.getRemainingTimeInMillis()) {
-      rval = await this.openApiLambdaHandler(asExtended, context);
-    } else {
-      // Outer wrap timeout makes sure that we timeout even if the slow part is a filter instead of the controller
-      const tmp: ProxyResult | TimeoutToken = await PromiseRatchet.timeout<ProxyResult>(
-        this.openApiLambdaHandler(asExtended, context),
-        'WebHandlerLastResortTimeout',
-        context.getRemainingTimeInMillis() - 1000
-      ); // Reserve 1 second for cleanup
-      if (TimeoutToken.isTimeoutToken(tmp)) {
-        (tmp as TimeoutToken).writeToLog();
-        rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
-      } else {
-        rval = tmp as ProxyResult;
-      }
-    }
+    const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
     Logger.setTracePrefix(null); // Just in case it was set
     return rval;
   }

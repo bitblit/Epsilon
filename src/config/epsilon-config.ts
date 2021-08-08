@@ -7,6 +7,9 @@ import { SnsConfig } from './sns-config';
 import { EpsilonLoggerConfig } from './epsilon-logger-config';
 
 export interface EpsilonConfig {
+  // If disabled, last resort timeout will instead roll to lambda (not recommended)
+  disableLastResortTimeout?: boolean;
+
   openApiYamlString: string;
   httpConfig?: HttpConfig;
 

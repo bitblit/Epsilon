@@ -13,8 +13,6 @@ export interface HttpConfig {
   // Allows setting meta handling for any specific routes
   // These are evaluated IN ORDER, to allow progressively less specific configuration
   overrideMetaHandling?: MappedHttpMetaProcessingConfig[];
-  // If disabled, last resort timeout will instead roll to lambda (not recommended)
-  disableLastResortTimeout?: boolean;
   // Maps routes to handlers
   handlers: Map<string, HandlerFunction<any>>;
   // Maps names to authorization functions

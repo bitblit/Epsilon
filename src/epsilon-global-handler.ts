@@ -1,4 +1,4 @@
-import { APIGatewayEvent, Context, DynamoDBStreamEvent, S3CreateEvent, S3Event, ScheduledEvent, SNSEvent } from 'aws-lambda';
+import { APIGatewayEvent, Context, DynamoDBStreamEvent, ProxyResult, S3CreateEvent, S3Event, ScheduledEvent, SNSEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
@@ -13,6 +13,11 @@ import { CronBackgroundEntry } from './config/cron/cron-background-entry';
 import { CronUtil } from './util/cron-util';
 import { CronDirectEntry } from './config/cron/cron-direct-entry';
 import { GenericAwsEventHandlerFunction } from './config/generic-aws-event-handler-function';
+import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
+import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
+import { ResponseUtil } from './http/response-util';
+import { EpsilonHttpError } from './http/error/epsilon-http-error';
+import { RequestTimeoutError } from './http/error/request-timeout-error';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -28,6 +33,28 @@ export class EpsilonGlobalHandler {
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
+    let rval: any = null;
+    if (this.epsilon.config.disableLastResortTimeout || !context || !context.getRemainingTimeInMillis()) {
+      rval = await this.innerLambdaHandler(event, context);
+    } else {
+      // Outer wrap timeout makes sure that we timeout even if the slow part is a filter instead of the controller
+      const tmp: any = await PromiseRatchet.timeout<ProxyResult>(
+        this.innerLambdaHandler(event, context),
+        'EpsilonLastResortTimeout',
+        context.getRemainingTimeInMillis() - 1000
+      ); // Reserve 1 second for cleanup
+      if (TimeoutToken.isTimeoutToken(tmp)) {
+        (tmp as TimeoutToken).writeToLog();
+        // Using the HTTP version since it can use it, and the background ones dont care about the response format
+        rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
+      } else {
+        rval = tmp;
+      }
+    }
+    return rval;
+  }
+
+  public async innerLambdaHandler(event: any, context: Context): Promise<any> {
     EpsilonGlobalHandler.CURRENT_CONTEXT = context;
     let rval: any = null;
     try {
