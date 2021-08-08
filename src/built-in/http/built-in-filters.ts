@@ -118,8 +118,22 @@ export class BuiltInFilters {
     return true;
   }
 
+  public static async autoRespondToOptionsRequestWithCors(fCtx: FilterChainContext): Promise<boolean> {
+    if (StringRatchet.trimToEmpty(fCtx?.event?.httpMethod).toLowerCase() === 'options') {
+      fCtx.result = {
+        statusCode: 200,
+        body: '{"cors":true, "m":2}',
+      };
+      await BuiltInFilters.addAllowReflectionCORSHeaders(fCtx);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   public static defaultEpsilonPreFilters(): FilterFunction[] {
     return [
+      (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
       (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
       (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
       (fCtx) => BuiltInFilters.fixStillEncodedQueryParameters(fCtx),
