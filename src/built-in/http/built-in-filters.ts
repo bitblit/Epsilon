@@ -9,6 +9,8 @@ import { FilterFunction } from '../../config/http/filter-function';
 import { ResponseUtil } from '../../http/response-util';
 import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
+import { MisconfiguredError } from '../../http/error/misconfigured-error';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 export class BuiltInFilters {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -67,7 +69,7 @@ export class BuiltInFilters {
     });
   }
 
-  public static async fixStillEncodedQueryParameters(fCtx: FilterChainContext): Promise<boolean> {
+  public static async uriDecodeAllQueryParameters(fCtx: FilterChainContext): Promise<boolean> {
     EventUtil.fixStillEncodedQueryParams(fCtx.event);
     return true;
   }
@@ -118,6 +120,58 @@ export class BuiltInFilters {
     return true;
   }
 
+  public static async validateInboundBody(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx?.event?.parsedBody && fCtx.routeAndParse) {
+      if (fCtx.routeAndParse.route.validation) {
+        if (!fCtx.modelValidator) {
+          throw new MisconfiguredError('Requested body validation but supplied no validator');
+        }
+        const errors: string[] = fCtx.modelValidator.validate(
+          fCtx.routeAndParse.route.validation.modelName,
+          fCtx.event.parsedBody,
+          fCtx.routeAndParse.route.validation.emptyAllowed,
+          fCtx.routeAndParse.route.validation.extraPropertiesAllowed
+        );
+        if (errors.length > 0) {
+          Logger.info('Found errors while validating %s object %j', fCtx.routeAndParse.route.validation.modelName, errors);
+          const newError: BadRequestError = new BadRequestError(...errors);
+          throw newError;
+        }
+      }
+    } else {
+      Logger.debug('No validation since no route specified or no parsed body');
+    }
+    return true;
+  }
+
+  public static async validateOutboundResponse(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx?.rawResult && fCtx?.routeAndParse?.mapping?.metaProcessingConfig?.enableValidateOutboundResponseBody) {
+      if (fCtx.routeAndParse.mapping.outboundValidation) {
+        Logger.debug('Applying outbound check to %j', fCtx.rawResult);
+        const errors: string[] = fCtx.modelValidator.validate(
+          fCtx.routeAndParse.mapping.outboundValidation.modelName,
+          fCtx.rawResult,
+          fCtx.routeAndParse.mapping.outboundValidation.emptyAllowed,
+          fCtx.routeAndParse.mapping.outboundValidation.extraPropertiesAllowed
+        );
+        if (errors.length > 0) {
+          Logger.error(
+            'Found outbound errors while validating %s object %j',
+            fCtx.routeAndParse.mapping.outboundValidation.modelName,
+            errors
+          );
+          errors.unshift('Server sent object invalid according to spec');
+          throw new EpsilonHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(fCtx.rawResult);
+        }
+      } else {
+        Logger.debug('Applied no outbound validation because none set');
+      }
+    } else {
+      Logger.debug('No validation since no outbound body or disabled');
+    }
+    return true;
+  }
+
   public static async autoRespondToOptionsRequestWithCors(fCtx: FilterChainContext): Promise<boolean> {
     if (StringRatchet.trimToEmpty(fCtx?.event?.httpMethod).toLowerCase() === 'options') {
       fCtx.result = {
@@ -136,14 +190,16 @@ export class BuiltInFilters {
       (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
       (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
       (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
-      (fCtx) => BuiltInFilters.fixStillEncodedQueryParameters(fCtx),
+      (fCtx) => BuiltInFilters.uriDecodeAllQueryParameters(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundBody(fCtx),
     ];
   }
 
   public static defaultEpsilonPostFilters(): FilterFunction[] {
     return [
+      (fCtx) => BuiltInFilters.validateOutboundResponse(fCtx),
       (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
       (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
       (fCtx) => BuiltInFilters.applyGzipIfPossible(fCtx),

@@ -17,6 +17,7 @@ import { NullReturnedObjectHandling } from '../config/http/null-returned-object-
 import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
+import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -51,6 +52,9 @@ export class WebHandler {
       event: evt,
       context: context,
       result: null,
+      rawResult: null,
+      routeAndParse: rm,
+      modelValidator: this.routerConfig.config.overrideModelValidator || this.routerConfig.openApiModelValidator,
     };
 
     try {

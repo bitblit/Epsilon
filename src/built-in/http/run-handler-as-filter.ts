@@ -25,6 +25,7 @@ export class RunHandlerAsFilter {
     }
     Logger.debug('Initial return value : %j', tmp);
     tmp = RunHandlerAsFilter.applyNullReturnedObjectHandling(tmp, rm.mapping.metaProcessingConfig.nullReturnedObjectHandling);
+    fCtx.rawResult = tmp;
     fCtx.result = ResponseUtil.coerceToProxyResult(tmp);
 
     return true;
