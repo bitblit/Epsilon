@@ -12,6 +12,7 @@ import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { NotFoundError } from './error/not-found-error';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from './error/request-timeout-error';
+import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -38,9 +39,12 @@ export class WebHandler {
 
   public async openApiLambdaHandler(evt: ExtendedAPIGatewayEvent, context: Context): Promise<ProxyResult> {
     const rm: RouteAndParse = this.findBestMatchingRoute(evt);
+    const procConfig: HttpMetaProcessingConfig = rm?.mapping?.metaProcessingConfig
+      ? rm.mapping.metaProcessingConfig
+      : this.routerConfig.config.defaultMetaHandling;
     let vals: [ExtendedAPIGatewayEvent, Context, ProxyResult, boolean] = null;
     try {
-      vals = await BuiltInFilters.combineFilters(evt, context, {} as ProxyResult, rm.mapping.metaProcessingConfig.preFilters);
+      vals = await BuiltInFilters.combineFilters(evt, context, {} as ProxyResult, procConfig.preFilters);
       if (vals[3]) {
         // Check for continue
         // Run the controller
@@ -55,14 +59,14 @@ export class WebHandler {
         vals[2] = ResponseUtil.coerceToProxyResult(result);
 
         // Run post-processors
-        vals = await BuiltInFilters.combineFilters(vals[0], vals[1], vals[2], rm.mapping.metaProcessingConfig.postFilters);
+        vals = await BuiltInFilters.combineFilters(vals[0], vals[1], vals[2], procConfig.postFilters);
       }
     } catch (err) {
       // Convert to an epsilon error
       const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
       vals[2] = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null));
       try {
-        vals = await BuiltInFilters.combineFilters(evt, context, vals[2], rm.mapping.metaProcessingConfig.errorFilters);
+        vals = await BuiltInFilters.combineFilters(evt, context, vals[2], procConfig.errorFilters);
       } catch (convErr) {
         Logger.error('REALLY BAD - FAILED WHILE PROCESSING ERROR FILTERS : %s', convErr);
       }

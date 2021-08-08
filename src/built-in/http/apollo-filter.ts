@@ -5,6 +5,7 @@ import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from '../../http/error/request-timeout-error';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
+import { FilterFunction } from '../../config/http/filter-function';
 
 export class ApolloFilter {
   private static CACHE_APOLLO_HANDLER: ApolloHandlerFunction;
@@ -77,6 +78,19 @@ export class ApolloFilter {
     // If we made it here, we didn't time out
     rval = result;
     return rval;
+  }
+
+  public static addApolloFilterToList(
+    filters: FilterFunction[],
+    apolloPathRegex: RegExp,
+    apolloServer: ApolloServer,
+    createHandlerOptions: CreateHandlerOptions
+  ): void {
+    if (filters) {
+      filters.push((evt, context, result) =>
+        ApolloFilter.handlePathWithApollo(evt, context, result, apolloPathRegex, apolloServer, createHandlerOptions)
+      );
+    }
   }
 }
 

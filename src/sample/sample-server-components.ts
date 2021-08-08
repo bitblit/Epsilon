@@ -32,6 +32,7 @@ import { BackgroundManager } from '../background-manager';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { BypassWebTokenManipulator } from '../http/auth/bypass-web-token-manipulator';
+import { ApolloFilter } from '../built-in/http/apollo-filter';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -120,6 +121,12 @@ export class SampleServerComponents {
     meta.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
+    ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
+      cors: {
+        origin: '*',
+        credentials: true,
+      },
+    });
 
     const cfg: HttpConfig = {
       defaultMetaHandling: meta,

@@ -6,6 +6,9 @@ import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-e
 import { BadRequestError } from '../../http/error/bad-request-error';
 import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { EpsilonRouter } from '../../http/route/epsilon-router';
+import { UnauthorizedError } from '../../http/error/unauthorized-error';
+import { NotFoundError } from '../../http/error/not-found-error';
+import { ForbiddenError } from '../../http/error/forbidden-error';
 
 export class BuiltInHandlers {
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
@@ -39,6 +42,12 @@ export class BuiltInHandlers {
           throw new Error('Test random failure');
         case 400:
           throw new BadRequestError('Bad request error');
+        case 401:
+          throw new UnauthorizedError('Unauthorized error');
+        case 403:
+          throw new ForbiddenError('Forbidden error');
+        case 404:
+          throw new NotFoundError('Not Found error');
         default:
           throw new EpsilonHttpError<any>()
             .withFormattedErrorMessage('Default error - %s', errNumber)
