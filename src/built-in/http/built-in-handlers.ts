@@ -28,7 +28,7 @@ export class BuiltInHandlers {
       flag: flag,
     };
 
-    if (!!context) {
+    if (context) {
       rval['context'] = context;
     }
 

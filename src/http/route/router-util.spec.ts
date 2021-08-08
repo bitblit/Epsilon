@@ -6,6 +6,7 @@ import path from 'path';
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 import { SampleServerComponents } from '../../sample/sample-server-components';
+import { ExtendedAPIGatewayEvent } from './extended-api-gateway-event';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
@@ -33,21 +34,23 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     expect(inst.epsilon.modelValidator).toBeTruthy();
 
     // TODO: move this to its own test
-    const evtFixed: APIGatewayEvent = {
+    const evtFixed: ExtendedAPIGatewayEvent = {
       httpMethod: 'get',
       path: '/v0/multi/fixed',
       requestContext: {
         stage: 'v0',
       },
-    } as APIGatewayEvent;
+      queryStringParameters: {},
+    } as ExtendedAPIGatewayEvent;
 
-    const evtVar: APIGatewayEvent = {
+    const evtVar: ExtendedAPIGatewayEvent = {
       httpMethod: 'get',
       path: '/v0/multi/xyz',
       requestContext: {
         stage: 'v0',
       },
-    } as APIGatewayEvent;
+      queryStringParameters: {},
+    } as ExtendedAPIGatewayEvent;
 
     const findFixedRP: RouteAndParse = await inst.epsilon.webHandler.findBestMatchingRoute(evtFixed);
     const findVariableRP: RouteAndParse = await inst.epsilon.webHandler.findBestMatchingRoute(evtVar);

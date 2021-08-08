@@ -1,10 +1,14 @@
 import { NullReturnedObjectHandling } from './null-returned-object-handling';
+import { FilterFunction } from './filter-function';
 
 export interface HttpMetaProcessingConfig {
   // If set, used in logging to help debugging
   configName?: string;
   // If set, matching routes will timeout after this amount of time (with a 50x error)
   timeoutMS: number;
+  preFilters?: FilterFunction[];
+  postFilters?: FilterFunction[];
+  errorFilters?: FilterFunction[];
   // If set, matching routes will use this instead of the one spec'd in the open api doc
   overrideAuthorizerName?: string;
   // If set, these headers will always be added to outbound traffic

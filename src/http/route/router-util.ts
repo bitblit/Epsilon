@@ -17,6 +17,7 @@ import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
 import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-meta-processing-config';
+import { BuiltInFilters } from '../../built-in/http/built-in-filters';
 
 /**
  * Endpoints about the api itself
@@ -37,6 +38,9 @@ export class RouterUtil {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
       timeoutMS: 30_000,
       overrideAuthorizerName: null,
+      preFilters: BuiltInFilters.defaultEpsilonPreFilters(),
+      postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
+      errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
       customExtraHeaders: {},
       defaultErrorMessage: 'Internal server error',
       corsAllowedOrigins: '*',

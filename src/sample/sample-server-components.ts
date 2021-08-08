@@ -115,12 +115,11 @@ export class SampleServerComponents {
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
-    const meta: HttpMetaProcessingConfig = {
-      timeoutMS: 10_000,
-      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-    };
+    const meta: HttpMetaProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfig();
+    meta.timeoutMS = 10_000;
+    meta.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
+    meta.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
+    meta.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
 
     const cfg: HttpConfig = {
       defaultMetaHandling: meta,
