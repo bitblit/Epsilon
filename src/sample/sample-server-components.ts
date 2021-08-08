@@ -112,7 +112,7 @@ export class SampleServerComponents {
       return rval;
     });
 
-    // Unused - intercepted by Epsilon, but needed to prevent 404
+    // Unused - intercepted by the Apollo filter, but needed to prevent 404
     handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
     handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
 
