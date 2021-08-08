@@ -133,6 +133,7 @@ export class SampleServerComponents {
     meta.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     meta.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
+    meta.enableValidateOutboundResponseBody = true;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
         origin: '*',
