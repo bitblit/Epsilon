@@ -7,7 +7,7 @@ import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
 /**
  * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
  */
-export class AuthHandler {
+export class ApiGatewayAdapterAuthenticationHandler {
   private webTokenManipulator: LocalWebTokenManipulator;
 
   constructor(issuer: string, encryptionKey: string) {

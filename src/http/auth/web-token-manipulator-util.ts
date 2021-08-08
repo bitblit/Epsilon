@@ -6,8 +6,8 @@ import { EpsilonConstants } from '../../epsilon-constants';
  * Util for common jwt handling
  */
 export class WebTokenManipulatorUtil {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   // Prevent instantiation
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   public static extractTokenStringFromAuthorizerEvent(event: CustomAuthorizerEvent): string {

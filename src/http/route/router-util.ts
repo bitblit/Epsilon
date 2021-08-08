@@ -16,6 +16,7 @@ import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
+import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-meta-processing-config';
 
 /**
  * Endpoints about the api itself
@@ -72,9 +73,28 @@ export class RouterUtil {
     return rval;
   }
 
-  public static findApplicableMeta(httpConfig: HttpConfig, path: string): HttpMetaProcessingConfig {
-    // TODO: IMplement
-    return RouterUtil.defaultHttpMetaProcessingConfig();
+  // Search the overrides in order to find a match, otherwise return default
+  public static findApplicableMeta(httpConfig: HttpConfig, method: string, path: string): HttpMetaProcessingConfig {
+    let rval: HttpMetaProcessingConfig = null;
+    if (httpConfig?.overrideMetaHandling) {
+      for (let i = 0; i < httpConfig.overrideMetaHandling.length && !rval; i++) {
+        const test: MappedHttpMetaProcessingConfig = httpConfig.overrideMetaHandling[i];
+        if (
+          !test.methods ||
+          test.methods.length === 0 ||
+          test.methods.map((s) => s.toLocaleLowerCase()).includes(method.toLocaleLowerCase())
+        ) {
+          if (test.pathRegex.match(path)) {
+            rval = test.config;
+          }
+        }
+      }
+    }
+    if (!rval) {
+      rval = httpConfig.defaultMetaHandling || RouterUtil.defaultHttpMetaProcessingConfig(); // If nothing found, use epsilon defaults
+    }
+
+    return rval;
   }
 
   // Parses an open api file to create a router config
@@ -117,7 +137,7 @@ export class RouterUtil {
         Object.keys(openApiDoc.paths[path]).forEach((method) => {
           const convertedPath: string = RouterUtil.openApiPathToRouteParserPath(path);
           const finder: string = method + ' ' + path;
-          const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, finder);
+          const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, method, path);
 
           if (method.toLowerCase() === 'options') {
             applicableMeta.timeoutMS = 10_000; // Options calls get really short timeouts since they are constant

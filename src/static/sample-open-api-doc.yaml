@@ -300,7 +300,7 @@ paths:
         '200':
           description: Standard CORS header response
 
-  /background/epsilon-echo:
+  /background:
     post:
       responses:
         '200':
@@ -326,139 +326,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Empty'
-        description: Content to echo
-        required: true
-    options:
-      tags:
-        - CORS
-      responses:
-        '200':
-          description: Standard CORS header response
-
-  /background/epsilon-log-and-enqueue-echo:
-    post:
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackgroundQueueResponse'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-        '403':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Empty'
-        description: Content to echo
-        required: true
-    options:
-      tags:
-        - CORS
-      responses:
-        '200':
-          description: Standard CORS header response
-
-  /background/epsilon-no-op:
-    post:
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackgroundQueueResponse'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-        '403':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-    options:
-      tags:
-        - CORS
-      responses:
-        '200':
-          description: Standard CORS header response
-
-  /background/epsilon-sample-delay:
-    post:
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackgroundQueueResponse'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-        '403':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Empty'
-        description: Content to echo
-        required: true
-    options:
-      tags:
-        - CORS
-      responses:
-        '200':
-          description: Standard CORS header response
-
-  /background/epsilon-sample-input-validated:
-    post:
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BackgroundQueueResponse'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-        '403':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorResponse'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BackgroundSampleInputValidatedProcessorData'
         description: Content to echo
         required: true
     options:

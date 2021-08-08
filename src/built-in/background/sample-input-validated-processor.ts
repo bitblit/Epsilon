@@ -1,5 +1,5 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
-import { BackgroundProcessor } from '../../config/background-processor';
+import { BackgroundProcessor } from '../../config/background/background-processor';
 import { BackgroundManager } from '../../background-manager';
 
 export class SampleInputValidatedProcessor implements BackgroundProcessor<SampleInputValidatedProcessorData> {
@@ -11,7 +11,7 @@ export class SampleInputValidatedProcessor implements BackgroundProcessor<Sample
     Logger.info('Running SampleInputValidatedProcessor, data was : %j', data);
   }
 
-  public get dataSchema(): string {
+  public get dataSchemaName(): string {
     return 'BackgroundSampleInputValidatedProcessorData';
   }
 }

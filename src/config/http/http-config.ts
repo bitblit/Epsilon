@@ -5,12 +5,14 @@ import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 import { HttpMetaProcessingConfig } from './http-meta-processing-config';
 import { ApolloGraphqlConfig } from './apollo-graphql-config';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { MappedHttpMetaProcessingConfig } from './mapped-http-meta-processing-config';
 
 export interface HttpConfig {
   // This is used for meta handling for any route not overridden by overrideMetaHandling
   defaultMetaHandling: HttpMetaProcessingConfig;
-  // Allows setting meta handling for any specific route
-  overrideModelValidator?: ModelValidator;
+  // Allows setting meta handling for any specific routes
+  // These are evaluated IN ORDER, to allow progressively less specific configuration
+  overrideMetaHandling?: MappedHttpMetaProcessingConfig[];
   // Maps routes to handlers
   handlers: Map<string, HandlerFunction<any>>;
   // Maps names to authorization functions
@@ -31,6 +33,6 @@ export interface HttpConfig {
   requestIdResponseHeaderName?: string;
   // If set, Apollo GraphQL will be used to process matching requests
   apolloConfig?: ApolloGraphqlConfig;
-  overrideMetaHandling?: Map<string, HttpMetaProcessingConfig>;
   // If set, the system will use this model validator instead of the OpenAPI one (Uncommon)
+  overrideModelValidator?: ModelValidator;
 }

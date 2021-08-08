@@ -12,9 +12,7 @@ import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dis
 import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
-import { SimpleLoggedInAuth } from '../http/auth/simple-logged-in-auth';
 import { HandlerFunction } from '../config/http/handler-function';
-import { SimpleRoleRouteAuth } from '../http/auth/simple-role-route-auth';
 import { BuiltInHandlers } from '../built-in/http/built-in-handlers';
 import { HttpConfig } from '../config/http/http-config';
 import { EpsilonConstants } from '../epsilon-constants';
@@ -25,13 +23,15 @@ import { NoOpProcessor } from '../built-in/background/no-op-processor';
 import { SampleDelayProcessor } from '../built-in/background/sample-delay-processor';
 import { LogAndEnqueueEchoProcessor } from '../built-in/background/log-and-enqueue-echo-processor';
 import { EpsilonConfig } from '../config/epsilon-config';
-import { EpsilonInstance } from '../config/epsilon-instance';
+import { EpsilonInstance } from '../epsilon-instance';
 import { EpsilonConfigParser } from '../util/epsilon-config-parser';
 import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 import { BackgroundManager } from '../background-manager';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
+import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
+import { BypassWebTokenManipulator } from '../http/auth/bypass-web-token-manipulator';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -83,22 +83,18 @@ export class SampleServerComponents {
   }
 
   // Functions below here are for using as samples
-
   public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
-    const validTokenAuth: SimpleLoggedInAuth = new SimpleLoggedInAuth();
-    authorizers.set('BACKGROUND', (token, event, route) => validTokenAuth.handler(token, event, route));
+    authorizers.set('BackgroundAuthorizer', (token, event, route) => BuiltInAuthorizers.simpleLogAccessAuth(token, event, route));
+    authorizers.set('SampleAuthorizer', (token, evt, route) => BuiltInAuthorizers.simpleRoleRouteAuth(token, evt, route, ['USER'], []));
 
     const handlers: Map<string, HandlerFunction<any>> = new Map<string, HandlerFunction<any>>();
-    const simpleRouteAuth: SimpleRoleRouteAuth = new SimpleRoleRouteAuth(['USER'], []);
-    authorizers.set('SampleAuthorizer', (token, event, route) => simpleRouteAuth.handler(token, event, route));
     handlers.set('get /', (event, context) => BuiltInHandlers.sample(event, null, context));
     handlers.set('get /meta/server', (event) => BuiltInHandlers.sample(event));
     handlers.set('get /meta/user', (event) => BuiltInHandlers.sample(event));
     handlers.set('get /meta/item/{itemId}', (event) => BuiltInHandlers.sample(event));
     handlers.set('post /secure/access-token', (event) => BuiltInHandlers.sample(event));
-
     handlers.set('get /multi/fixed', (event) => BuiltInHandlers.sample(event, 'fixed'));
     handlers.set('get /multi/{v}', (event) => BuiltInHandlers.sample(event, 'variable'));
     handlers.set('get /err/{code}', (event) => {
@@ -131,7 +127,14 @@ export class SampleServerComponents {
       handlers: handlers,
       authorizers: authorizers,
       requestIdResponseHeaderName: 'X-REQUEST-ID',
-      webTokenManipulator: new LocalWebTokenManipulator('abcd1234', 'Epsilon-Sample-Server', 'info'),
+      overrideMetaHandling: [
+        {
+          pathRegex: '/background',
+          methods: null,
+          config: Object.assign({}, meta, { overrideAuthorizerName: 'BackgroundAuthorizer' }),
+        },
+      ],
+      webTokenManipulator: new BypassWebTokenManipulator(),
       apolloConfig: {
         apolloServer: await SampleServerComponents.createSampleApollo(),
         createHandlerOptions: {
@@ -150,7 +153,7 @@ export class SampleServerComponents {
         queueUrl: 'FAKE-LOCAL',
         notificationArn: 'FAKE-LOCAL',
       },
-      backgroundHttpEndpointPrefix: '/background/',
+      backgroundHttpEndpointPrefix: '/background',
       processors: [
         new EchoProcessor(),
         new NoOpProcessor(),

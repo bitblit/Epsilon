@@ -1,14 +1,15 @@
 import AWS from 'aws-sdk';
 import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { BackgroundEntry } from './background-entry';
 import { Context, SNSEvent } from 'aws-lambda';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws';
 import { EpsilonConstants } from '../epsilon-constants';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from '../background-manager';
 import { BackgroundValidator } from './background-validator';
-import { BackgroundProcessor } from '../config/background-processor';
 import { BackgroundConfig } from '../config/background/background-config';
+import { BackgroundProcessor } from '../config/background/background-processor';
+import { InternalBackgroundEntry } from './internal-background-entry';
+import { BadRequestError } from '../http/error/bad-request-error';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -72,8 +73,8 @@ export class BackgroundHandler {
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
-  public parseImmediateFireBackgroundEntry(event: any): BackgroundEntry {
-    let rval: BackgroundEntry = null;
+  public parseImmediateFireBackgroundEntry(event: any): InternalBackgroundEntry<any> {
+    let rval: InternalBackgroundEntry<any> = null;
     try {
       if (!!event) {
         if (LambdaEventDetector.isSingleSnsEvent(event)) {
@@ -119,7 +120,7 @@ export class BackgroundHandler {
   public async processBackgroundSNSEvent(event: any, context: Context): Promise<number> {
     let rval: number = null;
     if (!this.isBackgroundStartSnsEvent(event)) {
-      const backgroundEntry: BackgroundEntry = this.parseImmediateFireBackgroundEntry(event);
+      const backgroundEntry: InternalBackgroundEntry<any> = this.parseImmediateFireBackgroundEntry(event);
       if (!!backgroundEntry) {
         Logger.silly('Processing immediate fire event : %j', backgroundEntry);
         const result: boolean = await this.processSingleBackgroundEntry(backgroundEntry);
@@ -133,8 +134,8 @@ export class BackgroundHandler {
     return rval;
   }
 
-  private async takeEntryFromBackgroundQueue(): Promise<BackgroundEntry[]> {
-    const rval: BackgroundEntry[] = [];
+  private async takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]> {
+    const rval: InternalBackgroundEntry<any>[] = [];
 
     const params = {
       MaxNumberOfMessages: 1,
@@ -148,7 +149,7 @@ export class BackgroundHandler {
       for (let i = 0; i < message.Messages.length; i++) {
         const m: AWS.SQS.Message = message.Messages[i];
         try {
-          const parsedBody: BackgroundEntry = JSON.parse(m.Body);
+          const parsedBody: InternalBackgroundEntry<any> = JSON.parse(m.Body);
           if (!parsedBody.type) {
             Logger.warn('Dropping invalid background entry : %j', parsedBody);
           } else {
@@ -175,12 +176,12 @@ export class BackgroundHandler {
 
   private async takeAndProcessSingleBackgroundSQSMessage(): Promise<number> {
     let rval: number = null;
-    const entries: BackgroundEntry[] = await this.takeEntryFromBackgroundQueue();
+    const entries: InternalBackgroundEntry<any>[] = await this.takeEntryFromBackgroundQueue();
 
     // Do them one at a time since Background is meant to throttle.  Also, it should really
     // only be one per pull anyway
     for (let i = 0; i < entries.length; i++) {
-      const e: BackgroundEntry = entries[i];
+      const e: InternalBackgroundEntry<any> = entries[i];
       const result: boolean = await this.processSingleBackgroundEntry(e);
       rval += result ? 1 : 0;
     }
@@ -191,7 +192,7 @@ export class BackgroundHandler {
   // CAW 2020-08-08 : I am making processSingle public because there are times (such as when
   // using AWS batch) that you want to be able to run a background command directly, eg, from
   // the command line without needing an AWS-compliant event wrapping it. Thus, this.
-  public async processSingleBackgroundEntry(e: BackgroundEntry): Promise<boolean> {
+  public async processSingleBackgroundEntry(e: InternalBackgroundEntry<any>): Promise<boolean> {
     let rval: boolean = false;
     try {
       const processorInput: BackgroundProcessor<any> = this.processors.get(e.type);
@@ -199,8 +200,20 @@ export class BackgroundHandler {
         Logger.warn('Found no processor for background entry : %j (returning false)', e);
       } else {
         const sw: StopWatch = new StopWatch(true);
-        await processorInput.handleEvent(e.data, this.mgr);
-        rval = true;
+        let dataValidationErrors: string[] = [];
+        if (StringRatchet.trimToNull(processorInput.dataSchemaName)) {
+          // If it was submitted through HTTP this was checked on the API side, but if they used the
+          // background manager directly (or direct-posted to SQS/SNS) that would have been bypassed.  We'll double
+          // check here
+          dataValidationErrors = this.modelValidator.validate(processorInput.dataSchemaName, e.data, false, false);
+        }
+        if (dataValidationErrors.length > 0) {
+          Logger.error('Not processing, data failed validation; entry was %j : errors : %j', e, dataValidationErrors);
+          rval = false;
+        } else {
+          await processorInput.handleEvent(e.data, this.mgr);
+          rval = true;
+        }
         sw.stop();
         Logger.info('Processed %j : %s', e, sw.dump());
       }

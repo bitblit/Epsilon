@@ -1,5 +1,4 @@
-export interface BackgroundEntry {
-  created: number;
+export interface BackgroundEntry<T> {
   type: string;
-  data: any;
+  data: T;
 }

@@ -6,6 +6,7 @@ import AWS from 'aws-sdk';
 import { BackgroundEntry } from './background/background-entry';
 import { BackgroundAwsConfig } from './config/background/background-aws-config';
 import { EpsilonConstants } from './epsilon-constants';
+import { InternalBackgroundEntry } from './background/internal-background-entry';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -15,7 +16,7 @@ import { EpsilonConstants } from './epsilon-constants';
  * define the type and validation.
  */
 export class BackgroundManager {
-  private _localBus: Subject<BackgroundEntry> = new Subject<BackgroundEntry>();
+  private _localBus: Subject<InternalBackgroundEntry<any>> = new Subject<InternalBackgroundEntry<any>>();
   private _localMode: boolean = false;
 
   constructor(private _awsConfig: BackgroundAwsConfig, private _sqs: AWS.SQS, private _sns: AWS.SNS) {}
@@ -41,35 +42,43 @@ export class BackgroundManager {
     this._localMode = newVal;
   }
 
-  public localBus(): Subject<BackgroundEntry> {
+  public localBus(): Subject<InternalBackgroundEntry<any>> {
     return this._localBus;
   }
 
-  public createEntry(type: string, data: any = {}): BackgroundEntry {
-    const rval: BackgroundEntry = {
-      created: new Date().getTime(),
+  public createEntry<T>(type: string, data?: T): BackgroundEntry<T> {
+    const rval: BackgroundEntry<T> = {
       type: type,
       data: data,
     };
     return rval;
   }
 
-  public async addEntryToQueueByParts(type: string, data: any = {}): Promise<string> {
+  private wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
+    const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
+      createdEpochMS: new Date().getTime(),
+      guid: StringRatchet.createType4Guid(),
+    });
+    return rval;
+  }
+
+  public async addEntryToQueueByParts<T>(type: string, data?: T): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data);
+    const entry: BackgroundEntry<T> = this.createEntry(type, data);
     if (entry) {
       rval = await this.addEntryToQueue(entry);
     }
     return rval;
   }
 
-  public async addEntryToQueue(entry: BackgroundEntry, fireStartMessage?: boolean): Promise<string> {
+  public async addEntryToQueue<T>(entry: BackgroundEntry<T>, fireStartMessage?: boolean): Promise<string> {
     let rval: string = null;
     try {
+      const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
       if (this.localMode) {
         Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
-        this._localBus.next(entry);
-        rval = 'addEntryToQueue' + new Date().toISOString() + StringRatchet.safeString(rval);
+        this._localBus.next(wrapped);
+        rval = wrapped.guid;
       } else {
         // Guard against bad entries up front
         const params = {
@@ -95,7 +104,7 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async addEntriesToQueue(entries: BackgroundEntry[], fireStartMessage?: boolean): Promise<string[]> {
+  public async addEntriesToQueue(entries: BackgroundEntry<any>[], fireStartMessage?: boolean): Promise<string[]> {
     const rval: string[] = [];
     for (let i = 0; i < entries.length; i++) {
       try {
@@ -115,21 +124,22 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async fireImmediateProcessRequestByParts(type: string, data: any = {}, returnNullOnInvalid: boolean = false): Promise<string> {
+  public async fireImmediateProcessRequestByParts<T>(type: string, data?: T): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry = this.createEntry(type, data);
+    const entry: BackgroundEntry<T> = this.createEntry(type, data);
     if (entry) {
       rval = await this.fireImmediateProcessRequest(entry);
     }
     return rval;
   }
 
-  public async fireImmediateProcessRequest(entry: BackgroundEntry): Promise<string> {
+  public async fireImmediateProcessRequest<T>(entry: BackgroundEntry<T>): Promise<string> {
     let rval: string = null;
+    const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
     if (this.localMode) {
       Logger.info('Fire immediately (local) : %j ', entry);
-      this.localBus().next(entry);
-      rval = 'fireImmediateProcessRequest' + new Date().toISOString() + StringRatchet.safeString(rval);
+      this.localBus().next(wrapped);
+      rval = wrapped.guid;
     } else {
       try {
         // Guard against bad entries up front

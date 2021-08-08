@@ -3,8 +3,8 @@ import { Logger } from '@bitblit/ratchet/dist/common';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BackgroundConfig } from '../config/background/background-config';
-import { BackgroundProcessor } from '../config/background-processor';
 import { BackgroundEntry } from './background-entry';
+import { BackgroundProcessor } from '../config/background/background-processor';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -21,7 +21,7 @@ export class BackgroundValidator {
     return !!this.findProcessor(type);
   }
 
-  public validateEntry(entry: BackgroundEntry): string[] {
+  public validateEntry<T>(entry: BackgroundEntry<T>): string[] {
     const rval: string[] = [];
     if (!entry) {
       rval.push('Entry is null');
@@ -36,7 +36,7 @@ export class BackgroundValidator {
     return rval;
   }
 
-  public validateEntryAndThrowException(entry: BackgroundEntry): void {
+  public validateEntryAndThrowException<T>(entry: BackgroundEntry<T>): void {
     const errors: string[] = this.validateEntry(entry);
     if (errors.length > 0) {
       Logger.warn('Invalid entry %j : errors : %j', entry, errors);

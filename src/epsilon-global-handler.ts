@@ -6,7 +6,7 @@ import { EventUtil } from './http/event-util';
 import { BackgroundHandler } from './background/background-handler';
 import { BackgroundEntry } from './background/background-entry';
 import { BackgroundManager } from './background-manager';
-import { EpsilonInstance } from './config/epsilon-instance';
+import { EpsilonInstance } from './epsilon-instance';
 import { CronConfig } from './config/cron/cron-config';
 import { BackgroundConfig } from './config/background/background-config';
 import { CronBackgroundEntry } from './config/cron/cron-background-entry';
@@ -180,15 +180,14 @@ export class EpsilonGlobalHandler {
       if (!!cronConfig.backgroundEntries) {
         if (!!background) {
           const backgroundConfig: BackgroundConfig = background.getConfig();
-          const toEnqueue: BackgroundEntry[] = [];
+          const toEnqueue: BackgroundEntry<any>[] = [];
           for (let i = 0; i < cronConfig.backgroundEntries.length; i++) {
             const smCronEntry: CronBackgroundEntry = cronConfig.backgroundEntries[i];
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
               Logger.info('Firing Background cron : %s', CronUtil.cronEntryName(smCronEntry));
 
-              const backgroundEntry: BackgroundEntry = {
+              const backgroundEntry: BackgroundEntry<any> = {
                 type: smCronEntry.backgroundTaskType,
-                created: new Date().getTime(),
                 data: EpsilonGlobalHandler.resolvePotentialFunctionToResult<any>(smCronEntry.data, {}),
               };
               Logger.silly('Resolved entry : %j', backgroundEntry);

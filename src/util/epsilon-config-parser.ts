@@ -5,18 +5,23 @@ import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundHttpAdapterHandler } from '../background/background-http-adapter-handler';
 import { OpenApiDocument } from '../config/open-api/open-api-document';
 import { EpsilonConfig } from '../config/epsilon-config';
-import { EpsilonInstance } from '../config/epsilon-instance';
+import { EpsilonInstance } from '../epsilon-instance';
 import { BackgroundHandler } from '../background/background-handler';
 import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { WebHandler } from '../http/web-handler';
 import { MisconfiguredError } from '../http/error/misconfigured-error';
 import { BackgroundManager } from '../background-manager';
+import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
+
+  public static epsilonConfigToEpsilonGlobalHandler(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonGlobalHandler {
+    return new EpsilonGlobalHandler(EpsilonConfigParser.epsilonConfigToEpsilonInstance(config, backgroundManager));
+  }
 
   public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonInstance {
     this.validateGlobalConfig(config);
@@ -25,6 +30,7 @@ export class EpsilonConfigParser {
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
     const backgroundHttpAdapter: BackgroundHttpAdapterHandler = new BackgroundHttpAdapterHandler(
       config.backgroundConfig,
+      modelValidator,
       backgroundManager
     );
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
