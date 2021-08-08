@@ -13,6 +13,10 @@ import { NotFoundError } from './error/not-found-error';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from './error/request-timeout-error';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
+import { NullReturnedObjectHandling } from '../config/http/null-returned-object-handling';
+import { FilterFunction } from '../config/http/filter-function';
+import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
+import { FilterChainContext } from '../config/http/filter-chain-context';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -43,59 +47,28 @@ export class WebHandler {
     const procConfig: HttpMetaProcessingConfig = rm?.mapping?.metaProcessingConfig
       ? rm.mapping.metaProcessingConfig
       : this.routerConfig.config.defaultMetaHandling;
-    let vals: [ExtendedAPIGatewayEvent, Context, ProxyResult, boolean] = null;
-    try {
-      vals = await BuiltInFilters.combineFilters(evt, context, {} as ProxyResult, procConfig.preFilters);
-      if (vals[3]) {
-        // Check for continue
-        // Run the controller
-        const handler: Promise<any> = this.findHandler(rm, vals[0], vals[1]);
-        Logger.debug('Processing event with epsilon: %j', vals[0]);
-        const result: any = await handler;
-        if (TimeoutToken.isTimeoutToken(result)) {
-          (result as TimeoutToken).writeToLog();
-          throw new RequestTimeoutError('Timed out');
-        }
-        Logger.debug('Initial return value : %j', result);
-        vals[2] = ResponseUtil.coerceToProxyResult(result);
+    const fCtx: FilterChainContext = {
+      event: evt,
+      context: context,
+      result: null,
+    };
 
-        // Run post-processors
-        vals = await BuiltInFilters.combineFilters(vals[0], vals[1], vals[2], procConfig.postFilters);
-      }
+    try {
+      let filterChain: FilterFunction[] = Object.assign([], procConfig.preFilters || []);
+      RunHandlerAsFilter.addRunHandlerAsFilterToList(filterChain, rm);
+      filterChain = filterChain.concat(procConfig.postFilters || []);
+      await BuiltInFilters.combineFilters(fCtx, filterChain);
     } catch (err) {
       // Convert to an epsilon error
       const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
-      vals[2] = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null));
+      fCtx.result = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null));
       try {
-        vals = await BuiltInFilters.combineFilters(evt, context, vals[2], procConfig.errorFilters);
+        await BuiltInFilters.combineFilters(fCtx, procConfig.errorFilters);
       } catch (convErr) {
         Logger.error('REALLY BAD - FAILED WHILE PROCESSING ERROR FILTERS : %s', convErr);
       }
     }
-    return vals[2];
-  }
-
-  public async findHandler(
-    rm: RouteAndParse,
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    add404OnMissing: boolean = true
-  ): Promise<any> {
-    let rval: Promise<any> = null;
-    // Execute
-    if (rm) {
-      // We extend with the parsed params here in case we are using the AWS any proxy
-      event.pathParameters = Object.assign({}, event.pathParameters, rm.parsed);
-
-      rval = PromiseRatchet.timeout(
-        rm.mapping.function(event, context),
-        'Timed out after ' + rm.mapping.metaProcessingConfig.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
-        rm.mapping.metaProcessingConfig.timeoutMS
-      );
-    } else if (add404OnMissing) {
-      throw new NotFoundError('No such endpoint');
-    }
-    return rval;
+    return fCtx.result;
   }
 
   public findBestMatchingRoute(event: APIGatewayEvent): RouteAndParse {

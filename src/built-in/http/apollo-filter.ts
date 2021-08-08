@@ -6,24 +6,23 @@ import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from '../../http/error/request-timeout-error';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 import { FilterFunction } from '../../config/http/filter-function';
+import { FilterChainContext } from '../../config/http/filter-chain-context';
 
 export class ApolloFilter {
   private static CACHE_APOLLO_HANDLER: ApolloHandlerFunction;
 
   public static async handlePathWithApollo(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult,
+    fCtx: FilterChainContext,
     apolloPathRegex: RegExp,
     apolloServer: ApolloServer,
     createHandlerOptions: CreateHandlerOptions
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (event?.path && apolloPathRegex && apolloPathRegex.test(event.path)) {
-      const newResult: ProxyResult = await ApolloFilter.processApolloRequest(event, context, apolloServer, createHandlerOptions);
-      return [event, context, newResult, false]; // Stop processing
+  ): Promise<boolean> {
+    if (fCtx.event?.path && apolloPathRegex && apolloPathRegex.test(fCtx.event.path)) {
+      fCtx.result = await ApolloFilter.processApolloRequest(fCtx.event, fCtx.context, apolloServer, createHandlerOptions);
+      return false;
     } else {
       // Not handled by apollo
-      return [event, context, result, true];
+      return true;
     }
   }
 
@@ -87,9 +86,7 @@ export class ApolloFilter {
     createHandlerOptions: CreateHandlerOptions
   ): void {
     if (filters) {
-      filters.push((evt, context, result) =>
-        ApolloFilter.handlePathWithApollo(evt, context, result, apolloPathRegex, apolloServer, createHandlerOptions)
-      );
+      filters.push((fCtx) => ApolloFilter.handlePathWithApollo(fCtx, apolloPathRegex, apolloServer, createHandlerOptions));
     }
   }
 }

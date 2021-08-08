@@ -7,173 +7,137 @@ import { EventUtil } from '../../http/event-util';
 import { BadRequestError } from '../../http/error/bad-request-error';
 import { FilterFunction } from '../../config/http/filter-function';
 import { ResponseUtil } from '../../http/response-util';
+import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
+import { FilterChainContext } from '../../config/http/filter-chain-context';
 
 export class BuiltInFilters {
-  public static async combineFilters(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult,
-    filters: FilterFunction[]
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    let vals: [ExtendedAPIGatewayEvent, Context, ProxyResult, boolean] = [event, context, result, true];
+  public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
+
+  public static async combineFilters(fCtx: FilterChainContext, filters: FilterFunction[]): Promise<boolean> {
+    let cont: boolean = true;
     if (filters && filters.length > 0) {
-      for (let i = 0; i < filters.length && vals[3]; i++) {
-        vals = await filters[i](vals[0], vals[1], vals[2]);
+      for (let i = 0; i < filters.length && cont; i++) {
+        cont = await filters[i](fCtx);
       }
     }
-    return vals;
+    return cont;
   }
 
-  public static async applyGzipIfPossible(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    let newResult: ProxyResult = result;
-    if (event?.headers && result) {
+  public static async applyGzipIfPossible(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx.event?.headers && fCtx.result) {
       const encodingHeader: string =
-        event && event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'accept-encoding') : null;
-      newResult = await ResponseUtil.applyGzipIfPossible(encodingHeader, newResult);
+        fCtx.event && fCtx.event.headers ? MapRatchet.extractValueFromMapIgnoreCase(fCtx.event.headers, 'accept-encoding') : null;
+      fCtx.result = await ResponseUtil.applyGzipIfPossible(encodingHeader, fCtx.result);
     }
-    return [event, context, newResult, true];
+    return true;
   }
 
-  public static async addConstantHeaders(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult,
-    headers: Record<string, string>
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (headers && result) {
-      result.headers = Object.assign({}, headers, result.headers);
+  public static async addConstantHeaders(fCtx: FilterChainContext, headers: Record<string, string>): Promise<boolean> {
+    if (headers && fCtx.result) {
+      fCtx.result.headers = Object.assign({}, headers, fCtx.result.headers);
     } else {
       Logger.warn('Could not add headers - either result or headers were missing');
     }
-    return [event, context, result, true];
+    return true;
   }
 
-  public static async addAWSRequestIdHeader(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult,
-    headerName: string = 'X-REQUEST-ID'
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (result && StringRatchet.trimToNull(headerName) && headerName.startsWith('X-')) {
-      result.headers = result.headers || {};
-      result.headers[headerName] = context?.awsRequestId || 'Request-Id-Missing';
+  public static async addAWSRequestIdHeader(fCtx: FilterChainContext, headerName: string = 'X-REQUEST-ID'): Promise<boolean> {
+    if (fCtx.result && StringRatchet.trimToNull(headerName) && headerName.startsWith('X-')) {
+      fCtx.result.headers = fCtx.result.headers || {};
+      fCtx.result.headers[headerName] = fCtx.context?.awsRequestId || 'Request-Id-Missing';
     } else {
       Logger.warn('Could not add request id header - either result or context were missing or name was invalid');
     }
-    return [event, context, result, true];
+    return true;
   }
 
-  public static async addAllowEverythingCORSHeaders(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    return BuiltInFilters.addConstantHeaders(event, context, result, {
+  public static async addAllowEverythingCORSHeaders(fCtx: FilterChainContext): Promise<boolean> {
+    return BuiltInFilters.addConstantHeaders(fCtx, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*',
       'Access-Control-Allow-Headers': '*',
     });
   }
 
-  public static async addAllowReflectionCORSHeaders(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    return BuiltInFilters.addConstantHeaders(event, context, result, {
-      'Access-Control-Allow-Origin': MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Origin') || '*',
-      'Access-Control-Allow-Methods': MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Headers') || '*',
-      'Access-Control-Allow-Headers': MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Access-Control-Request-Method') || '*',
+  public static async addAllowReflectionCORSHeaders(fCtx: FilterChainContext): Promise<boolean> {
+    return BuiltInFilters.addConstantHeaders(fCtx, {
+      'Access-Control-Allow-Origin': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Origin') || '*',
+      'Access-Control-Allow-Methods': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Headers') || '*',
+      'Access-Control-Allow-Headers': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Method') || '*',
     });
   }
 
-  public static async fixStillEncodedQueryParameters(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    EventUtil.fixStillEncodedQueryParams(event);
-    return [event, context, result, true];
+  public static async fixStillEncodedQueryParameters(fCtx: FilterChainContext): Promise<boolean> {
+    EventUtil.fixStillEncodedQueryParams(fCtx.event);
+    return true;
   }
 
-  public static async disallowStringNullAsPathParameter(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (event && event.pathParameters) {
-      Object.keys(event.pathParameters).forEach((k) => {
-        if ('null' === StringRatchet.trimToEmpty(event.pathParameters[k]).toLowerCase()) {
+  public static async disallowStringNullAsPathParameter(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx?.event?.pathParameters) {
+      Object.keys(fCtx.event.pathParameters).forEach((k) => {
+        if ('null' === StringRatchet.trimToEmpty(fCtx.event.pathParameters[k]).toLowerCase()) {
           throw new BadRequestError().withFormattedErrorMessage('Path parameter %s was string -null-', k);
         }
       });
     }
-    return [event, context, result, true];
+    return true;
   }
 
-  public static async disallowStringNullAsQueryStringParameter(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (event && event.queryStringParameters) {
-      Object.keys(event.queryStringParameters).forEach((k) => {
-        if ('null' === StringRatchet.trimToEmpty(event.queryStringParameters[k]).toLowerCase()) {
+  public static async disallowStringNullAsQueryStringParameter(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx?.event?.queryStringParameters) {
+      Object.keys(fCtx.event.queryStringParameters).forEach((k) => {
+        if ('null' === StringRatchet.trimToEmpty(fCtx.event.queryStringParameters[k]).toLowerCase()) {
           throw new BadRequestError().withFormattedErrorMessage('Path parameter %s was string -null-', k);
         }
       });
     }
-    return [event, context, result, true];
+    return true;
   }
 
-  public static async ensureEventMaps(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    event.queryStringParameters = event.queryStringParameters || {};
-    event.headers = event.headers || {};
-    event.pathParameters = event.pathParameters || {};
-    return [event, context, result, true];
+  public static async ensureEventMaps(fCtx: FilterChainContext): Promise<boolean> {
+    fCtx.event.queryStringParameters = fCtx.event.queryStringParameters || {};
+    fCtx.event.headers = fCtx.event.headers || {};
+    fCtx.event.pathParameters = fCtx.event.pathParameters || {};
+    return true;
   }
 
-  public static async parseBodyObject(
-    event: ExtendedAPIGatewayEvent,
-    context: Context,
-    result: ProxyResult
-  ): Promise<[ExtendedAPIGatewayEvent, Context, ProxyResult, boolean]> {
-    if (event?.body) {
-      event.parsedBody = EventUtil.bodyObject(event);
+  public static async parseBodyObject(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx.event?.body) {
+      fCtx.event.parsedBody = EventUtil.bodyObject(fCtx.event);
     }
-    return [event, context, result, true];
+    return true;
+  }
+
+  public static async checkMaximumLambdaBodySize(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx.result?.body && fCtx.result.body.length > BuiltInFilters.MAXIMUM_LAMBDA_BODY_SIZE_BYTES) {
+      const delta: number = fCtx.result.body.length - BuiltInFilters.MAXIMUM_LAMBDA_BODY_SIZE_BYTES;
+      throw new EpsilonHttpError(
+        'Response size is ' + fCtx.result.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler'
+      ).withHttpStatusCode(500);
+    }
+    return true;
   }
 
   public static defaultEpsilonPreFilters(): FilterFunction[] {
     return [
-      (evt, context, result) => BuiltInFilters.ensureEventMaps(evt, context, result),
-      (evt, context, result) => BuiltInFilters.parseBodyObject(evt, context, result),
-      (evt, context, result) => BuiltInFilters.fixStillEncodedQueryParameters(evt, context, result),
-      (evt, context, result) => BuiltInFilters.disallowStringNullAsPathParameter(evt, context, result),
-      (evt, context, result) => BuiltInFilters.disallowStringNullAsQueryStringParameter(evt, context, result),
+      (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
+      (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
+      (fCtx) => BuiltInFilters.fixStillEncodedQueryParameters(fCtx),
+      (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
+      (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
     ];
   }
 
   public static defaultEpsilonPostFilters(): FilterFunction[] {
     return [
-      (evt, context, result) => BuiltInFilters.addAWSRequestIdHeader(evt, context, result),
-      (evt, context, result) => BuiltInFilters.addAllowReflectionCORSHeaders(evt, context, result),
-      (evt, context, result) => BuiltInFilters.applyGzipIfPossible(evt, context, result),
+      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
+      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
+      (fCtx) => BuiltInFilters.applyGzipIfPossible(fCtx),
+      (fCtx) => BuiltInFilters.checkMaximumLambdaBodySize(fCtx),
     ];
   }
 
   public static defaultEpsilonErrorFilters(): FilterFunction[] {
-    return [
-      (evt, context, result) => BuiltInFilters.addAWSRequestIdHeader(evt, context, result),
-      (evt, context, result) => BuiltInFilters.addAllowReflectionCORSHeaders(evt, context, result),
-    ];
+    return [(fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx), (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx)];
   }
 }
