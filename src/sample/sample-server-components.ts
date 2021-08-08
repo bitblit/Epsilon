@@ -33,6 +33,9 @@ import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-co
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { BypassWebTokenManipulator } from '../http/auth/bypass-web-token-manipulator';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
+import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
+import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -103,13 +106,22 @@ export class SampleServerComponents {
       err['statusCode'] = NumberRatchet.safeNumber(event.pathParameters['code']);
       throw err;
     });
-    handlers.set('get /meta/simple-item', (event) => {
+    handlers.set('get /meta/sample-item', async (event) => {
       const numberToUse: number = NumberRatchet.safeNumber(event.queryStringParameters['num']) || 5;
-      const rval: any = {
-        numberField: numberToUse,
-        stringField: 'Test-String',
+      const rval: SampleInputValidatedProcessorData = {
+        numberParam: numberToUse,
+        nameParam: 'Test-String',
       };
       return rval;
+    });
+    handlers.set('post /meta/sample-item', async (event) => {
+      const parsed: SampleInputValidatedProcessorData = event.parsedBody;
+      const forceFail: boolean = BooleanRatchet.parseBool(StringRatchet.trimToNull(event.queryStringParameters['forceFail'])) === true;
+      if (forceFail) {
+        parsed['numberParam'] = 'test' as unknown as number; // Should cause a failure outbound
+      }
+
+      return parsed;
     });
 
     // Unused - intercepted by the Apollo filter, but needed to prevent 404

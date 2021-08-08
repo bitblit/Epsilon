@@ -122,18 +122,18 @@ export class BuiltInFilters {
 
   public static async validateInboundBody(fCtx: FilterChainContext): Promise<boolean> {
     if (fCtx?.event?.parsedBody && fCtx.routeAndParse) {
-      if (fCtx.routeAndParse.route.validation) {
+      if (fCtx.routeAndParse.mapping.validation) {
         if (!fCtx.modelValidator) {
           throw new MisconfiguredError('Requested body validation but supplied no validator');
         }
         const errors: string[] = fCtx.modelValidator.validate(
-          fCtx.routeAndParse.route.validation.modelName,
+          fCtx.routeAndParse.mapping.validation.modelName,
           fCtx.event.parsedBody,
-          fCtx.routeAndParse.route.validation.emptyAllowed,
-          fCtx.routeAndParse.route.validation.extraPropertiesAllowed
+          fCtx.routeAndParse.mapping.validation.emptyAllowed,
+          fCtx.routeAndParse.mapping.validation.extraPropertiesAllowed
         );
         if (errors.length > 0) {
-          Logger.info('Found errors while validating %s object %j', fCtx.routeAndParse.route.validation.modelName, errors);
+          Logger.info('Found errors while validating %s object %j', fCtx.routeAndParse.mapping.validation.modelName, errors);
           const newError: BadRequestError = new BadRequestError(...errors);
           throw newError;
         }
