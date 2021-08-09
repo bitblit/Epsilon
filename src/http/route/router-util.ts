@@ -4,10 +4,8 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import { ProxyResult } from 'aws-lambda';
 import { OpenApiDocument } from '../../config/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { BadRequestError } from '../error/bad-request-error';
 import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
 import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';
@@ -18,6 +16,9 @@ import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-me
 import { BuiltInFilters } from '../../built-in/http/built-in-filters';
 import { WebTokenManipulator } from '../auth/web-token-manipulator';
 import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
+import { FilterFunction } from '../../config/http/filter-function';
+import { BuiltInAuthFilters } from '../../built-in/http/built-in-auth-filters';
+import { LogLevelManipulationFilter } from '../../built-in/http/log-level-manipulation-filter';
 
 /**
  * Endpoints about the api itself
@@ -27,14 +28,57 @@ export class RouterUtil {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): HttpMetaProcessingConfig {
+  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): FilterFunction[] {
+    return [
+      (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
+      (fCtx) => BuiltInAuthFilters.applyOpenApiAuthorization(fCtx),
+    ].concat(RouterUtil.defaultEpsilonPreFilters());
+  }
+
+  public static defaultEpsilonPreFilters(): FilterFunction[] {
+    return [
+      (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
+      (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
+      (fCtx) => LogLevelManipulationFilter.setLogLevelForTransaction(fCtx),
+      (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
+      (fCtx) => BuiltInFilters.fixStillEncodedQueryParams(fCtx),
+      (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
+      (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundBody(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
+    ];
+  }
+
+  public static defaultEpsilonPostFilters(): FilterFunction[] {
+    return [
+      (fCtx) => BuiltInFilters.validateOutboundResponse(fCtx),
+      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
+      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
+      (fCtx) => BuiltInFilters.applyGzipIfPossible(fCtx),
+      (fCtx) => BuiltInFilters.checkMaximumLambdaBodySize(fCtx),
+      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
+    ];
+  }
+
+  public static defaultEpsilonErrorFilters(): FilterFunction[] {
+    return [
+      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
+      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
+      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
+    ];
+  }
+
+  public static defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(
+    webTokenManipulator: WebTokenManipulator
+  ): HttpMetaProcessingConfig {
     const defaults: HttpMetaProcessingConfig = {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
       timeoutMS: 30_000,
       overrideAuthorizerName: null,
-      preFilters: BuiltInFilters.defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator),
-      postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
-      errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
+      preFilters: RouterUtil.defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator),
+      postFilters: RouterUtil.defaultEpsilonPostFilters(),
+      errorFilters: RouterUtil.defaultEpsilonErrorFilters(),
       nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
     };
     return defaults;
@@ -45,9 +89,9 @@ export class RouterUtil {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
       timeoutMS: 30_000,
       overrideAuthorizerName: null,
-      preFilters: BuiltInFilters.defaultEpsilonPreFilters(),
-      postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
-      errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
+      preFilters: RouterUtil.defaultEpsilonPreFilters(),
+      postFilters: RouterUtil.defaultEpsilonPostFilters(),
+      errorFilters: RouterUtil.defaultEpsilonErrorFilters(),
       nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
     };
     return defaults;
@@ -256,48 +300,5 @@ export class RouterUtil {
     }
 
     return rval;
-  }
-
-  public static buildCorsResponse(
-    allowedOrigins: string = '*',
-    allowedMethods: string = '*',
-    allowedHeaders: string = '*',
-    body: string = '{"cors":true}',
-    statusCode: number = 200
-  ): ProxyResult {
-    const rval: ProxyResult = {
-      statusCode: statusCode,
-      body: body,
-      headers: {
-        'Access-Control-Allow-Origin': allowedOrigins || '*',
-        'Access-Control-Allow-Methods': allowedMethods || '*',
-        'Access-Control-Allow-Headers': allowedHeaders || '*',
-      },
-    };
-    return rval;
-  }
-
-  public static findRoute(router: EpsilonRouter, routeMethod: string, routePath: string): RouteMapping {
-    return (router?.routes || []).find((r) => r.path === routePath && r.method === routeMethod);
-  }
-
-  public static validateBodyAndThrowHttpException(
-    validator: ModelValidator,
-    modelName: string,
-    modelObject: any,
-    emptyAllowed: boolean = false,
-    extraPropertiesAllowed: boolean = true
-  ): Promise<any> {
-    const errors: any[] = validator.validate(modelName, modelObject, emptyAllowed, extraPropertiesAllowed);
-    if (errors.length > 0) {
-      const errorStrings: string[] = errors.map((x) => {
-        return String(x);
-      });
-      Logger.info('Found errors while validating %s object %j', modelName, errorStrings);
-      const newError: BadRequestError = new BadRequestError(...errorStrings);
-      throw newError;
-    } else {
-      return Promise.resolve(modelObject);
-    }
   }
 }

@@ -7,6 +7,7 @@ export interface RouteMapping {
   path: string;
   function: HandlerFunction<any>;
 
+  // This will always be set, either pointing at a specific one or the default one
   metaProcessingConfig: HttpMetaProcessingConfig;
   // If this is set, and fails, then it will 400
   validation: RouteValidatorConfig;

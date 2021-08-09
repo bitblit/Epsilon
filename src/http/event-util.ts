@@ -10,6 +10,7 @@ import { ExtendedAuthResponseContext } from './route/extended-auth-response-cont
 import { BasicAuthToken } from './auth/basic-auth-token';
 import { Base64Ratchet } from '@bitblit/ratchet/dist/common/base64-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { EpsilonConstants } from '../epsilon-constants';
 
 /**
  * Endpoints about the api itself
@@ -18,28 +19,6 @@ export class EventUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
-
-  public static extractToken<T>(event: APIGatewayEvent): CommonJwtToken<T> {
-    const auth: AuthResponseContext = EventUtil.extractAuthorizer(event);
-
-    if (!auth) {
-      Logger.debug('Could not extract authorizer from event : %j', event);
-      throw new UnauthorizedError('Missing authorization context');
-    } else {
-      if (!!auth['userData']) {
-        return auth['userData'] as any;
-      } else if (auth['userDataJSON']) {
-        return JSON.parse(StringRatchet.safeString(auth['userDataJSON'])) as CommonJwtToken<T>;
-      } else {
-        throw new UnauthorizedError('Missing authorization context data');
-      }
-    }
-  }
-
-  public static extractTokenSrc(event: APIGatewayEvent): string {
-    const auth = EventUtil.extractAuthorizer(event);
-    return auth ? StringRatchet.safeString(auth['srcData']) : null;
-  }
 
   public static extractStage(event: APIGatewayEvent): string {
     // This differs from extractApiGatewayStage in that the "real" stage can be
@@ -139,7 +118,7 @@ export class EventUtil {
   }
 
   /**
-   * This is a weird function - sometimes your customers will not unencode their query params and it
+   * This is a weird function - sometimes your customers will not decode their query params and it
    * results in query params that look like 'amp;SOMETHING' instead of 'SOMETHING'.  This function
    * looks for params that look like that, and strips the amp; from them.  If you have any
    * params you are expecting that have 'amp;' in front of them, DON'T use this function.
@@ -151,31 +130,29 @@ export class EventUtil {
    * @param event
    */
   public static fixStillEncodedQueryParams(event: APIGatewayEvent): void {
-    if (!!event) {
-      if (!!event.queryStringParameters) {
-        const newParams: any = {};
-        Object.keys(event.queryStringParameters).forEach((k) => {
-          const val: string = event.queryStringParameters[k];
-          if (k.toLowerCase().startsWith('amp;')) {
-            newParams[k.substring(4)] = val;
-          } else {
-            newParams[k] = val;
-          }
-        });
-        event.queryStringParameters = newParams;
-      }
-      if (!!event.multiValueQueryStringParameters) {
-        const newParams: any = {};
-        Object.keys(event.multiValueQueryStringParameters).forEach((k) => {
-          const val: string[] = event.multiValueQueryStringParameters[k];
-          if (k.toLowerCase().startsWith('amp;')) {
-            newParams[k.substring(4)] = val;
-          } else {
-            newParams[k] = val;
-          }
-        });
-        event.multiValueQueryStringParameters = newParams;
-      }
+    if (event?.queryStringParameters) {
+      const newParams: any = {};
+      Object.keys(event.queryStringParameters).forEach((k) => {
+        const val: string = event.queryStringParameters[k];
+        if (k.toLowerCase().startsWith('amp;')) {
+          newParams[k.substring(4)] = val;
+        } else {
+          newParams[k] = val;
+        }
+      });
+      event.queryStringParameters = newParams;
+    }
+    if (event?.multiValueQueryStringParameters) {
+      const newParams: any = {};
+      Object.keys(event.multiValueQueryStringParameters).forEach((k) => {
+        const val: string[] = event.multiValueQueryStringParameters[k];
+        if (k.toLowerCase().startsWith('amp;')) {
+          newParams[k.substring(4)] = val;
+        } else {
+          newParams[k] = val;
+        }
+      });
+      event.multiValueQueryStringParameters = newParams;
     }
   }
 
@@ -196,7 +173,7 @@ export class EventUtil {
 
     // Make the header consistent with the authorizer
     event.headers = event.headers || {};
-    event.headers['authorization'] = 'Bearer ' + jwtToken;
+    event.headers[EpsilonConstants.AUTH_HEADER_NAME.toLowerCase()] = 'Bearer ' + jwtToken;
 
     event.requestContext = event.requestContext || ({} as APIGatewayEventRequestContext);
     const newAuth: ExtendedAuthResponseContext = Object.assign({}, event.requestContext.authorizer) as ExtendedAuthResponseContext;
@@ -209,7 +186,7 @@ export class EventUtil {
   public static extractBasicAuthenticationToken(event: APIGatewayEvent, throwErrorOnMissingBad: boolean = false): BasicAuthToken {
     let rval: BasicAuthToken = null;
     if (!!event && !!event.headers) {
-      const headerVal: string = MapRatchet.caseInsensitiveAccess(event.headers, 'authorization');
+      const headerVal: string = MapRatchet.caseInsensitiveAccess(event.headers, EpsilonConstants.AUTH_HEADER_NAME);
       if (!!headerVal && headerVal.startsWith('Basic ')) {
         const parsed: string = Base64Ratchet.base64StringToString(headerVal.substring(6));
         const sp: string[] = parsed.split(':');

@@ -69,7 +69,7 @@ export class BuiltInFilters {
     });
   }
 
-  public static async uriDecodeAllQueryParameters(fCtx: FilterChainContext): Promise<boolean> {
+  public static async fixStillEncodedQueryParams(fCtx: FilterChainContext): Promise<boolean> {
     EventUtil.fixStillEncodedQueryParams(fCtx.event);
     return true;
   }
@@ -210,46 +210,5 @@ export class BuiltInFilters {
       }
     }
     return true;
-  }
-
-  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): FilterFunction[] {
-    return [
-      (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
-      (fCtx) => BuiltInAuthFilters.applyOpenApiAuthorization(fCtx),
-    ].concat(BuiltInFilters.defaultEpsilonPreFilters());
-  }
-
-  public static defaultEpsilonPreFilters(): FilterFunction[] {
-    return [
-      (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
-      (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
-      (fCtx) => LogLevelManipulationFilter.setLogLevelForTransaction(fCtx),
-      (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
-      (fCtx) => BuiltInFilters.uriDecodeAllQueryParameters(fCtx),
-      (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
-      (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
-      (fCtx) => BuiltInFilters.validateInboundBody(fCtx),
-      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
-      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
-    ];
-  }
-
-  public static defaultEpsilonPostFilters(): FilterFunction[] {
-    return [
-      (fCtx) => BuiltInFilters.validateOutboundResponse(fCtx),
-      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
-      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
-      (fCtx) => BuiltInFilters.applyGzipIfPossible(fCtx),
-      (fCtx) => BuiltInFilters.checkMaximumLambdaBodySize(fCtx),
-      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
-    ];
-  }
-
-  public static defaultEpsilonErrorFilters(): FilterFunction[] {
-    return [
-      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
-      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
-      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
-    ];
   }
 }

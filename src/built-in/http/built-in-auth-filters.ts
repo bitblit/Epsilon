@@ -6,6 +6,8 @@ import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { ForbiddenError } from '../../http/error/forbidden-error';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
+import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
+import { EpsilonConstants } from '../../epsilon-constants';
 
 export class BuiltInAuthFilters {
   public static async requireAllRolesInCommonJwt(fCtx: FilterChainContext, requiredRoleAllOf: string[]): Promise<boolean> {
@@ -63,7 +65,7 @@ export class BuiltInAuthFilters {
       throw new MisconfiguredError('Cannot continue - missing event or encryption');
     } else {
       // We dont throw errors if no token - just just decodes, it DOESNT enforce having tokens
-      const tokenString: string = StringRatchet.trimToEmpty(fCtx?.event?.headers['Authorization']);
+      const tokenString: string = MapRatchet.caseInsensitiveAccess<string>(fCtx?.event?.headers || {}, EpsilonConstants.AUTH_HEADER_NAME);
       try {
         // We include the prefix (like 'bearer') in case the token wants to code more than one type
         const token: CommonJwtToken<any> = await webTokenManipulator.extractTokenFromAuthorizationHeader(tokenString);

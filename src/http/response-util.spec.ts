@@ -5,6 +5,7 @@ import fs from 'fs';
 import { FilterChainContext } from '../config/http/filter-chain-context';
 import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
+import { EpsilonConstants } from '../epsilon-constants';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {
@@ -79,7 +80,7 @@ describe('#responseUtil', function () {
     expect(proxy.headers).toBeTruthy();
     expect(proxy.headers['Access-Control-Allow-Origin']).toEqual('http://localhost:4200');
     expect(proxy.headers['Access-Control-Allow-Methods']).toEqual('GET');
-    expect(proxy.headers['Access-Control-Allow-Headers']).toEqual('authorization');
+    expect(proxy.headers['Access-Control-Allow-Headers']).toEqual(EpsilonConstants.AUTH_HEADER_NAME.toLowerCase());
   });
 
   it('should add cors to proxy result MATCH 2', async () => {

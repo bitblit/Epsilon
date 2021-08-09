@@ -2,7 +2,7 @@ import { AuthResponse, AuthResponseContext, Callback, Context, CustomAuthorizerE
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { LocalWebTokenManipulator } from './local-web-token-manipulator';
-import { WebTokenManipulatorUtil } from './web-token-manipulator-util';
+import { EpsilonConstants } from '../../epsilon-constants';
 
 /**
  * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
@@ -24,7 +24,7 @@ export class ApiGatewayAdapterAuthenticationHandler {
   public lambdaHandler(event: CustomAuthorizerEvent, context: Context, callback: Callback): void {
     Logger.info('Got event : %j', event);
 
-    const srcString = WebTokenManipulatorUtil.extractTokenStringFromAuthorizerEvent(event);
+    const srcString = ApiGatewayAdapterAuthenticationHandler.extractTokenStringFromAuthorizerEvent(event);
 
     if (srcString) {
       const methodArn = event.methodArn;
@@ -73,5 +73,17 @@ export class ApiGatewayAdapterAuthenticationHandler {
     } as AuthResponse;
 
     return response;
+  }
+
+  public static extractTokenStringFromAuthorizerEvent(event: CustomAuthorizerEvent): string {
+    Logger.silly('Extracting token from event : %j', event);
+    let rval: string = null;
+    if (event && event.authorizationToken) {
+      const token: string = event.authorizationToken;
+      if (token && token.startsWith(EpsilonConstants.AUTH_HEADER_PREFIX)) {
+        rval = token.substring(EpsilonConstants.AUTH_HEADER_PREFIX.length); // Strip "Bearer "
+      }
+    }
+    return rval;
   }
 }

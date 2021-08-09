@@ -34,6 +34,7 @@ import { SampleInputValidatedProcessorData } from '../built-in/background/sample
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
+import { EpsilonConstants } from '../epsilon-constants';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -65,7 +66,7 @@ export class SampleServerComponents {
       resolvers,
       context: async ({ event, context }) => {
         const authTokenSt: string =
-          !!event && !!event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'authorization') : null;
+          !!event && !!event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, EpsilonConstants.AUTH_HEADER_NAME) : null;
         const token: CommonJwtToken<any> = null;
         if (!!authTokenSt && authTokenSt.startsWith('Bearer')) {
           Logger.info('Got : %s', authTokenSt);
@@ -124,7 +125,7 @@ export class SampleServerComponents {
     // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
     const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
-    const meta: HttpMetaProcessingConfig = RouterUtil.defaultAuthenticationHeaderParsingEpsilonPreFilters(tokenManipulator);
+    const meta: HttpMetaProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
     meta.timeoutMS = 10_000;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
