@@ -15,7 +15,6 @@ import { AuthorizerFunction } from '../config/http/authorizer-function';
 import { HandlerFunction } from '../config/http/handler-function';
 import { BuiltInHandlers } from '../built-in/http/built-in-handlers';
 import { HttpConfig } from '../config/http/http-config';
-import { EpsilonConstants } from '../epsilon-constants';
 import { LocalWebTokenManipulator } from '../http/auth/local-web-token-manipulator';
 import { BackgroundConfig } from '../config/background/background-config';
 import { EchoProcessor } from '../built-in/background/echo-processor';
@@ -25,7 +24,6 @@ import { LogAndEnqueueEchoProcessor } from '../built-in/background/log-and-enque
 import { EpsilonConfig } from '../config/epsilon-config';
 import { EpsilonInstance } from '../epsilon-instance';
 import { EpsilonConfigParser } from '../util/epsilon-config-parser';
-import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 import { BackgroundManager } from '../background-manager';
@@ -139,6 +137,11 @@ export class SampleServerComponents {
     });
     meta.errorFilters.push((fCtx) => BuiltInFilters.secureOutboundServerErrorForProduction(fCtx, 'Clean Internal Server Error', 500));
 
+    const preFiltersAllowingNull: HttpMetaProcessingConfig = Object.assign({}, meta);
+    // TODO: This approach is pretty fragile...
+    preFiltersAllowingNull.preFilters = Object.assign([], preFiltersAllowingNull.preFilters);
+    preFiltersAllowingNull.preFilters.splice(8, 1);
+
     const cfg: HttpConfig = {
       defaultMetaHandling: meta,
       handlers: handlers,
@@ -149,6 +152,11 @@ export class SampleServerComponents {
           pathRegex: '/background',
           methods: null,
           config: Object.assign({}, meta, { overrideAuthorizerName: 'LogAuthorizer' }),
+        },
+        {
+          pathRegex: '/meta/server', // Allow null params ONLY on this route
+          methods: ['GET'],
+          config: preFiltersAllowingNull,
         },
       ],
       webTokenManipulator: tokenManipulator,
@@ -189,10 +197,6 @@ export class SampleServerComponents {
     const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
     backgroundManager.localMode = true;
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
-
-    const router: EpsilonRouter = epsilonInstance.webHandler.router;
-    // Modify a single route...
-    // RouterUtil.findRoute(router, 'get', '/meta/server').metaProcessingConfig.allowLiteralStringNullAsQueryStringParameter = true;
 
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;

@@ -9,6 +9,7 @@ import { EpsilonRouter } from '../../http/route/epsilon-router';
 import { UnauthorizedError } from '../../http/error/unauthorized-error';
 import { NotFoundError } from '../../http/error/not-found-error';
 import { ForbiddenError } from '../../http/error/forbidden-error';
+import { NotImplemented } from '../../http/error/not-implemented';
 
 export class BuiltInHandlers {
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
@@ -48,6 +49,8 @@ export class BuiltInHandlers {
           throw new ForbiddenError('Forbidden error');
         case 404:
           throw new NotFoundError('Not Found error');
+        case 501:
+          throw new NotImplemented('Not Implemented');
         default:
           throw new EpsilonHttpError<any>()
             .withFormattedErrorMessage('Default error - %s', errNumber)

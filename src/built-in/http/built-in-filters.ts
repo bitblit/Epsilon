@@ -92,7 +92,7 @@ export class BuiltInFilters {
     if (fCtx?.event?.queryStringParameters) {
       Object.keys(fCtx.event.queryStringParameters).forEach((k) => {
         if ('null' === StringRatchet.trimToEmpty(fCtx.event.queryStringParameters[k]).toLowerCase()) {
-          throw new BadRequestError().withFormattedErrorMessage('Path parameter %s was string -null-', k);
+          throw new BadRequestError().withFormattedErrorMessage('Query parameter %s was string -null-', k);
         }
       });
     }
