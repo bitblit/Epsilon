@@ -35,6 +35,7 @@ import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EpsilonConstants } from '../epsilon-constants';
+import { EventUtil } from '../http/event-util';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -65,8 +66,7 @@ export class SampleServerComponents {
       typeDefs,
       resolvers,
       context: async ({ event, context }) => {
-        const authTokenSt: string =
-          !!event && !!event.headers ? MapRatchet.extractValueFromMapIgnoreCase(event.headers, EpsilonConstants.AUTH_HEADER_NAME) : null;
+        const authTokenSt: string = EventUtil.extractBearerTokenFromEvent(event);
         const token: CommonJwtToken<any> = null;
         if (!!authTokenSt && authTokenSt.startsWith('Bearer')) {
           Logger.info('Got : %s', authTokenSt);

@@ -186,7 +186,7 @@ export class EventUtil {
   public static extractBasicAuthenticationToken(event: APIGatewayEvent, throwErrorOnMissingBad: boolean = false): BasicAuthToken {
     let rval: BasicAuthToken = null;
     if (!!event && !!event.headers) {
-      const headerVal: string = MapRatchet.caseInsensitiveAccess(event.headers, EpsilonConstants.AUTH_HEADER_NAME);
+      const headerVal: string = EventUtil.extractAuthorizationHeaderCaseInsensitive(event);
       if (!!headerVal && headerVal.startsWith('Basic ')) {
         const parsed: string = Base64Ratchet.base64StringToString(headerVal.substring(6));
         const sp: string[] = parsed.split(':');
@@ -215,6 +215,19 @@ export class EventUtil {
           rval = !!body && !!body['operationName'] && body['operationName'] === 'IntrospectionQuery';
         }
       }
+    }
+    return rval;
+  }
+
+  public static extractAuthorizationHeaderCaseInsensitive(evt: APIGatewayEvent): string {
+    return MapRatchet.caseInsensitiveAccess<string>(evt?.headers || {}, EpsilonConstants.AUTH_HEADER_NAME);
+  }
+
+  public static extractBearerTokenFromEvent(evt: APIGatewayEvent): string {
+    let rval: string = null;
+    const authHeader: string = StringRatchet.trimToEmpty(EventUtil.extractAuthorizationHeaderCaseInsensitive(evt));
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+      rval = authHeader.substring(7);
     }
     return rval;
   }
