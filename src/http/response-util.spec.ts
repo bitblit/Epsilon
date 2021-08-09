@@ -2,9 +2,6 @@ import { APIGatewayEvent, APIGatewayEventRequestContext, ProxyResult } from 'aws
 import { ResponseUtil } from './response-util';
 import path from 'path';
 import fs from 'fs';
-import { EpsilonConstants } from '../epsilon-constants';
-import { HttpConfig } from '../config/http/http-config';
-import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 import { FilterChainContext } from '../config/http/filter-chain-context';
 import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';

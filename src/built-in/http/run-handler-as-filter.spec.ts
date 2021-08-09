@@ -1,6 +1,4 @@
-import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
-import fs from 'fs';
-import path from 'path';
+import { Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 import { SampleServerComponents } from '../../sample/sample-server-components';

@@ -22,6 +22,6 @@ export interface HttpConfig {
   prefixesToStripBeforeRouteMatch?: string[];
   // If set, the system will use this model validator instead of the OpenAPI one (Uncommon)
   overrideModelValidator?: ModelValidator;
-  // These paths are expected to be handled by a filter, and therefor should not cause a parse failure
-  filterHandledRouteMatches?: RegExp[];
+  // These paths are expected to be handled by a filter, and therefore should not cause a parse failure
+  filterHandledRouteMatches?: string[];
 }

@@ -1,6 +1,6 @@
 import { RouterUtil } from './router-util';
 import { RouteAndParse } from '../web-handler';
-import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent } from 'aws-lambda';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 import { SampleServerComponents } from '../../sample/sample-server-components';
 

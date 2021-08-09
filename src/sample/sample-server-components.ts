@@ -121,10 +121,7 @@ export class SampleServerComponents {
 
       return parsed;
     });
-
-    // Unused - intercepted by the Apollo filter, but needed to prevent 404
-    handlers.set('get /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
-    handlers.set('post /graphql', (evt) => BuiltInHandlers.handleNotImplemented(evt));
+    // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
     const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
     const meta: HttpMetaProcessingConfig = RouterUtil.defaultAuthenticationHeaderParsingEpsilonPreFilters(tokenManipulator);
@@ -159,6 +156,7 @@ export class SampleServerComponents {
         },
       ],
       prefixesToStripBeforeRouteMatch: ['v0'],
+      filterHandledRouteMatches: ['options .*'],
     };
 
     const background: BackgroundConfig = {

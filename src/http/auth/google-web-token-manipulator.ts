@@ -1,4 +1,3 @@
-import { APIGatewayEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';

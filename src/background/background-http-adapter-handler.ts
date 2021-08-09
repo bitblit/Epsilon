@@ -10,7 +10,6 @@ import { BackgroundManager } from '../background-manager';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
-import { InternalBackgroundEntry } from './internal-background-entry';
 import { BackgroundProcessor } from '../config/background/background-processor';
 
 /**

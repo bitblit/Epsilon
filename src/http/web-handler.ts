@@ -1,5 +1,5 @@
 import { EpsilonRouter } from './route/epsilon-router';
-import { APIGatewayEvent, APIGatewayProxyResult, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import Route from 'route-parser';
 import { RouteMapping } from './route/route-mapping';
@@ -8,16 +8,10 @@ import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
-import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
-import { NotFoundError } from './error/not-found-error';
-import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
-import { RequestTimeoutError } from './error/request-timeout-error';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
-import { NullReturnedObjectHandling } from '../config/http/null-returned-object-handling';
 import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon

@@ -60,7 +60,7 @@ export class RouterUtil {
       defaultMetaHandling: this.defaultHttpMetaProcessingConfig(),
       staticContentRoutes: {},
       prefixesToStripBeforeRouteMatch: [],
-      filterHandledRouteMatches: [new RegExp('options .*')], // Ignore all Options since they are handled by the default prefilter
+      filterHandledRouteMatches: ['options .*'], // Ignore all Options since they are handled by the default prefilter
     };
     const rval: HttpConfig = Object.assign({}, defaults, cfg || {});
     return rval;
@@ -110,12 +110,13 @@ export class RouterUtil {
       // Just validation, nothing to wire here
       Object.keys(openApiDoc.components.securitySchemes).forEach((sk) => {
         if (!rval.config.authorizers || !rval.config.authorizers.get(sk)) {
-          throw new MisconfiguredError('Doc requires authorizer ' + sk + ' but not found in map');
+          throw new MisconfiguredError().withFormattedErrorMessage('Doc requires authorizer %s but not found in map', sk);
         }
       });
     }
 
     const missingPaths: string[] = [];
+    const filterHandledPathMatches: string[] = httpConfig.filterHandledRouteMatches || [];
 
     if (openApiDoc?.paths) {
       Object.keys(openApiDoc.paths).forEach((path) => {
@@ -132,14 +133,12 @@ export class RouterUtil {
           }
 
           if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
-            if (httpConfig.filterHandledRouteMatches) {
-              const match: RegExp = httpConfig.filterHandledRouteMatches.find((reg) => reg.test(finder));
-              if (match) {
-                Logger.debug('Adding filter-handled handler for %s', finder);
-                // Insert a placeholder for these, which still handles them in runtime if the filter is misconfigured
-                rval.config.handlers.set(finder, (evt) => BuiltInHandlers.expectedHandledByFilter(evt));
-              } else {
-              }
+            const match: string = filterHandledPathMatches.find((reg) => finder.match(reg));
+            if (match) {
+              Logger.debug('Adding filter-handled handler for %s', finder);
+              // Insert a placeholder for these, which still handles them in runtime if the filter is misconfigured
+              rval.config.handlers.set(finder, (evt) => BuiltInHandlers.expectedHandledByFilter(evt));
+            } else {
               missingPaths.push(finder);
             }
           }

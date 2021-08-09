@@ -1,7 +1,5 @@
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { Context, ProxyResult } from 'aws-lambda';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
 import { EventUtil } from '../../http/event-util';
 import { BadRequestError } from '../../http/error/bad-request-error';
@@ -10,7 +8,6 @@ import { ResponseUtil } from '../../http/response-util';
 import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { MisconfiguredError } from '../../http/error/misconfigured-error';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BuiltInAuthFilters } from './built-in-auth-filters';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 import { LogLevelManipulationFilter } from './log-level-manipulation-filter';

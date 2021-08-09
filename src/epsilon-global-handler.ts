@@ -8,7 +8,6 @@ import { BackgroundEntry } from './background/background-entry';
 import { BackgroundManager } from './background-manager';
 import { EpsilonInstance } from './epsilon-instance';
 import { CronConfig } from './config/cron/cron-config';
-import { BackgroundConfig } from './config/background/background-config';
 import { CronBackgroundEntry } from './config/cron/cron-background-entry';
 import { CronUtil } from './util/cron-util';
 import { GenericAwsEventHandlerFunction } from './config/generic-aws-event-handler-function';

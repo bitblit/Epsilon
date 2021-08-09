@@ -1,5 +1,3 @@
-import AWS from 'aws-sdk';
-
 export interface BackgroundAwsConfig {
   queueUrl: string;
   notificationArn: string;

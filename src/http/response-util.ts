@@ -1,11 +1,8 @@
-import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
+import { ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
 import zlib from 'zlib';
-import { EpsilonConstants } from '../epsilon-constants';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
-import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
 
 export class ResponseUtil {
   // Prevent instantiation

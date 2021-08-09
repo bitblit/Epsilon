@@ -1,6 +1,5 @@
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyEvent, Context, ProxyResult } from 'aws-lambda';
-import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
 import { RequestTimeoutError } from '../../http/error/request-timeout-error';
