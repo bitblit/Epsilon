@@ -1,7 +1,7 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from './background-entry';
 import { Context } from 'aws-lambda';
-import { ExtendedAPIGatewayEvent } from '../http/route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';

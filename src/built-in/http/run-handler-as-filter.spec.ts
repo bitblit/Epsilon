@@ -3,7 +3,7 @@ import { Logger } from '@bitblit/ratchet/dist/common';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 import { SampleServerComponents } from '../../sample/sample-server-components';
 import { RunHandlerAsFilter } from './run-handler-as-filter';
-import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from '../../config/http/extended-api-gateway-event';
 import { RouteAndParse } from '../../http/web-handler';
 import { RouterUtil } from '../../http/route/router-util';
 

@@ -4,7 +4,7 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import Route from 'route-parser';
 import { RouteMapping } from './route/route-mapping';
 import { ResponseUtil } from './response-util';
-import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';

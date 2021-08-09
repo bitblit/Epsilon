@@ -1,5 +1,5 @@
 import { Context } from 'aws-lambda';
-import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from './extended-api-gateway-event';
 
 export interface HandlerFunction<T> {
   (event: ExtendedAPIGatewayEvent, context?: Context): Promise<T>;

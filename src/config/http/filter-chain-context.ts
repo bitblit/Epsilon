@@ -1,5 +1,5 @@
 import { Context, ProxyResult } from 'aws-lambda';
-import { ExtendedAPIGatewayEvent } from '../../http/route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from './extended-api-gateway-event';
 import { RouteAndParse } from '../../http/web-handler';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { AuthorizerFunction } from './authorizer-function';

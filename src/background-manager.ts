@@ -62,11 +62,11 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async addEntryToQueueByParts<T>(type: string, data?: T): Promise<string> {
+  public async addEntryToQueueByParts<T>(type: string, data?: T, fireStartMessage?: boolean): Promise<string> {
     let rval: string = null;
     const entry: BackgroundEntry<T> = this.createEntry(type, data);
     if (entry) {
-      rval = await this.addEntryToQueue(entry);
+      rval = await this.addEntryToQueue(entry, fireStartMessage);
     }
     return rval;
   }

@@ -3,7 +3,7 @@ import { ResponseUtil } from './response-util';
 import path from 'path';
 import fs from 'fs';
 import { FilterChainContext } from '../config/http/filter-chain-context';
-import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
+import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EpsilonConstants } from '../epsilon-constants';
 
