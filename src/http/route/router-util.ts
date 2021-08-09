@@ -4,8 +4,7 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import { APIGatewayEvent, ProxyResult } from 'aws-lambda';
-import { ResponseUtil } from '../response-util';
+import { ProxyResult } from 'aws-lambda';
 import { OpenApiDocument } from '../../config/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BadRequestError } from '../error/bad-request-error';
@@ -13,12 +12,12 @@ import { BackgroundHttpAdapterHandler } from '../../background/background-http-a
 import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
-import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
 import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-meta-processing-config';
 import { BuiltInFilters } from '../../built-in/http/built-in-filters';
 import { WebTokenManipulator } from '../auth/web-token-manipulator';
+import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 
 /**
  * Endpoints about the api itself
@@ -58,13 +57,10 @@ export class RouterUtil {
     const defaults: HttpConfig = {
       handlers: new Map<string, HandlerFunction<any>>(),
       authorizers: new Map<string, AuthorizerFunction>(),
-      errorProcessor: BuiltInHandlers.defaultErrorProcessor,
       defaultMetaHandling: this.defaultHttpMetaProcessingConfig(),
       staticContentRoutes: {},
-      webTokenManipulator: null,
       prefixesToStripBeforeRouteMatch: [],
-      requestIdResponseHeaderName: 'X-REQUEST-ID',
-      apolloConfig: null,
+      filterHandledRouteMatches: [new RegExp('options .*')], // Ignore all Options since they are handled by the default prefilter
     };
     const rval: HttpConfig = Object.assign({}, defaults, cfg || {});
     return rval;
@@ -110,14 +106,6 @@ export class RouterUtil {
       config: RouterUtil.assignDefaultsOnHttpConfig(httpConfig),
     };
 
-    let corsHandler: HandlerFunction<any> = rval.config.customOptionsRequestHandler;
-    if (!corsHandler) {
-      const corsOb: ProxyResult = RouterUtil.buildCorsResponse();
-      corsHandler = async (e) => {
-        return corsOb;
-      };
-    }
-
     if (openApiDoc?.components?.securitySchemes) {
       // Just validation, nothing to wire here
       Object.keys(openApiDoc.components.securitySchemes).forEach((sk) => {
@@ -136,107 +124,104 @@ export class RouterUtil {
           const finder: string = method + ' ' + path;
           const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, method, path);
 
-          if (method.toLowerCase() === 'options') {
-            applicableMeta.timeoutMS = 10_000; // Options calls get really short timeouts since they are constant
-            rval.routes.push({
-              path: convertedPath,
-              method: method,
-              function: corsHandler,
-              authorizerName: null,
-              metaProcessingConfig: applicableMeta,
-              validation: null,
-              outboundValidation: null,
-            });
-          } else {
-            const entry: any = openApiDoc.paths[path][method];
-            const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
-            // Auto-assign the background handler
-            if (isBackgroundEndpoint) {
-              rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
-            }
+          const entry: any = openApiDoc.paths[path][method];
+          const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
+          // Auto-assign the background handler
+          if (isBackgroundEndpoint) {
+            rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
+          }
 
-            if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
+          if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
+            if (httpConfig.filterHandledRouteMatches) {
+              const match: RegExp = httpConfig.filterHandledRouteMatches.find((reg) => reg.test(finder));
+              if (match) {
+                Logger.debug('Adding filter-handled handler for %s', finder);
+                // Insert a placeholder for these, which still handles them in runtime if the filter is misconfigured
+                rval.config.handlers.set(finder, (evt) => BuiltInHandlers.expectedHandledByFilter(evt));
+              } else {
+              }
               missingPaths.push(finder);
             }
-            if (entry && entry['security'] && entry['security'].length > 1) {
-              throw new MisconfiguredError('Epsilon does not currently support multiple security (path was ' + finder + ')');
-            }
-            let authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
-            if (isBackgroundEndpoint && backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName) {
-              authorizerName = backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName;
-            }
-
-            const newRoute: RouteMapping = {
-              path: convertedPath,
-              method: method,
-              function: rval.config.handlers.get(finder),
-              authorizerName: applicableMeta.overrideAuthorizerName || authorizerName,
-              metaProcessingConfig: applicableMeta,
-              validation: null,
-              outboundValidation: null,
-            };
-
-            // Add inbound validation, if available
-            if (
-              entry['requestBody'] &&
-              entry['requestBody']['content'] &&
-              entry['requestBody']['content']['application/json'] &&
-              entry['requestBody']['content']['application/json']['schema']
-            ) {
-              // TODO: this is brittle as hell, need to firm up
-              const schema: any = entry['requestBody']['content'];
-              Logger.silly('Applying schema %j to %s', schema, finder);
-
-              const modelName = this.findAndValidateModelName(
-                method,
-                path,
-                schema,
-                rval.config.overrideModelValidator || rval.openApiModelValidator
-              );
-              const required: boolean = BooleanRatchet.parseBool(entry['requestBody']['required']);
-              const validation: RouteValidatorConfig = {
-                extraPropertiesAllowed: true,
-                emptyAllowed: !required,
-                modelName: modelName,
-              } as RouteValidatorConfig;
-
-              newRoute.validation = validation;
-            }
-
-            // Add outbound validation, if available
-            if (
-              entry['responses'] &&
-              entry['responses']['200'] &&
-              entry['responses']['200']['content'] &&
-              entry['responses']['200']['content']['application/json'] &&
-              entry['responses']['200']['content']['application/json']['schema']
-            ) {
-              // TODO: this is brittle as hell, need to firm up
-              const schema: any = entry['responses']['200']['content'];
-              Logger.silly('Applying schema %j to %s', schema, finder);
-              const modelName = this.findAndValidateModelName(
-                method,
-                path,
-                schema,
-                rval.config.overrideModelValidator || rval.openApiModelValidator
-              );
-              const validation: RouteValidatorConfig = {
-                extraPropertiesAllowed: false,
-                emptyAllowed: false, // Its a 200 response, must be non-null
-                modelName: modelName,
-              } as RouteValidatorConfig;
-
-              newRoute.outboundValidation = validation;
-            }
-
-            rval.routes.push(newRoute);
           }
+
+          if (entry && entry['security'] && entry['security'].length > 1) {
+            throw new MisconfiguredError('Epsilon does not currently support multiple security (path was ' + finder + ')');
+          }
+          let authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
+          if (isBackgroundEndpoint && backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName) {
+            authorizerName = backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName;
+          }
+
+          const newRoute: RouteMapping = {
+            path: convertedPath,
+            method: method,
+            function: rval.config.handlers.get(finder),
+            authorizerName: applicableMeta.overrideAuthorizerName || authorizerName,
+            metaProcessingConfig: applicableMeta,
+            validation: null,
+            outboundValidation: null,
+          };
+
+          // Add inbound validation, if available
+          if (
+            entry['requestBody'] &&
+            entry['requestBody']['content'] &&
+            entry['requestBody']['content']['application/json'] &&
+            entry['requestBody']['content']['application/json']['schema']
+          ) {
+            // TODO: this is brittle as hell, need to firm up
+            const schema: any = entry['requestBody']['content'];
+            Logger.silly('Applying schema %j to %s', schema, finder);
+
+            const modelName = this.findAndValidateModelName(
+              method,
+              path,
+              schema,
+              rval.config.overrideModelValidator || rval.openApiModelValidator
+            );
+            const required: boolean = BooleanRatchet.parseBool(entry['requestBody']['required']);
+            const validation: RouteValidatorConfig = {
+              extraPropertiesAllowed: true,
+              emptyAllowed: !required,
+              modelName: modelName,
+            } as RouteValidatorConfig;
+
+            newRoute.validation = validation;
+          }
+
+          // Add outbound validation, if available
+          if (
+            entry['responses'] &&
+            entry['responses']['200'] &&
+            entry['responses']['200']['content'] &&
+            entry['responses']['200']['content']['application/json'] &&
+            entry['responses']['200']['content']['application/json']['schema']
+          ) {
+            // TODO: this is brittle as hell, need to firm up
+            const schema: any = entry['responses']['200']['content'];
+            Logger.silly('Applying schema %j to %s', schema, finder);
+            const modelName = this.findAndValidateModelName(
+              method,
+              path,
+              schema,
+              rval.config.overrideModelValidator || rval.openApiModelValidator
+            );
+            const validation: RouteValidatorConfig = {
+              extraPropertiesAllowed: false,
+              emptyAllowed: false, // Its a 200 response, must be non-null
+              modelName: modelName,
+            } as RouteValidatorConfig;
+
+            newRoute.outboundValidation = validation;
+          }
+
+          rval.routes.push(newRoute);
         });
       });
     }
 
     if (missingPaths.length > 0) {
-      throw new MisconfiguredError('Missing expected handlers : "' + JSON.stringify(missingPaths));
+      throw new MisconfiguredError().withFormattedErrorMessage('Missing expected handlers : %j', missingPaths);
     }
 
     return rval;

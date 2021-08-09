@@ -10,8 +10,16 @@ import { UnauthorizedError } from '../../http/error/unauthorized-error';
 import { NotFoundError } from '../../http/error/not-found-error';
 import { ForbiddenError } from '../../http/error/forbidden-error';
 import { NotImplemented } from '../../http/error/not-implemented';
+import { MisconfiguredError } from '../../http/error/misconfigured-error';
 
 export class BuiltInHandlers {
+  public static async expectedHandledByFilter(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
+    throw new MisconfiguredError().withFormattedErrorMessage(
+      'Should not happen - it was expected that route %s would be handled by a filter',
+      evt.path
+    );
+  }
+
   public static async handleNotImplemented(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
     Logger.info('A request was made to %s with body %j - not yet implemented', evt.path, evt.body);
 

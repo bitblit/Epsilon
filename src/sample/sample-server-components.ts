@@ -146,7 +146,6 @@ export class SampleServerComponents {
       defaultMetaHandling: meta,
       handlers: handlers,
       authorizers: authorizers,
-      requestIdResponseHeaderName: 'X-REQUEST-ID',
       overrideMetaHandling: [
         {
           pathRegex: '/background',
@@ -159,17 +158,6 @@ export class SampleServerComponents {
           config: preFiltersAllowingNull,
         },
       ],
-      webTokenManipulator: tokenManipulator,
-      apolloConfig: {
-        apolloServer: await SampleServerComponents.createSampleApollo(),
-        createHandlerOptions: {
-          cors: {
-            origin: '*',
-            credentials: true,
-          },
-        },
-        pathRegex: new RegExp('.*graphql.*'),
-      },
       prefixesToStripBeforeRouteMatch: ['v0'],
     };
 
