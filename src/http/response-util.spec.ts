@@ -5,6 +5,9 @@ import fs from 'fs';
 import { EpsilonConstants } from '../epsilon-constants';
 import { HttpConfig } from '../config/http/http-config';
 import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
+import { FilterChainContext } from '../config/http/filter-chain-context';
+import { ExtendedAPIGatewayEvent } from './route/extended-api-gateway-event';
+import { BuiltInFilters } from '../built-in/http/built-in-filters';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {
@@ -60,18 +63,21 @@ describe('#responseUtil', function () {
   });
 
   it('should add cors to proxy result MATCH 1', async () => {
-    const evt: APIGatewayEvent = JSON.parse(
+    const evt: ExtendedAPIGatewayEvent = JSON.parse(
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const metaConf: HttpMetaProcessingConfig = {
-      timeoutMS: 20_000,
-      corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+    const fCtx: FilterChainContext = {
+      event: evt,
+      rawResult: null,
+      context: null,
+      result: proxy,
+      routeAndParse: null,
+      modelValidator: null,
+      authenticators: null,
     };
 
-    ResponseUtil.addCORSToProxyResult(proxy, metaConf, evt);
+    await BuiltInFilters.addAllowReflectionCORSHeaders(fCtx);
 
     expect(proxy.headers).toBeTruthy();
     expect(proxy.headers['Access-Control-Allow-Origin']).toEqual('http://localhost:4200');
@@ -80,18 +86,21 @@ describe('#responseUtil', function () {
   });
 
   it('should add cors to proxy result MATCH 2', async () => {
-    const evt: APIGatewayEvent = JSON.parse(
+    const evt: ExtendedAPIGatewayEvent = JSON.parse(
       fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
     );
     const proxy: ProxyResult = {} as ProxyResult;
-    const metaConf: HttpMetaProcessingConfig = {
-      timeoutMS: 20_000,
-      corsAllowedOrigins: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedMethods: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
-      corsAllowedHeaders: EpsilonConstants.CORS_MATCH_REQUEST_FLAG,
+    const fCtx: FilterChainContext = {
+      event: evt,
+      rawResult: null,
+      context: null,
+      result: proxy,
+      routeAndParse: null,
+      modelValidator: null,
+      authenticators: null,
     };
 
-    ResponseUtil.addCORSToProxyResult(proxy, metaConf, evt);
+    await BuiltInFilters.addAllowReflectionCORSHeaders(fCtx);
 
     expect(proxy.headers).toBeTruthy();
   });

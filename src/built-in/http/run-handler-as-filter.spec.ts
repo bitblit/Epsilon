@@ -50,13 +50,4 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     const outString: string = RouterUtil.openApiPathToRouteParserPath(inString);
     expect(outString).toEqual('/meta/item/:itemId');
   });
-
-  it('should build default reflective cors handler', async () => {
-    const evt: APIGatewayEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../../test-data/sample-json/sample-request-1.json')).toString()
-    );
-    const proxy: ProxyResult = RouterUtil.defaultReflectiveCorsOptionsFunction(evt);
-
-    expect(proxy.headers).toBeTruthy();
-  });
 });

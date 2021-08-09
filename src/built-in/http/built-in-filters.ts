@@ -13,6 +13,7 @@ import { MisconfiguredError } from '../../http/error/misconfigured-error';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BuiltInAuthFilters } from './built-in-auth-filters';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
+import { LogLevelManipulationFilter } from './log-level-manipulation-filter';
 
 export class BuiltInFilters {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -66,8 +67,8 @@ export class BuiltInFilters {
   public static async addAllowReflectionCORSHeaders(fCtx: FilterChainContext): Promise<boolean> {
     return BuiltInFilters.addConstantHeaders(fCtx, {
       'Access-Control-Allow-Origin': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Origin') || '*',
-      'Access-Control-Allow-Methods': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Headers') || '*',
-      'Access-Control-Allow-Headers': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Method') || '*',
+      'Access-Control-Allow-Methods': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Method') || '*',
+      'Access-Control-Allow-Headers': MapRatchet.caseInsensitiveAccess<string>(fCtx.event.headers, 'Access-Control-Request-Headers') || '*',
     });
   }
 
@@ -146,9 +147,19 @@ export class BuiltInFilters {
     return true;
   }
 
+  public static async validateInboundQueryParams(fCtx: FilterChainContext): Promise<boolean> {
+    // TODO: Implement ME!
+    return true;
+  }
+
+  public static async validateInboundPathParams(fCtx: FilterChainContext): Promise<boolean> {
+    // TODO: Implement ME!
+    return true;
+  }
+
   public static async validateOutboundResponse(fCtx: FilterChainContext): Promise<boolean> {
     // Use !== true below because commonly it just wont be spec'd
-    if (fCtx?.rawResult && fCtx?.routeAndParse?.mapping?.metaProcessingConfig?.disableValidateOutboundResponseBody !== true) {
+    if (fCtx?.rawResult) {
       if (fCtx.routeAndParse.mapping.outboundValidation) {
         Logger.debug('Applying outbound check to %j', fCtx.rawResult);
         const errors: string[] = fCtx.modelValidator.validate(
@@ -188,6 +199,22 @@ export class BuiltInFilters {
     }
   }
 
+  public static async secureOutboundServerErrorForProduction(
+    fCtx: FilterChainContext,
+    errorMessage: string,
+    errCode: number
+  ): Promise<boolean> {
+    if (fCtx?.result?.statusCode) {
+      if (errCode === null || fCtx.result.statusCode === errCode) {
+        Logger.warn('Securing outbound error info (was : %j)', fCtx.result.body);
+        fCtx.rawResult = new EpsilonHttpError(errorMessage).withHttpStatusCode(fCtx.result.statusCode);
+        fCtx.result.body = JSON.stringify(fCtx.rawResult);
+        fCtx.result.isBase64Encoded = false;
+      }
+    }
+    return true;
+  }
+
   public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): FilterFunction[] {
     return [
       (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
@@ -199,11 +226,14 @@ export class BuiltInFilters {
     return [
       (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
       (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
+      (fCtx) => LogLevelManipulationFilter.setLogLevelForTransaction(fCtx),
       (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
       (fCtx) => BuiltInFilters.uriDecodeAllQueryParameters(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
       (fCtx) => BuiltInFilters.validateInboundBody(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
+      (fCtx) => BuiltInFilters.validateInboundQueryParams(fCtx),
     ];
   }
 
@@ -214,10 +244,15 @@ export class BuiltInFilters {
       (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
       (fCtx) => BuiltInFilters.applyGzipIfPossible(fCtx),
       (fCtx) => BuiltInFilters.checkMaximumLambdaBodySize(fCtx),
+      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
     ];
   }
 
   public static defaultEpsilonErrorFilters(): FilterFunction[] {
-    return [(fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx), (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx)];
+    return [
+      (fCtx) => BuiltInFilters.addAWSRequestIdHeader(fCtx),
+      (fCtx) => BuiltInFilters.addAllowReflectionCORSHeaders(fCtx),
+      (fCtx) => LogLevelManipulationFilter.clearLogLevelForTransaction(fCtx),
+    ];
   }
 }

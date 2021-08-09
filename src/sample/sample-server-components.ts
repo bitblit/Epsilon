@@ -35,6 +35,7 @@ import { ApolloFilter } from '../built-in/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { BuiltInFilters } from '../built-in/http/built-in-filters';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -130,15 +131,13 @@ export class SampleServerComponents {
     const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
     const meta: HttpMetaProcessingConfig = RouterUtil.defaultAuthenticationHeaderParsingEpsilonPreFilters(tokenManipulator);
     meta.timeoutMS = 10_000;
-    meta.corsAllowedHeaders = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
-    meta.corsAllowedOrigins = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
-    meta.corsAllowedMethods = EpsilonConstants.CORS_MATCH_REQUEST_FLAG;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
         origin: '*',
         credentials: true,
       },
     });
+    meta.errorFilters.push((fCtx) => BuiltInFilters.secureOutboundServerErrorForProduction(fCtx, 'Clean Internal Server Error', 500));
 
     const cfg: HttpConfig = {
       defaultMetaHandling: meta,
@@ -193,7 +192,7 @@ export class SampleServerComponents {
 
     const router: EpsilonRouter = epsilonInstance.webHandler.router;
     // Modify a single route...
-    RouterUtil.findRoute(router, 'get', '/meta/server').metaProcessingConfig.allowLiteralStringNullAsQueryStringParameter = true;
+    // RouterUtil.findRoute(router, 'get', '/meta/server').metaProcessingConfig.allowLiteralStringNullAsQueryStringParameter = true;
 
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;

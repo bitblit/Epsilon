@@ -123,61 +123,6 @@ export class ResponseUtil {
     return rval;
   }
 
-  // Public so it can be used in auth-web-handler
-  public static addCORSToProxyResult(input: ProxyResult, cfg: HttpMetaProcessingConfig, srcEvent: APIGatewayEvent): ProxyResult {
-    input.headers = input.headers || {};
-    srcEvent.headers = srcEvent.headers || {};
-
-    // Matching the request is mainly here to support old safari browsers
-    const targetOrigin: string =
-      cfg.corsAllowedOrigins !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG
-        ? cfg.corsAllowedOrigins
-        : ResponseUtil.buildReflectCorsAllowOrigin(srcEvent, '*');
-    const targetHeaders: string =
-      cfg.corsAllowedHeaders !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG
-        ? cfg.corsAllowedHeaders
-        : ResponseUtil.buildReflectCorsAllowHeaders(srcEvent, '*');
-    const targetMethod: string =
-      cfg.corsAllowedMethods !== EpsilonConstants.CORS_MATCH_REQUEST_FLAG
-        ? cfg.corsAllowedMethods
-        : ResponseUtil.buildReflectCorsAllowMethods(srcEvent, '*');
-
-    Logger.silly('Adding CORS to proxy result tOrigin: %s tHeaders: %s tMethod: %s', targetOrigin, targetHeaders, targetMethod);
-
-    if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Origin'])) === null && !!targetOrigin) {
-      input.headers['Access-Control-Allow-Origin'] = targetOrigin;
-    }
-    if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Methods'])) === null && !!targetMethod) {
-      input.headers['Access-Control-Allow-Methods'] = targetMethod;
-    }
-    if (StringRatchet.trimToNull(StringRatchet.safeString(input.headers['Access-Control-Allow-Headers'])) === null && !!targetHeaders) {
-      input.headers['Access-Control-Allow-Headers'] = targetHeaders;
-    }
-
-    return input;
-  }
-
-  public static buildReflectCorsAllowOrigin(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
-    const rval: string = MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Origin') || defaultValue;
-    return rval;
-  }
-
-  public static buildReflectCorsAllowHeaders(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
-    const rval: string =
-      MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Headers') ||
-      Object.keys(srcEvent.headers).join(', ') ||
-      defaultValue;
-    return rval;
-  }
-
-  public static buildReflectCorsAllowMethods(srcEvent: APIGatewayEvent, defaultValue: string = '*'): string {
-    const rval: string =
-      MapRatchet.caseInsensitiveAccess<string>(srcEvent.headers, 'Access-Control-Request-Method') ||
-      srcEvent.httpMethod.toUpperCase() ||
-      defaultValue;
-    return rval;
-  }
-
   public static async applyGzipIfPossible(encodingHeader: string, proxyResult: ProxyResult): Promise<ProxyResult> {
     const rval: ProxyResult = proxyResult;
     if (encodingHeader && encodingHeader.toLowerCase().indexOf('gzip') > -1) {

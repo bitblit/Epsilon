@@ -24,12 +24,6 @@ import { WebTokenManipulator } from '../auth/web-token-manipulator';
  * Endpoints about the api itself
  */
 export class RouterUtil {
-  // Thin wrapper to implement the handler interface
-  public static readonly DEFAULT_REFLECTIVE_CORS_OPTION_HANDLER: HandlerFunction<ProxyResult> = async (e) => {
-    const rval: ProxyResult = RouterUtil.defaultReflectiveCorsOptionsFunction(e);
-    return rval;
-  };
-
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
@@ -42,22 +36,7 @@ export class RouterUtil {
       preFilters: BuiltInFilters.defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator),
       postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
       errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
-      customExtraHeaders: {},
-      defaultErrorMessage: 'Internal server error',
-      corsAllowedOrigins: '*',
-      corsAllowedMethods: '*',
-      corsAllowedHeaders: '*',
-      disableAutoFixStillEncodedQueryParams: false,
-      disableAutoAddCorsHeadersToResponses: false,
-      disableCompression: false,
-      disableValidateInboundRequestBody: false,
-      disableValidateInboundQueryParameters: false,
-      disableValidateOutboundResponseBody: false,
-      disableAutomaticBodyParse: false,
-      disableParameterMapAssure: false,
       nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
-      allowLiteralStringNullAsPathParameter: false,
-      allowLiteralStringNullAsQueryStringParameter: false,
     };
     return defaults;
   }
@@ -70,22 +49,7 @@ export class RouterUtil {
       preFilters: BuiltInFilters.defaultEpsilonPreFilters(),
       postFilters: BuiltInFilters.defaultEpsilonPostFilters(),
       errorFilters: BuiltInFilters.defaultEpsilonErrorFilters(),
-      customExtraHeaders: {},
-      defaultErrorMessage: 'Internal server error',
-      corsAllowedOrigins: '*',
-      corsAllowedMethods: '*',
-      corsAllowedHeaders: '*',
-      disableAutoFixStillEncodedQueryParams: false,
-      disableAutoAddCorsHeadersToResponses: false,
-      disableCompression: false,
-      disableValidateInboundRequestBody: false,
-      disableValidateInboundQueryParameters: false,
-      disableValidateOutboundResponseBody: false,
-      disableAutomaticBodyParse: false,
-      disableParameterMapAssure: false,
       nullReturnedObjectHandling: NullReturnedObjectHandling.Return404NotFoundResponse,
-      allowLiteralStringNullAsPathParameter: false,
-      allowLiteralStringNullAsQueryStringParameter: false,
     };
     return defaults;
   }
@@ -327,27 +291,6 @@ export class RouterUtil {
       },
     };
     return rval;
-  }
-
-  public static buildCorsResponseForRouterConfig(config: HttpMetaProcessingConfig): ProxyResult {
-    return RouterUtil.buildCorsResponse(
-      config.corsAllowedOrigins,
-      config.corsAllowedMethods,
-      config.corsAllowedHeaders,
-      '{"cors":true}',
-      200
-    );
-  }
-
-  public static defaultReflectiveCorsOptionsFunction(evt: APIGatewayEvent): ProxyResult {
-    const corsResponse: ProxyResult = RouterUtil.buildCorsResponse(
-      ResponseUtil.buildReflectCorsAllowOrigin(evt, '*'),
-      ResponseUtil.buildReflectCorsAllowMethods(evt, '*'),
-      ResponseUtil.buildReflectCorsAllowHeaders(evt, '*'),
-      '',
-      204
-    );
-    return corsResponse;
   }
 
   public static findRoute(router: EpsilonRouter, routeMethod: string, routePath: string): RouteMapping {
