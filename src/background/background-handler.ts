@@ -27,12 +27,18 @@ export class BackgroundHandler {
     this.validator = new BackgroundValidator(cfg, modelValidator);
     this.processors = BackgroundValidator.validateAndMapProcessors(cfg.processors, modelValidator);
 
-    if (mgr && mgr.localMode) {
+    if (mgr) {
+      // We always subscribe, but check on a case-by-case basis so we can attach/detaach
+      // local mode at runtime
       Logger.info('Attaching local-mode background manager bus');
       mgr.localBus().subscribe(async (evt) => {
-        Logger.debug('Processing local background entry : %j', evt);
-        const rval: boolean = await this.processSingleBackgroundEntry(evt);
-        Logger.info('Processor returned %s', rval);
+        if (mgr.localMode) {
+          Logger.debug('Processing local background entry : %j', evt);
+          const rval: boolean = await this.processSingleBackgroundEntry(evt);
+          Logger.info('Processor returned %s', rval);
+        } else {
+          Logger.silly('Not local mode - ignoring');
+        }
       });
     }
   }

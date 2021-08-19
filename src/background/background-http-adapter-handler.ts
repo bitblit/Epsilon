@@ -44,6 +44,7 @@ export class BackgroundHttpAdapterHandler {
     const rval: BackgroundMetaResponseInternal = {
       currentQueueLength: currentCount,
       validTypes: valid,
+      localMode: this.backgroundManager.localMode,
     };
     return rval;
   }
