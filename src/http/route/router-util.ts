@@ -170,10 +170,14 @@ export class RouterUtil {
           const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, method, path);
 
           const entry: any = openApiDoc.paths[path][method];
-          const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.backgroundHttpEndpointPrefix);
-          // Auto-assign the background handler
+          const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.httpSubmissionPath);
+          const isBackgroundMetaEndpoint: boolean = path === backgroundHttpAdapterHandler.httpMetaEndpoint;
+          // Auto-assign the background handler endpoints
           if (isBackgroundEndpoint) {
             rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
+          }
+          if (isBackgroundMetaEndpoint) {
+            rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundMetaRequest(evt, ctx));
           }
 
           if (!rval.config.handlers || !rval.config.handlers.get(finder)) {
@@ -190,10 +194,7 @@ export class RouterUtil {
           if (entry && entry['security'] && entry['security'].length > 1) {
             throw new MisconfiguredError('Epsilon does not currently support multiple security (path was ' + finder + ')');
           }
-          let authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
-          if (isBackgroundEndpoint && backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName) {
-            authorizerName = backgroundHttpAdapterHandler.backgroundHttpEndpointAuthorizerName;
-          }
+          const authorizerName: string = entry['security'] && entry['security'].length == 1 ? Object.keys(entry['security'][0])[0] : null;
 
           const newRoute: RouteMapping = {
             path: convertedPath,

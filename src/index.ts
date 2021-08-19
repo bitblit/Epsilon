@@ -10,6 +10,7 @@ export * from './local-server';
 export * from './background/background-entry';
 export * from './background/background-handler';
 export * from './background/background-http-adapter-handler';
+export * from './background/background-meta-response-internal';
 export * from './background/background-process-handling';
 export * from './background/background-queue-response-internal';
 export * from './background/background-validator';

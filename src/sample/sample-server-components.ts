@@ -165,7 +165,9 @@ export class SampleServerComponents {
         queueUrl: 'FAKE-LOCAL',
         notificationArn: 'FAKE-LOCAL',
       },
-      backgroundHttpEndpointPrefix: '/background',
+      httpMetaEndpoint: '/background/meta',
+      httpSubmissionPath: '/background',
+      implyTypeFromPathSuffix: false,
       processors: [
         new EchoProcessor(),
         new NoOpProcessor(),

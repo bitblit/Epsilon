@@ -354,6 +354,34 @@ paths:
         '200':
           description: Standard CORS header response
 
+  /background/meta:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackgroundMetaResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '403':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+    options:
+      tags:
+        - CORS
+      responses:
+        '200':
+          description: Standard CORS header response
+
 x-amazon-apigateway-binary-media-types:
   - '*/*'
 x-amazon-apigateway-gateway-responses:
@@ -504,8 +532,8 @@ components:
       title: Background Queue Response
       description: When any of the background endpoints are hit, this is what will be returned
       required:
-        - nameParam
-        - numberParam
+        - resultId
+        - success
       properties:
         processHandling:
           type: string
@@ -514,6 +542,18 @@ components:
           type: boolean
         resultId:
           type: string
+    BackgroundMetaResponse:
+      type: object
+      title: Background Meta Response
+      description: If
+      properties:
+        validTypes:
+          type: array
+          items:
+            type: string
+        currentQueueLength:
+          type: number
+
     BackgroundSampleInputValidatedProcessorData:
       type: object
       title: BackgroundSampleInputValidatedProcessorData

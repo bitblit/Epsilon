@@ -25,8 +25,9 @@ describe('#createEntry', function () {
 
     backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],
-      backgroundHttpEndpointPrefix: '/background/',
-      backgroundHttpEndpointAuthorizerName: 'BackgroundAuthorizer',
+      httpSubmissionPath: '/background/',
+      implyTypeFromPathSuffix: true,
+      httpMetaEndpoint: '/background-meta',
       aws: {
         queueUrl: 'https://fake-sqs.fake-availability-zone.test.com/' + fakeAccountNumber + '/fakeQueue.fifo',
         notificationArn: 'arn:aws:sns:fake-availability-zone:' + fakeAccountNumber + ':fakeSnsTopicName',

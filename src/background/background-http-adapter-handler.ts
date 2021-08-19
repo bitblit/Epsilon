@@ -11,6 +11,7 @@ import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
+import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -23,12 +24,27 @@ export class BackgroundHttpAdapterHandler {
     private backgroundManager: BackgroundManager
   ) {}
 
-  public get backgroundHttpEndpointPrefix(): string {
-    return this.backgroundConfig.backgroundHttpEndpointPrefix;
+  public get httpMetaEndpoint(): string {
+    return this.backgroundConfig.httpMetaEndpoint;
   }
 
-  public get backgroundHttpEndpointAuthorizerName(): string {
-    return this.backgroundConfig.backgroundHttpEndpointAuthorizerName;
+  public get httpSubmissionPath(): string {
+    return this.backgroundConfig.httpSubmissionPath;
+  }
+
+  public get implyTypeFromPathSuffix(): boolean {
+    return this.backgroundConfig.implyTypeFromPathSuffix;
+  }
+
+  public async handleBackgroundMetaRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundMetaResponseInternal> {
+    Logger.info('handleBackgroundMetaRequest called');
+    const currentCount: number = await this.backgroundManager.fetchApproximateNumberOfQueueEntries();
+    const valid: string[] = this.backgroundConfig.processors.map((b) => b.typeName);
+    const rval: BackgroundMetaResponseInternal = {
+      currentQueueLength: currentCount,
+      validTypes: valid,
+    };
+    return rval;
   }
 
   public async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundQueueResponseInternal> {
@@ -36,8 +52,10 @@ export class BackgroundHttpAdapterHandler {
 
     let rval: BackgroundQueueResponseInternal = null;
 
-    const startIdx: number = evt.path.indexOf(this.backgroundHttpEndpointPrefix) + this.backgroundHttpEndpointPrefix.length;
-    let pathSuppliedBackgroundType: string = evt.path.substring(startIdx).split('-').join('').toLowerCase();
+    const startIdx: number = evt.path.indexOf(this.httpSubmissionPath) + this.httpSubmissionPath.length;
+    let pathSuppliedBackgroundType: string = this.backgroundConfig.implyTypeFromPathSuffix
+      ? evt.path.substring(startIdx).split('-').join('').toLowerCase()
+      : '';
     // Strip any query params or fragments
     if (pathSuppliedBackgroundType.includes('?')) {
       pathSuppliedBackgroundType = pathSuppliedBackgroundType.substring(0, pathSuppliedBackgroundType.indexOf('?'));

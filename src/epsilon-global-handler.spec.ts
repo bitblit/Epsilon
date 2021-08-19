@@ -47,8 +47,9 @@ describe('#epsilonGlobalHandler', function () {
     };
     const smConfig: BackgroundConfig = {
       processors: [],
-      backgroundHttpEndpointPrefix: '/background/',
-      backgroundHttpEndpointAuthorizerName: 'BackgroundAuthorizer',
+      httpSubmissionPath: '/background/',
+      implyTypeFromPathSuffix: true,
+      httpMetaEndpoint: '/background-meta',
       aws: null,
     };
     const background = new BackgroundHandler(null, null);

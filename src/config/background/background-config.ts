@@ -3,7 +3,8 @@ import { BackgroundProcessor } from './background-processor';
 
 export interface BackgroundConfig {
   aws: BackgroundAwsConfig;
-  backgroundHttpEndpointPrefix: string;
-  backgroundHttpEndpointAuthorizerName?: string;
+  httpMetaEndpoint?: string;
+  httpSubmissionPath: string;
+  implyTypeFromPathSuffix: boolean;
   processors: BackgroundProcessor<any>[];
 }
