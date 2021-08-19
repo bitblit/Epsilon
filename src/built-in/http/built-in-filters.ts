@@ -196,6 +196,17 @@ export class BuiltInFilters {
     }
   }
 
+  public static async autoRespond(fCtx: FilterChainContext, inBody: any): Promise<boolean> {
+    const body: any = inBody || {
+      message: 'Not Implemented',
+    };
+    fCtx.result = {
+      statusCode: 200,
+      body: JSON.stringify(body),
+    };
+    return false;
+  }
+
   public static async secureOutboundServerErrorForProduction(
     fCtx: FilterChainContext,
     errorMessage: string,
