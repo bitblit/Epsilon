@@ -86,7 +86,7 @@ export class SampleServerComponents {
   }
 
   // Functions below here are for using as samples
-  public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
+  public static async createSampleEpsilonConfig(): Promise<EpsilonConfig> {
     const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     authorizers.set('SampleAuthorizer', (token, evt) => BuiltInAuthorizers.simpleLoggedInAuth(token, evt));
@@ -182,11 +182,38 @@ export class SampleServerComponents {
       httpConfig: cfg,
       backgroundConfig: background,
     };
+    return epsilonConfig;
+  }
+
+  public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
+    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
+    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
+    backgroundManager.localMode = true;
+    const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
+    const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
+    return rval;
+  }
+
+  public static async createSampleBatchOnlyEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
+    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
+    epsilonConfig.httpConfig.handlers = new Map<string, HandlerFunction<any>>(); // Unused
+
+    const byPassCfg: HttpMetaProcessingConfig = Object.assign({}, epsilonConfig.httpConfig.defaultMetaHandling);
+    byPassCfg.preFilters = byPassCfg.preFilters.concat([
+      (fCtx) => BuiltInFilters.autoRespond(fCtx, { message: 'Background Processing Only' }),
+    ]);
+    epsilonConfig.httpConfig.overrideMetaHandling = [
+      {
+        pathRegex: '.*background.*',
+        invertPathMatching: true,
+        config: byPassCfg,
+      },
+    ];
+    epsilonConfig.httpConfig.filterHandledRouteMatches = ['.*']; // Only want the batch handling
 
     const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
     backgroundManager.localMode = true;
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
-
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;
   }
