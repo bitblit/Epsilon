@@ -39,7 +39,8 @@ export class BackgroundHttpAdapterHandler {
   public async handleBackgroundMetaRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundMetaResponseInternal> {
     Logger.info('handleBackgroundMetaRequest called');
     const currentCount: number = await this.backgroundManager.fetchApproximateNumberOfQueueEntries();
-    const valid: string[] = this.backgroundConfig.processors.map((b) => b.typeName);
+    const valid: string[] = this.backgroundConfig.processors.map((b) => b.typeName).filter((a) => !!a);
+    valid.sort((a, b) => a.localeCompare(b));
     const rval: BackgroundMetaResponseInternal = {
       currentQueueLength: currentCount,
       validTypes: valid,
