@@ -121,7 +121,8 @@ export class RouterUtil {
           test.methods.length === 0 ||
           test.methods.map((s) => s.toLocaleLowerCase()).includes(method.toLocaleLowerCase())
         ) {
-          if (test.pathRegex.match(path)) {
+          const matches: boolean = !!test.pathRegex.match(path);
+          if ((matches && !test.invertPathMatching) || (!matches && test.invertPathMatching)) {
             rval = test.config;
           }
         }
