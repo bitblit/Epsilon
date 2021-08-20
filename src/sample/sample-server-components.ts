@@ -35,6 +35,7 @@ import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EventUtil } from '../http/event-util';
+import { LogMessageBackgroundErrorProcessor } from '../built-in/background/log-message-background-error-processor';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -174,6 +175,7 @@ export class SampleServerComponents {
         new SampleInputValidatedProcessor(),
         new LogAndEnqueueEchoProcessor(),
       ],
+      errorProcessor: new LogMessageBackgroundErrorProcessor(),
     };
 
     const epsilonConfig: EpsilonConfig = {

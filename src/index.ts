@@ -18,6 +18,7 @@ export * from './background/epsilon-background-process-error';
 export * from './background/internal-background-entry';
 export * from './built-in/background/echo-processor';
 export * from './built-in/background/log-and-enqueue-echo-processor';
+export * from './built-in/background/log-message-background-error-processor';
 export * from './built-in/background/no-op-processor';
 export * from './built-in/http/apollo-filter';
 export * from './built-in/http/built-in-auth-filters';
