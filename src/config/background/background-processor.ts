@@ -9,6 +9,6 @@ export interface BackgroundProcessor<T> {
   // single-post background support
   dataSchemaName?: string;
 
-  // Returns void since you can't use the result anyway
-  handleEvent(data: T, mgr: BackgroundManager): Promise<void>;
+  // Allowed to return since it may be logged
+  handleEvent(data: T, mgr: BackgroundManager): Promise<any>;
 }

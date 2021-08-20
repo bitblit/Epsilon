@@ -10,9 +10,9 @@ import { BackgroundHttpAdapterHandler } from '../../background/background-http-a
 import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
-import { HttpMetaProcessingConfig } from '../../config/http/http-meta-processing-config';
+import { HttpProcessingConfig } from '../../config/http/http-processing-config';
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
-import { MappedHttpMetaProcessingConfig } from '../../config/http/mapped-http-meta-processing-config';
+import { MappedHttpProcessingConfig } from '../../config/http/mapped-http-processing-config';
 import { BuiltInFilters } from '../../built-in/http/built-in-filters';
 import { WebTokenManipulator } from '../auth/web-token-manipulator';
 import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
@@ -71,8 +71,8 @@ export class RouterUtil {
 
   public static defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(
     webTokenManipulator: WebTokenManipulator
-  ): HttpMetaProcessingConfig {
-    const defaults: HttpMetaProcessingConfig = {
+  ): HttpProcessingConfig {
+    const defaults: HttpProcessingConfig = {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
       timeoutMS: 30_000,
       overrideAuthorizerName: null,
@@ -84,8 +84,8 @@ export class RouterUtil {
     return defaults;
   }
 
-  public static defaultHttpMetaProcessingConfig(): HttpMetaProcessingConfig {
-    const defaults: HttpMetaProcessingConfig = {
+  public static defaultHttpMetaProcessingConfig(): HttpProcessingConfig {
+    const defaults: HttpProcessingConfig = {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
       timeoutMS: 30_000,
       overrideAuthorizerName: null,
@@ -111,11 +111,11 @@ export class RouterUtil {
   }
 
   // Search the overrides in order to find a match, otherwise return default
-  public static findApplicableMeta(httpConfig: HttpConfig, method: string, path: string): HttpMetaProcessingConfig {
-    let rval: HttpMetaProcessingConfig = null;
+  public static findApplicableMeta(httpConfig: HttpConfig, method: string, path: string): HttpProcessingConfig {
+    let rval: HttpProcessingConfig = null;
     if (httpConfig?.overrideMetaHandling) {
       for (let i = 0; i < httpConfig.overrideMetaHandling.length && !rval; i++) {
-        const test: MappedHttpMetaProcessingConfig = httpConfig.overrideMetaHandling[i];
+        const test: MappedHttpProcessingConfig = httpConfig.overrideMetaHandling[i];
         if (
           !test.methods ||
           test.methods.length === 0 ||
@@ -168,17 +168,21 @@ export class RouterUtil {
         Object.keys(openApiDoc.paths[path]).forEach((method) => {
           const convertedPath: string = RouterUtil.openApiPathToRouteParserPath(path);
           const finder: string = method + ' ' + path;
-          const applicableMeta: HttpMetaProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, method, path);
+          const applicableMeta: HttpProcessingConfig = RouterUtil.findApplicableMeta(httpConfig, method, path);
 
           const entry: any = openApiDoc.paths[path][method];
           const isBackgroundEndpoint: boolean = path.startsWith(backgroundHttpAdapterHandler.httpSubmissionPath);
           const isBackgroundMetaEndpoint: boolean = path === backgroundHttpAdapterHandler.httpMetaEndpoint;
+          const isBackgroundStatusEndpoint: boolean = path === backgroundHttpAdapterHandler.httpStatusPath;
           // Auto-assign the background handler endpoints
           if (isBackgroundEndpoint) {
             rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundSubmission(evt, ctx));
           }
           if (isBackgroundMetaEndpoint) {
             rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundMetaRequest(evt, ctx));
+          }
+          if (isBackgroundStatusEndpoint) {
+            rval.config.handlers.set(finder, (evt, ctx) => backgroundHttpAdapterHandler.handleBackgroundStatusRequest(evt, ctx));
           }
 
           if (!rval.config.handlers || !rval.config.handlers.get(finder)) {

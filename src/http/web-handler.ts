@@ -8,7 +8,7 @@ import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-eve
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
-import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
+import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
@@ -39,7 +39,7 @@ export class WebHandler {
 
   public async openApiLambdaHandler(evt: ExtendedAPIGatewayEvent, context: Context): Promise<ProxyResult> {
     const rm: RouteAndParse = this.findBestMatchingRoute(evt);
-    const procConfig: HttpMetaProcessingConfig = rm?.mapping?.metaProcessingConfig
+    const procConfig: HttpProcessingConfig = rm?.mapping?.metaProcessingConfig
       ? rm.mapping.metaProcessingConfig
       : this.routerConfig.config.defaultMetaHandling;
     const fCtx: FilterChainContext = {

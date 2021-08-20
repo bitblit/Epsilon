@@ -12,17 +12,29 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
+import { S3CacheRatchet } from '@bitblit/ratchet/dist/aws';
+import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
+import { NotFoundError } from '../http/error/not-found-error';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
  * thing at the same time.
  */
 export class BackgroundHttpAdapterHandler {
+  private s3TransactionLogCacheRatchet: S3CacheRatchet;
+
   constructor(
     private backgroundConfig: BackgroundConfig,
     private modelValidator: ModelValidator,
     private backgroundManager: BackgroundManager
-  ) {}
+  ) {
+    if (this?.backgroundConfig?.s3TransactionLoggingConfig?.s3 && this?.backgroundConfig?.s3TransactionLoggingConfig?.bucket) {
+      this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
+        this.backgroundConfig.s3TransactionLoggingConfig.s3,
+        this.backgroundConfig.s3TransactionLoggingConfig.bucket
+      );
+    }
+  }
 
   public get httpMetaEndpoint(): string {
     return this.backgroundConfig.httpMetaEndpoint;
@@ -32,8 +44,32 @@ export class BackgroundHttpAdapterHandler {
     return this.backgroundConfig.httpSubmissionPath;
   }
 
+  public get httpStatusPath(): string {
+    return this.backgroundConfig.httpStatusEndpoint;
+  }
+
   public get implyTypeFromPathSuffix(): boolean {
     return this.backgroundConfig.implyTypeFromPathSuffix;
+  }
+
+  public async handleBackgroundStatusRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundTransactionLog> {
+    Logger.info('handleBackgroundStatusRequest called');
+    if (!this.s3TransactionLogCacheRatchet) {
+      throw new BadRequestError('Process logging not enabled');
+    } else {
+      const guid: string =
+        StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
+      if (guid) {
+        const path: string = BackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
+        const log: BackgroundTransactionLog = await this.s3TransactionLogCacheRatchet.readCacheFileToObject<BackgroundTransactionLog>(path);
+        if (!log) {
+          throw new NotFoundError().withFormattedErrorMessage('No background result found for guid %s', guid);
+        }
+        return log;
+      } else {
+        throw new BadRequestError('No guid specified');
+      }
+    }
   }
 
   public async handleBackgroundMetaRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundMetaResponseInternal> {

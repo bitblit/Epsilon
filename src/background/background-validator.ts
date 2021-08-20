@@ -90,6 +90,17 @@ export class BackgroundValidator {
           rval.push('At least one send notification flag set to true but no sns arn set');
         }
       }
+      if (cfg.s3TransactionLoggingConfig) {
+        if (!cfg.s3TransactionLoggingConfig.s3) {
+          rval.push('If you define s3TransactionLoggingConfig you must supply an S3 object');
+        }
+        if (!cfg.s3TransactionLoggingConfig.bucket) {
+          rval.push('If you define s3TransactionLoggingConfig you must supply a bucket');
+        }
+        if (!cfg.s3TransactionLoggingConfig.timeToLiveDays) {
+          rval.push('If you define s3TransactionLoggingConfig you must supply a timeToLiveDays');
+        }
+      }
     }
     return rval;
   }

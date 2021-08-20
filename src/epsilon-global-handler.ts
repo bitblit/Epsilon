@@ -91,7 +91,7 @@ export class EpsilonGlobalHandler {
           const procd: number = await sm.processBackgroundSNSEvent(event, context);
           rval = procd;
           if (procd > 0) {
-            Logger.info('Processed %d entries - refiring');
+            Logger.info('Processed %d entries - re-firing', procd);
             await this._epsilon.backgroundManager.fireStartProcessingRequest();
           } else {
             Logger.info('Queue is now empty, stopping');
@@ -208,7 +208,7 @@ export class EpsilonGlobalHandler {
           for (let i = 0; i < cronConfig.entries.length; i++) {
             const smCronEntry: CronBackgroundEntry = cronConfig.entries[i];
             if (CronUtil.eventMatchesEntry(evt, smCronEntry, cronConfig)) {
-              Logger.info('Firing Background cron : %s', CronUtil.cronEntryName(smCronEntry));
+              Logger.info('CRON Firing : %s', CronUtil.cronEntryName(smCronEntry));
 
               const backgroundEntry: BackgroundEntry<any> = {
                 type: smCronEntry.backgroundTaskType,

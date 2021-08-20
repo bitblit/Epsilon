@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Logger, NumberRatchet } from '@bitblit/ratchet/dist/common';
+import { ErrorRatchet, Logger, NumberRatchet } from '@bitblit/ratchet/dist/common';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { GetQueueAttributesRequest, GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import AWS from 'aws-sdk';
@@ -7,6 +7,8 @@ import { BackgroundEntry } from './background/background-entry';
 import { BackgroundAwsConfig } from './config/background/background-aws-config';
 import { EpsilonConstants } from './epsilon-constants';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
+import { DateTime } from 'luxon';
+import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -57,7 +59,7 @@ export class BackgroundManager {
   private wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
     const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
       createdEpochMS: new Date().getTime(),
-      guid: StringRatchet.createType4Guid(),
+      guid: BackgroundManager.generateBackgroundGuid(),
     });
     return rval;
   }
@@ -207,5 +209,39 @@ export class BackgroundManager {
     const result: AWS.SNS.Types.PublishResponse = await this.sns.publish(params).promise();
     rval = result.MessageId;
     return rval;
+  }
+
+  public static generateBackgroundGuid(targetEpochMS: number = new Date().getTime()): string {
+    const dt: DateTime = DateTime.fromMillis(targetEpochMS);
+    return dt.toFormat('yyyy-MM-dd-') + StringRatchet.createType4Guid();
+  }
+
+  public static backgroundGuidToPath(prefix: string, guid: string): string {
+    let path: string = StringRatchet.trimToEmpty(prefix);
+    if (path.length && !path.endsWith('/')) {
+      path += '/';
+    }
+    path += guid.substring(0, 4) + '/' + guid.substring(5, 7) + '/' + guid.substring(8, 10) + '/';
+    path += guid + '.json';
+    return path;
+  }
+
+  public static pathToBackgroundGuid(prefix: string, path: string): string {
+    RequireRatchet.notNullOrUndefined(path, 'path');
+    let start: number = 0;
+    if (!path.endsWith('.json')) {
+      ErrorRatchet.throwFormattedErr('Cannot extract guid, does not end with .json : %s : %s', path, prefix);
+    }
+    if (StringRatchet.trimToNull(prefix)) {
+      if (!path.startsWith(prefix)) {
+        ErrorRatchet.throwFormattedErr('Cannot extract guid, does not start with prefix : %s : %s', path, prefix);
+      }
+      start = prefix.length;
+      if (!prefix.endsWith('/')) {
+        start++;
+      }
+    }
+    start += 11;
+    return path.substring(start, path.length - 5); // strip prefix and .json at the end
   }
 }

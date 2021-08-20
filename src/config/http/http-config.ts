@@ -1,15 +1,15 @@
 import { HandlerFunction } from './handler-function';
 import { AuthorizerFunction } from './authorizer-function';
-import { HttpMetaProcessingConfig } from './http-meta-processing-config';
+import { HttpProcessingConfig } from './http-processing-config';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { MappedHttpMetaProcessingConfig } from './mapped-http-meta-processing-config';
+import { MappedHttpProcessingConfig } from './mapped-http-processing-config';
 
 export interface HttpConfig {
   // This is used for meta handling for any route not overridden by overrideMetaHandling
-  defaultMetaHandling: HttpMetaProcessingConfig;
+  defaultMetaHandling: HttpProcessingConfig;
   // Allows setting meta handling for any specific routes
   // These are evaluated IN ORDER, to allow progressively less specific configuration
-  overrideMetaHandling?: MappedHttpMetaProcessingConfig[];
+  overrideMetaHandling?: MappedHttpProcessingConfig[];
   // Maps routes to handlers
   handlers: Map<string, HandlerFunction<any>>;
   // Maps names to authorization functions

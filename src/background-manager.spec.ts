@@ -50,4 +50,31 @@ describe('#createEntry', function () {
     expect(queueAttr).toBeTruthy();
     expect(msgCount).toEqual(1);
   });
+
+  it('Should round-trip guids with prefix no slash', async () => {
+    const prefix: string = 'test';
+    const guid: string = BackgroundManager.generateBackgroundGuid();
+    expect(guid).toBeTruthy();
+    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    expect(outGuid).toEqual(guid);
+  });
+
+  it('Should round-trip guids with prefix with slash', async () => {
+    const prefix: string = 'test/';
+    const guid: string = BackgroundManager.generateBackgroundGuid();
+    expect(guid).toBeTruthy();
+    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    expect(outGuid).toEqual(guid);
+  });
+
+  it('Should round-trip guids with no prefix', async () => {
+    const prefix: string = null;
+    const guid: string = BackgroundManager.generateBackgroundGuid();
+    expect(guid).toBeTruthy();
+    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    expect(outGuid).toEqual(guid);
+  });
 });

@@ -8,7 +8,7 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import fs from 'fs';
 import path from 'path';
-import { CommonJwtToken, MapRatchet, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { CommonJwtToken, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
@@ -27,14 +27,13 @@ import { EpsilonConfigParser } from '../util/epsilon-config-parser';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 import { BackgroundManager } from '../background-manager';
-import { HttpMetaProcessingConfig } from '../config/http/http-meta-processing-config';
+import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
 import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
-import { EpsilonConstants } from '../epsilon-constants';
 import { EventUtil } from '../http/event-util';
 
 export class SampleServerComponents {
@@ -125,7 +124,7 @@ export class SampleServerComponents {
     // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
     const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
-    const meta: HttpMetaProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
+    const meta: HttpProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
     meta.timeoutMS = 10_000;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
@@ -135,7 +134,7 @@ export class SampleServerComponents {
     });
     meta.errorFilters.push((fCtx) => BuiltInFilters.secureOutboundServerErrorForProduction(fCtx, 'Clean Internal Server Error', 500));
 
-    const preFiltersAllowingNull: HttpMetaProcessingConfig = Object.assign({}, meta);
+    const preFiltersAllowingNull: HttpProcessingConfig = Object.assign({}, meta);
     // TODO: This approach is pretty fragile...
     preFiltersAllowingNull.preFilters = Object.assign([], preFiltersAllowingNull.preFilters);
     preFiltersAllowingNull.preFilters.splice(8, 1);
@@ -198,7 +197,7 @@ export class SampleServerComponents {
     const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
     epsilonConfig.httpConfig.handlers = new Map<string, HandlerFunction<any>>(); // Unused
 
-    const byPassCfg: HttpMetaProcessingConfig = Object.assign({}, epsilonConfig.httpConfig.defaultMetaHandling);
+    const byPassCfg: HttpProcessingConfig = Object.assign({}, epsilonConfig.httpConfig.defaultMetaHandling);
     byPassCfg.preFilters = byPassCfg.preFilters.concat([
       (fCtx) => BuiltInFilters.autoRespond(fCtx, { message: 'Background Processing Only' }),
     ]);
