@@ -10,8 +10,8 @@ import { EpsilonConstants } from '../../epsilon-constants';
 export class ApiGatewayAdapterAuthenticationHandler {
   private webTokenManipulator: LocalWebTokenManipulator;
 
-  constructor(issuer: string, encryptionKey: string) {
-    this.webTokenManipulator = new LocalWebTokenManipulator(encryptionKey, issuer);
+  constructor(issuer: string, encryptionKeys: string) {
+    this.webTokenManipulator = new LocalWebTokenManipulator([encryptionKeys], issuer);
   }
 
   /**

@@ -4,7 +4,10 @@ import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 describe('#localWebTokenManipulator', function () {
   it('should round trip a JWT token', async () => {
-    const svc: LocalWebTokenManipulator = new LocalWebTokenManipulator('1234567890', 'test');
+    const svc: LocalWebTokenManipulator = new LocalWebTokenManipulator(['1234567890'], 'test')
+      .withParseFailureLogLevel('info')
+      .withExtraDecryptionKeys(['abcdefabcdef'])
+      .withOldKeyUseLogLevel('info');
 
     const testUser: any = {
       data1: 'test',

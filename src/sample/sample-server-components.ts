@@ -124,7 +124,11 @@ export class SampleServerComponents {
     });
     // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
-    const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator('abcd1234', 'sample.erigir.com', 'debug');
+    const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator(['abcd1234'], 'sample.erigir.com')
+      .withParseFailureLogLevel('debug')
+      .withExtraDecryptionKeys(['abcdefabcdef'])
+      .withOldKeyUseLogLevel('info');
+
     const meta: HttpProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
     meta.timeoutMS = 10_000;
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
