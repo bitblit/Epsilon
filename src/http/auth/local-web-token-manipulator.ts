@@ -18,6 +18,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
     RequireRatchet.notNullOrUndefined(encryptionKeys, 'encryptionKeys');
     RequireRatchet.noNullOrUndefinedValuesInArray(encryptionKeys, encryptionKeys.length);
     RequireRatchet.true(encryptionKeys.length > 0, 'Encryption keys may not be empty');
+    this.decryptionKeys = encryptionKeys; // Default decryption to same as encryption
   }
 
   public withExtraDecryptionKeys(keys: string[]): LocalWebTokenManipulator {
