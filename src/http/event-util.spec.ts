@@ -3,7 +3,6 @@ import { EventUtil } from './event-util';
 import { BasicAuthToken } from './auth/basic-auth-token';
 import fs from 'fs';
 import path from 'path';
-import { EpsilonConstants } from '../epsilon-constants';
 
 describe('#eventUtil', function () {
   it('should extract pieces', function () {
