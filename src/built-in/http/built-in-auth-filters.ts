@@ -6,8 +6,6 @@ import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { ForbiddenError } from '../../http/error/forbidden-error';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
-import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
-import { EpsilonConstants } from '../../epsilon-constants';
 import { EventUtil } from '../../http/event-util';
 
 export class BuiltInAuthFilters {
@@ -79,7 +77,7 @@ export class BuiltInAuthFilters {
         fCtx.event.authorization = {
           raw: tokenString,
           auth: null,
-          error: err.message,
+          error: err['message'],
         };
       }
     }

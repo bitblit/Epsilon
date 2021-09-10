@@ -90,7 +90,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
       } catch (err) {
         // Only Log on the last one since it might have just been an old key
         if (this.parseFailureLogLevel && i === this.decryptionKeys.length - 1) {
-          Logger.logByLevel(this.parseFailureLogLevel, 'Failed to parse JWT token : %s : %s', err.message, tokenString);
+          Logger.logByLevel(this.parseFailureLogLevel, 'Failed to parse JWT token : %s : %s', err['message'], tokenString);
         }
         rval = null;
       }

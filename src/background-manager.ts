@@ -115,7 +115,7 @@ export class BackgroundManager {
         rval.push(tmp);
       } catch (err) {
         Logger.error('Error processing %j : %s', entries[i], err);
-        rval.push(err.message);
+        rval.push(err['message']);
       }
 
       if (fireStartMessage) {

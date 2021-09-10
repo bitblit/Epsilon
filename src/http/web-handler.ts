@@ -59,7 +59,7 @@ export class WebHandler {
       await BuiltInFilters.combineFilters(fCtx, filterChain);
     } catch (err) {
       // Convert to an epsilon error
-      const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
+      const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err as Error);
       fCtx.result = ResponseUtil.errorResponse(wrapper);
       try {
         await BuiltInFilters.combineFilters(fCtx, procConfig.errorFilters);
