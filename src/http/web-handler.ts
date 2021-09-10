@@ -60,7 +60,7 @@ export class WebHandler {
     } catch (err) {
       // Convert to an epsilon error
       const wrapper: EpsilonHttpError = EpsilonHttpError.wrapError(err);
-      fCtx.result = ResponseUtil.errorResponse(wrapper.sanitizeErrorForPublicIfDefaultSet(null));
+      fCtx.result = ResponseUtil.errorResponse(wrapper);
       try {
         await BuiltInFilters.combineFilters(fCtx, procConfig.errorFilters);
       } catch (convErr) {

@@ -71,17 +71,6 @@ export class EpsilonHttpError<T = void> extends Error {
     return !!this._wrappedError;
   }
 
-  public sanitizeErrorForPublicIfDefaultSet(defaultErrorMessage?: string): EpsilonHttpError<T> {
-    let rval: EpsilonHttpError<T> = this;
-    if (rval && defaultErrorMessage) {
-      rval = Object.assign({}, rval);
-      Object.setPrototypeOf(rval, EpsilonHttpError.prototype);
-      rval.errors = [defaultErrorMessage];
-      rval.wrappedError = null;
-    }
-    return rval;
-  }
-
   public static wrapError<T = void>(err: Error): EpsilonHttpError<T> {
     let rval: EpsilonHttpError<T> = null;
     if (EpsilonHttpError.objectIsEpsilonHttpError(err)) {

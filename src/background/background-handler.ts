@@ -23,7 +23,7 @@ export class BackgroundHandler {
   constructor(private cfg: BackgroundConfig, private mgr: BackgroundManager, private modelValidator?: ModelValidator) {
     const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);
     if (cfgErrors.length > 0) {
-      ErrorRatchet.throwFormattedErr('Invalid background config : %j : %j', cfgErrors, cfg);
+      ErrorRatchet.throwFormattedErr('Invalid background config : %j', cfgErrors);
     }
     Logger.silly('Starting Background processor, %d processors', cfg.processors.length);
     this.validator = new BackgroundValidator(cfg, modelValidator);

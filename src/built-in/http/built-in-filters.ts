@@ -8,9 +8,6 @@ import { ResponseUtil } from '../../http/response-util';
 import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { MisconfiguredError } from '../../http/error/misconfigured-error';
-import { BuiltInAuthFilters } from './built-in-auth-filters';
-import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
-import { LogLevelManipulationFilter } from './log-level-manipulation-filter';
 
 export class BuiltInFilters {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -216,8 +213,7 @@ export class BuiltInFilters {
       if (errCode === null || fCtx.result.statusCode === errCode) {
         Logger.warn('Securing outbound error info (was : %j)', fCtx.result.body);
         fCtx.rawResult = new EpsilonHttpError(errorMessage).withHttpStatusCode(fCtx.result.statusCode);
-        fCtx.result.body = JSON.stringify(fCtx.rawResult);
-        fCtx.result.isBase64Encoded = false;
+        fCtx.result = ResponseUtil.errorResponse(fCtx.rawResult);
       }
     }
     return true;
