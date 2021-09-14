@@ -56,7 +56,7 @@ export class BackgroundManager {
     return rval;
   }
 
-  private wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
+  public wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
     const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
       createdEpochMS: new Date().getTime(),
       guid: BackgroundManager.generateBackgroundGuid(),

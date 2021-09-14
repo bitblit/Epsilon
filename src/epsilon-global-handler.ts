@@ -16,6 +16,7 @@ import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
+import { InternalBackgroundEntry } from './background/internal-background-entry';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -28,6 +29,22 @@ export class EpsilonGlobalHandler {
 
   public get epsilon(): EpsilonInstance {
     return this._epsilon;
+  }
+
+  public async processSingleBackgroundByParts<T>(type: string, data?: T): Promise<boolean> {
+    return this.processSingleBackgroundEntry(this._epsilon.backgroundManager.createEntry(type, data));
+  }
+
+  public async processSingleBackgroundEntry(e: BackgroundEntry<any>): Promise<boolean> {
+    let rval: boolean = false;
+    if (e?.type) {
+      const internal: InternalBackgroundEntry<any> = this._epsilon.backgroundManager.wrapEntryForInternal(e);
+      rval = await this._epsilon.backgroundHandler.processSingleBackgroundEntry(internal);
+      Logger.info('Direct processed request %j to %s', e, rval);
+    } else {
+      Logger.error('Cannot process null/unnamed background entry');
+    }
+    return rval;
   }
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
