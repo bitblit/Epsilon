@@ -16,7 +16,7 @@ export class BuiltInAuthorizers {
 
   public static async simpleLoggedInAuth(authorizationContext: EpsilonAuthorizationContext<any>, evt: APIGatewayEvent): Promise<boolean> {
     // Just verifies that there is a valid token in the request
-    const rval: boolean = authorizationContext?.auth;
+    const rval: boolean = !!authorizationContext?.auth;
     Logger.silly('SimpleLoggedInAuth returning %s for %s', rval, evt.path);
     return rval;
   }
