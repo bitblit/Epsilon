@@ -90,7 +90,7 @@ export class BuiltInAuthFilters {
     if (StringRatchet.trimToNull(fCtx?.routeAndParse?.mapping?.authorizerName)) {
       const authorizer: AuthorizerFunction = fCtx?.authenticators?.get(fCtx.routeAndParse.mapping.authorizerName);
       if (authorizer) {
-        if (!fCtx?.event?.authorization?.auth) {
+        if (fCtx?.event?.authorization?.auth) {
           const allowed: boolean = await authorizer(fCtx.event.authorization, fCtx.event, fCtx.routeAndParse.mapping);
           if (!allowed) {
             throw new ForbiddenError('You lack privileges to see this endpoint');
