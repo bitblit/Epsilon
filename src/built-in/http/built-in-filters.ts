@@ -100,9 +100,13 @@ export class BuiltInFilters {
     return true;
   }
 
-  public static async parseBodyObject(fCtx: FilterChainContext): Promise<boolean> {
+  public static async parseJsonBodyToObject(fCtx: FilterChainContext): Promise<boolean> {
     if (fCtx.event?.body) {
-      fCtx.event.parsedBody = EventUtil.bodyObject(fCtx.event);
+      try {
+        fCtx.event.parsedBody = EventUtil.jsonBodyToObject(fCtx.event);
+      } catch (err) {
+        throw new EpsilonHttpError('Supplied body was not parsable as valid JSON').withHttpStatusCode(400);
+      }
     }
     return true;
   }

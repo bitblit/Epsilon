@@ -80,7 +80,7 @@ export class EventUtil {
     return protocol + '://' + event.requestContext['domainName'] + prefix;
   }
 
-  public static bodyObject(event: APIGatewayEvent): any {
+  public static jsonBodyToObject(event: APIGatewayEvent): any {
     let rval: any = null;
     if (event.body) {
       const contentType = MapRatchet.extractValueFromMapIgnoreCase(event.headers, 'Content-Type') || 'application/octet-stream';
@@ -210,7 +210,7 @@ export class EventUtil {
     if (!!event) {
       if (!!event.httpMethod && 'post' === event.httpMethod.toLowerCase()) {
         if (!!event.path && event.path.endsWith('/graphql')) {
-          const body: any = EventUtil.bodyObject(event);
+          const body: any = EventUtil.jsonBodyToObject(event);
           rval = !!body && !!body['operationName'] && body['operationName'] === 'IntrospectionQuery';
         }
       }

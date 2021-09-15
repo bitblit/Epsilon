@@ -40,7 +40,7 @@ export class RouterUtil {
       (fCtx) => BuiltInFilters.autoRespondToOptionsRequestWithCors(fCtx),
       (fCtx) => BuiltInFilters.ensureEventMaps(fCtx),
       (fCtx) => LogLevelManipulationFilter.setLogLevelForTransaction(fCtx),
-      (fCtx) => BuiltInFilters.parseBodyObject(fCtx),
+      (fCtx) => BuiltInFilters.parseJsonBodyToObject(fCtx),
       (fCtx) => BuiltInFilters.fixStillEncodedQueryParams(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
