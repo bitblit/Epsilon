@@ -16,7 +16,7 @@ export class BuiltInAuthorizers {
 
   public static async simpleLoggedInAuth(authorizationContext: EpsilonAuthorizationContext<any>, evt: APIGatewayEvent): Promise<boolean> {
     // Just verifies that there is a valid token in the request
-    const rval: boolean = authorizationContext?.auth?.auth;
+    const rval: boolean = authorizationContext?.auth;
     Logger.silly('SimpleLoggedInAuth returning %s for %s', rval, evt.path);
     return rval;
   }
@@ -29,7 +29,7 @@ export class BuiltInAuthorizers {
     requiredRoleAllOf: string[] = null
   ): Promise<boolean> {
     let rval: boolean = true;
-    const token: CommonJwtToken<any> = authorizationContext?.auth?.auth;
+    const token: CommonJwtToken<any> = authorizationContext?.auth;
     if (token) {
       if (requiredRoleOneOf) {
         requiredRoleOneOf.forEach((r) => {
