@@ -10,7 +10,7 @@ export class BuiltInAuthorizers {
     evt: APIGatewayEvent
   ): Promise<boolean> {
     // Just logs the request but does nothing else
-    Logger.debug('Auth requested for %s : %j', evt.path, authorizationContext?.auth?.auth);
+    Logger.debug('Auth requested for %s : %j', evt.path, authorizationContext?.auth);
     return true;
   }
 
