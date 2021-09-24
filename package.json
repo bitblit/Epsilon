@@ -56,7 +56,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.16.1030",
+    "@bitblit/ratchet": "0.16.1039",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.4",
@@ -83,7 +83,7 @@
   },
   "peerDependencies": {
     "@types/aws-lambda": "8.10.83",
-    "aws-sdk": "2.987.0"
+    "aws-sdk": "2.994.0"
   },
   "devDependencies": {
     "@fluffy-spoon/substitute": "1.208.0",
@@ -96,7 +96,7 @@
     "@typescript-eslint/parser": "4.31.0",
     "apollo-server-lambda": "2.21.0",
     "graphql": "15.5.0",
-    "aws-sdk": "2.987.0",
+    "aws-sdk": "2.994.0",
     "barrelsby": "2.2.0",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
