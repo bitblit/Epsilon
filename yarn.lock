@@ -553,10 +553,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@0.16.1039":
-  version "0.16.1039"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1039.tgz#fb506879d9907f77eb6930dc76c312397a1cbb7f"
-  integrity sha512-HT5pcTc/zBU3hXy2MON47GYFDzNxUfDRv2tY1ekOuMJUnpzdMMAl4Omu5g6bqD2bGYKK863iOZkOvUS3a5bcYg==
+"@bitblit/ratchet@0.16.1045":
+  version "0.16.1045"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1045.tgz#fb5cb6aab3c3017039e50cf0f833c0251bf15f82"
+  integrity sha512-oXtClaIjW0V0ZCTJSOUwnsCBRMUBGre5AYgSX3w2aOBWDvT7yuDEu7Qqb2f/Uk6JxQCCmf4tkWBlt2EyOewOug==
   dependencies:
     lodash "4.17.21"
     luxon "2.0.2"
@@ -918,10 +918,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/aws-lambda@8.10.83":
-  version "8.10.83"
-  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.83.tgz#66db06cedb7476e860e8655e4387fd2e4385433a"
-  integrity sha512-7YsLv/B8rF7K7jYAGmYBxLq3QU+hQV7qNJBMcSCmJCTcXuzoTKGBX8d4v9CsVs0SOKBSAErXG7rtk8jVxiP30g==
+"@types/aws-lambda@8.10.84":
+  version "8.10.84"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.84.tgz#b1f391ceeb6908b28d8416d93f27afe8d1348d4e"
+  integrity sha512-5V78eLtmN0d4RA14hKDwcsMQRl3JotQJlhGFDBo/jdE2TyDFRaYwB/UmMUC4SzhSvRGn+YMkh7jGPnXi8COAng==
 
 "@types/aws-lambda@^8.10.31":
   version "8.10.40"
@@ -1642,10 +1642,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@2.994.0:
-  version "2.994.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.994.0.tgz#5715fd0ad6a713634fb1817883b7fe451e627620"
-  integrity sha512-NBGY9IgE3EsIkIhylR6pwVx9ETrVZ6fCzd7/Ptzjx7Ccw4L2sMhl4EiBAW2sp5M7PZz5DnEQHdAQstqmdxggaQ==
+aws-sdk@2.1007.0:
+  version "2.1007.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1007.0.tgz#f50f69db535d3e30b4706420ed0061d9f5eafcdc"
+  integrity sha512-I/o2R7RTh6NGRilsBrJHg7r9WprU9EavozZ43qMQcppaLAeZrECBbGfpfRyhfrj7885+KS+WOu1SGn6bsSd2VQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -4775,10 +4775,10 @@ run-parallel@^1.1.9:
   resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.1.9.tgz#c9dd3a7cf9f4b2c4b6244e173a6ed866e61dd679"
   integrity sha512-DEqnSRTDw/Tc3FXf49zedI638Z9onwUotBMiUFKmrO2sdFKIbXamXGQ3Axd4qgphxKB4kw/qP1w5kTxnfU1B9Q==
 
-rxjs@7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.3.0.tgz#39fe4f3461dc1e50be1475b2b85a0a88c1e938c6"
-  integrity sha512-p2yuGIg9S1epc3vrjKf6iVb3RCaAYjYskkO+jHIaV0IjOPlJop4UnodOoFb2xeNwlguqLYvGw1b1McillYb5Gw==
+rxjs@7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.4.0.tgz#a12a44d7eebf016f5ff2441b87f28c9a51cebc68"
+  integrity sha512-7SQDi7xeTMCJpqViXh8gL/lebcwlp3d831F05+9B44A4B0WfsEwUQHR64gsH1kvJ+Ep/J9K2+n1hVl1CsGN23w==
   dependencies:
     tslib "~2.1.0"
 
