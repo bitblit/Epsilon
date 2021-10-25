@@ -85,7 +85,7 @@ export class BackgroundManager {
         // Guard against bad entries up front
         const params = {
           DelaySeconds: 0,
-          MessageBody: JSON.stringify(entry),
+          MessageBody: JSON.stringify(wrapped),
           MessageGroupId: entry.type,
           QueueUrl: this.awsConfig.queueUrl,
         };
@@ -148,7 +148,7 @@ export class BackgroundManager {
         Logger.info('Fire immediately (remote) : %j ', entry);
         const toWrite: any = {
           type: EpsilonConstants.BACKGROUND_SNS_IMMEDIATE_RUN_FLAG,
-          backgroundEntry: entry,
+          backgroundEntry: wrapped,
         };
         const msg: string = JSON.stringify(toWrite);
         const snsId: string = await this.writeMessageToSnsTopic(msg);
@@ -213,7 +213,7 @@ export class BackgroundManager {
 
   public static generateBackgroundGuid(targetEpochMS: number = new Date().getTime()): string {
     const dt: DateTime = DateTime.fromMillis(targetEpochMS);
-    return dt.toFormat('yyyy-MM-dd-') + StringRatchet.createType4Guid();
+    return dt.toFormat('yyyy-MM-dd-HH-mm-ss-') + StringRatchet.createType4Guid();
   }
 
   public static backgroundGuidToPath(prefix: string, guid: string): string {
