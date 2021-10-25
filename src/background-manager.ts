@@ -77,10 +77,10 @@ export class BackgroundManager {
     let rval: string = null;
     try {
       const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
+      rval = wrapped.guid;
       if (this.localMode) {
         Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
         this._localBus.next(wrapped);
-        rval = wrapped.guid;
       } else {
         // Guard against bad entries up front
         const params = {
@@ -98,7 +98,7 @@ export class BackgroundManager {
           Logger.silly('FireResult : %s', fireResult);
         }
 
-        rval = result.MessageId;
+        Logger.info('Background process %s using message id %s', rval, result.MessageId);
       }
     } catch (err) {
       Logger.error('Failed to add entry to queue: %s', err, err);
@@ -138,10 +138,10 @@ export class BackgroundManager {
   public async fireImmediateProcessRequest<T>(entry: BackgroundEntry<T>): Promise<string> {
     let rval: string = null;
     const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
+    rval = wrapped.guid;
     if (this.localMode) {
       Logger.info('Fire immediately (local) : %j ', entry);
       this.localBus().next(wrapped);
-      rval = wrapped.guid;
     } else {
       try {
         // Guard against bad entries up front
@@ -151,8 +151,8 @@ export class BackgroundManager {
           backgroundEntry: entry,
         };
         const msg: string = JSON.stringify(toWrite);
-        rval = await this.writeMessageToSnsTopic(msg);
-        Logger.debug('Wrote message : %s : %s', msg, rval);
+        const snsId: string = await this.writeMessageToSnsTopic(msg);
+        Logger.debug('Background guid %s Wrote message : %s to SNS : %s', rval, msg, snsId);
       } catch (err) {
         Logger.error('Failed to fireImmediateProcessRequest : %s', err, err);
       }
