@@ -1,4 +1,4 @@
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger, StopWatch } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from './background-entry';
 import { Context } from 'aws-lambda';
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
@@ -15,6 +15,7 @@ import { BackgroundMetaResponseInternal } from './background-meta-response-inter
 import { S3CacheRatchet } from '@bitblit/ratchet/dist/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
+import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -26,7 +27,8 @@ export class BackgroundHttpAdapterHandler {
   constructor(
     private backgroundConfig: BackgroundConfig,
     private modelValidator: ModelValidator,
-    private backgroundManager: BackgroundManager
+    private backgroundManager: BackgroundManager,
+    private maxWaitInMsForBackgroundJobToStart: number = 10_000
   ) {
     if (this?.backgroundConfig?.s3TransactionLoggingConfig?.s3 && this?.backgroundConfig?.s3TransactionLoggingConfig?.bucket) {
       this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
@@ -61,7 +63,20 @@ export class BackgroundHttpAdapterHandler {
         StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
       if (guid) {
         const path: string = BackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
-        const log: BackgroundTransactionLog = await this.s3TransactionLogCacheRatchet.readCacheFileToObject<BackgroundTransactionLog>(path);
+        const sw: StopWatch = new StopWatch(true);
+        let log: BackgroundTransactionLog = null;
+        while (!log && sw.elapsedMS() < this.maxWaitInMsForBackgroundJobToStart) {
+          log = await this.s3TransactionLogCacheRatchet.readCacheFileToObject<BackgroundTransactionLog>(path);
+          if (!log) {
+            Logger.debug(
+              'No log found yet, waiting 500 ms and retrying (%s of %d waited so far)',
+              sw.dump(),
+              this.maxWaitInMsForBackgroundJobToStart
+            );
+            await PromiseRatchet.wait(500);
+          }
+        }
+
         if (!log) {
           throw new NotFoundError().withFormattedErrorMessage('No background result found for guid %s', guid);
         }
