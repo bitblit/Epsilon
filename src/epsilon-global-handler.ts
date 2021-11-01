@@ -17,6 +17,7 @@ import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
+import { InterApiUtil } from './inter-api/inter-api-util';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -113,6 +114,8 @@ export class EpsilonGlobalHandler {
           } else {
             Logger.info('Queue is now empty, stopping');
           }
+        } else if (this._epsilon.config.interApiConfig && InterApiUtil.isInterApiSnsEvent(event)) {
+          rval = await InterApiUtil.processInterApiEvent(event, this._epsilon.config.interApiConfig, this._epsilon.backgroundManager);
         } else {
           rval = await this.processSnsEvent(event as SNSEvent);
         }

@@ -4,6 +4,7 @@ import { BackgroundHandler } from './background/background-handler';
 import { OpenApiDocument } from './config/open-api/open-api-document';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
+import { InterApiManager } from './inter-api-manager';
 
 /**
  * This interface just wraps up everything that gets created by the config parsing process so that

@@ -33,6 +33,19 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 # Release Notes
 
+## 0.11.x
+
+- Adding concept of inter-api events (Only useful when combining multiple related apis and decoupling)
+
+## 0.10.x
+
+- Deprecated Salt Mine library and moved all handling into Epsilon under "Background" handling
+- Switched HTTP handling to a filter based model
+
+## 0.9.x
+
+- TBD
+
 ## 0.8.x
 
 - Updated core libs

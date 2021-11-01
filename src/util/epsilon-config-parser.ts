@@ -13,6 +13,7 @@ import { WebHandler } from '../http/web-handler';
 import { MisconfiguredError } from '../http/error/misconfigured-error';
 import { BackgroundManager } from '../background-manager';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
+import { InterApiManager } from '../inter-api-manager';
 
 export class EpsilonConfigParser {
   // Prevent instantiation

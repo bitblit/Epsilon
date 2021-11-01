@@ -553,10 +553,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@0.16.1045":
-  version "0.16.1045"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1045.tgz#fb5cb6aab3c3017039e50cf0f833c0251bf15f82"
-  integrity sha512-oXtClaIjW0V0ZCTJSOUwnsCBRMUBGre5AYgSX3w2aOBWDvT7yuDEu7Qqb2f/Uk6JxQCCmf4tkWBlt2EyOewOug==
+"@bitblit/ratchet@0.16.1048":
+  version "0.16.1048"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1048.tgz#090ec34bc0d9f1f20e81418d8207841af69e972d"
+  integrity sha512-h9/OUqwlWOPOAuzVake3vZZSCxIy1sNYr7XnTNBY+ZR2g5uVZhyBhXo3MLTJtUkUik6e9EYf2RGYiF0yYiIPlg==
   dependencies:
     lodash "4.17.21"
     luxon "2.0.2"
@@ -1649,10 +1649,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@2.1007.0:
-  version "2.1007.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1007.0.tgz#f50f69db535d3e30b4706420ed0061d9f5eafcdc"
-  integrity sha512-I/o2R7RTh6NGRilsBrJHg7r9WprU9EavozZ43qMQcppaLAeZrECBbGfpfRyhfrj7885+KS+WOu1SGn6bsSd2VQ==
+aws-sdk@2.1018.0:
+  version "2.1018.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1018.0.tgz#6ceb079c00e4935d23c6dcd5f5d8197b1ebc4ed8"
+  integrity sha512-XIZ7X8O//bkwuh7a7CkWt5+ldwFzP1bHpWCI33BdCaW7Q6WFKokvtS8CkHMxgsmqnaQ+YC0PpHzoTdAtXpqxQw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
