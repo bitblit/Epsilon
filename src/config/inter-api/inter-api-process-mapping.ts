@@ -4,7 +4,7 @@
  * task
  */
 export interface InterApiProcessMapping {
-  source: string;
-  type: string;
-  backgroundTaskNames: string[];
+  sourceRegex: string;
+  typeRegex: string;
+  backgroundProcessTypes: string[];
 }

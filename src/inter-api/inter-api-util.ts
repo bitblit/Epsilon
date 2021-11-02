@@ -29,8 +29,8 @@ export class InterApiUtil {
     Logger.info('Processing inter-api event : %j', evt);
     const backgroundEntries: BackgroundEntry<any>[] = [];
     cfg.processMappings.forEach((map) => {
-      if (map.source === evt.source && map.type === evt.type) {
-        map.backgroundTaskNames.forEach((taskName) => {
+      if (evt.source.match(map.sourceRegex) && evt.type.match(map.typeRegex)) {
+        map.backgroundProcessTypes.forEach((taskName) => {
           const entry: BackgroundEntry<any> = mgr.createEntry(taskName, evt.data);
           backgroundEntries.push(entry);
         });

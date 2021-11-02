@@ -553,10 +553,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@0.16.1048":
-  version "0.16.1048"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1048.tgz#090ec34bc0d9f1f20e81418d8207841af69e972d"
-  integrity sha512-h9/OUqwlWOPOAuzVake3vZZSCxIy1sNYr7XnTNBY+ZR2g5uVZhyBhXo3MLTJtUkUik6e9EYf2RGYiF0yYiIPlg==
+"@bitblit/ratchet@0.16.1051":
+  version "0.16.1051"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.16.1051.tgz#81dd66c4285b2819a703e8f4dd56c6bbfffa9656"
+  integrity sha512-nDj3Kv58fK/rjxYaIyRtawejQvW/hcr8KutWqZXGWO7+rVqaOvM3CGck8HOIVR90t0x6t+ixyIhPFONnWa8jaQ==
   dependencies:
     lodash "4.17.21"
     luxon "2.0.2"
