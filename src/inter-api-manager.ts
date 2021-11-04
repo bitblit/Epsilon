@@ -8,8 +8,6 @@ import { InterApiAwsConfig } from './config/inter-api/inter-api-aws-config';
  * Handles all submission of events to the inter-api SNS topic (if any)
  */
 export class InterApiManager {
-  private _localMode: boolean = false;
-
   constructor(private _aws: InterApiAwsConfig, private _sns: AWS.SNS) {}
 
   public get config(): InterApiAwsConfig {
@@ -18,15 +16,6 @@ export class InterApiManager {
 
   public get sns(): AWS.SNS {
     return this._sns;
-  }
-
-  public get localMode(): boolean {
-    return this._localMode;
-  }
-
-  public set localMode(newVal: boolean) {
-    Logger.info('Setting local-mode for inter-api processing to : %s', newVal);
-    this._localMode = newVal;
   }
 
   public createEntry<T>(type: string, data?: T): InterApiEntry<T> {
@@ -46,7 +35,7 @@ export class InterApiManager {
 
   public async fireInterApiEvent<T>(entry: InterApiEntry<T>): Promise<string> {
     let rval: string = null;
-    if (this.localMode) {
+    if (this.config.localMode) {
       Logger.info('Fire inter-api event ignored because running locally (was %j)', entry);
       rval = 'INTER-API-IGNORED';
     } else {
