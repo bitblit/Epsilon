@@ -4,7 +4,7 @@ import { EpsilonConstants } from '../epsilon-constants';
 import { InterApiEntry } from './inter-api-entry';
 import { BackgroundManager } from '../background-manager';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from '../background/background-entry';
 import { InterApiConfig } from '../config/inter-api/inter-api-config';
 
@@ -12,12 +12,18 @@ export class InterApiUtil {
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
   public static isInterApiSnsEvent(event: any): boolean {
     let rval: boolean = false;
-    if (event) {
+
+    if (!!event) {
       if (LambdaEventDetector.isSingleSnsEvent(event)) {
         const cast: SNSEvent = event as SNSEvent;
-        rval = cast.Records[0].Sns.Message === EpsilonConstants.INTER_API_SNS_EVENT;
+        const msg: string = cast.Records[0].Sns.Message;
+        if (!!StringRatchet.trimToNull(msg)) {
+          const parsed: any = JSON.parse(msg);
+          rval = !!parsed && parsed['type'] === EpsilonConstants.INTER_API_SNS_EVENT;
+        }
       }
     }
+
     return rval;
   }
 
