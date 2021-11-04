@@ -11,15 +11,21 @@ import { InterApiConfig } from '../config/inter-api/inter-api-config';
 export class InterApiUtil {
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
   public static isInterApiSnsEvent(event: any): boolean {
-    let rval: boolean = false;
+    return !!InterApiUtil.extractEntryFromEvent(event);
+  }
 
-    if (!!event) {
-      if (LambdaEventDetector.isSingleSnsEvent(event)) {
-        const cast: SNSEvent = event as SNSEvent;
+  public static extractEntryFromEvent(evt: SNSEvent): InterApiEntry<any> {
+    let rval: InterApiEntry<any> = null;
+
+    if (!!evt) {
+      if (LambdaEventDetector.isSingleSnsEvent(evt)) {
+        const cast: SNSEvent = evt as SNSEvent;
         const msg: string = cast.Records[0].Sns.Message;
         if (!!StringRatchet.trimToNull(msg)) {
           const parsed: any = JSON.parse(msg);
-          rval = !!parsed && parsed['type'] === EpsilonConstants.INTER_API_SNS_EVENT;
+          if (!!parsed && parsed['type'] === EpsilonConstants.INTER_API_SNS_EVENT) {
+            rval = parsed;
+          }
         }
       }
     }
@@ -27,17 +33,18 @@ export class InterApiUtil {
     return rval;
   }
 
-  public static async processInterApiEvent(evt: InterApiEntry<any>, cfg: InterApiConfig, mgr: BackgroundManager): Promise<string[]> {
+  public static async processInterApiEvent(evt: SNSEvent, cfg: InterApiConfig, mgr: BackgroundManager): Promise<string[]> {
     let rval: string[] = [];
     RequireRatchet.notNullOrUndefined(evt, 'InterApiEntry');
     RequireRatchet.notNullOrUndefined(mgr, 'BackgroundManager');
 
+    const interApiEntry: InterApiEntry<any> = InterApiUtil.extractEntryFromEvent(evt);
     Logger.info('Processing inter-api event : %j', evt);
     const backgroundEntries: BackgroundEntry<any>[] = [];
     cfg.processMappings.forEach((map) => {
-      if (evt.source.match(map.sourceRegex) && evt.type.match(map.typeRegex)) {
+      if (interApiEntry.source.match(map.sourceRegex) && interApiEntry.type.match(map.typeRegex)) {
         map.backgroundProcessTypes.forEach((taskName) => {
-          const entry: BackgroundEntry<any> = mgr.createEntry(taskName, evt.data);
+          const entry: BackgroundEntry<any> = mgr.createEntry(taskName, interApiEntry.data);
           backgroundEntries.push(entry);
         });
       }
