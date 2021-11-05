@@ -24,7 +24,7 @@ export class InterApiUtil {
         if (!!StringRatchet.trimToNull(msg)) {
           const parsed: any = JSON.parse(msg);
           if (!!parsed && parsed['type'] === EpsilonConstants.INTER_API_SNS_EVENT) {
-            rval = parsed;
+            rval = parsed['interApiEvent'];
           }
         }
       }
@@ -42,7 +42,7 @@ export class InterApiUtil {
     Logger.info('Processing inter-api event : %j', evt);
     const backgroundEntries: BackgroundEntry<any>[] = [];
     cfg.processMappings.forEach((map) => {
-      if (interApiEntry.source.match(map.sourceRegex) && interApiEntry.type.match(map.typeRegex)) {
+      if (!map.disabled && interApiEntry.source.match(map.sourceRegex) && interApiEntry.type.match(map.typeRegex)) {
         map.backgroundProcessTypes.forEach((taskName) => {
           const entry: BackgroundEntry<any> = mgr.createEntry(taskName, interApiEntry.data);
           backgroundEntries.push(entry);

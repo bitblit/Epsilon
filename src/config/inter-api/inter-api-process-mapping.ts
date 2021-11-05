@@ -6,5 +6,6 @@
 export interface InterApiProcessMapping {
   sourceRegex: string;
   typeRegex: string;
+  disabled: boolean;
   backgroundProcessTypes: string[];
 }
