@@ -67,6 +67,21 @@ export class BuiltInFilters {
     });
   }
 
+  public static async uriDecodeQueryParams(fCtx: FilterChainContext): Promise<boolean> {
+    if (fCtx?.event?.queryStringParameters) {
+      Object.keys(fCtx.event.queryStringParameters).forEach((k) => {
+        const val: string = fCtx.event.queryStringParameters[k];
+        if (val) {
+          const dec: string = decodeURIComponent(val);
+          if (val !== dec) {
+            fCtx.event.queryStringParameters[k] = dec;
+          }
+        }
+      });
+    }
+    return true;
+  }
+
   public static async fixStillEncodedQueryParams(fCtx: FilterChainContext): Promise<boolean> {
     EventUtil.fixStillEncodedQueryParams(fCtx.event);
     return true;

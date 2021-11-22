@@ -42,6 +42,7 @@ export class RouterUtil {
       (fCtx) => LogLevelManipulationFilter.setLogLevelForTransaction(fCtx),
       (fCtx) => BuiltInFilters.parseJsonBodyToObject(fCtx),
       (fCtx) => BuiltInFilters.fixStillEncodedQueryParams(fCtx),
+      (fCtx) => BuiltInFilters.uriDecodeQueryParams(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsPathParameter(fCtx),
       (fCtx) => BuiltInFilters.disallowStringNullAsQueryStringParameter(fCtx),
       (fCtx) => BuiltInFilters.validateInboundBody(fCtx),
