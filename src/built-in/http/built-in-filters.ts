@@ -72,10 +72,16 @@ export class BuiltInFilters {
       Object.keys(fCtx.event.queryStringParameters).forEach((k) => {
         const val: string = fCtx.event.queryStringParameters[k];
         if (val) {
-          const dec: string = decodeURIComponent(val);
-          if (val !== dec) {
-            fCtx.event.queryStringParameters[k] = dec;
-          }
+          fCtx.event.queryStringParameters[k] = decodeURIComponent(val);
+        }
+      });
+    }
+    if (fCtx?.event?.multiValueQueryStringParameters) {
+      Object.keys(fCtx.event.multiValueQueryStringParameters).forEach((k) => {
+        const val: string[] = fCtx.event.multiValueQueryStringParameters[k];
+        if (val && val.length) {
+          const cleaned: string[] = val.map((v) => decodeURIComponent(v));
+          fCtx.event.multiValueQueryStringParameters[k] = cleaned;
         }
       });
     }
