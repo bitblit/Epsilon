@@ -20,7 +20,7 @@ export class Auth0WebTokenManipulator implements WebTokenManipulator {
   public async parseAndValidateAuth0Token<T>(auth0Token: string, allowExpired: boolean = false): Promise<CommonJwtToken<T>> {
     Logger.debug('Validating Auth0 token : %s', StringRatchet.obscure(auth0Token, 4));
 
-    const fullToken: any = jwt.decode(auth0Token, { complete: true }); // question: do I need complete: true? what about json: true?
+    const fullToken: any = jwt.decode(auth0Token, { complete: true });
     const kid: string = fullToken?.header?.kid;
     const nowEpochSeconds: number = Math.floor(new Date().getTime() / 1000);
 
