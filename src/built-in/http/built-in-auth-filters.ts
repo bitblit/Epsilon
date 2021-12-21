@@ -59,26 +59,35 @@ export class BuiltInAuthFilters {
     return true;
   }
 
-  public static async parseAuthorizationHeader(fCtx: FilterChainContext, webTokenManipulator: WebTokenManipulator): Promise<boolean> {
-    if (!fCtx?.event || !webTokenManipulator) {
+  public static async parseAuthorizationHeader(
+    fCtx: FilterChainContext,
+    webTokenManipulators: WebTokenManipulator | WebTokenManipulator[]
+  ): Promise<boolean> {
+    if (!fCtx?.event || !webTokenManipulators || (Array.isArray(webTokenManipulators) && !webTokenManipulators.length)) {
       throw new MisconfiguredError('Cannot continue - missing event or encryption');
     } else {
       // We dont throw errors if no token - just just decodes, it DOESNT enforce having tokens
       const tokenString: string = EventUtil.extractBearerTokenFromEvent(fCtx?.event);
-      try {
-        // We include the prefix (like 'bearer') in case the token wants to code more than one type
-        const token: CommonJwtToken<any> = await webTokenManipulator.extractTokenFromAuthorizationHeader(tokenString);
-        fCtx.event.authorization = {
-          raw: tokenString,
-          auth: token,
-          error: null,
-        };
-      } catch (err) {
-        fCtx.event.authorization = {
-          raw: tokenString,
-          auth: null,
-          error: err['message'],
-        };
+      if (!Array.isArray(webTokenManipulators)) {
+        webTokenManipulators = [webTokenManipulators];
+      }
+      for (const manipulator of webTokenManipulators) {
+        try {
+          // We include the prefix (like 'bearer') in case the token wants to code more than one type
+          const token: CommonJwtToken<any> = await manipulator.extractTokenFromAuthorizationHeader(tokenString);
+          fCtx.event.authorization = {
+            raw: tokenString,
+            auth: token,
+            error: null,
+          };
+          return true;
+        } catch (err) {
+          fCtx.event.authorization = {
+            raw: tokenString,
+            auth: null,
+            error: err['message'],
+          };
+        }
       }
     }
     return true;
