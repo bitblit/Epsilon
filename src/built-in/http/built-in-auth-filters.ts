@@ -71,7 +71,8 @@ export class BuiltInAuthFilters {
       if (!Array.isArray(webTokenManipulators)) {
         webTokenManipulators = [webTokenManipulators];
       }
-      for (const manipulator of webTokenManipulators) {
+      for (let i = 0; i < webTokenManipulators.length && !fCtx?.event?.authorization?.auth; i++) {
+        const manipulator: WebTokenManipulator = webTokenManipulators[i];
         try {
           // We include the prefix (like 'bearer') in case the token wants to code more than one type
           const token: CommonJwtToken<any> = await manipulator.extractTokenFromAuthorizationHeader(tokenString);
@@ -80,7 +81,6 @@ export class BuiltInAuthFilters {
             auth: token,
             error: null,
           };
-          return true;
         } catch (err) {
           fCtx.event.authorization = {
             raw: tokenString,

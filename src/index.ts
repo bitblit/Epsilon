@@ -63,6 +63,7 @@ export * from './http/event-util';
 export * from './http/response-util';
 export * from './http/web-handler';
 export * from './http/auth/api-gateway-adapter-authentication-handler';
+export * from './http/auth/auth0-web-token-manipulator';
 export * from './http/auth/basic-auth-token';
 export * from './http/auth/google-web-token-manipulator';
 export * from './http/auth/local-web-token-manipulator';

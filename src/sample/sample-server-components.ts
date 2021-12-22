@@ -3,7 +3,7 @@
  * with your own.
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { ApolloServer, gql } from 'apollo-server-lambda';
+import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import fs from 'fs';
@@ -131,12 +131,13 @@ export class SampleServerComponents {
 
     const meta: HttpProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
     meta.timeoutMS = 10_000;
+
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
       cors: {
         origin: '*',
         credentials: true,
       },
-    });
+    } as CreateHandlerOptions);
     meta.errorFilters.push((fCtx) => BuiltInFilters.secureOutboundServerErrorForProduction(fCtx, 'Clean Internal Server Error', 500));
 
     const preFiltersAllowingNull: HttpProcessingConfig = Object.assign({}, meta);
