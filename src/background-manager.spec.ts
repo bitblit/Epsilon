@@ -1,12 +1,12 @@
 import { Logger } from '@bitblit/ratchet/dist/common';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
-import { Substitute } from '@fluffy-spoon/substitute';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
 import { BackgroundManager } from './background-manager';
 import { BackgroundConfig } from './config/background/background-config';
 import { EchoProcessor } from './built-in/background/echo-processor';
 import { NoOpProcessor } from './built-in/background/no-op-processor';
+import { JestRatchet } from '@bitblit/ratchet/dist/jest';
 
 describe('#createEntry', function () {
   let mockSqs;
@@ -20,8 +20,8 @@ describe('#createEntry', function () {
   const noOpProcessor: NoOpProcessor = new NoOpProcessor();
 
   beforeEach(() => {
-    mockSqs = Substitute.for<AWS.SQS>();
-    mockSns = Substitute.for<AWS.SNS>();
+    mockSqs = JestRatchet.mock<AWS.SQS>();
+    mockSns = JestRatchet.mock<AWS.SNS>();
 
     backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],
@@ -38,10 +38,14 @@ describe('#createEntry', function () {
   });
 
   it('Should return queue attributes', async () => {
-    mockSqs
-      .getQueueAttributes({ AttributeNames: ['All'], QueueUrl: backgroundConfig.aws.queueUrl })
-      .promise()
-      .resolves({ Attributes: { ApproximateNumberOfMessages: 1 } });
+    mockSqs.getQueueAttributes.mockReturnValue({
+      promise: () =>
+        Promise.resolve({
+          Attributes: {
+            ApproximateNumberOfMessages: 1,
+          },
+        }),
+    });
 
     const queueAttr: GetQueueAttributesResult = await backgroundMgr.fetchCurrentQueueAttributes();
     const msgCount: number = await backgroundMgr.fetchApproximateNumberOfQueueEntries();
