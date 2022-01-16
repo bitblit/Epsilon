@@ -33,6 +33,10 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 # Release Notes
 
+## 0.12.x
+
+- Updated Apollo (GraphQL) to v3 which may be backwards incompatible
+
 ## 0.11.x
 
 - Adding concept of inter-api events (Only useful when combining multiple related apis and decoupling)
