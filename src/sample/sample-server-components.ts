@@ -4,6 +4,7 @@
  */
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import fs from 'fs';
@@ -63,9 +64,11 @@ export class SampleServerComponents {
 
     const server: ApolloServer = new ApolloServer({
       debug: false,
+      introspection: true,
       typeDefs,
       resolvers,
-      context: async ({ event, context }) => {
+      plugins: [ApolloServerPluginLandingPageGraphQLPlayground({ endpoint: '/graphql' })],
+      context: async ({ event, context, express }) => {
         const authTokenSt: string = EventUtil.extractBearerTokenFromEvent(event);
         const token: CommonJwtToken<any> = null;
         if (!!authTokenSt && authTokenSt.startsWith('Bearer')) {

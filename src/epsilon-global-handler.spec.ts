@@ -4,8 +4,8 @@ import { BackgroundHandler } from './background/background-handler';
 import { BackgroundManager } from './background-manager';
 import { CronConfig } from './config/cron/cron-config';
 import { BackgroundConfig } from './config/background/background-config';
-import { Substitute } from '@fluffy-spoon/substitute';
 import AWS from 'aws-sdk';
+import { JestRatchet } from '@bitblit/ratchet/dist/jest';
 
 // jest.mock('@bitblit/background');
 
@@ -14,8 +14,8 @@ describe('#epsilonGlobalHandler', function () {
   let mockSns;
 
   beforeEach(() => {
-    mockSqs = Substitute.for<AWS.SQS>();
-    mockSns = Substitute.for<AWS.SNS>();
+    mockSqs = JestRatchet.mock<AWS.SQS>();
+    mockSns = JestRatchet.mock<AWS.SNS>();
   });
 
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why
