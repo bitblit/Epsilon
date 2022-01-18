@@ -153,6 +153,11 @@ export class LocalServer {
         response.setHeader(hk, String(proxyResult.headers[hk]));
       });
     }
+    if (proxyResult.multiValueHeaders) {
+      Object.keys(proxyResult.multiValueHeaders).forEach((hk) => {
+        response.setHeader(hk, proxyResult.multiValueHeaders[hk].join(','));
+      });
+    }
     const toWrite: Buffer = proxyResult.isBase64Encoded ? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
 
     response.end(toWrite);
