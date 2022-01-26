@@ -6,7 +6,7 @@ on:
       - 'release-*'
 
 jobs:
-  build-and-deploy-api:
+  build-and-deploy-project-lib:
     runs-on: ubuntu-latest
 
     concurrency:

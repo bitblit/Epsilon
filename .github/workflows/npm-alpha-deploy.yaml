@@ -6,7 +6,7 @@ on:
       - 'alpha-*'
 
 jobs:
-  build-and-deploy-website:
+  build-and-deploy-alpha-lib:
     runs-on: ubuntu-latest
 
     concurrency:

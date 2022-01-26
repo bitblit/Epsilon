@@ -75,7 +75,7 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.5",
     "path-parse": "^1.0.7",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "glob-parent": "^5.1.2",
     "axios": "^0.21.4",
     "nanoid": "^3.2.0",
