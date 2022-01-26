@@ -32,7 +32,7 @@
     "clean": "shx rm -Rf dist",
     "compile-test": "yarn compile && yarn test",
     "test": "jest",
-    "apply-circle": "node node_modules/@bitblit/ratchet/dist/node-only/circleci/apply-circle-ci-env-variables-to-files dist/static/build-properties.json",
+    "apply-ci-vars": "node node_modules/@bitblit/ratchet/dist/node-only/ci/apply-ci-env-variables-to-files github dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
     "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
@@ -57,11 +57,11 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.17.1081",
+    "@bitblit/ratchet": "0.18.1",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.5",
-    "luxon": "2.2.0",
+    "luxon": "2.3.0",
     "cross-fetch": "3.1.4",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
@@ -93,16 +93,16 @@
     "aws-sdk": "2.1048.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.88",
+    "@types/aws-lambda": "8.10.92",
     "@types/js-yaml": "4.0.5",
-    "@types/luxon": "2.0.8",
+    "@types/luxon": "2.0.9",
     "@types/node": "14.14.31",
     "@types/jest": "27.0.1",
     "@typescript-eslint/eslint-plugin": "4.31.0",
     "@typescript-eslint/parser": "4.31.0",
     "apollo-server-lambda": "3.6.1",
     "graphql": "15.8.0",
-    "aws-sdk": "2.1048.0",
+    "aws-sdk": "2.1063.0",
     "barrelsby": "2.3.0",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
@@ -116,8 +116,8 @@
     "pretty-quick": "3.1.1",
     "rimraf": "3.0.2",
     "shx": "0.3.4",
-    "ts-jest": "27.0.5",
-    "ts-node": "10.2.1",
-    "typescript": "4.5.4"
+    "ts-jest": "27.1.3",
+    "ts-node": "10.4.0",
+    "typescript": "4.5.5"
   }
 }

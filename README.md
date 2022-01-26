@@ -33,6 +33,10 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 # Release Notes
 
+## 0.13.x
+
+- Updated AWS, switched to github actions
+
 ## 0.12.x
 
 - Updated Apollo (GraphQL) to v3 which may be backwards incompatible

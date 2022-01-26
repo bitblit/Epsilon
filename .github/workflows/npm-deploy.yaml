@@ -1,0 +1,37 @@
+name: Build and Deploy Production Library
+
+on:
+  push:
+    tags:
+      - 'release-*'
+
+jobs:
+  build-and-deploy-api:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure environment
+        uses: ./.github/workflows/actions/build-env-setup
+
+      - name: Build, Test, Package
+        run: yarn prepare-to-publish
+        shell: bash
+
+      - name: Apply CI vars
+        run: yarn apply-ci-vars
+        shell: bash
+
+      - name: Deploy to NPMJS
+        run: yarn publish --no-git-tag-version --non-interactive --new-version 0.13.$GITHUB_RUN_NUMBER
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Save coverage reports
+        uses: ./.github/workflows/actions/test-report

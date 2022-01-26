@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - 'alpha-*'
+      - 'release-*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: ./.github/workflows/actions/build-env-setup
+
+      - uses: ./.github/workflows/actions/build

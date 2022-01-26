@@ -1,0 +1,28 @@
+name: 'Node Setup'
+description: 'Initial setup for node'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: ./.github/workflows/actions/job-setup
+
+    - name: Setup Node
+      uses: actions/setup-node@v2
+      with:
+        cache: 'yarn'
+        node-version: '14.18.1'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Set Node Memory flags
+      run: echo "NODE_OPTIONS=\"--max_old_space_size=8192\"" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Setup Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    - name: Yarn install
+      run: yarn install --frozen-lockfile
+      shell: bash
