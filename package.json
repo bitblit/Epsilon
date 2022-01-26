@@ -78,6 +78,7 @@
     "node-fetch": "^2.6.1",
     "glob-parent": "^5.1.2",
     "axios": "^0.21.4",
+    "nanoid": "^3.2.0",
     "shelljs": "^0.8.5",
     "follow-redirects": "^1.14.7",
     "ws": "^5.2.3",
