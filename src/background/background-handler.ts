@@ -287,17 +287,20 @@ export class BackgroundHandler {
         dataValidationErrors = this.modelValidator.validate(processorInput.dataSchemaName, e.data, false, false);
       }
       if (dataValidationErrors.length > 0) {
+        await this.cfg.executionListener?.processDataValidationError(processorInput, dataValidationErrors);
         ErrorRatchet.throwFormattedErr('Not processing, data failed validation; entry was %j : errors : %j', e, dataValidationErrors);
       } else {
         let result: any = await processorInput.handleEvent(e.data, this.mgr);
         result = result || 'SUCCESSFUL COMPLETION : NO RESULT RETURNED';
         await this.conditionallyCompleteTransactionLog(e, result, null, sw.elapsedMS());
+        await this.cfg.executionListener?.executionComplete(processorInput, result);
         rval = true;
       }
     } catch (err) {
       Logger.error('Background Process Error: %j : %s', e, err, err);
       await this.conditionallyRunErrorProcessor(e, err);
       await this.conditionallyCompleteTransactionLog(e, null, err, sw.elapsedMS());
+      await this.cfg.executionListener?.executionError(e, err);
     }
     sw.stop();
     Logger.info('Background Process Stop: %j : %s', e, sw.dump());

@@ -2,6 +2,7 @@ import { BackgroundAwsConfig } from './background-aws-config';
 import { BackgroundProcessor } from './background-processor';
 import { BackgroundS3TransactionLoggingConfig } from './background-s3-transaction-logging-config';
 import { BackgroundErrorProcessor } from './background-error-processor';
+import { BackgroundHandlerListener } from '../../background/background-handler-listener';
 
 export interface BackgroundConfig {
   aws: BackgroundAwsConfig;
@@ -12,4 +13,5 @@ export interface BackgroundConfig {
   httpSubmissionPath: string;
   implyTypeFromPathSuffix: boolean;
   processors: BackgroundProcessor<any>[];
+  executionListener?: BackgroundHandlerListener;
 }
