@@ -37,7 +37,8 @@
     "lint-fix": "eslint --fix src/**/*.ts",
     "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
-    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js"
+    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -57,16 +58,16 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.18.1",
+    "@bitblit/ratchet": "0.19.2",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.5",
     "luxon": "2.3.0",
-    "cross-fetch": "3.1.4",
+    "cross-fetch": "3.1.5",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
     "swagger-model-validator": "3.0.21",
-    "rxjs": "7.4.0"
+    "rxjs": "7.5.4"
   },
   "resolutions": {
     "browserslist": "^4.16.6",
@@ -90,35 +91,35 @@
     "semver-regex": "^3.1.3"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.88",
-    "aws-sdk": "2.1048.0"
+    "@types/aws-lambda": "8.10.92",
+    "aws-sdk": "2.1074.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.92",
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "2.0.9",
     "@types/node": "14.14.31",
-    "@types/jest": "27.0.1",
-    "@typescript-eslint/eslint-plugin": "4.31.0",
-    "@typescript-eslint/parser": "4.31.0",
-    "apollo-server-lambda": "3.6.1",
+    "@types/jest": "27.4.0",
+    "@typescript-eslint/eslint-plugin": "5.12.0",
+    "@typescript-eslint/parser": "5.12.0",
+    "apollo-server-lambda": "3.6.3",
     "graphql": "15.8.0",
-    "aws-sdk": "2.1063.0",
-    "barrelsby": "2.3.0",
-    "eslint": "7.32.0",
+    "aws-sdk": "2.1074.0",
+    "barrelsby": "2.3.2",
+    "eslint": "8.9.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-import": "2.24.2",
+    "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "4.0.0",
     "handlebars": "4.7.7",
     "handlebars-layouts": "3.1.4",
-    "husky": "4.3.8",
-    "jest": "27.2.5",
-    "prettier": "2.4.1",
-    "pretty-quick": "3.1.1",
+    "husky": "^7.0.0",
+    "jest": "27.5.1",
+    "prettier": "2.5.1",
+    "pretty-quick": "3.1.3",
     "rimraf": "3.0.2",
     "shx": "0.3.4",
     "ts-jest": "27.1.3",
-    "ts-node": "10.4.0",
+    "ts-node": "10.5.0",
     "typescript": "4.5.5"
   }
 }
