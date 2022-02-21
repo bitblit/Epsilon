@@ -270,9 +270,13 @@ export class BackgroundHandler {
   }
 
   private async fireListenerEvent(event: BackgroundHandlerEvent) {
-    const listeners: BackgroundHandlerListener[] = this.cfg.executionListeners || [];
-    for (const listener of listeners) {
-      await listener.onEvent(event);
+    try {
+      const listeners: BackgroundHandlerListener[] = this.cfg.executionListeners || [];
+      for (const listener of listeners) {
+        await listener.onEvent(event);
+      }
+    } catch (e) {
+      Logger.error('Background Listener : Error during listener processing : %s', e);
     }
   }
 
