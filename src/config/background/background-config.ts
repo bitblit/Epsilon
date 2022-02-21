@@ -13,5 +13,5 @@ export interface BackgroundConfig {
   httpSubmissionPath: string;
   implyTypeFromPathSuffix: boolean;
   processors: BackgroundProcessor<any>[];
-  executionListener?: BackgroundHandlerListener;
+  executionListeners?: BackgroundHandlerListener[];
 }
