@@ -6,10 +6,11 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common';
 import { ContextUtil } from '../../dist';
 
 export class BackgroundDynamoAuditTable implements BackgroundHandlerListener {
-  constructor(private dynamo: DynamoRatchet, private tableName: string, private backgroundQueueName: string) {}
+  constructor(private dynamo: DynamoRatchet, private tableName: string, private env: string, private backgroundQueueName: string) {}
 
   async onEvent(event: BackgroundHandlerEvent): Promise<void> {
     const entry = {
+      env: this.env,
       backgroundQueueName: this.backgroundQueueName,
       requestId: ContextUtil.currentRequestId(),
       guid: event.guid,
