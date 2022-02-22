@@ -7,4 +7,5 @@ export interface BackgroundProcessLogTableEntry {
   state: string;
   timestampEpochMs: number;
   error?: string;
+  params?: any;
 }

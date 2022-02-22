@@ -289,13 +289,15 @@ export class BackgroundHandler {
     await this.conditionallyStartTransactionLog(e);
     let rval: boolean = false;
     try {
+      await this.fireListenerEvent(
+        new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ProcessStarting, e.type, e.data)
+      );
+
       const processorInput: BackgroundProcessor<any> = this.processors.get(e.type);
       if (!processorInput) {
         ErrorRatchet.throwFormattedErr('Found no processor for background entry : %j (returning false)', e);
         await this.fireListenerEvent(new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.NoMatchProcessorName, e.type));
       }
-
-      await this.fireListenerEvent(new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ProcessStarting, e.type));
 
       let dataValidationErrors: string[] = [];
       if (StringRatchet.trimToNull(processorInput.dataSchemaName)) {

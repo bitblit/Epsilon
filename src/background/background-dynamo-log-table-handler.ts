@@ -23,6 +23,8 @@ export class BackgroundDynamoLogTableHandler implements BackgroundHandlerExecuti
     if (event.type == BackgroundHandlerExecutionEventType.DataValidationError) {
       const errors: string[] = event.data;
       entry.error = errors.join(', ');
+    } else if (event.type == BackgroundHandlerExecutionEventType.ProcessStarting) {
+      entry.params = event.data;
     } else if (event.type == BackgroundHandlerExecutionEventType.ExecutionFailedError) {
       const error: Error = event.data;
       entry.error = ErrorRatchet.safeStringifyErr(error);
