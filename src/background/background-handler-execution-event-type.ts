@@ -1,4 +1,4 @@
-export enum BackgroundHandlerEventType {
+export enum BackgroundHandlerExecutionEventType {
   ProcessStarting = 'ProcessStarting',
   DataValidationError = 'DataValidationError',
   ExecutionSuccessfullyComplete = 'ExecutionSuccessfullyComplete',
