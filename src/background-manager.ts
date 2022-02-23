@@ -9,6 +9,8 @@ import { EpsilonConstants } from './epsilon-constants';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { DateTime } from 'luxon';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { PromiseResult, Request } from 'aws-sdk/lib/request';
+import { AWSError } from 'aws-sdk/lib/error';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -91,7 +93,11 @@ export class BackgroundManager {
         };
 
         Logger.info('Add entry to queue (remote) : %j : Start : %s', params, fireStartMessage);
-        const result: AWS.SQS.SendMessageResult = await this.sqs.sendMessage(params).promise();
+        const result: PromiseResult<AWS.SQS.Types.SendMessageResult, AWSError> = await this.sqs.sendMessage(params).promise();
+
+        if (result.$response.error) {
+          Logger.error('Error inserting background entry into SQS queue : %j', result.$response.error);
+        }
 
         if (fireStartMessage) {
           const fireResult: string = await this.fireStartProcessingRequest();
