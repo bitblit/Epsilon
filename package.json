@@ -9,7 +9,8 @@
   ],
   "contributors": [
     "Christopher Weiss <bitblit@gmail.com>",
-    "Lucas Myers <veganbeef@protonmail.com>"
+    "Lucas Myers <veganbeef@protonmail.com>",
+    "Zach Herridge"
   ],
   "husky": {
     "hooks": {
@@ -58,11 +59,11 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.19.2",
+    "@bitblit/ratchet": "0.20.4",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.5",
-    "luxon": "2.3.0",
+    "luxon": "2.3.1",
     "cross-fetch": "3.1.5",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
@@ -93,22 +94,22 @@
   },
   "peerDependencies": {
     "@types/aws-lambda": "8.10.92",
-    "aws-sdk": "2.1074.0"
+    "aws-sdk": "2.1082.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.92",
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "2.0.9",
-    "@types/node": "14.14.31",
-    "@types/jest": "27.4.0",
-    "@typescript-eslint/eslint-plugin": "5.12.0",
-    "@typescript-eslint/parser": "5.12.0",
+    "@types/node": "14.18.1",
+    "@types/jest": "27.4.1",
+    "@typescript-eslint/eslint-plugin": "5.12.1",
+    "@typescript-eslint/parser": "5.12.1",
     "apollo-server-lambda": "3.6.3",
     "graphql": "15.8.0",
-    "aws-sdk": "2.1074.0",
+    "aws-sdk": "2.1082.0",
     "barrelsby": "2.3.2",
     "eslint": "8.9.0",
-    "eslint-config-prettier": "8.3.0",
+    "eslint-config-prettier": "8.4.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "4.0.0",
     "handlebars": "4.7.7",
