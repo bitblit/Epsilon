@@ -9,6 +9,8 @@ import { EpsilonConstants } from './epsilon-constants';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { DateTime } from 'luxon';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { PromiseResult, Request } from 'aws-sdk/lib/request';
+import { AWSError } from 'aws-sdk/lib/error';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -74,34 +76,35 @@ export class BackgroundManager {
   }
 
   public async addEntryToQueue<T>(entry: BackgroundEntry<T>, fireStartMessage?: boolean): Promise<string> {
-    let rval: string = null;
-    try {
-      const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
-      rval = wrapped.guid;
-      if (this.localMode) {
-        Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
-        this._localBus.next(wrapped);
-      } else {
-        // Guard against bad entries up front
-        const params = {
-          DelaySeconds: 0,
-          MessageBody: JSON.stringify(wrapped),
-          MessageGroupId: entry.type,
-          QueueUrl: this.awsConfig.queueUrl,
-        };
+    const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
+    const rval: string = wrapped.guid;
+    if (this.localMode) {
+      Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
+      this._localBus.next(wrapped);
+    } else {
+      // Guard against bad entries up front
+      const params = {
+        DelaySeconds: 0,
+        MessageBody: JSON.stringify(wrapped),
+        MessageGroupId: entry.type,
+        QueueUrl: this.awsConfig.queueUrl,
+      };
 
-        Logger.info('Add entry to queue (remote) : %j : Start : %s', params, fireStartMessage);
-        const result: AWS.SQS.SendMessageResult = await this.sqs.sendMessage(params).promise();
+      Logger.info('Add entry to queue (remote) : %j : Start : %s', params, fireStartMessage);
+      const result: PromiseResult<AWS.SQS.Types.SendMessageResult, AWSError> = await this.sqs.sendMessage(params).promise();
 
-        if (fireStartMessage) {
-          const fireResult: string = await this.fireStartProcessingRequest();
-          Logger.silly('FireResult : %s', fireResult);
-        }
-
-        Logger.info('Background process %s using message id %s', rval, result.MessageId);
+      const error = result?.$response?.error;
+      if (error) {
+        Logger.error('Error inserting background entry into SQS queue : %j', error);
+        throw new Error('Error inserting background entry into SQS queue : ' + error.code + ' : ' + error.name);
       }
-    } catch (err) {
-      Logger.error('Failed to add entry to queue: %s', err, err);
+
+      if (fireStartMessage) {
+        const fireResult: string = await this.fireStartProcessingRequest();
+        Logger.silly('FireResult : %s', fireResult);
+      }
+
+      Logger.info('Background process %s using message id %s', rval, result.MessageId);
     }
     return rval;
   }

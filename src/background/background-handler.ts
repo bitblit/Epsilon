@@ -10,6 +10,9 @@ import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { InternalBackgroundEntry } from './internal-background-entry';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
+import { BackgroundHandlerExecutionEvent } from './background-handler-execution-event';
+import { BackgroundHandlerExecutionListener } from './background-handler-execution-listener';
+import { BackgroundHandlerExecutionEventType } from './background-handler-execution-event-type';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -266,6 +269,17 @@ export class BackgroundHandler {
     }
   }
 
+  private async fireListenerEvent(event: BackgroundHandlerExecutionEvent) {
+    try {
+      const listeners: BackgroundHandlerExecutionListener[] = this.cfg.executionListeners || [];
+      for (const listener of listeners) {
+        await listener.onEvent(event);
+      }
+    } catch (e) {
+      Logger.error('Background Listener : Error during listener processing : %s', e);
+    }
+  }
+
   // CAW 2020-08-08 : I am making processSingle public because there are times (such as when
   // using AWS batch) that you want to be able to run a background command directly, eg, from
   // the command line without needing an AWS-compliant event wrapping it. Thus, this.
@@ -275,10 +289,16 @@ export class BackgroundHandler {
     await this.conditionallyStartTransactionLog(e);
     let rval: boolean = false;
     try {
+      await this.fireListenerEvent(
+        new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ProcessStarting, e.type, e.data)
+      );
+
       const processorInput: BackgroundProcessor<any> = this.processors.get(e.type);
       if (!processorInput) {
         ErrorRatchet.throwFormattedErr('Found no processor for background entry : %j (returning false)', e);
+        await this.fireListenerEvent(new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.NoMatchProcessorName, e.type));
       }
+
       let dataValidationErrors: string[] = [];
       if (StringRatchet.trimToNull(processorInput.dataSchemaName)) {
         // If it was submitted through HTTP this was checked on the API side, but if they used the
@@ -287,17 +307,26 @@ export class BackgroundHandler {
         dataValidationErrors = this.modelValidator.validate(processorInput.dataSchemaName, e.data, false, false);
       }
       if (dataValidationErrors.length > 0) {
+        await this.fireListenerEvent(
+          new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.DataValidationError, e.type, dataValidationErrors)
+        );
         ErrorRatchet.throwFormattedErr('Not processing, data failed validation; entry was %j : errors : %j', e, dataValidationErrors);
       } else {
         let result: any = await processorInput.handleEvent(e.data, this.mgr);
         result = result || 'SUCCESSFUL COMPLETION : NO RESULT RETURNED';
         await this.conditionallyCompleteTransactionLog(e, result, null, sw.elapsedMS());
+        await this.fireListenerEvent(
+          new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ExecutionSuccessfullyComplete, e.type, result)
+        );
         rval = true;
       }
     } catch (err) {
       Logger.error('Background Process Error: %j : %s', e, err, err);
       await this.conditionallyRunErrorProcessor(e, err);
       await this.conditionallyCompleteTransactionLog(e, null, err, sw.elapsedMS());
+      await this.fireListenerEvent(
+        new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ExecutionFailedError, e.type, err)
+      );
     }
     sw.stop();
     Logger.info('Background Process Stop: %j : %s', e, sw.dump());
