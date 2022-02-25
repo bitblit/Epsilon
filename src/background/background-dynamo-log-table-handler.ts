@@ -1,15 +1,20 @@
-import { BackgroundHandlerExecutionListener } from './background-handler-execution-listener';
-import { BackgroundHandlerExecutionEvent } from './background-handler-execution-event';
-import { BackgroundHandlerExecutionEventType } from './background-handler-execution-event-type';
+import { BackgroundExecutionListener } from './background-execution-listener';
+import { BackgroundExecutionEvent } from './background-execution-event';
+import { BackgroundExecutionEventType } from './background-execution-event-type';
 import { DynamoRatchet } from '@bitblit/ratchet/dist/aws';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common';
-import { ContextUtil } from '../../dist';
 import { BackgroundProcessLogTableEntry } from './background-process-log-table-entry';
+import { ContextUtil } from '../util/context-util';
 
-export class BackgroundDynamoLogTableHandler implements BackgroundHandlerExecutionListener {
+/*
+Table should be
+- Hash key : guid
+- Range key: timestamp
+ */
+export class BackgroundDynamoLogTableHandler<T> implements BackgroundExecutionListener<T> {
   constructor(private dynamo: DynamoRatchet, private tableName: string, private env: string, private backgroundQueueName: string) {}
 
-  async onEvent(event: BackgroundHandlerExecutionEvent): Promise<void> {
+  async onEvent(event: BackgroundExecutionEvent<T>): Promise<void> {
     const entry: BackgroundProcessLogTableEntry = {
       env: this.env,
       backgroundQueueName: this.backgroundQueueName,
@@ -20,14 +25,14 @@ export class BackgroundDynamoLogTableHandler implements BackgroundHandlerExecuti
       timestampEpochMs: new Date().getTime(),
     };
 
-    if (event.type == BackgroundHandlerExecutionEventType.DataValidationError) {
-      const errors: string[] = event.data;
-      entry.error = errors.join(', ');
-    } else if (event.type == BackgroundHandlerExecutionEventType.ProcessStarting) {
+    if (event.type == BackgroundExecutionEventType.DataValidationError) {
+      const errors: string[] = event?.errors?.length ? event.errors : ['No-Error']; // DDB does not allow empty sets
+      entry.errors = errors;
+    } else if (event.type == BackgroundExecutionEventType.ProcessStarting) {
       entry.params = event.data;
-    } else if (event.type == BackgroundHandlerExecutionEventType.ExecutionFailedError) {
-      const error: Error = event.data;
-      entry.error = ErrorRatchet.safeStringifyErr(error);
+    } else if (event.type == BackgroundExecutionEventType.ExecutionFailedError) {
+      const errors: string[] = event?.errors?.length ? event.errors : ['No-Error']; // DDB does not allow empty sets
+      entry.errors = errors;
     }
 
     await this.dynamo.simplePut(this.tableName, entry);

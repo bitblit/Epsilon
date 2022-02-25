@@ -6,6 +6,6 @@ export interface BackgroundProcessLogTableEntry {
   processTypeName: string;
   state: string;
   timestampEpochMs: number;
-  error?: string;
+  errors?: string[];
   params?: any;
 }

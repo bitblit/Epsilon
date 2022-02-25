@@ -10,9 +10,9 @@ import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { InternalBackgroundEntry } from './internal-background-entry';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
-import { BackgroundHandlerExecutionEvent } from './background-handler-execution-event';
-import { BackgroundHandlerExecutionListener } from './background-handler-execution-listener';
-import { BackgroundHandlerExecutionEventType } from './background-handler-execution-event-type';
+import { BackgroundExecutionEvent } from './background-execution-event';
+import { BackgroundExecutionListener } from './background-execution-listener';
+import { BackgroundExecutionEventType } from './background-execution-event-type';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -269,14 +269,14 @@ export class BackgroundHandler {
     }
   }
 
-  private async fireListenerEvent(event: BackgroundHandlerExecutionEvent) {
-    try {
-      const listeners: BackgroundHandlerExecutionListener[] = this.cfg.executionListeners || [];
-      for (const listener of listeners) {
+  private async fireListenerEvent(event: BackgroundExecutionEvent<any>) {
+    const listeners: BackgroundExecutionListener<any>[] = this.cfg.executionListeners || [];
+    for (const listener of listeners) {
+      try {
         await listener.onEvent(event);
+      } catch (err) {
+        Logger.error('Failure triggering handler %s : %s', StringRatchet.trimToNull(listener?.label) || 'No-name', err);
       }
-    } catch (e) {
-      Logger.error('Background Listener : Error during listener processing : %s', e);
     }
   }
 
@@ -289,14 +289,22 @@ export class BackgroundHandler {
     await this.conditionallyStartTransactionLog(e);
     let rval: boolean = false;
     try {
-      await this.fireListenerEvent(
-        new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ProcessStarting, e.type, e.data)
-      );
+      await this.fireListenerEvent({
+        type: BackgroundExecutionEventType.ProcessStarting,
+        processorType: e.type,
+        data: e.data,
+        guid: e.guid,
+      });
 
       const processorInput: BackgroundProcessor<any> = this.processors.get(e.type);
       if (!processorInput) {
         ErrorRatchet.throwFormattedErr('Found no processor for background entry : %j (returning false)', e);
-        await this.fireListenerEvent(new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.NoMatchProcessorName, e.type));
+        await this.fireListenerEvent({
+          type: BackgroundExecutionEventType.NoMatchProcessorName,
+          processorType: e.type,
+          data: e.data,
+          guid: e.guid,
+        });
       }
 
       let dataValidationErrors: string[] = [];
@@ -307,26 +315,37 @@ export class BackgroundHandler {
         dataValidationErrors = this.modelValidator.validate(processorInput.dataSchemaName, e.data, false, false);
       }
       if (dataValidationErrors.length > 0) {
-        await this.fireListenerEvent(
-          new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.DataValidationError, e.type, dataValidationErrors)
-        );
+        await this.fireListenerEvent({
+          type: BackgroundExecutionEventType.DataValidationError,
+          processorType: e.type,
+          data: e.data,
+          errors: dataValidationErrors,
+          guid: e.guid,
+        });
         ErrorRatchet.throwFormattedErr('Not processing, data failed validation; entry was %j : errors : %j', e, dataValidationErrors);
       } else {
         let result: any = await processorInput.handleEvent(e.data, this.mgr);
         result = result || 'SUCCESSFUL COMPLETION : NO RESULT RETURNED';
         await this.conditionallyCompleteTransactionLog(e, result, null, sw.elapsedMS());
-        await this.fireListenerEvent(
-          new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ExecutionSuccessfullyComplete, e.type, result)
-        );
+        await this.fireListenerEvent({
+          type: BackgroundExecutionEventType.ExecutionSuccessfullyComplete,
+          processorType: e.type,
+          data: result,
+          guid: e.guid,
+        });
         rval = true;
       }
     } catch (err) {
       Logger.error('Background Process Error: %j : %s', e, err, err);
       await this.conditionallyRunErrorProcessor(e, err);
       await this.conditionallyCompleteTransactionLog(e, null, err, sw.elapsedMS());
-      await this.fireListenerEvent(
-        new BackgroundHandlerExecutionEvent(BackgroundHandlerExecutionEventType.ExecutionFailedError, e.type, err)
-      );
+      await this.fireListenerEvent({
+        type: BackgroundExecutionEventType.ExecutionFailedError,
+        processorType: e.type,
+        data: e.data,
+        errors: [ErrorRatchet.safeStringifyErr(err)],
+        guid: e.guid,
+      });
     }
     sw.stop();
     Logger.info('Background Process Stop: %j : %s', e, sw.dump());
