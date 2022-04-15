@@ -324,10 +324,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@0.20.13":
-  version "0.20.13"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.20.13.tgz#eb8a6b273d12d6159c22b36e7bc45532b3365d08"
-  integrity sha512-6p8gRXAXDgpKYuXwNvZJpJYilNpSylVdarg3iuDY2d5OXhGbtKPVivYKCX8sQg0hfNGkrHiZqcwMmXq5t6566w==
+"@bitblit/ratchet@0.20.15":
+  version "0.20.15"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-0.20.15.tgz#d2f658cf8cc316c182b25cbeecdb9cd840e988d8"
+  integrity sha512-ciEVt4svYOjy2YM7TlZCsG0RhNtoHIbZv00RxUc9cn4Z0S++YnAniIxZnOQJ6O0adOB71vBRQJHJ/MZ2HNZy4w==
   dependencies:
     browserslist "4.19.3"
     lodash "4.17.21"
@@ -1336,10 +1336,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@2.1089.0:
-  version "2.1089.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1089.0.tgz#198ee116f3d6f70cd26cd6f7efa6adba46a54768"
-  integrity sha512-QhawXCxhOLR+SJHuKXNzyx1hd+oA1HqaDRjbeTKUrz7g2KF4EyPWvLwzf1fNaOTPK3Vp3JDYijusdKlfV69efw==
+aws-sdk@2.1116.0:
+  version "2.1116.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1116.0.tgz#1187ab943e6bf730db282afe7950dd2af409cb5b"
+  integrity sha512-36JFrxPPh/fRQWsgGrZZbzTxRu7dq4KyCKKXPxgVMXylEJsG/KEAVMB1f3eq4PiI5eGxYrpt2OkKoMQZQZLjPA==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
