@@ -75,7 +75,7 @@
     "sanitize-html": "^2.3.2",
     "hosted-git-info": "^2.8.9",
     "lodash": "^4.17.21",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "path-parse": "^1.0.7",
     "node-fetch": "^2.6.7",
     "glob-parent": "^5.1.2",
