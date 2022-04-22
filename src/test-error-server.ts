@@ -99,8 +99,11 @@ export class TestErrorServer {
    */
 }
 
+/*
 const testServer: TestErrorServer = new TestErrorServer();
 testServer.runServer().then((res) => {
   Logger.info('Got res server');
   process.exit(0);
 });
+
+ */
