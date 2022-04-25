@@ -35,7 +35,8 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 ## 0.13.x
 
-- Updated AWS, switched to github actions
+- Updated AWS, switched to Github actions
+- Above 0.13.10 added most basic support for ApiGatewayV2 (and Lambda Function Url) handling backwards compatibility
 
 ## 0.12.x
 

@@ -98,6 +98,7 @@ export * from './inter-api/inter-api-util';
 export * from './open-api-util/open-api-doc-modifications';
 export * from './open-api-util/open-api-doc-modifier';
 export * from './open-api-util/yaml-combiner';
+export * from './util/aws-util';
 export * from './util/context-util';
 export * from './util/cron-util';
 export * from './util/epsilon-config-parser';

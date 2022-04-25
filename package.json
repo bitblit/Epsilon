@@ -60,7 +60,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.20.17",
+    "@bitblit/ratchet": "0.20.18",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.5",
@@ -94,8 +94,8 @@
     "ajv": "^6.12.6"
   },
   "peerDependencies": {
-    "@types/aws-lambda": "8.10.93",
-    "aws-sdk": "2.1116.0",
+    "@types/aws-lambda": "8.10.95",
+    "aws-sdk": "2.1120.0",
     "@bitblit/ratchet": "0.20.17"
   },
   "devDependencies": {

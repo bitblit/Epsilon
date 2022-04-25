@@ -18,26 +18,23 @@ export class LocalServer {
   constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888) {}
 
   async runServer(): Promise<boolean> {
-    Logger.info('Starting Epsilon server on port %d', this.port);
-    this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
-    Logger.info('Epsilon server is listening');
+    return new Promise<boolean>((res, rej) => {
+      try {
+        Logger.info('Starting Epsilon server on port %d', this.port);
+        this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+        Logger.info('Epsilon server is listening');
 
-    // Also listen for SIGINT
-    process.on('SIGINT', () => {
-      Logger.info('Caught SIGINT - shutting down test server...');
-      this.aborted = true;
+        // Also listen for SIGINT
+        process.on('SIGINT', () => {
+          Logger.info('Caught SIGINT - shutting down test server...');
+          this.aborted = true;
+          res(true);
+        });
+      } catch (err) {
+        Logger.error('Local server failed : %s', err, err);
+        rej(err);
+      }
     });
-
-    return this.checkFinished();
-  }
-
-  async checkFinished(): Promise<boolean> {
-    if (this.aborted) {
-      return true;
-    } else {
-      const wait: any = await PromiseRatchet.wait(1000);
-      return this.checkFinished();
-    }
   }
 
   async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {

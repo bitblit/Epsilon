@@ -1,5 +1,5 @@
 import { EpsilonRouter } from './route/epsilon-router';
-import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyEventV2, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import Route from 'route-parser';
 import { RouteMapping } from './route/route-mapping';
@@ -12,6 +12,7 @@ import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
+import { AwsUtil } from '../util/aws-util';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -31,7 +32,26 @@ export class WebHandler {
     if (!this.routerConfig) {
       throw new Error('Router config not found');
     }
-    const asExtended: ExtendedAPIGatewayEvent = Object.assign({}, { parsedBody: null, authorization: null }, event);
+    const asExtended: ExtendedAPIGatewayEvent = Object.assign(
+      {},
+      { parsedBody: null, authorization: null, convertedFromV2Event: false },
+      event
+    );
+    const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
+    Logger.setTracePrefix(null); // Just in case it was set
+    return rval;
+  }
+
+  public async v2LambdaHandler(event: APIGatewayProxyEventV2, context: Context): Promise<ProxyResult> {
+    if (!this.routerConfig) {
+      throw new Error('Router config not found');
+    }
+    const conv: APIGatewayEvent = AwsUtil.apiGatewayV2ToApiGatewayV1(event);
+    const asExtended: ExtendedAPIGatewayEvent = Object.assign(
+      {},
+      { parsedBody: null, authorization: null, convertedFromV2Event: true },
+      conv
+    );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
     Logger.setTracePrefix(null); // Just in case it was set
     return rval;

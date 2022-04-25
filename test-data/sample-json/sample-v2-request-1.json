@@ -1,0 +1,44 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/favicon.ico",
+  "rawQueryString": "",
+  "headers": {
+    "sec-fetch-mode": "no-cors",
+    "referer": "https://ixvgtgytd3i72srxpiw3mrhfie0pnjmy.lambda-url.us-east-1.on.aws/",
+    "sec-fetch-site": "same-origin",
+    "accept-language": "en-US,en;q=0.9",
+    "x-forwarded-proto": "https",
+    "x-forwarded-port": "443",
+    "dnt": "1",
+    "x-forwarded-for": "72.193.60.27",
+    "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"100\", \"Google Chrome\";v=\"100\"",
+    "sec-ch-ua-mobile": "?0",
+    "x-amzn-trace-id": "Root=1-6265d0f7-0390277270eaf1ec6494c9d3",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "host": "ixvgtgytd3i72srxpiw3mrhfie0pnjmy.lambda-url.us-east-1.on.aws",
+    "accept-encoding": "gzip, deflate, br",
+    "sec-fetch-dest": "image",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+  },
+  "requestContext": {
+    "accountId": "anonymous",
+    "apiId": "ixvgtgytd3i72srxpiw3mrhfie0pnjmy",
+    "domainName": "ixvgtgytd3i72srxpiw3mrhfie0pnjmy.lambda-url.us-east-1.on.aws",
+    "domainPrefix": "ixvgtgytd3i72srxpiw3mrhfie0pnjmy",
+    "http": {
+      "method": "GET",
+      "path": "/favicon.ico",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "72.193.60.27",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+    },
+    "requestId": "f8fcd765-5c2e-4330-9d9c-acd8603ad7b8",
+    "routeKey": "$default",
+    "stage": "$default",
+    "time": "24/Apr/2022:22:36:39 +0000",
+    "timeEpoch": 1650839799330
+  },
+  "isBase64Encoded": false
+}

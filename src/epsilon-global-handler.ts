@@ -1,4 +1,14 @@
-import { APIGatewayEvent, Context, DynamoDBStreamEvent, ProxyResult, S3CreateEvent, S3Event, ScheduledEvent, SNSEvent } from 'aws-lambda';
+import {
+  APIGatewayEvent,
+  APIGatewayProxyEventV2,
+  Context,
+  DynamoDBStreamEvent,
+  ProxyResult,
+  S3CreateEvent,
+  S3Event,
+  ScheduledEvent,
+  SNSEvent,
+} from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { WebHandler } from './http/web-handler';
 import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
@@ -100,6 +110,14 @@ export class EpsilonGlobalHandler {
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
           Logger.warn('ALB / API Gateway event, but no handler or disabled');
+        }
+      } else if (LambdaEventDetector.isValidApiGatewayV2WithRequestContextEvent(event)) {
+        Logger.debug('Epsilon: APIGV2: %j', event);
+        const wh: WebHandler = this._epsilon.webHandler;
+        if (wh) {
+          rval = await wh.v2LambdaHandler(event as APIGatewayProxyEventV2, context);
+        } else {
+          Logger.warn('ALB / API Gateway V2 event, but no handler or disabled');
         }
       } else if (LambdaEventDetector.isValidSnsEvent(event)) {
         Logger.debug('Epsilon: SNS: %j', event);
