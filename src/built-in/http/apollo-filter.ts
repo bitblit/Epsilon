@@ -8,6 +8,7 @@ import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { EventUtil } from '../../http/event-util';
 import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/dist/common';
 
 export class ApolloFilter {
   private static CACHE_APOLLO_HANDLER: Handler<APIGatewayProxyEvent, ProxyResult>;
@@ -52,8 +53,6 @@ export class ApolloFilter {
       event.isBase64Encoded = false;
     }
 
-    const x: any = ApolloFilter.CACHE_APOLLO_HANDLER;
-    Logger.info('x:%s', x);
     const apolloPromise: Promise<ProxyResult> = ApolloFilter.CACHE_APOLLO_HANDLER(event, context, null) || Promise.resolve(null);
 
     // We do this because fully timing out on Lambda is never a good thing
@@ -74,6 +73,13 @@ export class ApolloFilter {
 
     // If we made it here, we didn't time out
     rval = result;
+
+    // Finally, a double check to set the content type correctly if the browser page was shown
+    if (StringRatchet.trimToEmpty(rval?.body).startsWith('<!DOCTYPE html>')) {
+      Logger.info('Forcing content type to html');
+      rval.headers = rval.headers || {};
+      rval.headers['content-type'] = 'text/html';
+    }
     return rval;
   }
 
