@@ -39,12 +39,18 @@ export class CronUtil {
     return !filter || filter.length === 0 || filter.includes(num);
   }
 
-  public static eventMatchesEntry(event: ScheduledEvent, entry: AbstractCronEntry, cfg: CronConfig): boolean {
+  public static eventMatchesEntry(
+    event: ScheduledEvent,
+    entry: AbstractCronEntry,
+    cfg: CronConfig,
+    testTimeEpochMS: number = new Date().getTime()
+  ): boolean {
     let rval: boolean = false;
     if (!!event && !!entry && !!cfg.timezone) {
       if (!!event.resources && event.resources.length > 0) {
         const eventSourceName: string = event.resources[0];
-        const nowInTZ: DateTime = DateTime.local().setZone(cfg.timezone);
+        const targetTZ: string = StringRatchet.trimToNull(entry.overrideTimezone) || cfg.timezone;
+        const nowInTZ: DateTime = DateTime.fromMillis(testTimeEpochMS).setZone(targetTZ);
         rval = !entry.eventFilter || entry.eventFilter.test(eventSourceName);
         rval = rval && CronUtil.numberMatchesFilter(nowInTZ.minute, entry.minuteFilter);
         rval = rval && CronUtil.numberMatchesFilter(nowInTZ.hour, entry.hourFilter);

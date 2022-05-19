@@ -1,6 +1,8 @@
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
 import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
+import { CliRatchet } from '@bitblit/ratchet/dist/node-only/common/cli-ratchet';
+import net from 'net';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -12,31 +14,63 @@ export class TestErrorServer {
   constructor(private port: number = 9999) {}
 
   async runServer(): Promise<boolean> {
-    Logger.info('Starting Test Error server on port %d', this.port);
-    this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
-    Logger.info('Test Error server is listening');
+    Logger.info('Starting Test Error net server on port %d', this.port);
 
-    // Also listen for SIGINT
-    process.on('SIGINT', () => {
-      Logger.info('Caught SIGINT - shutting down test server...');
-      this.aborted = true;
-    });
+    return new Promise<boolean>((res, rej) => {
+      const server = new net.Server({});
+      // The server listens to a socket for a client to make a connection request.
+      // Think of a socket as an end point.
+      server.listen(this.port, () => {
+        Logger.info('Server listening for connection requests on socket localhost: %s', this.port);
+      });
 
-    return this.checkFinished();
-  }
+      // When a client requests a connection with the server, the server creates a new
+      // socket dedicated to that client.
+      server.on('connection', async (socket) => {
+        Logger.info('X: A new connection has been established.');
 
-  async checkFinished(): Promise<boolean> {
-    if (this.aborted) {
-      return true;
-    } else {
-      const wait: any = await PromiseRatchet.wait(1000);
+        //await PromiseRatchet.wait(30000);
+        // Now that a TCP connection has been established, the server can send data to
+        // the client by writing to its socket.
+        socket.write('Hello, client.');
+
+        // The server can also receive data from the client by reading from its socket.
+        socket.on('data', (chunk) => {
+          Logger.info('Data received from client: %s', chunk);
+        });
+
+        // When the client requests to end the TCP connection with the server, the server
+        // ends the connection.
+        socket.on('end', () => {
+          Logger.info('Closing connection with the client');
+        });
+
+        // Don't forget to catch error, for your own sake.
+        socket.on('error', (err) => {
+          Logger.info('Error: %s', err);
+        });
+      });
+
+      /*
+      this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+      Logger.info('Test Error server is listening');
+
+      // Also listen for SIGINT
+      process.on('SIGINT', () => {
+        Logger.info('Caught SIGINT - shutting down test server...');
+        this.aborted = true;
+      });
+
       return this.checkFinished();
-    }
+
+       */
+    });
   }
 
   async requestHandler(request: IncomingMessage, response: ServerResponse): Promise<any> {
-    Logger.info('Got request %j - closing socket', request);
-    await PromiseRatchet.wait(3000);
+    Logger.info('Got request %d - closing socket', request);
+    request.setTimeout(100);
+    //await PromiseRatchet.wait(3000);
     response.end('x');
     /*response.socket.end(() => {
       //return null;
@@ -99,11 +133,10 @@ export class TestErrorServer {
    */
 }
 
-/*
-const testServer: TestErrorServer = new TestErrorServer();
-testServer.runServer().then((res) => {
-  Logger.info('Got res server');
-  process.exit(0);
-});
-
- */
+if (CliRatchet.isCalledFromCLI('test-error-server')) {
+  const testServer: TestErrorServer = new TestErrorServer();
+  testServer.runServer().then((res) => {
+    Logger.info('Got res server');
+    process.exit(0);
+  });
+}

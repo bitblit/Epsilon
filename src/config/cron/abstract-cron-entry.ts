@@ -9,4 +9,9 @@ export interface AbstractCronEntry {
   contextMatchFilter?: RegExp; // If set, the context must match this filter
   contextNoMatchFilter?: RegExp; // If set, the context must NOT match this filter
   // If both match and nomatch are set, the noMatch dominates over match
+
+  // If set, this will be used instead of the timezone in cron-config
+  // This override is to allow you to use a simple timezone like PT for most, while
+  // still scheduling certain things to run in UTC (Not DST switching)
+  overrideTimezone?: string;
 }
