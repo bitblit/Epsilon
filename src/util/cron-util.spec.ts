@@ -118,4 +118,52 @@ describe('#cronUtil', function () {
     expect(match1).toBeFalsy();
     expect(match2).toBeTruthy();
   });
+
+  it('should match day of month filters', async () => {
+    const sEvent: ScheduledEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+    );
+    const cfg: CronConfig = {
+      context: 'prod',
+      timezone: 'etc/utc',
+      entries: [], // only works since this isn't checked
+    };
+
+    const entry1: AbstractCronEntry = {};
+
+    //Timestamp in milliseconds: 1652931000000
+    //Date and time (GMT): Thursday, May 19, 2022 3:30:00 AM
+    const testTimestampEpochMS: number = 1652931000000;
+
+    const dayOfMonth: AbstractCronEntry = {
+      dayOfMonthFilter: [19],
+    };
+
+    const matchDay: boolean = CronUtil.eventMatchesEntry(sEvent, dayOfMonth, cfg, testTimestampEpochMS);
+    expect(matchDay).toBeTruthy();
+  });
+
+  it('should match month of year filter', async () => {
+    const sEvent: ScheduledEvent = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+    );
+    const cfg: CronConfig = {
+      context: 'prod',
+      timezone: 'etc/utc',
+      entries: [], // only works since this isn't checked
+    };
+
+    const entry1: AbstractCronEntry = {};
+
+    //Timestamp in milliseconds: 1652931000000
+    //Date and time (GMT): Thursday, May 19, 2022 3:30:00 AM
+    const testTimestampEpochMS: number = 1652931000000;
+
+    const monthOfYear: AbstractCronEntry = {
+      monthOfYearFilter: [5],
+    };
+
+    const matchMonth: boolean = CronUtil.eventMatchesEntry(sEvent, monthOfYear, cfg, testTimestampEpochMS);
+    expect(matchMonth).toBeTruthy();
+  });
 });

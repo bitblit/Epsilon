@@ -56,7 +56,7 @@ export class CronUtil {
         rval = rval && CronUtil.numberMatchesFilter(nowInTZ.hour, entry.hourFilter);
         rval = rval && CronUtil.numberMatchesFilter(nowInTZ.weekday, entry.dayOfWeekFilter);
         rval = rval && CronUtil.numberMatchesFilter(nowInTZ.day, entry.dayOfMonthFilter);
-        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.month + 1, entry.monthOfYearFilter);
+        rval = rval && CronUtil.numberMatchesFilter(nowInTZ.month, entry.monthOfYearFilter);
         rval = rval && (!entry.contextMatchFilter || entry.contextMatchFilter.test(StringRatchet.trimToEmpty(cfg.context)));
         rval = rval && (!entry.contextNoMatchFilter || !entry.contextNoMatchFilter.test(StringRatchet.trimToEmpty(cfg.context)));
       }

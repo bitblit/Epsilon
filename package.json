@@ -60,7 +60,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.20.19",
+    "@bitblit/ratchet": "0.20.20",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.0.5",
