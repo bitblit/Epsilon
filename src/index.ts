@@ -27,6 +27,7 @@ export * from './built-in/background/echo-processor';
 export * from './built-in/background/log-and-enqueue-echo-processor';
 export * from './built-in/background/log-message-background-error-processor';
 export * from './built-in/background/no-op-processor';
+export * from './built-in/background/retry-processor';
 export * from './built-in/http/apollo-filter';
 export * from './built-in/http/built-in-auth-filters';
 export * from './built-in/http/built-in-authorizers';
