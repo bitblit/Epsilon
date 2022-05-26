@@ -10,7 +10,7 @@ export class RetryProcessor implements BackgroundProcessor<any> {
   constructor(private delegate: BackgroundProcessor<any>, private opts: RetryProcessorOptions) {}
 
   public get typeName(): string {
-    return StringRatchet.trimToNull(this.opts?.typePrefix) + this.delegate.typeName + StringRatchet.trimToNull(this.opts?.typeSuffix);
+    return StringRatchet.trimToEmpty(this.opts?.typePrefix) + this.delegate.typeName + StringRatchet.trimToEmpty(this.opts?.typeSuffix);
   }
 
   public async handleEvent(data: any, mgr: BackgroundManager): Promise<void> {
