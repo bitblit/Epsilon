@@ -11,4 +11,6 @@ export interface EpsilonApiStackProps extends StackProps {
   lambdaSecurityGroupIds: string[];
   vpcSubnetIds: string[];
   vpcId: string;
+
+  extraEnvironmentalVars: Record<string, string>;
 }

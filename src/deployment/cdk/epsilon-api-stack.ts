@@ -47,7 +47,7 @@ export class EpsilonApiStack extends Stack {
 
     const interApiGenericEventTopic: Topic = new Topic(this, id + 'InterApiTopic');
 
-    const env: Record<string, any> = {
+    const epsilonEnv: Record<string, string> = {
       AWS_REGION: StringRatchet.safeString(Stack.of(this).region),
       AWS_AVAILABILITY_ZONES: StringRatchet.safeString(JSON.stringify(Stack.of(this).availabilityZones)),
       EPSILON_BACKGROUND_SQS_QUEUE_URL: StringRatchet.safeString(workQueue.queueUrl),
@@ -58,6 +58,7 @@ export class EpsilonApiStack extends Stack {
       EPSILON_LIB_BUILD_BRANCH_OR_TAG: StringRatchet.safeString(EpsilonBuildProperties.buildBranchOrTag),
       EPSILON_LIB_BUILD_VERSION: StringRatchet.safeString(EpsilonBuildProperties.buildVersion),
     };
+    const env: Record<string, string> = Object.assign({}, props.extraEnvironmentalVars || {}, epsilonEnv);
 
     // Then build the Batch compute stuff...
     const ecsRole = new Role(this, id + 'AwsEcsRole', {
@@ -128,6 +129,7 @@ export class EpsilonApiStack extends Stack {
 
     const batchEnvVars: any[] = EpsilonStackUtil.toEnvironmentVariables([
       env,
+      props.extraEnvironmentalVars || {},
       {
         EPSILON_RUNNING_IN_AWS_BATCH: true,
       },
