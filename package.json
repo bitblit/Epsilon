@@ -96,7 +96,8 @@
   "peerDependencies": {
     "@types/aws-lambda": "8.10.97",
     "aws-sdk": "2.1138.0",
-    "@bitblit/ratchet": "0.20.17"
+    "@bitblit/ratchet": "0.20.17",
+    "aws-cdk-lib": "2.27.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.97",
@@ -106,8 +107,8 @@
     "@types/jest": "27.5.1",
     "@typescript-eslint/eslint-plugin": "5.25.0",
     "@typescript-eslint/parser": "5.25.0",
-    "aws-cdk-lib": "2.23.0",
-    "constructs": "10.1.5",
+    "aws-cdk-lib": "2.27.0",
+    "constructs": "10.1.26",
     "apollo-server-lambda": "3.6.3",
     "graphql": "15.8.0",
     "aws-sdk": "2.1138.0",
