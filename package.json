@@ -24,7 +24,7 @@
   },
   "config": {},
   "scripts": {
-    "prepare-to-publish": "yarn clean-compile && yarn run apply-ci-vars && yarn remove-compiled-tests",
+    "prepare-to-publish": "yarn run apply-ci-vars && yarn clean-compile && yarn remove-compiled-tests",
     "copy-static-files": "shx cp -R src/static dist",
     "clean-compile": "yarn run clean && yarn run generate-barrels && yarn run compile",
     "compile": "tsc && yarn copy-static-files",
