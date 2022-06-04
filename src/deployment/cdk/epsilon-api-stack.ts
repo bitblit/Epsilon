@@ -21,6 +21,7 @@ import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonStackUtil } from './epsilon-stack-util';
 import { EpsilonApiStackProps } from './epsilon-api-stack-props';
+import { EpsilonBuildProperties } from '../../epsilon-build-properties';
 
 export class EpsilonApiStack extends Stack {
   public apiDomain: string;
@@ -47,11 +48,15 @@ export class EpsilonApiStack extends Stack {
     const interApiGenericEventTopic: Topic = new Topic(this, id + 'InterApiTopic');
 
     const env: Record<string, any> = {
-      REGION: StringRatchet.safeString(Stack.of(this).region),
-      AVAILABILITY_ZONES: StringRatchet.safeString(JSON.stringify(Stack.of(this).availabilityZones)),
+      AWS_REGION: StringRatchet.safeString(Stack.of(this).region),
+      AWS_AVAILABILITY_ZONES: StringRatchet.safeString(JSON.stringify(Stack.of(this).availabilityZones)),
       EPSILON_BACKGROUND_SQS_QUEUE_URL: StringRatchet.safeString(workQueue.queueUrl),
       EPSILON_BACKGROUND_SNS_TOPIC_ARN: StringRatchet.safeString(notificationTopic.topicArn),
       EPSILON_INTER_API_EVENT_TOPIC_ARN: StringRatchet.safeString(interApiGenericEventTopic.topicArn),
+      EPSILON_LIB_BUILD_HASH: StringRatchet.safeString(EpsilonBuildProperties.buildHash),
+      EPSILON_LIB_BUILD_TIME: StringRatchet.safeString(EpsilonBuildProperties.buildHash),
+      EPSILON_LIB_BUILD_BRANCH_OR_TAG: StringRatchet.safeString(EpsilonBuildProperties.buildBranchOrTag),
+      EPSILON_LIB_BUILD_VERSION: StringRatchet.safeString(EpsilonBuildProperties.buildVersion),
     };
 
     // Then build the Batch compute stuff...
