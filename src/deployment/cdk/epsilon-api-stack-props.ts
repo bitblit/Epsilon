@@ -2,7 +2,7 @@ import { StackProps } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export interface EpsilonApiStackProps extends StackProps {
-  batchInstancesEc2KeyPairName: string;
+  batchInstancesEc2KeyPairName?: string;
   additionalPolicyStatements: PolicyStatement[];
 
   dockerFileFolder: string;
@@ -12,5 +12,5 @@ export interface EpsilonApiStackProps extends StackProps {
   vpcSubnetIds: string[];
   vpcId: string;
 
-  extraEnvironmentalVars: Record<string, string>;
+  extraEnvironmentalVars?: Record<string, string>;
 }

@@ -48,8 +48,8 @@ export class EpsilonApiStack extends Stack {
     const interApiGenericEventTopic: Topic = new Topic(this, id + 'InterApiTopic');
 
     const epsilonEnv: Record<string, string> = {
-      AWS_REGION: StringRatchet.safeString(Stack.of(this).region),
-      AWS_AVAILABILITY_ZONES: StringRatchet.safeString(JSON.stringify(Stack.of(this).availabilityZones)),
+      EPSILON_AWS_REGION: StringRatchet.safeString(Stack.of(this).region),
+      EPSILON_AWS_AVAILABILITY_ZONES: StringRatchet.safeString(JSON.stringify(Stack.of(this).availabilityZones)),
       EPSILON_BACKGROUND_SQS_QUEUE_URL: StringRatchet.safeString(workQueue.queueUrl),
       EPSILON_BACKGROUND_SNS_TOPIC_ARN: StringRatchet.safeString(notificationTopic.topicArn),
       EPSILON_INTER_API_EVENT_TOPIC_ARN: StringRatchet.safeString(interApiGenericEventTopic.topicArn),
