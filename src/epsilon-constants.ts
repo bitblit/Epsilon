@@ -2,7 +2,7 @@ import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 export class EpsilonConstants {
-  public static readonly DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME = 'epsilon-global-handler-provider';
+  public static readonly DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME = 'EpsilonGlobalHandlerProvider';
 
   public static readonly AUTH_HEADER_PREFIX: string = 'Bearer ';
   public static readonly AUTH_HEADER_NAME: string = 'Authorization';
