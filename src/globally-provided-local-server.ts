@@ -7,7 +7,7 @@ import { LocalServer } from './local-server';
 
 Logger.setLevelByName('debug');
 Logger.debug('Fetching handler from global');
-const producer: Promise<EpsilonGlobalHandler> = EpsilonConstants.findGloballyAvailableEpsilonGlobalHandler();
+const producer: Promise<EpsilonGlobalHandler> = EpsilonConstants.findDynamicImportEpsilonGlobalHandlerProvider();
 
 if (producer) {
   producer.then((globalHandler: EpsilonGlobalHandler) => {

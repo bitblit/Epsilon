@@ -1,9 +1,8 @@
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 export class EpsilonConstants {
-  private static readonly EPSILON_GLOBAL_HANDLER_PRODUCER_FIELD_NAME = '___epsilonGlobalHandlerProducer';
+  public static readonly DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME = 'epsilon-global-handler-provider';
 
   public static readonly AUTH_HEADER_PREFIX: string = 'Bearer ';
   public static readonly AUTH_HEADER_NAME: string = 'Authorization';
@@ -14,19 +13,14 @@ export class EpsilonConstants {
 
   public static readonly INTER_API_SNS_EVENT = 'EPSILON_INTER_API_EVENT';
 
-  public static applyGloballyAvailableEpsilonGlobalHandlerProducer(producer: () => Promise<EpsilonGlobalHandler>): void {
-    if (!global) {
-      ErrorRatchet.throwFormattedErr('Cannot set global - global does not exist');
+  public static async findDynamicImportEpsilonGlobalHandlerProvider(): Promise<EpsilonGlobalHandler> {
+    const producer: Promise<EpsilonGlobalHandler> = import(EpsilonConstants.DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME);
+    if (!producer) {
+      ErrorRatchet.throwFormattedErr('Could not find handler with name ');
     }
-    global[EpsilonConstants.EPSILON_GLOBAL_HANDLER_PRODUCER_FIELD_NAME] = producer;
+    return producer;
   }
-
-  public static async findGloballyAvailableEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
-    Logger.info('Looking for global epsilon global handler');
-    const rval: EpsilonGlobalHandler = global ? global[EpsilonConstants.EPSILON_GLOBAL_HANDLER_PRODUCER_FIELD_NAME] : null;
-    Logger.debug('Found %s', rval);
-    return rval;
-  }
+  //producer: () => Promise<EpsilonGlobalHandler>
 
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function

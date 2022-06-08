@@ -18,7 +18,7 @@ import { EpsilonConstants } from './epsilon-constants';
 export class AwsBatchCore {
   public static start(): void {
     if (CliRatchet.isCalledFromCLI('aws-batch-cli')) {
-      this.bootstrapRun(EpsilonConstants.findGloballyAvailableEpsilonGlobalHandler())
+      this.bootstrapRun(EpsilonConstants.findDynamicImportEpsilonGlobalHandlerProvider())
         .then(() => {
           Logger.info('Complete');
           process.exit(0);

@@ -14,7 +14,7 @@ import { EpsilonGlobalHandler } from './epsilon-global-handler';
 export const handler = async (event: any, context: Context) => {
   try {
     Logger.debug('Fetching handler from global');
-    const producer: Promise<EpsilonGlobalHandler> = EpsilonConstants.findGloballyAvailableEpsilonGlobalHandler();
+    const producer: Promise<EpsilonGlobalHandler> = EpsilonConstants.findDynamicImportEpsilonGlobalHandlerProvider();
     const epsilonHandler: EpsilonGlobalHandler = producer ? await producer : null;
     if (!epsilonHandler) {
       ErrorRatchet.throwFormattedErr('Cannot continue - no epsilon handler found.  Producer was %s', producer);
