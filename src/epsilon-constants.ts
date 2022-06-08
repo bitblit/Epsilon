@@ -24,10 +24,21 @@ export class EpsilonConstants {
     const fnName: string =
       process.env[EpsilonConstants.EPSILON_FINDER_FUNCTION_NAME_ENV_NAME] || EpsilonConstants.DEFAULT_EPSILON_FINDER_FUNCTION_NAME;
     Logger.debug('Using epsilon finder dynamic import path : %s / %s', importPath, fnName);
-    const dynImport: any = await import(importPath);
+    let dynImport: any = null;
+
+    try {
+      dynImport = await import(importPath);
+    } catch (err) {
+      Logger.error('Failed to pull %s - %s', importPath, err);
+    }
+
     let producer: Promise<EpsilonGlobalHandler>;
     if (dynImport) {
-      const producer: Promise<EpsilonGlobalHandler> = dynImport[fnName]();
+      try {
+        producer = dynImport[fnName]();
+      } catch (err) {
+        Logger.error('Failed to execute function : %s : %s', fnName, err);
+      }
       if (!producer) {
         ErrorRatchet.throwFormattedErr('Failed to run producer');
       }
