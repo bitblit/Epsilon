@@ -54,7 +54,7 @@ export class EpsilonApiStack extends Stack {
       EPSILON_BACKGROUND_SNS_TOPIC_ARN: StringRatchet.safeString(notificationTopic.topicArn),
       EPSILON_INTER_API_EVENT_TOPIC_ARN: StringRatchet.safeString(interApiGenericEventTopic.topicArn),
       EPSILON_LIB_BUILD_HASH: StringRatchet.safeString(EpsilonBuildProperties.buildHash),
-      EPSILON_LIB_BUILD_TIME: StringRatchet.safeString(EpsilonBuildProperties.buildHash),
+      EPSILON_LIB_BUILD_TIME: StringRatchet.safeString(EpsilonBuildProperties.buildTime),
       EPSILON_LIB_BUILD_BRANCH_OR_TAG: StringRatchet.safeString(EpsilonBuildProperties.buildBranchOrTag),
       EPSILON_LIB_BUILD_VERSION: StringRatchet.safeString(EpsilonBuildProperties.buildVersion),
     };
