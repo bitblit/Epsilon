@@ -1,8 +1,10 @@
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 export class EpsilonConstants {
-  public static readonly DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME = 'EpsilonGlobalHandlerProvider';
+  public static readonly EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME = 'EPSILON_FINDER_DYNAMIC_IMPORT_PATH';
+  public static readonly DEFAULT_EPSILON_FINDER_DYNAMIC_IMPORT_PATH = 'epsilon-global-handler-provider';
 
   public static readonly AUTH_HEADER_PREFIX: string = 'Bearer ';
   public static readonly AUTH_HEADER_NAME: string = 'Authorization';
@@ -14,9 +16,19 @@ export class EpsilonConstants {
   public static readonly INTER_API_SNS_EVENT = 'EPSILON_INTER_API_EVENT';
 
   public static async findDynamicImportEpsilonGlobalHandlerProvider(): Promise<EpsilonGlobalHandler> {
-    const producer: Promise<EpsilonGlobalHandler> = import(EpsilonConstants.DEFAULT_DYNAMIC_IMPORT_GLOBAL_HANDLER_PROVIDER_EXPORT_NAME);
-    if (!producer) {
-      ErrorRatchet.throwFormattedErr('Could not find handler with name ');
+    const importPath: string =
+      process.env[EpsilonConstants.EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME] ||
+      EpsilonConstants.DEFAULT_EPSILON_FINDER_DYNAMIC_IMPORT_PATH;
+    Logger.debug('Using epsilon finder dynamic import path : %s', importPath);
+    const dynImport: any = await import(importPath);
+    let producer: Promise<EpsilonGlobalHandler>;
+    if (dynImport) {
+      const producer: Promise<EpsilonGlobalHandler> = dynImport();
+      if (!producer) {
+        ErrorRatchet.throwFormattedErr('Failed to run producer');
+      }
+    } else {
+      ErrorRatchet.throwFormattedErr('Import with that name not found');
     }
     return producer;
   }
