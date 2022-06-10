@@ -99,7 +99,7 @@
   "peerDependencies": {
     "@types/aws-lambda": "8.10.97",
     "aws-sdk": "2.1138.0",
-    "@bitblit/ratchet": "0.20.17",
+    "@bitblit/ratchet": "0.20.20",
     "aws-cdk-lib": "2.27.0"
   },
   "devDependencies": {
