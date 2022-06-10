@@ -36,7 +36,7 @@
     "apply-ci-vars": "node node_modules/@bitblit/ratchet/dist/node-only/ci/apply-ci-env-variables-to-files github src/epsilon-build-properties.ts",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
+    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
     "run-test-error-server": "yarn compile && node dist/test-error-server.js",
     "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js",
