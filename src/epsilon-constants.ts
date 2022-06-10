@@ -19,7 +19,14 @@ export class EpsilonConstants {
 
   private static load<T>(filePath: string, className: string): T {
     // eslint-disable-next-line @typescript-eslint/no-var-frequires
-    return require(filePath)[className];
+    Logger.info('Searching for %s : %s', filePath, __dirname);
+    let rval: T = null;
+    const val = require(filePath);
+    if (val) {
+      Logger.debug('Found %s - pulling object', filePath, Object.keys(val));
+      rval = val[className];
+    }
+    return rval;
   }
 
   public static async findDynamicImportEpsilonGlobalHandlerProvider(): Promise<EpsilonGlobalHandler> {
