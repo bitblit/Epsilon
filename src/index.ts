@@ -5,6 +5,7 @@
 export * from './background-manager';
 export * from './epsilon-build-properties';
 export * from './epsilon-constants';
+export * from './epsilon-global-handler-provider';
 export * from './epsilon-global-handler';
 export * from './epsilon-instance';
 export * from './globally-provided-aws-batch-core';

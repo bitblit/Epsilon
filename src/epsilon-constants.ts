@@ -1,6 +1,6 @@
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { EpsilonGlobalHandlerProvider } from './epsilon-global-handler-provider';
 
 export class EpsilonConstants {
   public static readonly EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME = 'EPSILON_FINDER_DYNAMIC_IMPORT_PATH';
@@ -17,6 +17,11 @@ export class EpsilonConstants {
 
   public static readonly INTER_API_SNS_EVENT = 'EPSILON_INTER_API_EVENT';
 
+  private static load<T>(filePath: string, className: string): T {
+    // eslint-disable-next-line @typescript-eslint/no-var-frequires
+    return require(filePath)[className];
+  }
+
   public static async findDynamicImportEpsilonGlobalHandlerProvider(): Promise<EpsilonGlobalHandler> {
     const importPath: string =
       process.env[EpsilonConstants.EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME] ||
@@ -24,28 +29,15 @@ export class EpsilonConstants {
     const fnName: string =
       process.env[EpsilonConstants.EPSILON_FINDER_FUNCTION_NAME_ENV_NAME] || EpsilonConstants.DEFAULT_EPSILON_FINDER_FUNCTION_NAME;
     Logger.debug('Using epsilon finder dynamic import path : %s / %s', importPath, fnName);
-    let dynImport: any = null;
 
+    let provider: EpsilonGlobalHandlerProvider = null;
     try {
-      dynImport = await import(importPath);
+      provider = this.load(importPath, fnName);
     } catch (err) {
-      Logger.error('Failed to pull %s - %s', importPath, err);
+      Logger.error('Error loading provider : %s / %s : %s', importPath, fnName, err, err);
     }
 
-    let producer: Promise<EpsilonGlobalHandler>;
-    if (dynImport) {
-      try {
-        producer = dynImport[fnName]();
-      } catch (err) {
-        Logger.error('Failed to execute function : %s : %s', fnName, err);
-      }
-      if (!producer) {
-        ErrorRatchet.throwFormattedErr('Failed to run producer');
-      }
-    } else {
-      ErrorRatchet.throwFormattedErr('Import with that name not found');
-    }
-    return producer;
+    return provider ? provider.fetchEpsilonGlobalHandler() : null;
   }
   //producer: () => Promise<EpsilonGlobalHandler>
 
