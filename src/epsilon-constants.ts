@@ -47,9 +47,9 @@ export class EpsilonConstants {
     if (provider) {
       Logger.debug('Type2 is : %s', typeof provider);
       //const fn = provider.fetchEpsilonGlobalHandler();
-      Logger.info('Got2 : %s : %s', provider, typeof provider);
-      rval = await provider();
-      Logger.info('Rval2 is %s', rval);
+      Logger.info('Got3 : %s : %s', provider, typeof provider);
+      rval = provider();
+      Logger.info('Rval3 is %s', rval);
     }
     return rval;
   }
