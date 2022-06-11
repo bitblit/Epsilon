@@ -6,10 +6,10 @@ import { LocalServer } from './local-server';
 
 Logger.setLevelByName('debug');
 Logger.debug('Fetching handler from global');
-const producer: Promise<EpsilonGlobalHandler> = EpsilonGlobalHandler.globalInstanceProvider;
+const producer: () => Promise<EpsilonGlobalHandler> = EpsilonGlobalHandler.globalInstanceProvider;
 
 if (producer) {
-  producer
+  producer()
     .then((globalHandler: EpsilonGlobalHandler) => {
       //globalHandler.epsilon.backgroundManager.localMode = true;
       Logger.info('Starting local server with : %s', globalHandler);
