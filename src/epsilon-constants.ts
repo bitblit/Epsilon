@@ -44,7 +44,13 @@ export class EpsilonConstants {
       Logger.error('Error loading provider : %s / %s : %s', importPath, fnName, err, err);
     }
 
-    return provider ? provider.fetchEpsilonGlobalHandler() : null;
+    let rval: Promise<EpsilonGlobalHandler> = null;
+    if (provider) {
+      Logger.debug('Type is : %s', typeof provider.fetchEpsilonGlobalHandler);
+      rval = provider.fetchEpsilonGlobalHandler();
+      Logger.info('Got : %s', rval);
+    }
+    return rval;
   }
   //producer: () => Promise<EpsilonGlobalHandler>
 
