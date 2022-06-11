@@ -45,11 +45,11 @@ export class EpsilonConstants {
 
     let rval: Promise<EpsilonGlobalHandler> = null;
     if (provider) {
-      Logger.debug('Type is : %s', typeof provider);
+      Logger.debug('Type2 is : %s', typeof provider);
       //const fn = provider.fetchEpsilonGlobalHandler();
-      Logger.info('Got : %s : %s', provider, typeof provider);
+      Logger.info('Got2 : %s : %s', provider, typeof provider);
       rval = await provider();
-      Logger.info('Rval is %s', rval);
+      Logger.info('Rval2 is %s', rval);
     }
     return rval;
   }
