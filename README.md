@@ -49,7 +49,47 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - That VPC should have one or more subnets, and you should know their ids (e.g., **05966bfadca940a88**)
 - That VPC should have a security group, which probably should allow outbound traffic if you want your lambda to talk to the internet. You should know its id (e.g., **02a89a55b0f2cb4ae** - leave off the **sg-** prefix)
 
-##
+## Docker setup
+
+### DockerFile
+
+```
+FROM public.ecr.aws/lambda/nodejs:14
+COPY modules/api/package.json modules/api/gql-codegen.yml modules/api/tsconfig.json ${LAMBDA_TASK_ROOT}/
+COPY modules/api/src ${LAMBDA_TASK_ROOT}/src
+COPY lambda-bootstrap-shell.sh ${LAMBDA_TASK_ROOT}
+RUN npm install -g yarn
+RUN yarn install
+RUN yarn clean-compile
+ENTRYPOINT ["sh","/var/task/lambda-bootstrap-shell.sh"]
+CMD [ "dist/lambda.handler" ]
+```
+
+### Docker Bootstrap Shell
+
+```
+#!/bin/sh
+# Based on the default script in public.ecr.aws/lambda/nodejs:14, which is copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Modifications copyright Christopher Weiss, 2022
+
+if [ -z "${EPSILON_RUNNING_IN_AWS_BATCH}" ]; then
+    if [ $# -lt 1 ]; then
+      echo "entrypoint requires the handler name to be the first argument" 1>&2
+      exit 142
+    fi
+    export _HANDLER="$1"
+
+    RUNTIME_ENTRYPOINT=/var/runtime/bootstrap
+    if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
+      exec /usr/local/bin/aws-lambda-rie $RUNTIME_ENTRYPOINT
+    else
+      exec $RUNTIME_ENTRYPOINT
+    fi
+  else
+    echo "Running Epsilon inside AWS batch - triggering direct $1 $2"
+    exec node dist/aws-batch-cli.js --process $1 --data $2
+fi
+```
 
 # Release Notes
 
