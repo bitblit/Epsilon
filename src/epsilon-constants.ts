@@ -1,6 +1,5 @@
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { EpsilonGlobalHandlerProvider } from './epsilon-global-handler-provider';
 
 export class EpsilonConstants {
   public static readonly EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME = 'EPSILON_FINDER_DYNAMIC_IMPORT_PATH';
@@ -37,7 +36,7 @@ export class EpsilonConstants {
       process.env[EpsilonConstants.EPSILON_FINDER_FUNCTION_NAME_ENV_NAME] || EpsilonConstants.DEFAULT_EPSILON_FINDER_FUNCTION_NAME;
     Logger.debug('Using epsilon finder dynamic import path : %s / %s', importPath, fnName);
 
-    let provider: EpsilonGlobalHandlerProvider = null;
+    let provider: any = null;
     try {
       provider = this.load(importPath, fnName);
     } catch (err) {
@@ -47,8 +46,12 @@ export class EpsilonConstants {
     let rval: Promise<EpsilonGlobalHandler> = null;
     if (provider) {
       Logger.debug('Type is : %s', typeof provider.fetchEpsilonGlobalHandler);
-      rval = provider.fetchEpsilonGlobalHandler();
-      Logger.info('Got : %s', rval);
+      const fn = provider.fetchEpsilonGlobalHandler();
+      if (fn) {
+        Logger.info('Got : %s : %s', fn, typeof fn);
+        rval = await fn();
+        Logger.info('Called fn, got : %s', rval);
+      }
     }
     return rval;
   }
