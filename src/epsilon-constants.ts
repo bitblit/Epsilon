@@ -18,11 +18,11 @@ export class EpsilonConstants {
 
   private static load<T>(filePath: string, className: string): T {
     // eslint-disable-next-line @typescript-eslint/no-var-frequires
-    Logger.info('Searching for %s : %s', filePath, __dirname);
+    Logger.info('Searching for %s : %s : %s', filePath, className, __dirname);
     let rval: T = null;
     const val = require(filePath);
     if (val) {
-      Logger.debug('Found %s - pulling object', filePath, Object.keys(val));
+      Logger.debug('Found %s - pulling object : %j : %s', filePath, Object.keys(val), className);
       rval = val[className];
     }
     return rval;
@@ -45,13 +45,10 @@ export class EpsilonConstants {
 
     let rval: Promise<EpsilonGlobalHandler> = null;
     if (provider) {
-      Logger.debug('Type is : %s', typeof provider.fetchEpsilonGlobalHandler);
-      const fn = provider.fetchEpsilonGlobalHandler();
-      if (fn) {
-        Logger.info('Got : %s : %s', fn, typeof fn);
-        rval = await fn();
-        Logger.info('Called fn, got : %s', rval);
-      }
+      Logger.debug('Type is : %s', typeof provider);
+      //const fn = provider.fetchEpsilonGlobalHandler();
+      Logger.info('Got : %s : %s', provider, typeof provider);
+      rval = await provider();
     }
     return rval;
   }
