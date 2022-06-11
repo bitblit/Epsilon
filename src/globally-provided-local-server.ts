@@ -1,13 +1,12 @@
 import 'reflect-metadata';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { EpsilonConstants } from './epsilon-constants';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { LocalServer } from './local-server';
 
 Logger.setLevelByName('debug');
 Logger.debug('Fetching handler from global');
-const producer: Promise<EpsilonGlobalHandler> = EpsilonConstants.findDynamicImportEpsilonGlobalHandlerProvider();
+const producer: Promise<EpsilonGlobalHandler> = EpsilonGlobalHandler.globalInstanceProvider;
 
 if (producer) {
   producer

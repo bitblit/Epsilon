@@ -51,6 +51,21 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 ## Docker setup
 
+### .dockerignore
+
+In general the docker file needs to be in a folder above both your api and cdk folders, but it must ignore
+the cdk folder in that case or it will infinitely recurse
+
+```
+# Need this here to prevent infinite recusion of cdk folder at least
+.github
+.idea
+.yarn
+.git
+modules/cdk
+node_modules
+```
+
 ### DockerFile
 
 ```
@@ -65,7 +80,7 @@ ENTRYPOINT ["sh","/var/task/lambda-bootstrap-shell.sh"]
 CMD [ "dist/lambda.handler" ]
 ```
 
-### Docker Bootstrap Shell
+### lambda-bootstrap-shell.sh
 
 ```
 #!/bin/sh

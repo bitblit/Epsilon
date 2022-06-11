@@ -33,6 +33,16 @@ import { InterApiUtil } from './inter-api/inter-api-util';
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
  */
 export class EpsilonGlobalHandler {
+  private static GLOBAL_INSTANCE_PROVIDER: Promise<EpsilonGlobalHandler>;
+
+  public static set globalInstanceProvider(input: Promise<EpsilonGlobalHandler>) {
+    EpsilonGlobalHandler.GLOBAL_INSTANCE_PROVIDER = input;
+  }
+
+  public static get globalInstanceProvider(): Promise<EpsilonGlobalHandler> {
+    return EpsilonGlobalHandler.GLOBAL_INSTANCE_PROVIDER;
+  }
+
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
 
