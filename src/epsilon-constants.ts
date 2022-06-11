@@ -49,6 +49,7 @@ export class EpsilonConstants {
       //const fn = provider.fetchEpsilonGlobalHandler();
       Logger.info('Got : %s : %s', provider, typeof provider);
       rval = await provider();
+      Logger.info('Rval is %s', rval);
     }
     return rval;
   }
