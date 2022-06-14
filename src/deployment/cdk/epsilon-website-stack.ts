@@ -130,7 +130,7 @@ export class EpsilonWebsiteStack extends Stack {
       priceClass: PriceClass.PRICE_CLASS_ALL,
       viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       viewerCertificate: {
-        aliases: [props.cloudFrontDomainName],
+        aliases: props.cloudFrontDomainNames,
         props: {
           acmCertificateArn: props.cloudFrontHttpsCertificateArn,
           sslSupportMethod: 'sni-only',
@@ -140,14 +140,18 @@ export class EpsilonWebsiteStack extends Stack {
 
     const cloudfrontDistro: CloudFrontWebDistribution = new CloudFrontWebDistribution(this, id + 'CloudfrontDistro', distributionProps);
 
-    const domain = new RecordSet(this, 'DomainName', {
-      recordType: RecordType.A,
-      recordName: props.cloudFrontDomainName,
-      target: {
-        aliasTarget: new CloudFrontTarget(cloudfrontDistro),
-      },
-      zone: HostedZone.fromLookup(this, id, { domainName: props.cloudFrontDomainName }),
-    });
+    if (props?.cloudFrontDomainNames?.length) {
+      for (let i = 0; i < props.cloudFrontDomainNames.length; i++) {
+        const domain = new RecordSet(this, 'DomainName', {
+          recordType: RecordType.A,
+          recordName: props.cloudFrontDomainNames[i],
+          target: {
+            aliasTarget: new CloudFrontTarget(cloudfrontDistro),
+          },
+          zone: HostedZone.fromLookup(this, id, { domainName: props.cloudFrontDomainNames[i] }),
+        });
+      }
+    }
 
     new BucketDeployment(this, id + 'SiteDeploy', {
       sources: [Source.asset(path.resolve('../website/dist'))],
