@@ -100,7 +100,8 @@
     "@types/aws-lambda": "8.10.97",
     "aws-sdk": "2.1138.0",
     "@bitblit/ratchet": "0.20.20",
-    "aws-cdk-lib": "2.27.0"
+    "aws-cdk-lib": "2.27.0",
+    "constructs": "10.1.26"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.97",
