@@ -42,6 +42,7 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - Any time you are doing something automated like this, I **HIGHLY RECOMMEND** setting up a billing alert first. Don't
   blame me if you skip this step and then accidentally spend $1,000 next month. (https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/monitor_estimated_charges_with_cloudwatch.html)
 - CDK V2 must be bootstrapped in your account (https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+  -- e.g. (**npx cdk bootstrap aws://1234567890/us-east-1**)
 - The user running the CDK deploy needs -LOTS- of AWS privs (I'll list them all later. For now, assume a bunch)
 - Policy **arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole** must exist (this should be there by default)
 - Policy **arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole** must exist (You may have to create it - see https://docs.aws.amazon.com/batch/latest/userguide/service_IAM_role.html)
