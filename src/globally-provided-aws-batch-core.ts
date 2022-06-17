@@ -14,7 +14,7 @@ import { EpsilonConstants } from './epsilon-constants';
  *
  * You are likely to mess it up otherwise.
  */
-SqNPopUZT4nFoFT3S6R7NS2OiM1hCzoe4uIb;
+
 export class AwsBatchCore {
   public static start(): void {
     if (CliRatchet.isCalledFromCLI('aws-batch-cli')) {
