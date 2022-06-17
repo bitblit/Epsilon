@@ -142,7 +142,7 @@ export class EpsilonWebsiteStack extends Stack {
 
     if (props?.cloudFrontDomainNames?.length) {
       for (let i = 0; i < props.cloudFrontDomainNames.length; i++) {
-        const domain = new RecordSet(this, 'DomainName', {
+        const domain = new RecordSet(this, id + 'DomainName-' + props.cloudFrontDomainNames[i], {
           recordType: RecordType.A,
           recordName: props.cloudFrontDomainNames[i],
           target: {
