@@ -153,8 +153,9 @@ export class EpsilonWebsiteStack extends Stack {
       }
     }
 
+    //  [Source.asset(path.resolve('../website/dist'))],
     new BucketDeployment(this, id + 'SiteDeploy', {
-      sources: [Source.asset(path.resolve('../website/dist'))],
+      sources: props.pathsToAssets.map((inPath) => Source.asset(path.resolve(inPath))),
       destinationBucket: websiteBucket,
       distribution: cloudfrontDistro,
       distributionPaths: ['/*'], //'/locales/*', '/index.html', '/manifest.webmanifest', '/service-worker.js']

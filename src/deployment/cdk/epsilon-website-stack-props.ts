@@ -5,4 +5,5 @@ export interface EpsilonWebsiteStackProps extends StackProps {
   cloudFrontHttpsCertificateArn: string;
   cloudFrontDomainNames: string[];
   apiDomainName: string;
+  pathsToAssets: string[];
 }
