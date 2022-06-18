@@ -17,7 +17,7 @@ import {
 import { HostedZone, RecordSet, RecordType } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
-import { EpsilonWebsiteStackProps } from './epsilon-website-stack-props';
+import { EpsilonWebsiteStackProps, EpsilonWebsiteStackPropsRoute53Handling } from './epsilon-website-stack-props';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
@@ -142,16 +142,19 @@ export class EpsilonWebsiteStack extends Stack {
 
     const cloudfrontDistro: CloudFrontWebDistribution = new CloudFrontWebDistribution(this, id + 'CloudfrontDistro', distributionProps);
 
-    if (props?.cloudFrontDomainNames?.length) {
-      for (let i = 0; i < props.cloudFrontDomainNames.length; i++) {
-        const domain = new RecordSet(this, id + 'DomainName-' + props.cloudFrontDomainNames[i], {
-          recordType: RecordType.A,
-          recordName: props.cloudFrontDomainNames[i],
-          target: {
-            aliasTarget: new CloudFrontTarget(cloudfrontDistro),
-          },
-          zone: HostedZone.fromLookup(this, id, { domainName: EpsilonWebsiteStack.extractApexDomain(props.cloudFrontDomainNames[i]) }),
-        });
+    // Have to be able to skip this since SOME people don't do DNS in Route53
+    if (props?.route53Handling === EpsilonWebsiteStackPropsRoute53Handling.Update) {
+      if (props?.cloudFrontDomainNames?.length) {
+        for (let i = 0; i < props.cloudFrontDomainNames.length; i++) {
+          const domain = new RecordSet(this, id + 'DomainName-' + props.cloudFrontDomainNames[i], {
+            recordType: RecordType.A,
+            recordName: props.cloudFrontDomainNames[i],
+            target: {
+              aliasTarget: new CloudFrontTarget(cloudfrontDistro),
+            },
+            zone: HostedZone.fromLookup(this, id, { domainName: EpsilonWebsiteStack.extractApexDomain(props.cloudFrontDomainNames[i]) }),
+          });
+        }
       }
     }
 

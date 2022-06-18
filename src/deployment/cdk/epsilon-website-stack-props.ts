@@ -6,4 +6,10 @@ export interface EpsilonWebsiteStackProps extends StackProps {
   cloudFrontDomainNames: string[];
   apiDomainName: string;
   pathsToAssets: string[];
+  route53Handling: EpsilonWebsiteStackPropsRoute53Handling;
+}
+
+export enum EpsilonWebsiteStackPropsRoute53Handling {
+  Update = 'Update',
+  DoNotUpdate = 'DoNotUpdate',
 }
