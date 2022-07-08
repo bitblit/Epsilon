@@ -50,6 +50,13 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 - That VPC should have one or more subnets, and you should know their ids (e.g., **05966bfadca940a88**)
 - That VPC should have a security group, which probably should allow outbound traffic if you want your lambda to talk to the internet. You should know its id (e.g., **02a89a55b0f2cb4ae** - leave off the **sg-** prefix)
 
+## Api Setup
+
+- Your api layer, in addition to depending on Epsilon, will need:
+  ** "aws-cdk-lib": (Peer version)
+  ** "constructs": (Peer version)
+  \*\* "walk": (Peer version)
+
 ## Docker setup
 
 ### .dockerignore
