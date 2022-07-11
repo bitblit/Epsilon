@@ -66,13 +66,13 @@
     "commander": "5.1.0",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "2.0.5",
+    "jwks-rsa": "2.1.4",
     "luxon": "2.4.0",
     "cross-fetch": "3.1.5",
     "route-parser": "0.0.5",
     "strip-js": "1.2.0",
     "swagger-model-validator": "3.0.21",
-    "rxjs": "7.5.4"
+    "rxjs": "7.5.5"
   },
   "resolutions": {
     "browserslist": "^4.16.6",
@@ -100,8 +100,8 @@
     "@types/aws-lambda": "8.10.101",
     "aws-sdk": "2.1171.0",
     "@bitblit/ratchet": "0.21.22",
-    "aws-cdk-lib": "2.27.0",
-    "constructs": "10.1.26"
+    "aws-cdk-lib": "2.31.1",
+    "constructs": "10.1.43"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.101",
@@ -111,8 +111,8 @@
     "@types/jest": "28.1.4",
     "@typescript-eslint/eslint-plugin": "5.30.5",
     "@typescript-eslint/parser": "5.30.5",
-    "aws-cdk-lib": "2.27.0",
-    "constructs": "10.1.26",
+    "aws-cdk-lib": "2.31.1",
+    "constructs": "10.1.43",
     "apollo-server-lambda": "3.6.3",
     "graphql": "15.8.0",
     "aws-sdk": "2.1171.0",
