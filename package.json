@@ -60,13 +60,13 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.21.22",
+    "@bitblit/ratchet": "0.21.23",
     "reflect-metadata": "0.1.13",
     "clear": "0.1.0",
     "commander": "5.1.0",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "2.1.4",
+    "jwks-rsa": "2.0.5",
     "luxon": "2.4.0",
     "cross-fetch": "3.1.5",
     "route-parser": "0.0.5",
@@ -99,7 +99,7 @@
   "peerDependencies": {
     "@types/aws-lambda": "8.10.101",
     "aws-sdk": "2.1171.0",
-    "@bitblit/ratchet": "0.21.22",
+    "@bitblit/ratchet": "0.21.23",
     "aws-cdk-lib": "2.31.1",
     "constructs": "10.1.43"
   },
