@@ -180,6 +180,14 @@ export class EpsilonApiStack extends Stack {
       environment: env,
     });
 
+    if (props?.webLambdaPingMinutes && props.webLambdaPingMinutes > 0) {
+      // Wire up the cron handler
+      const rule = new Rule(this, id + 'WebKeepaliveRule', {
+        schedule: Schedule.rate(Duration.minutes(Math.ceil(props.webLambdaPingMinutes))),
+      });
+      rule.addTarget(new LambdaFunction(webHandler));
+    }
+
     const fnUrl: FunctionUrl = webHandler.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE,
       cors: {
@@ -190,7 +198,6 @@ export class EpsilonApiStack extends Stack {
       },
     });
 
-    Logger.info('c');
     const bgHandler = new DockerImageFunction(this, id + 'Background', {
       //reservedConcurrentExecutions: 1,
       retryAttempts: 2,

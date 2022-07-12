@@ -13,4 +13,5 @@ export interface EpsilonApiStackProps extends StackProps {
   vpcId: string;
 
   extraEnvironmentalVars?: Record<string, string>;
+  webLambdaPingMinutes?: number;
 }
