@@ -22,8 +22,12 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonStackUtil } from './epsilon-stack-util';
 import { EpsilonApiStackProps } from './epsilon-api-stack-props';
 import { EpsilonBuildProperties } from '../../epsilon-build-properties';
+import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 export class EpsilonApiStack extends Stack {
+  private webHandler: DockerImageFunction;
+  private backgroundHandler: DockerImageFunction;
+
   public apiDomain: string;
 
   constructor(scope: Construct, id: string, props?: EpsilonApiStackProps) {
@@ -168,7 +172,7 @@ export class EpsilonApiStack extends Stack {
     env['EPSILON_AWS_BATCH_JOB_DEFINITION_ARN'] = jobDef.ref;
     env['EPSILON_AWS_BATCH_JOB_QUEUE_ARN'] = batchJobQueue.ref;
 
-    const webHandler: DockerImageFunction = new DockerImageFunction(this, id + 'Web', {
+    this.webHandler = new DockerImageFunction(this, id + 'Web', {
       //reservedConcurrentExecutions: 1,
       retryAttempts: 2,
       //allowAllOutbound: true, // Needs a VPC
@@ -185,10 +189,10 @@ export class EpsilonApiStack extends Stack {
       const rule = new Rule(this, id + 'WebKeepaliveRule', {
         schedule: Schedule.rate(Duration.minutes(Math.ceil(props.webLambdaPingMinutes))),
       });
-      rule.addTarget(new LambdaFunction(webHandler));
+      rule.addTarget(new LambdaFunction(this.webHandler));
     }
 
-    const fnUrl: FunctionUrl = webHandler.addFunctionUrl({
+    const fnUrl: FunctionUrl = this.webHandler.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE,
       cors: {
         allowedOrigins: ['*'],
@@ -198,7 +202,7 @@ export class EpsilonApiStack extends Stack {
       },
     });
 
-    const bgHandler = new DockerImageFunction(this, id + 'Background', {
+    this.backgroundHandler = new DockerImageFunction(this, id + 'Background', {
       //reservedConcurrentExecutions: 1,
       retryAttempts: 2,
       // allowAllOutbound: true,
@@ -210,14 +214,14 @@ export class EpsilonApiStack extends Stack {
       environment: env,
     });
 
-    notificationTopic.addSubscription(new LambdaSubscription(bgHandler));
-    interApiGenericEventTopic.addSubscription(new LambdaSubscription(bgHandler));
+    notificationTopic.addSubscription(new LambdaSubscription(this.backgroundHandler));
+    interApiGenericEventTopic.addSubscription(new LambdaSubscription(this.backgroundHandler));
 
     // Wire up the cron handler
     const rule = new Rule(this, id + 'CronRule', {
       schedule: Schedule.rate(Duration.minutes(1)),
     });
-    rule.addTarget(new LambdaFunction(bgHandler));
+    rule.addTarget(new LambdaFunction(this.backgroundHandler));
 
     this.apiDomain = Lazy.uncachedString({
       produce: (context) => {
@@ -225,5 +229,24 @@ export class EpsilonApiStack extends Stack {
         return { 'Fn::Select': [2, { 'Fn::Split': ['/', resolved] }] } as any;
       },
     });
+  }
+
+  public addEnvironmentVariableToWebHandler(name: string, value: string): void {
+    if (!this.webHandler) {
+      ErrorRatchet.throwFormattedErr('Cannot addEnvironmentVariableToWebHandler - not set yet');
+    }
+    this.webHandler.addEnvironment(name, value);
+  }
+
+  public addEnvironmentVariableToBackgroundHandler(name: string, value: string): void {
+    if (!this.backgroundHandler) {
+      ErrorRatchet.throwFormattedErr('Cannot addEnvironmentVariableToBackgroundHandler - not set yet');
+    }
+    this.backgroundHandler.addEnvironment(name, value);
+  }
+
+  public addEnvironmentVariableToAll(name: string, value: string): void {
+    this.addEnvironmentVariableToWebHandler(name, value);
+    this.addEnvironmentVariableToBackgroundHandler(name, value);
   }
 }
