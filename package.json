@@ -60,7 +60,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "0.21.23",
+    "@bitblit/ratchet": "0.21.25",
     "reflect-metadata": "0.1.13",
     "clear": "0.1.0",
     "commander": "5.1.0",
@@ -99,7 +99,7 @@
   "peerDependencies": {
     "@types/aws-lambda": "8.10.101",
     "aws-sdk": "2.1171.0",
-    "@bitblit/ratchet": "0.21.23",
+    "@bitblit/ratchet": "0.21.25",
     "aws-cdk-lib": "2.31.1",
     "constructs": "10.1.43"
   },
