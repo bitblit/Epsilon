@@ -230,23 +230,4 @@ export class EpsilonApiStack extends Stack {
       },
     });
   }
-
-  public addEnvironmentVariableToWebHandler(name: string, value: string): void {
-    if (!this.webHandler) {
-      ErrorRatchet.throwFormattedErr('Cannot addEnvironmentVariableToWebHandler - not set yet');
-    }
-    this.webHandler.addEnvironment(name, value);
-  }
-
-  public addEnvironmentVariableToBackgroundHandler(name: string, value: string): void {
-    if (!this.backgroundHandler) {
-      ErrorRatchet.throwFormattedErr('Cannot addEnvironmentVariableToBackgroundHandler - not set yet');
-    }
-    this.backgroundHandler.addEnvironment(name, value);
-  }
-
-  public addEnvironmentVariableToAll(name: string, value: string): void {
-    this.addEnvironmentVariableToWebHandler(name, value);
-    this.addEnvironmentVariableToBackgroundHandler(name, value);
-  }
 }
