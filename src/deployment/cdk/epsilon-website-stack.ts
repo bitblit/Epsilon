@@ -25,6 +25,8 @@ export class EpsilonWebsiteStack extends Stack {
   constructor(scope: Construct, id: string, props?: EpsilonWebsiteStackProps) {
     super(scope, id, props);
 
+    const originAccessId: OriginAccessIdentity = new OriginAccessIdentity(this, id + 'OriginAccessId');
+
     const websiteBucket = new Bucket(this, id + 'DeployBucket', {
       bucketName: props.targetBucketName,
       //removalPolicy: RemovalPolicy.DESTROY,
@@ -98,7 +100,6 @@ export class EpsilonWebsiteStack extends Stack {
     //websiteBucket.grantReadWrite(webHandler);
     //websiteBucket.grantReadWrite(bgHandler);
 
-    const originAccessId: OriginAccessIdentity = new OriginAccessIdentity(this, id + 'OriginAccessId');
     const assetSource: SourceConfiguration = {
       s3OriginSource: {
         s3BucketSource: websiteBucket,
