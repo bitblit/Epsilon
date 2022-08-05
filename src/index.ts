@@ -76,6 +76,7 @@ export * from './deployment/cdk/epsilon-api-stack';
 export * from './deployment/cdk/epsilon-stack-util';
 export * from './deployment/cdk/epsilon-website-stack-props';
 export * from './deployment/cdk/epsilon-website-stack';
+export * from './deployment/cdk/simple-additional-s3-website-mapping';
 export * from './http/event-util';
 export * from './http/response-util';
 export * from './http/web-handler';

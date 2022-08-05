@@ -60,6 +60,41 @@ export class EpsilonWebsiteStack extends Stack {
                    */
     });
 
+    const extraBucketAndSource: BucketAndSourceConfiguration[] = (props.simpleAdditionalMappings || []).map((eb) => {
+      const nextBucket = new Bucket(this, eb.bucketName + 'DeployBucket', {
+        bucketName: eb.bucketName,
+        //removalPolicy: RemovalPolicy.DESTROY,
+        //autoDeleteObjects: true,
+        versioned: false,
+        publicReadAccess: false,
+        encryption: BucketEncryption.S3_MANAGED,
+      });
+
+      const nextBS: BucketAndSourceConfiguration = {
+        bucket: nextBucket,
+        sourceConfig: {
+          s3OriginSource: {
+            s3BucketSource: nextBucket,
+            originAccessIdentity: originAccessId,
+          },
+          behaviors: [
+            {
+              pathPattern: eb.pathPattern,
+              isDefaultBehavior: false,
+              compress: true,
+              defaultTtl: Duration.seconds(1), //  Duration.days(100),
+              minTtl: Duration.seconds(1), //Duration.days(90),
+              maxTtl: Duration.seconds(1), //Duration.days(110),
+              forwardedValues: {
+                queryString: false,
+              },
+            },
+          ],
+        },
+      };
+      return nextBS;
+    });
+
     //websiteBucket.grantReadWrite(webHandler);
     //websiteBucket.grantReadWrite(bgHandler);
 
@@ -114,7 +149,7 @@ export class EpsilonWebsiteStack extends Stack {
     const distributionProps: CloudFrontWebDistributionProps = {
       httpVersion: HttpVersion.HTTP2,
       defaultRootObject: 'index.html',
-      originConfigs: [assetSource, apiSource],
+      originConfigs: [assetSource, apiSource, ...extraBucketAndSource.map((s) => s.sourceConfig)],
       errorConfigurations: [
         {
           errorCode: 404,
@@ -174,4 +209,9 @@ export class EpsilonWebsiteStack extends Stack {
     }
     return pieces[pieces.length - 2] + '.' + pieces[pieces.length - 1];
   }
+}
+
+export interface BucketAndSourceConfiguration {
+  bucket: Bucket;
+  sourceConfig: SourceConfiguration;
 }
