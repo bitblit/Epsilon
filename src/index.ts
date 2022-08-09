@@ -11,6 +11,7 @@ export * from './globally-provided-aws-batch-core';
 export * from './globally-provided-handler-lambda';
 export * from './globally-provided-local-server';
 export * from './inter-api-manager';
+export * from './local-container-server';
 export * from './local-server';
 export * from './run-background-process-from-command-line';
 export * from './test-error-server';

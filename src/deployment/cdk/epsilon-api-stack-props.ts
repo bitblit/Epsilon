@@ -14,4 +14,10 @@ export interface EpsilonApiStackProps extends StackProps {
 
   extraEnvironmentalVars?: Record<string, string>;
   webLambdaPingMinutes?: number;
+
+  webMemorySizeMb?: number;
+  backgroundMemorySizeMb?: number;
+
+  webTimeoutSeconds?: number;
+  backgroundTimeoutSeconds?: number;
 }
