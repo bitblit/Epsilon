@@ -28,6 +28,18 @@ export class WebHandler {
     return this.routerConfig;
   }
 
+  public static extractProcessLabel(event: APIGatewayEvent, context: Context): string {
+    const rval: string = 'TBD';
+    // TODO: Impl
+    return rval;
+  }
+
+  public static v2extractProcessLabel(event: APIGatewayProxyEventV2, context: Context): string {
+    const rval: string = 'TBD-V2';
+    // TODO: Impl
+    return rval;
+  }
+
   public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     if (!this.routerConfig) {
       throw new Error('Router config not found');
