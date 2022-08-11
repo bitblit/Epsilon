@@ -100,7 +100,7 @@
   "peerDependencies": {
     "@bitblit/ratchet": "0.22.15-alpha",
     "@types/aws-lambda": "8.10.101",
-    "aws-sdk": "2.1171.0",
+    "aws-sdk": "2.1191.0",
     "aws-cdk-lib": "2.32.1",
     "constructs": "10.1.50"
   },
