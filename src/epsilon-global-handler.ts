@@ -28,7 +28,8 @@ import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { InterApiUtil } from './inter-api/inter-api-util';
-import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/dist/common';
+import { ContextUtil } from './util/context-util';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -36,8 +37,37 @@ import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 export class EpsilonGlobalHandler {
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
+  public static CURRENT_EVENT: any;
 
-  constructor(private _epsilon: EpsilonInstance) {}
+  constructor(private _epsilon: EpsilonInstance) {
+    this.configureDefaultLogger();
+    Logger.info('Default logger configured');
+  }
+
+  public configureDefaultLogger(): void {
+    Logger.changeDefaultOptions(
+      {
+        initialLevel: LoggerLevelName.info,
+        formatType: LogMessageFormatType.StructuredJson,
+        trace: null,
+        globalVars: {
+          ep: '1',
+        },
+        doNotUseConsoleDebug: false,
+        ringBufferSize: 0,
+        preProcessors: [
+          {
+            process: (msg: LogMessage): LogMessage => {
+              msg.params = msg.params || {};
+              msg.params['requestId'] = ContextUtil.currentRequestId();
+              return msg;
+            },
+          },
+        ],
+      },
+      true
+    );
+  }
 
   public get epsilon(): EpsilonInstance {
     return this._epsilon;
@@ -83,6 +113,7 @@ export class EpsilonGlobalHandler {
 
   public async innerLambdaHandler(event: any, context: Context): Promise<any> {
     EpsilonGlobalHandler.CURRENT_CONTEXT = context;
+    EpsilonGlobalHandler.CURRENT_EVENT = event;
     let rval: any = null;
     try {
       if (!this._epsilon) {
@@ -170,6 +201,7 @@ export class EpsilonGlobalHandler {
       rval = false;
     } finally {
       EpsilonGlobalHandler.CURRENT_CONTEXT = null;
+      EpsilonGlobalHandler.CURRENT_EVENT = null;
     }
 
     return rval;
