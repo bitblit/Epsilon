@@ -42,11 +42,11 @@ export class EpsilonGlobalHandler {
   public static CURRENT_PROCESS_LABEL: string;
 
   constructor(private _epsilon: EpsilonInstance) {
-    this.configureDefaultLogger();
+    EpsilonGlobalHandler.configureDefaultLogger();
     Logger.info('Default logger configured');
   }
 
-  public configureDefaultLogger(): void {
+  public static configureDefaultLogger(): void {
     Logger.changeDefaultOptions(
       {
         initialLevel: LoggerLevelName.info,
