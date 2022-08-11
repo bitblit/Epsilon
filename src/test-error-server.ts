@@ -89,7 +89,7 @@ export class TestErrorServer {
       },
     } as Context; //TBD
     const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request, context);
-    const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
+    const logEventLevel: LoggerLevelName = EventUtil.eventIsAGraphQLIntrospection(evt) ? LoggerLevelName.silly : LoggerLevelName.info;
 
     Logger.logByLevel(logEventLevel, 'Processing event: %j', evt);
 

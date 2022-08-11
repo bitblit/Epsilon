@@ -5,8 +5,9 @@
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { SampleServerComponents } from './sample-server-components';
 import { LocalServer } from '../local-server';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
-Logger.setLevelByName('debug');
+Logger.setLevel(LoggerLevelName.debug);
 
 SampleServerComponents.createSampleEpsilonGlobalHandler()
   .then((handler) => {

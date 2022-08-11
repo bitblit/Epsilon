@@ -2,6 +2,7 @@ import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } 
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { SampleServerComponents } from '../sample/sample-server-components';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 describe('#errorToProxyResult', function () {
   /*
@@ -86,7 +87,7 @@ describe('#errorToProxyResult', function () {
       body: null,
     } as APIGatewayEvent;
 
-    Logger.setLevelByName('silly');
+    Logger.setLevel(LoggerLevelName.silly);
     const result: ProxyResult = await inst.epsilon.webHandler.lambdaHandler(evt, {} as Context);
 
     expect(result).toBeTruthy();

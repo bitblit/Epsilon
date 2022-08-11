@@ -20,7 +20,7 @@ describe('#epsilonGlobalHandler', function () {
 
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why
   xit('should verify that cron data functions get executed', async () => {
-    // Logger.setLevelByName('silly');
+    // Logger.setLevel(LoggerLevelName.silly);
     const evt: ScheduledEvent = {
       id: '1',
       version: '1',

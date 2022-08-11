@@ -10,6 +10,7 @@ import { BasicAuthToken } from './auth/basic-auth-token';
 import { Base64Ratchet } from '@bitblit/ratchet/dist/common/base64-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonConstants } from '../epsilon-constants';
+import { EnumRatchet, LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 /**
  * Endpoints about the api itself
@@ -97,10 +98,14 @@ export class EventUtil {
     return rval;
   }
 
-  public static calcLogLevelViaEventOrEnvParam(curLevel: string, event: APIGatewayEvent, rConfig: EpsilonLoggerConfig): string {
-    let rval: string = curLevel;
+  public static calcLogLevelViaEventOrEnvParam(
+    curLevel: LoggerLevelName,
+    event: APIGatewayEvent,
+    rConfig: EpsilonLoggerConfig
+  ): LoggerLevelName {
+    let rval: LoggerLevelName = curLevel;
     if (rConfig && rConfig.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
-      rval = process.env[rConfig.envParamLogLevelName];
+      rval = EnumRatchet.keyToEnum<LoggerLevelName>(LoggerLevelName, process.env[rConfig.envParamLogLevelName]);
       Logger.silly('Found env log level : %s', rval);
     }
     if (
@@ -110,7 +115,7 @@ export class EventUtil {
       event.queryStringParameters &&
       event.queryStringParameters[rConfig.queryParamLogLevelName]
     ) {
-      rval = event.queryStringParameters[rConfig.queryParamLogLevelName];
+      rval = EnumRatchet.keyToEnum<LoggerLevelName>(LoggerLevelName, event.queryStringParameters[rConfig.queryParamLogLevelName]);
       Logger.silly('Found query log level : %s', rval);
     }
     return rval;

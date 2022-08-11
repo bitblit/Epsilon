@@ -28,6 +28,7 @@ import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { InterApiUtil } from './inter-api/inter-api-util';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -90,8 +91,12 @@ export class EpsilonGlobalHandler {
       }
 
       // Setup logging
-      const logLevel: string = EventUtil.calcLogLevelViaEventOrEnvParam(Logger.getLevel(), event, this._epsilon.config.loggerConfig);
-      Logger.setLevelByName(logLevel);
+      const logLevel: LoggerLevelName = EventUtil.calcLogLevelViaEventOrEnvParam(
+        Logger.getLevel(),
+        event,
+        this._epsilon.config.loggerConfig
+      );
+      Logger.setLevel(logLevel);
 
       if (
         this._epsilon.config.loggerConfig &&
@@ -100,7 +105,7 @@ export class EpsilonGlobalHandler {
         event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]
       ) {
         Logger.info('Setting trace prefix to %s', event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]);
-        Logger.setTracePrefix(event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]);
+        Logger.updateTracePrefix(event.queryStringParameters[this._epsilon.config.loggerConfig.queryParamTracePrefixName]);
       }
 
       if (LambdaEventDetector.isValidApiGatewayEvent(event)) {

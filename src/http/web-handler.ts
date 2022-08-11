@@ -38,7 +38,7 @@ export class WebHandler {
       event
     );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
-    Logger.setTracePrefix(null); // Just in case it was set
+    Logger.updateTracePrefix(null); // Just in case it was set
     return rval;
   }
 
@@ -53,7 +53,7 @@ export class WebHandler {
       conv
     );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
-    Logger.setTracePrefix(null); // Just in case it was set
+    Logger.updateTracePrefix(null); // Just in case it was set
     return rval;
   }
 

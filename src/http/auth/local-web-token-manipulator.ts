@@ -5,14 +5,15 @@ import { WebTokenManipulator } from './web-token-manipulator';
 import { UnauthorizedError } from '../error/unauthorized-error';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 /**
  * Service for handling jwt tokens
  */
 export class LocalWebTokenManipulator implements WebTokenManipulator {
   private decryptionKeys: string[];
-  private oldKeyUseLogLevel: string = 'info';
-  private parseFailureLogLevel: string = 'debug';
+  private oldKeyUseLogLevel: LoggerLevelName = LoggerLevelName.info;
+  private parseFailureLogLevel: LoggerLevelName = LoggerLevelName.debug;
 
   constructor(private encryptionKeys: string[], private issuer: string) {
     RequireRatchet.notNullOrUndefined(encryptionKeys, 'encryptionKeys');
@@ -28,12 +29,12 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
     return this;
   }
 
-  public withParseFailureLogLevel(logLevel: string): LocalWebTokenManipulator {
+  public withParseFailureLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator {
     this.parseFailureLogLevel = logLevel;
     return this;
   }
 
-  public withOldKeyUseLogLevel(logLevel: string): LocalWebTokenManipulator {
+  public withOldKeyUseLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator {
     this.oldKeyUseLogLevel = logLevel;
     return this;
   }
@@ -83,7 +84,7 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
     for (let i = 0; i < this.decryptionKeys.length && !rval; i++) {
       try {
         const testKey: string = this.decryptionKeys[i];
-        rval = jwt.verify(tokenString, testKey);
+        rval = jwt.verify(tokenString, testKey) as CommonJwtToken<T>;
         if (rval && !this.encryptionKeys.includes(testKey) && this.oldKeyUseLogLevel) {
           Logger.logByLevel(this.oldKeyUseLogLevel, 'Used old key to decode token : %s', testKey);
         }
