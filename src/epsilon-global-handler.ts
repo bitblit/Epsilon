@@ -48,6 +48,8 @@ export class EpsilonGlobalHandler {
   // This only really works because Node is single-threaded - otherwise need some kind of thread local
   public static CURRENT_CONTEXT: Context;
   public static CURRENT_EVENT: any;
+  public static CURRENT_LOG_VARS: Record<string, string | number | boolean> = {};
+  public static CURRENT_PROCESS_LABEL: string;
 
   constructor(private _epsilon: EpsilonInstance) {
     this.configureDefaultLogger();
@@ -68,10 +70,11 @@ export class EpsilonGlobalHandler {
         preProcessors: [
           {
             process: (msg: LogMessage): LogMessage => {
-              msg.params = msg.params || {};
-              msg.params['requestId'] = ContextUtil.currentRequestId();
+              msg.params = Object.assign({}, msg.params || {}, ContextUtil.fetchLogVariables());
+              msg.params['awsRequestId'] = ContextUtil.currentRequestId();
               msg.params['traceId'] = ContextUtil.currentTraceId();
               msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
+              msg.params['processLbl'] = EpsilonGlobalHandler.CURRENT_PROCESS_LABEL;
               return msg;
             },
           },
@@ -126,6 +129,7 @@ export class EpsilonGlobalHandler {
   public async innerLambdaHandler(event: any, context: Context): Promise<any> {
     EpsilonGlobalHandler.CURRENT_CONTEXT = context;
     EpsilonGlobalHandler.CURRENT_EVENT = event;
+    EpsilonGlobalHandler.CURRENT_LOG_VARS = {};
     let rval: any = null;
     try {
       if (!this._epsilon) {
@@ -155,6 +159,7 @@ export class EpsilonGlobalHandler {
         Logger.debug('Epsilon: APIG: %j', event);
         const wh: WebHandler = this._epsilon.webHandler;
         if (wh) {
+          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'web_' + WebHandler.extractProcessLabel(event as APIGatewayEvent, context);
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
           Logger.warn('ALB / API Gateway event, but no handler or disabled');
@@ -163,6 +168,7 @@ export class EpsilonGlobalHandler {
         Logger.debug('Epsilon: APIGV2: %j', event);
         const wh: WebHandler = this._epsilon.webHandler;
         if (wh) {
+          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'web_' + WebHandler.v2extractProcessLabel(event as APIGatewayProxyEventV2, context);
           rval = await wh.v2LambdaHandler(event as APIGatewayProxyEventV2, context);
         } else {
           Logger.warn('ALB / API Gateway V2 event, but no handler or disabled');
@@ -172,6 +178,7 @@ export class EpsilonGlobalHandler {
         // If background processing is here, it takes precedence
         const sm: BackgroundHandler = this._epsilon.backgroundHandler;
         if (sm && sm.isBackgroundSNSEvent(event)) {
+          // TODO: implement EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'background_' + WebHandler.extractProcessLabel(event, context);
           const procd: number = await sm.processBackgroundSNSEvent(event, context);
           rval = procd;
           if (procd > 0) {
@@ -181,15 +188,19 @@ export class EpsilonGlobalHandler {
             Logger.info('Queue is now empty, stopping');
           }
         } else if (this._epsilon.config.interApiConfig && InterApiUtil.isInterApiSnsEvent(event)) {
+          // TODO: implement EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'interapi_' + WebHandler.extractProcessLabel(event, context);
           rval = await InterApiUtil.processInterApiEvent(event, this._epsilon.config.interApiConfig, this._epsilon.backgroundManager);
         } else {
+          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_sns';
           rval = await this.processSnsEvent(event as SNSEvent);
         }
       } else if (LambdaEventDetector.isValidS3Event(event)) {
+        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_s3';
         Logger.debug('Epsilon: S3: %j', event);
 
         rval = await this.processS3Event(event as S3CreateEvent);
       } else if (LambdaEventDetector.isValidCronEvent(event)) {
+        // TODO: Imple EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'cron_trigger_' + WebHandler.extractProcessLabel(event, context);
         Logger.debug('Epsilon: CRON: %j', event);
         if (!this._epsilon.config.cron) {
           Logger.debug('Skipping - CRON disabled');
@@ -202,10 +213,12 @@ export class EpsilonGlobalHandler {
           );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
+        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_dynamo_';
         Logger.debug('Epsilon: DDB: %j', event);
 
         rval = await this.processDynamoDbEvent(event as DynamoDBStreamEvent);
       } else {
+        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'unrecognized_evt';
         Logger.warn('Unrecognized event, returning false : %j', event);
       }
     } catch (err) {
@@ -214,6 +227,8 @@ export class EpsilonGlobalHandler {
     } finally {
       EpsilonGlobalHandler.CURRENT_CONTEXT = null;
       EpsilonGlobalHandler.CURRENT_EVENT = null;
+      EpsilonGlobalHandler.CURRENT_LOG_VARS = null;
+      EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = null;
     }
 
     return rval;

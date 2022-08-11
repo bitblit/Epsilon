@@ -30,4 +30,20 @@ export class ContextUtil {
     const caller: number = NumberRatchet.safeNumber(evt?.headers?.['x-trace-depth'], 0);
     return caller + 1;
   }
+
+  public static currentProcessLabel(): string {
+    return EpsilonGlobalHandler.CURRENT_PROCESS_LABEL;
+  }
+
+  public static addLogVariable(name: string, val: string | number | boolean): void {
+    EpsilonGlobalHandler.CURRENT_LOG_VARS[name] = val;
+  }
+
+  public static fetchLogVariable(name: string): string | number | boolean {
+    return EpsilonGlobalHandler.CURRENT_LOG_VARS?.[name];
+  }
+
+  public static fetchLogVariables(): Record<string, string | number | boolean> {
+    return Object.assign({}, EpsilonGlobalHandler.CURRENT_LOG_VARS || {});
+  }
 }
