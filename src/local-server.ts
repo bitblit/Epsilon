@@ -1,12 +1,12 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { DateTime } from 'luxon';
 import qs from 'querystring';
 import { EventUtil } from './http/event-util';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -45,7 +45,7 @@ export class LocalServer {
       },
     } as Context; //TBD
     const evt: APIGatewayEvent = await LocalServer.messageToApiGatewayEvent(request, context);
-    const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
+    const logEventLevel: LoggerLevelName = EventUtil.eventIsAGraphQLIntrospection(evt) ? LoggerLevelName.silly : LoggerLevelName.info;
 
     Logger.logByLevel(logEventLevel, 'Processing event: %j', evt);
 

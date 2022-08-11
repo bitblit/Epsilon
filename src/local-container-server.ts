@@ -6,6 +6,7 @@ import { EventUtil } from './http/event-util';
 import fetch from 'cross-fetch';
 import { LocalServer } from './local-server';
 import { CliRatchet } from '@bitblit/ratchet/dist/node-only';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -44,7 +45,7 @@ export class LocalContainerServer {
       },
     } as Context; //TBD
     const evt: APIGatewayEvent = await LocalServer.messageToApiGatewayEvent(request, context);
-    const logEventLevel: string = EventUtil.eventIsAGraphQLIntrospection(evt) ? 'silly' : 'info';
+    const logEventLevel: LoggerLevelName = EventUtil.eventIsAGraphQLIntrospection(evt) ? LoggerLevelName.silly : LoggerLevelName.info;
 
     Logger.logByLevel(logEventLevel, 'Processing event: %j', evt);
 
@@ -68,7 +69,7 @@ export class LocalContainerServer {
 }
 
 if (CliRatchet.isCalledFromCLI('local-container-server')) {
-  Logger.setLevelByName('debug');
+  Logger.setLevel(LoggerLevelName.debug);
   Logger.debug('Running local container server');
   const testServer: LocalContainerServer = new LocalContainerServer();
   testServer

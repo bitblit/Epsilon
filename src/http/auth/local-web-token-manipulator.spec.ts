@@ -1,13 +1,14 @@
 import { LocalWebTokenManipulator } from './local-web-token-manipulator';
 import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 describe('#localWebTokenManipulator', function () {
   it('should round trip a JWT token', async () => {
     const svc: LocalWebTokenManipulator = new LocalWebTokenManipulator(['1234567890'], 'test')
-      .withParseFailureLogLevel('info')
+      .withParseFailureLogLevel(LoggerLevelName.info)
       .withExtraDecryptionKeys(['abcdefabcdef'])
-      .withOldKeyUseLogLevel('info');
+      .withOldKeyUseLogLevel(LoggerLevelName.info);
 
     const testUser: any = {
       data1: 'test',

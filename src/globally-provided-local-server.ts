@@ -4,9 +4,10 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { LocalServer } from './local-server';
 import { CliRatchet } from '@bitblit/ratchet/dist/node-only';
+import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
 
 if (CliRatchet.isCalledFromCLI('globally-provided-local-server')) {
-  Logger.setLevelByName('debug');
+  Logger.setLevel(LoggerLevelName.debug);
   Logger.debug('Fetching handler from global');
   const producer: () => Promise<EpsilonGlobalHandler> = EpsilonGlobalHandler.globalInstanceProvider;
 

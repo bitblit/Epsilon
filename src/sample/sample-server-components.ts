@@ -9,7 +9,7 @@ import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
 import fs from 'fs';
 import path from 'path';
-import { CommonJwtToken, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { CommonJwtToken, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/dist/common';
 import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
@@ -128,9 +128,9 @@ export class SampleServerComponents {
     // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
     const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator(['abcd1234'], 'sample.erigir.com')
-      .withParseFailureLogLevel('debug')
+      .withParseFailureLogLevel(LoggerLevelName.debug)
       .withExtraDecryptionKeys(['abcdefabcdef'])
-      .withOldKeyUseLogLevel('info');
+      .withOldKeyUseLogLevel(LoggerLevelName.info);
 
     const meta: HttpProcessingConfig = RouterUtil.defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(tokenManipulator);
     meta.timeoutMS = 10_000;
