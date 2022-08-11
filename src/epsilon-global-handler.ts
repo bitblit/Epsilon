@@ -60,6 +60,8 @@ export class EpsilonGlobalHandler {
             process: (msg: LogMessage): LogMessage => {
               msg.params = msg.params || {};
               msg.params['requestId'] = ContextUtil.currentRequestId();
+              msg.params['traceId'] = ContextUtil.currentTraceId();
+              msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
               return msg;
             },
           },
