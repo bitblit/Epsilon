@@ -13,6 +13,7 @@ import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
 import { AwsUtil } from '../util/aws-util';
+import { ContextUtil } from '../util/context-util';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
@@ -50,6 +51,7 @@ export class WebHandler {
       event
     );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
+    ContextUtil.addTraceToProxyResult(rval);
     Logger.updateTracePrefix(null); // Just in case it was set
     return rval;
   }
@@ -65,6 +67,7 @@ export class WebHandler {
       conv
     );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
+    ContextUtil.addTraceToProxyResult(rval);
     Logger.updateTracePrefix(null); // Just in case it was set
     return rval;
   }

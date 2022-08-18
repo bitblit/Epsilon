@@ -104,7 +104,7 @@ export class EventUtil {
     rConfig: EpsilonLoggerConfig
   ): LoggerLevelName {
     let rval: LoggerLevelName = curLevel;
-    if (rConfig && rConfig.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
+    if (rConfig?.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
       rval = EnumRatchet.keyToEnum<LoggerLevelName>(LoggerLevelName, process.env[rConfig.envParamLogLevelName]);
       Logger.silly('Found env log level : %s', rval);
     }

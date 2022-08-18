@@ -45,12 +45,6 @@ export class EpsilonGlobalHandler {
     return EpsilonGlobalHandler.GLOBAL_INSTANCE_PROVIDER;
   }
 
-  // This only really works because Node is single-threaded - otherwise need some kind of thread local
-  public static CURRENT_CONTEXT: Context;
-  public static CURRENT_EVENT: any;
-  public static CURRENT_LOG_VARS: Record<string, string | number | boolean> = {};
-  public static CURRENT_PROCESS_LABEL: string;
-
   constructor(private _epsilon: EpsilonInstance) {
     EpsilonGlobalHandler.configureDefaultLogger();
     Logger.info('Default logger configured');
@@ -74,7 +68,7 @@ export class EpsilonGlobalHandler {
               msg.params['awsRequestId'] = ContextUtil.currentRequestId();
               msg.params['traceId'] = ContextUtil.currentTraceId();
               msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
-              msg.params['processLbl'] = EpsilonGlobalHandler.CURRENT_PROCESS_LABEL;
+              msg.params['processLbl'] = ContextUtil.currentProcessLabel();
               return msg;
             },
           },
@@ -127,9 +121,7 @@ export class EpsilonGlobalHandler {
   }
 
   public async innerLambdaHandler(event: any, context: Context): Promise<any> {
-    EpsilonGlobalHandler.CURRENT_CONTEXT = context;
-    EpsilonGlobalHandler.CURRENT_EVENT = event;
-    EpsilonGlobalHandler.CURRENT_LOG_VARS = {};
+    ContextUtil.initContext(this._epsilon, event, context, 'TBD');
     let rval: any = null;
     try {
       if (!this._epsilon) {
@@ -159,7 +151,7 @@ export class EpsilonGlobalHandler {
         Logger.debug('Epsilon: APIG: %j', event);
         const wh: WebHandler = this._epsilon.webHandler;
         if (wh) {
-          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'web_' + WebHandler.extractProcessLabel(event as APIGatewayEvent, context);
+          ContextUtil.setProcessLabel('web_' + WebHandler.extractProcessLabel(event as APIGatewayEvent, context));
           rval = await wh.lambdaHandler(event as APIGatewayEvent, context);
         } else {
           Logger.warn('ALB / API Gateway event, but no handler or disabled');
@@ -168,7 +160,7 @@ export class EpsilonGlobalHandler {
         Logger.debug('Epsilon: APIGV2: %j', event);
         const wh: WebHandler = this._epsilon.webHandler;
         if (wh) {
-          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'web_' + WebHandler.v2extractProcessLabel(event as APIGatewayProxyEventV2, context);
+          ContextUtil.setProcessLabel('web_' + WebHandler.v2extractProcessLabel(event as APIGatewayProxyEventV2, context));
           rval = await wh.v2LambdaHandler(event as APIGatewayProxyEventV2, context);
         } else {
           Logger.warn('ALB / API Gateway V2 event, but no handler or disabled');
@@ -191,11 +183,11 @@ export class EpsilonGlobalHandler {
           // TODO: implement EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'interapi_' + WebHandler.extractProcessLabel(event, context);
           rval = await InterApiUtil.processInterApiEvent(event, this._epsilon.config.interApiConfig, this._epsilon.backgroundManager);
         } else {
-          EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_sns';
+          ContextUtil.setProcessLabel('generic_sns');
           rval = await this.processSnsEvent(event as SNSEvent);
         }
       } else if (LambdaEventDetector.isValidS3Event(event)) {
-        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_s3';
+        ContextUtil.setProcessLabel('generic_s3');
         Logger.debug('Epsilon: S3: %j', event);
 
         rval = await this.processS3Event(event as S3CreateEvent);
@@ -213,22 +205,19 @@ export class EpsilonGlobalHandler {
           );
         }
       } else if (LambdaEventDetector.isValidDynamoDBEvent(event)) {
-        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'generic_dynamo_';
+        ContextUtil.setProcessLabel('generic_dynamo_');
         Logger.debug('Epsilon: DDB: %j', event);
 
         rval = await this.processDynamoDbEvent(event as DynamoDBStreamEvent);
       } else {
-        EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = 'unrecognized_evt';
+        ContextUtil.setProcessLabel('unrecognized_evt');
         Logger.warn('Unrecognized event, returning false : %j', event);
       }
     } catch (err) {
       Logger.error('Error slipped out to outer edge.  Logging and returning false : %s', err, err);
       rval = false;
     } finally {
-      EpsilonGlobalHandler.CURRENT_CONTEXT = null;
-      EpsilonGlobalHandler.CURRENT_EVENT = null;
-      EpsilonGlobalHandler.CURRENT_LOG_VARS = null;
-      EpsilonGlobalHandler.CURRENT_PROCESS_LABEL = null;
+      ContextUtil.clearContext();
     }
 
     return rval;
