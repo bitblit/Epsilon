@@ -112,7 +112,8 @@ export class ContextUtil {
   public static currentTraceDepth(): number {
     const caller: number =
       ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH ||
-      NumberRatchet.safeNumber(ContextUtil.CURRENT_EVENT?.headers?.[ContextUtil.traceDepthHeaderName()], 1);
+      NumberRatchet.safeNumber(ContextUtil.CURRENT_EVENT?.headers?.[ContextUtil.traceDepthHeaderName()]) ||
+      1;
     return caller;
   }
 
