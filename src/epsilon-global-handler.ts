@@ -82,15 +82,27 @@ export class EpsilonGlobalHandler {
     return this._epsilon;
   }
 
-  public async processSingleBackgroundByParts<T>(type: string, data?: T, traceId?: string, traceDepth?: number): Promise<boolean> {
-    ContextUtil.setOverrideTrace(traceId, traceDepth);
-    return this.processSingleBackgroundEntry(this._epsilon.backgroundManager.createEntry(type, data));
+  public async processSingleBackgroundByParts<T>(
+    type: string,
+    data?: T,
+    overrideTraceId?: string,
+    overrideTraceDepth?: number
+  ): Promise<boolean> {
+    return this.processSingleBackgroundEntry(this._epsilon.backgroundManager.createEntry(type, data), overrideTraceId, overrideTraceDepth);
   }
 
-  public async processSingleBackgroundEntry(e: BackgroundEntry<any>): Promise<boolean> {
+  public async processSingleBackgroundEntry(
+    e: BackgroundEntry<any>,
+    overrideTraceId?: string,
+    overrideTraceDepth?: number
+  ): Promise<boolean> {
     let rval: boolean = false;
     if (e?.type) {
-      const internal: InternalBackgroundEntry<any> = this._epsilon.backgroundManager.wrapEntryForInternal(e);
+      const internal: InternalBackgroundEntry<any> = this._epsilon.backgroundManager.wrapEntryForInternal(
+        e,
+        overrideTraceId,
+        overrideTraceDepth
+      );
       rval = await this._epsilon.backgroundHandler.processSingleBackgroundEntry(internal);
       Logger.info('Direct processed request %j to %s', e, rval);
     } else {

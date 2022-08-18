@@ -59,10 +59,16 @@ export class BackgroundManager {
     return rval;
   }
 
-  public wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
+  public wrapEntryForInternal<T>(
+    entry: BackgroundEntry<T>,
+    overrideTraceId?: string,
+    overrideTraceDepth?: number
+  ): InternalBackgroundEntry<T> {
     const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
       createdEpochMS: new Date().getTime(),
       guid: BackgroundManager.generateBackgroundGuid(),
+      traceId: overrideTraceId || ContextUtil.currentTraceId(), // || cuz no empty strings allowed
+      traceDepth: overrideTraceDepth || ContextUtil.currentTraceDepth() + 1, // || no 0 allowed either
     });
     return rval;
   }
