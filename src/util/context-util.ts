@@ -52,10 +52,10 @@ export class ContextUtil {
     ContextUtil.setOverrideTrace(entry.traceId, entry.traceDepth);
   }
 
-  public static addHeadersToRecord(input: Record<string, any>): void {
+  public static addHeadersToRecord(input: Record<string, any>, depthOffset: number = 0): void {
     if (input) {
       input[ContextUtil.traceHeaderName()] = ContextUtil.currentTraceId();
-      input[ContextUtil.traceDepthHeaderName()] = ContextUtil.currentTraceDepth() + 1;
+      input[ContextUtil.traceDepthHeaderName()] = ContextUtil.currentTraceDepth() + depthOffset;
     } else {
       ErrorRatchet.throwFormattedErr('Cannot add headers to null/undefined input');
     }
@@ -68,7 +68,7 @@ export class ContextUtil {
 
   public static addTraceToHttpRequestInit(ri: RequestInit): void {
     ri.headers = ri.headers || {};
-    ContextUtil.addHeadersToRecord(ri.headers);
+    ContextUtil.addHeadersToRecord(ri.headers, 1);
   }
 
   public static setProcessLabel(processLabel: string): void {
