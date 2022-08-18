@@ -7,6 +7,7 @@ import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
 import { Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
 import { BackgroundEntry } from '../background/background-entry';
 import { InterApiConfig } from '../config/inter-api/inter-api-config';
+import { ContextUtil } from '../util/context-util';
 
 export class InterApiUtil {
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -39,6 +40,7 @@ export class InterApiUtil {
     RequireRatchet.notNullOrUndefined(mgr, 'BackgroundManager');
 
     const interApiEntry: InterApiEntry<any> = InterApiUtil.extractEntryFromEvent(evt);
+    ContextUtil.setOverrideTraceFromInterApiEntry(interApiEntry);
     Logger.info('Processing inter-api event : %j', evt);
     const backgroundEntries: BackgroundEntry<any>[] = [];
     cfg.processMappings.forEach((map) => {
@@ -56,5 +58,13 @@ export class InterApiUtil {
       Logger.info('No entries mapped for this event');
     }
     return rval;
+  }
+
+  public static addTraceToInterApiEntry(ent: InterApiEntry<any>): InterApiEntry<any> {
+    if (ent) {
+      ent.traceId = ent.traceId || ContextUtil.currentTraceId();
+      ent.traceDepth = ent.traceDepth || ContextUtil.currentTraceDepth() + 1;
+    }
+    return ent;
   }
 }

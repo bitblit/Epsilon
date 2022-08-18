@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 import { EpsilonConstants } from './epsilon-constants';
 import { InterApiEntry } from './inter-api/inter-api-entry';
 import { InterApiAwsConfig } from './config/inter-api/inter-api-aws-config';
+import { InterApiUtil } from './inter-api/inter-api-util';
 
 /**
  * Handles all submission of events to the inter-api SNS topic (if any)
@@ -44,7 +45,7 @@ export class InterApiManager {
         Logger.info('Firing inter-api event (remote) : %j ', entry);
         const toWrite: any = {
           type: EpsilonConstants.INTER_API_SNS_EVENT,
-          interApiEvent: entry,
+          interApiEvent: InterApiUtil.addTraceToInterApiEntry(entry),
         };
         const msg: string = JSON.stringify(toWrite);
         const snsId: string = await this.writeMessageToSnsTopic(msg);
