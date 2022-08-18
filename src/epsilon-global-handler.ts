@@ -28,7 +28,7 @@ import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { InterApiUtil } from './inter-api/inter-api-util';
-import { LoggerLevelName, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName, LoggerOutputFunction, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/dist/common';
 import { ContextUtil } from './util/context-util';
 
 /**
@@ -49,7 +49,7 @@ export class EpsilonGlobalHandler {
         globalVars: {
           ep: '1',
         },
-        doNotUseConsoleDebug: false,
+        outputFunction: LoggerOutputFunction.StdOut,
         ringBufferSize: 0,
         preProcessors: [
           {
