@@ -150,7 +150,7 @@ export class EpsilonApiStack extends Stack {
         readonlyRootFilesystem: false,
         vcpus: 1,
         image: dockerImageAsset.imageUri,
-        command: ['Ref::taskName', 'Ref::taskData'], // Bootstrap to the Lambda handler
+        command: ['Ref::taskName', 'Ref::taskData', 'Ref::traceId', 'Ref::traceDepth'], // Bootstrap to the Lambda handler
         environment: batchEnvVars,
       },
     };
