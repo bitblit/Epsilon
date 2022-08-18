@@ -6,6 +6,7 @@ import { LoggingTraceIdGenerator } from '../config/logging-trace-id-generator';
 import { BuiltInTraceIdGenerators } from '../built-in/built-in-trace-id-generators';
 import { BackgroundEntry } from '../background/background-entry';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { InternalBackgroundEntry } from '../background/internal-background-entry';
 
 // This class serves as a static holder for the AWS Lambda context, and also adds some
 // simple helper functions
@@ -45,6 +46,10 @@ export class ContextUtil {
   public static setOverrideTrace(traceId: string, traceDepth: number): void {
     ContextUtil.CURRENT_OVERRIDE_TRACE_ID = traceId || ContextUtil.CURRENT_OVERRIDE_TRACE_ID;
     ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH = traceDepth || ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH;
+  }
+
+  public static setOverrideTraceFromInternalBackgroundEntry(entry: InternalBackgroundEntry<any>): void {
+    ContextUtil.setOverrideTrace(entry.traceId, entry.traceDepth);
   }
 
   public static addHeadersToRecord(input: Record<string, any>): void {

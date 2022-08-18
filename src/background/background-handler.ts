@@ -13,6 +13,7 @@ import { BackgroundTransactionLog } from '../config/background/background-transa
 import { BackgroundExecutionEvent } from './background-execution-event';
 import { BackgroundExecutionListener } from './background-execution-listener';
 import { BackgroundExecutionEventType } from './background-execution-event-type';
+import { ContextUtil } from '../util/context-util';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -284,6 +285,8 @@ export class BackgroundHandler {
   // using AWS batch) that you want to be able to run a background command directly, eg, from
   // the command line without needing an AWS-compliant event wrapping it. Thus, this.
   public async processSingleBackgroundEntry(e: InternalBackgroundEntry<any>): Promise<boolean> {
+    // Set the trace ids appropriately
+    ContextUtil.setOverrideTraceFromInternalBackgroundEntry(e);
     Logger.info('Background Process Start: %j', e);
     const sw: StopWatch = new StopWatch(true);
     await this.conditionallyStartTransactionLog(e);
