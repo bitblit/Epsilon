@@ -10,7 +10,6 @@ export * from './inter-api-manager';
 export * from './local-server';
 export * from './test-error-server';
 export * from './background/background-dynamo-log-table-handler';
-export * from './background/background-entry-metadata';
 export * from './background/background-entry';
 export * from './background/background-execution-event-type';
 export * from './background/background-execution-event';
