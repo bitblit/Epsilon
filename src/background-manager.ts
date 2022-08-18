@@ -51,31 +51,15 @@ export class BackgroundManager {
     return this._localBus;
   }
 
-  public static addMetaDataToEntry<T>(entry: BackgroundEntry<T>, userMeta?: Record<string, string | number | boolean>) {
-    if (entry) {
-      const oldUserMeta: Record<string, string | number | boolean> = (entry?.meta || {}) as Record<string, string | number | boolean>;
-      const newUserMeta: Record<string, string | number | boolean> = userMeta || {};
-      entry.meta = {
-        traceDepth: ContextUtil.currentTraceDepth() + 1,
-        traceId: ContextUtil.currentTraceId(),
-        userMeta: Object.assign({}, oldUserMeta, newUserMeta),
-      };
-    } else {
-      Logger.warn('Tried to add meta to null/undefined entry');
-    }
-  }
-
-  public createEntry<T>(type: string, data?: T, userMeta?: Record<string, string | number | boolean>): BackgroundEntry<T> {
+  public createEntry<T>(type: string, data?: T): BackgroundEntry<T> {
     const rval: BackgroundEntry<T> = {
       type: type,
       data: data,
     };
-    BackgroundManager.addMetaDataToEntry(rval, userMeta);
     return rval;
   }
 
   public wrapEntryForInternal<T>(entry: BackgroundEntry<T>): InternalBackgroundEntry<T> {
-    BackgroundManager.addMetaDataToEntry(entry);
     const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
       createdEpochMS: new Date().getTime(),
       guid: BackgroundManager.generateBackgroundGuid(),
@@ -83,15 +67,9 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async addEntryToQueueByParts<T>(
-    type: string,
-    data?: T,
-    fireStartMessage?: boolean,
-    userMeta?: Record<string, string | number | boolean>
-  ): Promise<string> {
+  public async addEntryToQueueByParts<T>(type: string, data?: T, fireStartMessage?: boolean): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry<T> = this.createEntry(type, data, userMeta);
-    BackgroundManager.addMetaDataToEntry(entry, userMeta);
+    const entry: BackgroundEntry<T> = this.createEntry(type, data);
     if (entry) {
       rval = await this.addEntryToQueue(entry, fireStartMessage);
     }
@@ -99,7 +77,6 @@ export class BackgroundManager {
   }
 
   public async addEntryToQueue<T>(entry: BackgroundEntry<T>, fireStartMessage?: boolean): Promise<string> {
-    BackgroundManager.addMetaDataToEntry(entry);
     const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
     const rval: string = wrapped.guid;
     if (this.localMode) {
@@ -134,7 +111,6 @@ export class BackgroundManager {
   }
 
   public async addEntriesToQueue(entries: BackgroundEntry<any>[], fireStartMessage?: boolean): Promise<string[]> {
-    entries?.forEach((e) => BackgroundManager.addMetaDataToEntry(e));
     const rval: string[] = [];
     for (let i = 0; i < entries.length; i++) {
       try {
@@ -154,15 +130,10 @@ export class BackgroundManager {
     return rval;
   }
 
-  public async fireImmediateProcessRequestByParts<T>(
-    type: string,
-    data?: T,
-    userMeta?: Record<string, string | number | boolean>
-  ): Promise<string> {
+  public async fireImmediateProcessRequestByParts<T>(type: string, data?: T): Promise<string> {
     let rval: string = null;
-    const entry: BackgroundEntry<T> = this.createEntry(type, data, userMeta);
+    const entry: BackgroundEntry<T> = this.createEntry(type, data);
     if (entry) {
-      BackgroundManager.addMetaDataToEntry(entry, userMeta);
       rval = await this.fireImmediateProcessRequest(entry);
     }
     return rval;
@@ -170,7 +141,6 @@ export class BackgroundManager {
 
   public async fireImmediateProcessRequest<T>(entry: BackgroundEntry<T>): Promise<string> {
     let rval: string = null;
-    BackgroundManager.addMetaDataToEntry(entry);
     const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
     rval = wrapped.guid;
     if (this.localMode) {

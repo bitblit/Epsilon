@@ -82,7 +82,8 @@ export class EpsilonGlobalHandler {
     return this._epsilon;
   }
 
-  public async processSingleBackgroundByParts<T>(type: string, data?: T): Promise<boolean> {
+  public async processSingleBackgroundByParts<T>(type: string, data?: T, traceId?: string, traceDepth?: number): Promise<boolean> {
+    ContextUtil.setOverrideTrace(traceId, traceDepth);
     return this.processSingleBackgroundEntry(this._epsilon.backgroundManager.createEntry(type, data));
   }
 

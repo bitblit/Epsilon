@@ -42,13 +42,9 @@ export class ContextUtil {
     ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH = null;
   }
 
-  public static setTraceFromBackgroundEntry(be: BackgroundEntry<any>): void {
-    if (be?.meta?.traceId) {
-      ContextUtil.CURRENT_OVERRIDE_TRACE_ID = be.meta.traceId;
-      ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH = NumberRatchet.safeNumber(be.meta.traceDepth, 1);
-    } else {
-      Logger.info('Cannot set trace from background entry that lacks the meta fields : %j', be);
-    }
+  public static setOverrideTrace(traceId: string, traceDepth: number): void {
+    ContextUtil.CURRENT_OVERRIDE_TRACE_ID = traceId || ContextUtil.CURRENT_OVERRIDE_TRACE_ID;
+    ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH = traceDepth || ContextUtil.CURRENT_OVERRIDE_TRACE_DEPTH;
   }
 
   public static addHeadersToRecord(input: Record<string, any>): void {
