@@ -3,9 +3,9 @@ import { LoggingTraceIdGenerator } from './logging-trace-id-generator';
 
 export interface EpsilonLoggerConfig {
   // If set, the logger will be set to this instead of the default
-  envParamLogLevelName?: LoggerLevelName;
+  envParamLogLevelName?: string;
   // If set, and the user provides the query param, the logger level will be set to this
-  queryParamLogLevelName?: LoggerLevelName;
+  queryParamLogLevelName?: string;
   // If set, and the user provides the query param, the logger will use this common prefix for the transaction
   queryParamTracePrefixName?: string;
   // If set, this will be used to generate trace ids when none are provided - otherwise, defaults to the aws request id
