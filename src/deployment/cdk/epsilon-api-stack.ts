@@ -13,7 +13,6 @@ import { CfnInstanceProfile, ManagedPolicy, PolicyDocument, Role, ServicePrincip
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { LambdaSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
 
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -22,7 +21,6 @@ import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 import { EpsilonStackUtil } from './epsilon-stack-util';
 import { EpsilonApiStackProps } from './epsilon-api-stack-props';
 import { EpsilonBuildProperties } from '../../epsilon-build-properties';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
 
 export class EpsilonApiStack extends Stack {
   private webHandler: DockerImageFunction;
