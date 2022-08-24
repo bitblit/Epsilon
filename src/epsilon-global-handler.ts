@@ -69,7 +69,7 @@ export class EpsilonGlobalHandler {
               msg.params['awsRequestId'] = ContextUtil.currentRequestId();
               msg.params['traceId'] = ContextUtil.currentTraceId();
               msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
-              msg.params['processLbl'] = ContextUtil.currentProcessLabel();
+              msg.params['procLabel'] = ContextUtil.currentProcessLabel();
               return msg;
             },
           },
