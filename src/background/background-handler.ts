@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/dist/common';
-import { Context, SNSEvent } from 'aws-lambda';
+import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
 import { LambdaEventDetector, S3CacheRatchet } from '@bitblit/ratchet/dist/aws';
 import { EpsilonConstants } from '../epsilon-constants';
 import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
@@ -13,13 +13,14 @@ import { BackgroundTransactionLog } from '../config/background/background-transa
 import { BackgroundExecutionEvent } from './background-execution-event';
 import { BackgroundExecutionListener } from './background-execution-listener';
 import { BackgroundExecutionEventType } from './background-execution-event-type';
+import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { ContextUtil } from '../util/context-util';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
  * thing at the same time.
  */
-export class BackgroundHandler {
+export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   private processors: Map<string, BackgroundProcessor<any>>;
   private validator: BackgroundValidator;
   private s3TransactionLogCacheRatchet: S3CacheRatchet;
@@ -46,13 +47,30 @@ export class BackgroundHandler {
       mgr.localBus().subscribe(async (evt) => {
         if (mgr.localMode) {
           Logger.debug('Processing local background entry : %j', evt);
-          const rval: boolean = await this.processSingleBackgroundEntry(evt);
+          const rval: ProxyResult = await this.processEvent(evt, null);
           Logger.info('Processor returned %s', rval);
         } else {
           Logger.silly('Not local mode - ignoring');
         }
       });
     }
+  }
+
+  public extractLabel(evt: SNSEvent, context: Context): string {
+    let rval: string = null;
+    if (this.isBackgroundStartSnsEvent(evt)) {
+      rval = 'BG:START-EVT';
+    } else if (this.isBackgroundImmediateFireEvent(evt)) {
+      const pEvt: InternalBackgroundEntry<any> = this.parseImmediateFireBackgroundEntry(evt);
+      rval = 'BG:' + pEvt.type + ':' + pEvt.guid;
+    } else {
+      rval = 'BG:UNKNOWN';
+    }
+    return rval;
+  }
+
+  public handlesEvent(evt: any): boolean {
+    return LambdaEventDetector.isValidSnsEvent(evt) && this.isBackgroundSNSEvent(evt);
   }
 
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -134,20 +152,27 @@ export class BackgroundHandler {
 
   // Either trigger a pull of the SQS queue, or process immediately
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
-  public async processBackgroundSNSEvent(event: any, context: Context): Promise<number> {
-    let rval: number = null;
+  public async processEvent(event: any, context: Context): Promise<ProxyResult> {
+    let procd: number = null;
     if (!this.isBackgroundStartSnsEvent(event)) {
       const backgroundEntry: InternalBackgroundEntry<any> = this.parseImmediateFireBackgroundEntry(event);
       if (!!backgroundEntry) {
         Logger.silly('Processing immediate fire event : %j', backgroundEntry);
         const result: boolean = await this.processSingleBackgroundEntry(backgroundEntry);
-        rval = 1; // Process a single entry
+        procd = 1; // Process a single entry
       } else {
         Logger.warn('Tried to process non-background start / immediate event : %j returning false', event);
       }
     } else {
-      rval = await this.takeAndProcessSingleBackgroundSQSMessage();
+      procd = await this.takeAndProcessSingleBackgroundSQSMessage();
     }
+
+    const rval: ProxyResult = {
+      statusCode: 200,
+      body: StringRatchet.safeString(procd),
+      isBase64Encoded: false,
+    };
+
     return rval;
   }
 

@@ -1,5 +1,5 @@
 import { EpsilonRouter } from './route/epsilon-router';
-import { APIGatewayEvent, APIGatewayProxyEventV2, Context, ProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/dist/common/logger';
 import Route from 'route-parser';
 import { RouteMapping } from './route/route-mapping';
@@ -12,13 +12,15 @@ import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { FilterFunction } from '../config/http/filter-function';
 import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
-import { AwsUtil } from '../util/aws-util';
 import { ContextUtil } from '../util/context-util';
+import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
+import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
+import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
  */
-export class WebHandler {
+export class WebHandler implements EpsilonLambdaEventHandler<APIGatewayEvent> {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
 
   constructor(private routerConfig: EpsilonRouter) {
@@ -29,19 +31,15 @@ export class WebHandler {
     return this.routerConfig;
   }
 
-  public static extractProcessLabel(event: APIGatewayEvent, context: Context): string {
-    const rval: string = 'TBD';
-    // TODO: Impl
-    return rval;
+  public extractLabel(evt: APIGatewayEvent, context: Context): string {
+    return 'WEB:' + StringRatchet.trimToEmpty(evt.httpMethod).toUpperCase() + ':' + evt.path;
   }
 
-  public static v2extractProcessLabel(event: APIGatewayProxyEventV2, context: Context): string {
-    const rval: string = 'TBD-V2';
-    // TODO: Impl
-    return rval;
+  public handlesEvent(evt: any): boolean {
+    return LambdaEventDetector.isValidApiGatewayEvent(evt);
   }
 
-  public async lambdaHandler(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
+  public async processEvent(event: APIGatewayEvent, context: Context): Promise<ProxyResult> {
     if (!this.routerConfig) {
       throw new Error('Router config not found');
     }
@@ -49,22 +47,6 @@ export class WebHandler {
       {},
       { parsedBody: null, authorization: null, convertedFromV2Event: false },
       event
-    );
-    const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
-    ContextUtil.addTraceToProxyResult(rval);
-    Logger.updateTracePrefix(null); // Just in case it was set
-    return rval;
-  }
-
-  public async v2LambdaHandler(event: APIGatewayProxyEventV2, context: Context): Promise<ProxyResult> {
-    if (!this.routerConfig) {
-      throw new Error('Router config not found');
-    }
-    const conv: APIGatewayEvent = AwsUtil.apiGatewayV2ToApiGatewayV1(event);
-    const asExtended: ExtendedAPIGatewayEvent = Object.assign(
-      {},
-      { parsedBody: null, authorization: null, convertedFromV2Event: true },
-      conv
     );
     const rval: ProxyResult = await this.openApiLambdaHandler(asExtended, context);
     ContextUtil.addTraceToProxyResult(rval);

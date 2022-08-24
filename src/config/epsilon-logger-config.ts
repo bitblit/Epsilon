@@ -17,4 +17,6 @@ export interface EpsilonLoggerConfig {
   traceHeaderName?: string;
   // Defaults to x-trace-depth if not set
   traceDepthHeaderName?: string;
+  // Epsilon start/end messages are logged at this level (info by default)
+  epsilonStartEndMessageLogLevel?: LoggerLevelName;
 }
