@@ -88,7 +88,7 @@ describe('#errorToProxyResult', function () {
     } as APIGatewayEvent;
 
     Logger.setLevel(LoggerLevelName.silly);
-    const result: ProxyResult = await inst.epsilon.webHandler.lambdaHandler(evt, {} as Context);
+    const result: ProxyResult = await inst.epsilon.webHandler.processEvent(evt, {} as Context);
 
     expect(result).toBeTruthy();
     expect(result.isBase64Encoded).toEqual(true);

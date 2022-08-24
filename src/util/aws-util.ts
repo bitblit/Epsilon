@@ -58,4 +58,32 @@ export class AwsUtil {
     };
     return rval;
   }
+
+  public static findInMap<T>(toFind: string, map: Map<string, T>): T {
+    let rval: T = null;
+    map.forEach((val, key) => {
+      if (AwsUtil.matchExact(key, toFind)) {
+        rval = val;
+      }
+    });
+    return rval;
+  }
+
+  public static matchExact(r, str) {
+    const match = str.match(r);
+    return match != null && str == match[0];
+  }
+
+  // Returns either the value if non-function, the result if function, and default if neither
+  public static resolvePotentialFunctionToResult<T>(src: any, def: T): T {
+    let rval: T = def;
+    if (src) {
+      if (typeof src === 'function') {
+        rval = src();
+      } else {
+        rval = src;
+      }
+    }
+    return rval;
+  }
 }

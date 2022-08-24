@@ -1,15 +1,15 @@
 import { ScheduledEvent } from 'aws-lambda';
-import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { BackgroundHandler } from './background/background-handler';
-import { BackgroundManager } from './background-manager';
-import { CronConfig } from './config/cron/cron-config';
-import { BackgroundConfig } from './config/background/background-config';
+import { BackgroundHandler } from '../background/background-handler';
+import { BackgroundManager } from '../background-manager';
+import { CronConfig } from '../config/cron/cron-config';
+import { BackgroundConfig } from '../config/background/background-config';
 import AWS from 'aws-sdk';
 import { JestRatchet } from '@bitblit/ratchet/dist/jest';
+import { CronEpsilonLambdaEventHandler } from './cron-epsilon-lambda-event-handler';
 
 // jest.mock('@bitblit/background');
 
-describe('#epsilonGlobalHandler', function () {
+describe('#cronEpsilonLambdaEventHandler', function () {
   let mockSqs;
   let mockSns;
 
@@ -58,7 +58,7 @@ describe('#epsilonGlobalHandler', function () {
     const backgroundManager: BackgroundManager = new BackgroundManager(smConfig.aws, mockSqs, mockSns);
     backgroundManager.localMode = true;
 
-    const res: boolean = await EpsilonGlobalHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
+    const res: boolean = await CronEpsilonLambdaEventHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();
   }, 500);
 });
