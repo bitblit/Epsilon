@@ -2,11 +2,9 @@
   "name": "@bitblit/epsilon",
   "version": "0.0.0",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
-  "main": "./dist/index",
-  "typings": "./dist/index",
-  "directories": [
-    "dist"
-  ],
+  "sideEffects": false,
+  "main": "./index.js",
+  "typings": "./index.d.ts",
   "contributors": [
     "Christopher Weiss <bitblit@gmail.com>",
     "Lucas Myers <veganbeef@protonmail.com>",
@@ -24,7 +22,7 @@
   },
   "config": {},
   "scripts": {
-    "prepare-to-publish": "yarn run apply-ci-vars && yarn build && yarn remove-compiled-tests",
+    "prepare-to-publish": "yarn build && cp package.json README.md CHANGELOG.md License.txt dist && yarn run apply-ci-vars && yarn remove-compiled-tests",
     "copy-static-files": "shx cp -R src/static dist",
     "build": "yarn run clean && yarn run generate-barrels && yarn run compile",
     "compile": "tsc && yarn copy-static-files",
@@ -98,10 +96,10 @@
     "ajv": "^6.12.6"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "1.0.27",
+    "@bitblit/ratchet": "2.0.45-alpha",
     "@types/aws-lambda": "8.10.102",
     "aws-cdk-lib": "2.38.1",
-    "aws-sdk": "2.1201.0",
+    "aws-sdk": "2.1209.0",
     "constructs": "10.1.84"
   },
   "devDependencies": {
