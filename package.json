@@ -100,8 +100,8 @@
   "peerDependencies": {
     "@bitblit/ratchet": "1.0.27",
     "@types/aws-lambda": "8.10.102",
-    "aws-sdk": "2.1201.0",
     "aws-cdk-lib": "2.38.1",
+    "aws-sdk": "2.1201.0",
     "constructs": "10.1.84"
   },
   "devDependencies": {
@@ -110,13 +110,13 @@
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.0.1",
     "@types/node": "14.18.1",
-    "aws-cdk-lib": "2.38.1",
-    "constructs": "10.1.84",
     "@typescript-eslint/eslint-plugin": "5.36.2",
     "@typescript-eslint/parser": "5.36.2",
     "apollo-server-lambda": "3.10.2",
+    "aws-cdk-lib": "2.40.0",
     "aws-sdk": "2.1209.0",
     "barrelsby": "2.4.0",
+    "constructs": "10.1.94",
     "eslint": "8.22.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
