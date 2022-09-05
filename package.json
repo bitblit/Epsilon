@@ -33,7 +33,7 @@
     "clean": "shx rm -Rf dist",
     "compile-test": "yarn compile && yarn test",
     "test": "jest",
-    "apply-ci-vars": "node node_modules/@bitblit/ratchet/dist/node-only/ci/apply-ci-env-variables-to-files github dist/static/build-properties.json",
+    "apply-ci-vars": "yarn ratchet-apply-ci-env-variables-to-files github dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
     "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
