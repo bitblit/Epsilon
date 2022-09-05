@@ -4,7 +4,7 @@ import { BackgroundManager } from '../background-manager';
 import { CronConfig } from '../config/cron/cron-config';
 import { BackgroundConfig } from '../config/background/background-config';
 import AWS from 'aws-sdk';
-import { JestRatchet } from '@bitblit/ratchet/dist/jest';
+import { JestRatchet } from '@bitblit/ratchet/jest';
 import { CronEpsilonLambdaEventHandler } from './cron-epsilon-lambda-event-handler';
 
 // jest.mock('@bitblit/background');

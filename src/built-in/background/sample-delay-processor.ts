@@ -1,4 +1,4 @@
-import { Logger, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { Logger, PromiseRatchet } from '@bitblit/ratchet/common';
 import { BackgroundProcessor } from '../../config/background/background-processor';
 import { BackgroundManager } from '../../background-manager';
 

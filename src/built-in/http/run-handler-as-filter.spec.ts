@@ -1,5 +1,5 @@
 import { Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger } from '@bitblit/ratchet/common';
 import { EpsilonGlobalHandler } from '../../epsilon-global-handler';
 import { SampleServerComponents } from '../../sample/sample-server-components';
 import { RunHandlerAsFilter } from './run-handler-as-filter';

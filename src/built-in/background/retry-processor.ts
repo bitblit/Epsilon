@@ -1,8 +1,8 @@
-import { DurationRatchet, Logger, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { DurationRatchet, Logger, PromiseRatchet } from '@bitblit/ratchet/common';
 import { BackgroundProcessor } from '../../config/background/background-processor';
 import { BackgroundManager } from '../../background-manager';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 
 export class RetryProcessor implements BackgroundProcessor<any> {
   private static readonly RETRY_FIELD_NAME: string = '___RetryProcessorTryNumber';

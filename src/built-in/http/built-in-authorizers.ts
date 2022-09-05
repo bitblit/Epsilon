@@ -1,6 +1,6 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { APIGatewayEvent } from 'aws-lambda';
-import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
+import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { RouteMapping } from '../../http/route/route-mapping';
 import { EpsilonAuthorizationContext } from '../../config/http/epsilon-authorization-context';
 

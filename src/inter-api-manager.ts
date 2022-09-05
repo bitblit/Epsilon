@@ -1,4 +1,4 @@
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger } from '@bitblit/ratchet/common';
 import AWS from 'aws-sdk';
 import { EpsilonConstants } from './epsilon-constants';
 import { InterApiEntry } from './inter-api/inter-api-entry';

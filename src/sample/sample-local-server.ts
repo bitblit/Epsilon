@@ -2,10 +2,10 @@
  * This is an example of how to setup a local server for testing.  Replace the createRouterConfig function
  * with your own.
  */
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { SampleServerComponents } from './sample-server-components';
 import { LocalServer } from '../local-server';
-import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName } from '@bitblit/ratchet/common';
 
 Logger.setLevel(LoggerLevelName.debug);
 

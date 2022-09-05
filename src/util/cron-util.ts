@@ -1,8 +1,8 @@
-import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 import { ScheduledEvent } from 'aws-lambda';
 import { DateTime } from 'luxon';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { AbstractCronEntry } from '../config/cron/abstract-cron-entry';
 import { CronConfig } from '../config/cron/cron-config';
 

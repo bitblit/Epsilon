@@ -1,6 +1,6 @@
 import { BackgroundProcessor } from '../../config/background/background-processor';
 import { BackgroundManager } from '../../background-manager';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 
 export class NoOpProcessor implements BackgroundProcessor<any> {
   public get typeName(): string {

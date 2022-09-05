@@ -1,7 +1,7 @@
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { APIGatewayEvent, Context } from 'aws-lambda';
-import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 import { ExtendedAPIGatewayEvent } from '../../config/http/extended-api-gateway-event';
 import { BadRequestError } from '../../http/error/bad-request-error';
 import { EpsilonHttpError } from '../../http/error/epsilon-http-error';

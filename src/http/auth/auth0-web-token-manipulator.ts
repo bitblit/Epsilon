@@ -1,4 +1,4 @@
-import { CommonJwtToken, Logger, StringRatchet } from '@bitblit/ratchet/dist/common';
+import { CommonJwtToken, Logger, StringRatchet } from '@bitblit/ratchet/common';
 import jwt from 'jsonwebtoken';
 import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';

@@ -1,10 +1,10 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { Context, ProxyResult, S3Event, ScheduledEvent } from 'aws-lambda';
 import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
-import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
 import { CronConfig } from '../config/cron/cron-config';
 import { BackgroundManager } from '../background-manager';
 import { BackgroundHandler } from '../background/background-handler';

@@ -1,16 +1,16 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext } from 'aws-lambda';
 import { UnauthorizedError } from './error/unauthorized-error';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { BadRequestError } from './error/bad-request-error';
 import { EpsilonLoggerConfig } from '../config/epsilon-logger-config';
-import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
+import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
 import jwt from 'jsonwebtoken';
 import { ExtendedAuthResponseContext } from './route/extended-auth-response-context';
 import { BasicAuthToken } from './auth/basic-auth-token';
-import { Base64Ratchet } from '@bitblit/ratchet/dist/common/base64-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { Base64Ratchet } from '@bitblit/ratchet/common/base64-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { EpsilonConstants } from '../epsilon-constants';
-import { EnumRatchet, LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { EnumRatchet, LoggerLevelName } from '@bitblit/ratchet/common';
 
 /**
  * Endpoints about the api itself

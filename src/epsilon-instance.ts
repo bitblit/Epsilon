@@ -2,7 +2,7 @@ import { EpsilonConfig } from './config/epsilon-config';
 import { WebHandler } from './http/web-handler';
 import { BackgroundHandler } from './background/background-handler';
 import { OpenApiDocument } from './config/open-api/open-api-document';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundManager } from './background-manager';
 
 /**

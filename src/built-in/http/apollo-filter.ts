@@ -1,14 +1,14 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { APIGatewayEvent, APIGatewayProxyEvent, Context, Handler, ProxyResult } from 'aws-lambda';
-import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
-import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
+import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
+import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
 import { RequestTimeoutError } from '../../http/error/request-timeout-error';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { EventUtil } from '../../http/event-util';
-import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/dist/common';
+import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common';
 
 export class ApolloFilter {
   private static CACHE_APOLLO_HANDLER: Handler<APIGatewayProxyEvent, ProxyResult>;
