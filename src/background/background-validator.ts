@@ -1,7 +1,7 @@
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { Logger } from '@bitblit/ratchet/dist/common';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
+import { Logger } from '@bitblit/ratchet/common';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundEntry } from './background-entry';
 import { BackgroundProcessor } from '../config/background/background-processor';

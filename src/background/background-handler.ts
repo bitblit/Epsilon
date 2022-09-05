@@ -1,9 +1,9 @@
 import AWS from 'aws-sdk';
-import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/dist/common';
+import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
-import { LambdaEventDetector, S3CacheRatchet } from '@bitblit/ratchet/dist/aws';
+import { LambdaEventDetector, S3CacheRatchet } from '@bitblit/ratchet/aws';
 import { EpsilonConstants } from '../epsilon-constants';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundManager } from '../background-manager';
 import { BackgroundValidator } from './background-validator';
 import { BackgroundConfig } from '../config/background/background-config';

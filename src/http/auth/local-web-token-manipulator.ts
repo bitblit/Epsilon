@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { CommonJwtToken } from '@bitblit/ratchet/dist/common/common-jwt-token';
+import { Logger } from '@bitblit/ratchet/common/logger';
+import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { UnauthorizedError } from '../error/unauthorized-error';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
-import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
+import { LoggerLevelName } from '@bitblit/ratchet/common';
 
 /**
  * Service for handling jwt tokens

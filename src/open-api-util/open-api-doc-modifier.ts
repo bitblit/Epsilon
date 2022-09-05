@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
 import { OpenApiDocModifications } from './open-api-doc-modifications';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 
 /**
  * Monitoring endpoints

@@ -1,6 +1,6 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
-import { MapRatchet } from '@bitblit/ratchet/dist/common/map-ratchet';
+import { Logger } from '@bitblit/ratchet/common/logger';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
 import { EventUtil } from '../../http/event-util';
 import { BadRequestError } from '../../http/error/bad-request-error';
 import { FilterFunction } from '../../config/http/filter-function';

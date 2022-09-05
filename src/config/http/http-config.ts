@@ -1,7 +1,7 @@
 import { HandlerFunction } from './handler-function';
 import { AuthorizerFunction } from './authorizer-function';
 import { HttpProcessingConfig } from './http-processing-config';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { MappedHttpProcessingConfig } from './mapped-http-processing-config';
 
 export interface HttpConfig {

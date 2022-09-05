@@ -1,12 +1,12 @@
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger } from '@bitblit/ratchet/common';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundManager } from './background-manager';
 import { BackgroundConfig } from './config/background/background-config';
 import { EchoProcessor } from './built-in/background/echo-processor';
 import { NoOpProcessor } from './built-in/background/no-op-processor';
-import { JestRatchet } from '@bitblit/ratchet/dist/jest';
+import { JestRatchet } from '@bitblit/ratchet/jest';
 
 describe('#createEntry', function () {
   let mockSqs;

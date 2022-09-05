@@ -1,8 +1,8 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { Logger } from '@bitblit/ratchet/common/logger';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import program from 'commander';
 import clear from 'clear';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common';
+import { ErrorRatchet } from '@bitblit/ratchet/common';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 
 /**

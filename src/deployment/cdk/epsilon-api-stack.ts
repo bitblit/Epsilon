@@ -17,7 +17,7 @@ import { LambdaSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { EpsilonStackUtil } from './epsilon-stack-util';
 import { EpsilonApiStackProps } from './epsilon-api-stack-props';
 import { EpsilonBuildProperties } from '../../epsilon-build-properties';

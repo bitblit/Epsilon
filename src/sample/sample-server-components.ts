@@ -2,14 +2,14 @@
  * This is an example of how to setup a local server for testing.  Replace the createRouterConfig function
  * with your own.
  */
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
-import { NumberRatchet } from '@bitblit/ratchet/dist/common/number-ratchet';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
+import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 import fs from 'fs';
 import path from 'path';
-import { CommonJwtToken, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/dist/common';
+import { CommonJwtToken, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/common';
 import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
@@ -32,8 +32,8 @@ import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
-import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EventUtil } from '../http/event-util';
 import { LogMessageBackgroundErrorProcessor } from '../built-in/background/log-message-background-error-processor';

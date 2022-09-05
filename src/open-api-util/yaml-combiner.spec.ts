@@ -1,4 +1,4 @@
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import path from 'path';
 import { YamlCombiner } from './yaml-combiner';
 

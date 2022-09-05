@@ -1,12 +1,12 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { DateTime } from 'luxon';
 import qs from 'querystring';
 import { EventUtil } from './http/event-util';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName } from '@bitblit/ratchet/common';
 
 /**
  * A simplistic server for testing your lambdas locally

@@ -1,6 +1,6 @@
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { CliRatchet } from '@bitblit/ratchet/dist/node-only';
+import { ErrorRatchet } from '@bitblit/ratchet/common';
+import { Logger } from '@bitblit/ratchet/common/logger';
+import { CliRatchet } from '@bitblit/ratchet/node-only';
 import { RunBackgroundProcessFromCommandLine } from './run-background-process-from-command-line';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { EpsilonConstants } from './epsilon-constants';

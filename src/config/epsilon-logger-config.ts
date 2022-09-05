@@ -1,4 +1,4 @@
-import { LoggerLevelName, LogMessageFormatType } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName, LogMessageFormatType } from '@bitblit/ratchet/common';
 import { LoggingTraceIdGenerator } from './logging-trace-id-generator';
 
 export interface EpsilonLoggerConfig {

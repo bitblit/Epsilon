@@ -1,21 +1,21 @@
-import { Logger, StopWatch } from '@bitblit/ratchet/dist/common';
+import { Logger, StopWatch } from '@bitblit/ratchet/common';
 import { BackgroundEntry } from './background-entry';
 import { Context } from 'aws-lambda';
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
-import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
+import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundManager } from '../background-manager';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
-import { S3CacheRatchet } from '@bitblit/ratchet/dist/aws';
+import { S3CacheRatchet } from '@bitblit/ratchet/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
-import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
+import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same

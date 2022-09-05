@@ -1,8 +1,8 @@
 import { BackgroundExecutionListener } from './background-execution-listener';
 import { BackgroundExecutionEvent } from './background-execution-event';
 import { BackgroundExecutionEventType } from './background-execution-event-type';
-import { DynamoRatchet } from '@bitblit/ratchet/dist/aws';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common';
+import { DynamoRatchet } from '@bitblit/ratchet/aws';
+import { ErrorRatchet } from '@bitblit/ratchet/common';
 import { BackgroundProcessLogTableEntry } from './background-process-log-table-entry';
 import { ContextUtil } from '../util/context-util';
 

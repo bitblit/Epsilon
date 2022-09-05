@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { Context } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { EpsilonConstants } from './epsilon-constants';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 
 /**

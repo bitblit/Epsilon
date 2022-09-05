@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
-import { ErrorRatchet, Logger, NumberRatchet } from '@bitblit/ratchet/dist/common';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { ErrorRatchet, Logger, NumberRatchet } from '@bitblit/ratchet/common';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { GetQueueAttributesRequest, GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import AWS from 'aws-sdk';
 import { BackgroundEntry } from './background/background-entry';
@@ -8,7 +8,7 @@ import { BackgroundAwsConfig } from './config/background/background-aws-config';
 import { EpsilonConstants } from './epsilon-constants';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import { DateTime } from 'luxon';
-import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { AWSError } from 'aws-sdk/lib/error';
 import { ContextUtil } from './util/context-util';

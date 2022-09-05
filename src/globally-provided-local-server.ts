@@ -1,10 +1,10 @@
 import 'reflect-metadata';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
-import { ErrorRatchet } from '@bitblit/ratchet/dist/common/error-ratchet';
+import { Logger } from '@bitblit/ratchet/common/logger';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { LocalServer } from './local-server';
-import { CliRatchet } from '@bitblit/ratchet/dist/node-only';
-import { LoggerLevelName } from '@bitblit/ratchet/dist/common';
+import { CliRatchet } from '@bitblit/ratchet/node-only';
+import { LoggerLevelName } from '@bitblit/ratchet/common';
 
 if (CliRatchet.isCalledFromCLI('globally-provided-local-server')) {
   Logger.setLevel(LoggerLevelName.debug);

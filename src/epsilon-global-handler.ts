@@ -1,15 +1,15 @@
 import { Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { EventUtil } from './http/event-util';
 import { BackgroundEntry } from './background/background-entry';
 import { EpsilonInstance } from './epsilon-instance';
-import { TimeoutToken } from '@bitblit/ratchet/dist/common/timeout-token';
-import { PromiseRatchet } from '@bitblit/ratchet/dist/common/promise-ratchet';
+import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
+import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
 import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
-import { LoggerLevelName, LoggerOutputFunction, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/dist/common';
+import { LoggerLevelName, LoggerOutputFunction, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
@@ -18,7 +18,7 @@ import { GenericSnsEpsilonLambdaEventHandler } from './lambda-event-handler/gene
 import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsilon-lambda-event-handler';
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon

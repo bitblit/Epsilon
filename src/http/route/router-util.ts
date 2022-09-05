@@ -1,11 +1,11 @@
 import { EpsilonRouter } from './epsilon-router';
 import { MisconfiguredError } from '../error/misconfigured-error';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
-import { BooleanRatchet } from '@bitblit/ratchet/dist/common/boolean-ratchet';
+import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
 import { OpenApiDocument } from '../../config/open-api/open-api-document';
-import { ModelValidator } from '@bitblit/ratchet/dist/model-validator';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
 import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';

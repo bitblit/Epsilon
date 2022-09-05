@@ -1,4 +1,4 @@
-import { Logger } from '@bitblit/ratchet/dist/common';
+import { Logger } from '@bitblit/ratchet/common';
 import { BackgroundProcessor } from '../../config/background/background-processor';
 import { BackgroundManager } from '../../background-manager';
 import { SampleInputValidatedProcessorData } from './sample-input-validated-processor-data';

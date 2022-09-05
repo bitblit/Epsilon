@@ -1,5 +1,5 @@
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 
 export class EpsilonConstants {
   public static readonly EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME = 'EPSILON_FINDER_DYNAMIC_IMPORT_PATH';

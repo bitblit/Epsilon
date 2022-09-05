@@ -1,11 +1,11 @@
 import { EpsilonRouter } from './route/epsilon-router';
 import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/dist/common/logger';
+import { Logger } from '@bitblit/ratchet/common/logger';
 import Route from 'route-parser';
 import { RouteMapping } from './route/route-mapping';
 import { ResponseUtil } from './response-util';
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
-import { RequireRatchet } from '@bitblit/ratchet/dist/common/require-ratchet';
+import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
 import { EpsilonHttpError } from './error/epsilon-http-error';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { HttpProcessingConfig } from '../config/http/http-processing-config';
@@ -14,8 +14,8 @@ import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
 import { ContextUtil } from '../util/context-util';
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { LambdaEventDetector } from '@bitblit/ratchet/dist/aws/lambda-event-detector';
-import { StringRatchet } from '@bitblit/ratchet/dist/common/string-ratchet';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon
