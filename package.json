@@ -34,7 +34,7 @@
     "apply-ci-vars": "yarn ratchet-apply-ci-env-variables-to-files github dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
+    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
     "run-test-error-server": "yarn compile && node dist/test-error-server.js",
     "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js"
