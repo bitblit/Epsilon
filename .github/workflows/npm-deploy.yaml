@@ -28,7 +28,7 @@ jobs:
         shell: bash
 
       - name: Deploy to NPMJS
-        run: yarn publish --no-git-tag-version --non-interactive --new-version 1.0.$GITHUB_RUN_NUMBER dist
+        run: yarn publish --no-git-tag-version --non-interactive --new-version 2.0.$GITHUB_RUN_NUMBER dist
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
