@@ -38,8 +38,7 @@
     "run-local-container-server": "node dist/local-container-server.js",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
     "run-test-error-server": "yarn compile && node dist/test-error-server.js",
-    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js",
-    "prepare": "husky install"
+    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js"
   },
   "repository": {
     "type": "git",
