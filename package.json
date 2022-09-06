@@ -37,8 +37,7 @@
     "generate-barrels": "barrelsby --delete -d src -e .*\\.spec\\.ts -e .*sample.*",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
     "run-test-error-server": "yarn compile && node dist/test-error-server.js",
-    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js",
-    "prepare": "husky install"
+    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js"
   },
   "repository": {
     "type": "git",
