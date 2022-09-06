@@ -2,6 +2,8 @@
 
 A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
+You may wish to read [the changelog](CHANGELOG.md)
+
 # TODO:
 
 - Discuss pros/cons of single lambda for http/batch in this document
@@ -30,73 +32,6 @@ A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 - Environmental service
 - Simple redirects
-
-# Release Notes
-
-## 0.13.x
-
-- Updated AWS, switched to Github actions
-- Above 0.13.10 added most basic support for ApiGatewayV2 (and Lambda Function Url) handling backwards compatibility
-
-## 0.12.x
-
-- Updated Apollo (GraphQL) to v3 which may be backwards incompatible
-
-## 0.11.x
-
-- Adding concept of inter-api events (Only useful when combining multiple related apis and decoupling)
-
-## 0.10.x
-
-- Deprecated Salt Mine library and moved all handling into Epsilon under "Background" handling
-- Switched HTTP handling to a filter based model
-
-## 0.9.x
-
-- TBD
-
-## 0.8.x
-
-- Updated core libs
-- Switched to Luxon from Moment to match Ratchet
-
-## 0.7.x
-
-- Updated core libs
-- Added ContextUtil to get static access to the AWS context object
-- Renamed apiGateway to http in config
-- Add ability to log JWT parse errors at defined levels
-- Added new endpoints to the sample server
-- Added outbound model validation
-- Added blocking on "null" literal string on query and path params
-- Added request id as outbound header
-- Added better (no longer crashes) handling when a null object returns from a handler
-
-## 0.6.x
-
-- Updated core libs
-- Added richer error object and builder pattern for errors
-
-## 0.5.x
-
-- Updated core libs
-- Moved to eslint and cleaned up
-
-## 0.4.x
-
-- Switched logging for GraphQL introspection calls on local-server down to silly level
-- Updated to new version of libraries
-- Switched to js-yaml instead of node-yaml
-- Moved api-gateway package to http package to reflect that this also handles ALB endpoints
-
-## 0.3.x
-
-- Remapped CRON handler to be able to filter on more than just the incoming Event name. Given the new mapping,
-  I'd recommend just setting up an "every minute" Cloudwatch event and using filters. Filters now allow
-  running multiple Batch processors, eg Dev/QA/Prod
-- Adding logging of request ID to output errors
-- Added default error (to allow masking of 500 errors in prod and prevent information leakage)
-- Allow optional access to the request context for handlers (esp for the request id, remaining time)
 
 # GraphQL Support (v0.1.x and above)
 
