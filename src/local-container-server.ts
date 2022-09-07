@@ -68,7 +68,7 @@ export class LocalContainerServer {
   }
 }
 
-if (CliRatchet.isCalledFromCLI('local-container-server')) {
+if (CliRatchet.isCalledFromCLISingle('local-container-server')) {
   Logger.setLevel(LoggerLevelName.debug);
   Logger.debug('Running local container server');
   const testServer: LocalContainerServer = new LocalContainerServer();

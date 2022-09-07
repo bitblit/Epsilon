@@ -6,7 +6,7 @@ import { LocalServer } from './local-server';
 import { CliRatchet } from '@bitblit/ratchet/node-only';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
 
-if (CliRatchet.isCalledFromCLI('globally-provided-local-server')) {
+if (CliRatchet.isCalledFromCLISingle('globally-provided-local-server')) {
   Logger.setLevel(LoggerLevelName.debug);
   Logger.debug('Fetching handler from global');
   const producer: () => Promise<EpsilonGlobalHandler> = EpsilonGlobalHandler.globalInstanceProvider;
