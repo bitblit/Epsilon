@@ -95,12 +95,12 @@ export class ContextUtil {
   }
 
   private static traceHeaderName(): string {
-    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceHeaderName || 'x-ep-trace-id';
+    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceHeaderName || 'X-EP-TRACE-ID';
     return headerName;
   }
 
   private static traceDepthHeaderName(): string {
-    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceDepthHeaderName || 'x-ep-trace-depth';
+    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceDepthHeaderName || 'X-EP-TRACE-DEPTH';
     return headerName;
   }
 
