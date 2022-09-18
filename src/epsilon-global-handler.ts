@@ -122,6 +122,7 @@ export class EpsilonGlobalHandler {
         rval = tmp;
       }
     }
+    Logger.silly('EpsilonEnd:LambdaHandler returning %j', rval);
     return rval;
   }
 
@@ -170,12 +171,7 @@ export class EpsilonGlobalHandler {
             'EvtEnd: %s',
             label
           );
-          Logger.silly(
-            this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
-            'EvtEnd: %s  Value: %j',
-            label,
-            rval
-          );
+          Logger.silly('EvtEnd:Value: %s Value: %j', label, rval);
         }
       }
     } catch (err) {
