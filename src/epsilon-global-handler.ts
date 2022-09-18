@@ -58,6 +58,8 @@ export class EpsilonGlobalHandler {
             process: (msg: LogMessage): LogMessage => {
               msg.params = Object.assign({}, msg.params || {}, ContextUtil.fetchLogVariables());
               msg.params['awsRequestId'] = ContextUtil.currentRequestId();
+              msg.params['@requestId'] = ContextUtil.currentRequestId(); // Backwards compatible with AWS
+              msg.params['epoch'] = msg.timestamp;
               msg.params['traceId'] = ContextUtil.currentTraceId();
               msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
               msg.params['procLabel'] = ContextUtil.currentProcessLabel();
@@ -105,23 +107,35 @@ export class EpsilonGlobalHandler {
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
     let rval: any = null;
+    Logger.info('a');
     if (this.epsilon.config.disableLastResortTimeout || !context || !context.getRemainingTimeInMillis()) {
+      Logger.info('b');
       rval = await this.innerLambdaHandler(event, context);
+      Logger.info('c');
     } else {
       // Outer wrap timeout makes sure that we timeout even if the slow part is a filter instead of the controller
+      Logger.info('d');
       const tmp: any = await PromiseRatchet.timeout<ProxyResult>(
         this.innerLambdaHandler(event, context),
         'EpsilonLastResortTimeout',
         context.getRemainingTimeInMillis() - 1000
       ); // Reserve 1 second for cleanup
+      Logger.info('e');
       if (TimeoutToken.isTimeoutToken(tmp)) {
+        Logger.info('f');
         (tmp as TimeoutToken).writeToLog();
         // Using the HTTP version since it can use it, and the background ones dont care about the response format
+        Logger.info('g');
         rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
+        Logger.info('h');
       } else {
+        Logger.info('i');
         rval = tmp;
+        Logger.info('j');
       }
     }
+    Logger.info('k:%j', rval);
+
     Logger.silly('EpsilonEnd:LambdaHandler returning %j', rval);
     return rval;
   }
