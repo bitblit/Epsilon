@@ -170,6 +170,12 @@ export class EpsilonGlobalHandler {
             'EvtEnd: %s',
             label
           );
+          Logger.logByLevel(
+            this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
+            'EvtEnd: %s  Value: %j',
+            label,
+            rval
+          );
         }
       }
     } catch (err) {
