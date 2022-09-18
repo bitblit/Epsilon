@@ -170,7 +170,7 @@ export class EpsilonGlobalHandler {
             'EvtEnd: %s',
             label
           );
-          Logger.logByLevel(
+          Logger.silly(
             this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
             'EvtEnd: %s  Value: %j',
             label,
