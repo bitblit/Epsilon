@@ -8,6 +8,7 @@ import { BackgroundEntry } from '../background/background-entry';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { InternalBackgroundEntry } from '../background/internal-background-entry';
 import { InterApiEntry } from '../inter-api/inter-api-entry';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 
 // This class serves as a static holder for the AWS Lambda context, and also adds some
 // simple helper functions
@@ -60,7 +61,7 @@ export class ContextUtil {
   public static addHeadersToRecord(input: Record<string, any>, depthOffset: number = 0): void {
     if (input) {
       input[ContextUtil.traceHeaderName()] = ContextUtil.currentTraceId();
-      input[ContextUtil.traceDepthHeaderName()] = ContextUtil.currentTraceDepth() + depthOffset;
+      input[ContextUtil.traceDepthHeaderName()] = StringRatchet.safeString(ContextUtil.currentTraceDepth() + depthOffset);
     } else {
       ErrorRatchet.throwFormattedErr('Cannot add headers to null/undefined input');
     }
@@ -95,12 +96,12 @@ export class ContextUtil {
   }
 
   private static traceHeaderName(): string {
-    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceHeaderName || 'x-trace-id';
+    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceHeaderName || 'X-TRACE-ID';
     return headerName;
   }
 
   private static traceDepthHeaderName(): string {
-    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceDepthHeaderName || 'x-trace-depth';
+    const headerName: string = ContextUtil?.CURRENT_EPSILON_REFERENCE?.config?.loggerConfig?.traceDepthHeaderName || 'X-TRACE-DEPTH';
     return headerName;
   }
 

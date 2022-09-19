@@ -67,6 +67,7 @@ export class EpsilonGlobalHandler {
             process: (msg: LogMessage): LogMessage => {
               msg.params = Object.assign({}, msg.params || {}, ContextUtil.fetchLogVariables());
               msg.params['awsRequestId'] = ContextUtil.currentRequestId();
+              //msg.params['epoch'] = msg.timestamp;
               msg.params['traceId'] = ContextUtil.currentTraceId();
               msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
               msg.params['procLabel'] = ContextUtil.currentProcessLabel();
@@ -114,22 +115,26 @@ export class EpsilonGlobalHandler {
 
   public async lambdaHandler(event: any, context: Context): Promise<any> {
     let rval: any = null;
-    if (this.epsilon.config.disableLastResortTimeout || !context || !context.getRemainingTimeInMillis()) {
-      rval = await this.innerLambdaHandler(event, context);
-    } else {
-      // Outer wrap timeout makes sure that we timeout even if the slow part is a filter instead of the controller
-      const tmp: any = await PromiseRatchet.timeout<ProxyResult>(
-        this.innerLambdaHandler(event, context),
-        'EpsilonLastResortTimeout',
-        context.getRemainingTimeInMillis() - 1000
-      ); // Reserve 1 second for cleanup
-      if (TimeoutToken.isTimeoutToken(tmp)) {
-        (tmp as TimeoutToken).writeToLog();
-        // Using the HTTP version since it can use it, and the background ones dont care about the response format
-        rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
+    try {
+      if (this.epsilon.config.disableLastResortTimeout || !context || !context.getRemainingTimeInMillis()) {
+        rval = await this.innerLambdaHandler(event, context);
       } else {
-        rval = tmp;
+        // Outer wrap timeout makes sure that we timeout even if the slow part is a filter instead of the controller
+        const tmp: any = await PromiseRatchet.timeout<ProxyResult>(
+          this.innerLambdaHandler(event, context),
+          'EpsilonLastResortTimeout',
+          context.getRemainingTimeInMillis() - 1000
+        ); // Reserve 1 second for cleanup
+        if (TimeoutToken.isTimeoutToken(tmp)) {
+          (tmp as TimeoutToken).writeToLog();
+          // Using the HTTP version since it can use it, and the background ones dont care about the response format
+          rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
+        } else {
+          rval = tmp;
+        }
       }
+    } finally {
+      ContextUtil.clearContext();
     }
     return rval;
   }
@@ -179,6 +184,7 @@ export class EpsilonGlobalHandler {
             'EvtEnd: %s',
             label
           );
+          Logger.silly('EvtEnd:Value: %s Value: %j', label, rval);
         }
       }
     } catch (err) {
@@ -188,10 +194,7 @@ export class EpsilonGlobalHandler {
         body: JSON.stringify({ error: StringRatchet.safeString(err) }),
         isBase64Encoded: false,
       };
-    } finally {
-      ContextUtil.clearContext();
     }
-
     return rval;
   }
 }
