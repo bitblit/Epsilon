@@ -19,6 +19,7 @@ import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsil
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { EpsilonLoggingExtensionProcessor } from './epsilon-logging-extension-processor';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -57,21 +58,11 @@ export class EpsilonGlobalHandler {
     output.outputFunction = output.outputFunction ?? LoggerOutputFunction.StdOut;
     output.ringBufferSize = output.ringBufferSize ?? 0;
     output.preProcessors = output.preProcessors ?? [];
-    output.preProcessors.push({
-      process: (msg: LogMessage): LogMessage => {
-        msg.params = Object.assign({}, msg.params || {}, ContextUtil.fetchLogVariables());
-        msg.params['awsRequestId'] = ContextUtil.currentRequestId();
-        //msg.params['epoch'] = msg.timestamp;
-        msg.params['traceId'] = ContextUtil.currentTraceId();
-        msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
-        msg.params['procLabel'] = ContextUtil.currentProcessLabel();
-        return msg;
-      },
-    });
+    output.preProcessors.push(new EpsilonLoggingExtensionProcessor());
 
     Logger.changeDefaultOptions(output, true);
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
-    Logger.info('EpsilonLoggingConfiguration: Updated to %j', output);
+    Logger.info('EpsilonLoggingConfiguration: Updated to : %j', output);
   }
 
   public get epsilon(): EpsilonInstance {

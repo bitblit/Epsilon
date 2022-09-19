@@ -6,6 +6,7 @@ export * from './background-manager';
 export * from './epsilon-constants';
 export * from './epsilon-global-handler';
 export * from './epsilon-instance';
+export * from './epsilon-logging-extension-processor';
 export * from './inter-api-manager';
 export * from './local-server';
 export * from './test-error-server';
