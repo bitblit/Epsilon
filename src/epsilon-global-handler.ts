@@ -31,7 +31,9 @@ export class EpsilonGlobalHandler {
     // We only want to do this if it wasn't explicitly configured earlier
     if (!EpsilonGlobalHandler.LOGGER_CONFIGURED) {
       EpsilonGlobalHandler.configureDefaultLogger();
-      Logger.info('Default logger configured');
+      Logger.info('EpsilonLoggingConfiguration:Default logger configured');
+    } else {
+      Logger.info('EpsilonLoggingConfiguration:Skipping default logger config - already configured');
     }
 
     this.handlers = [
@@ -69,6 +71,7 @@ export class EpsilonGlobalHandler {
 
     Logger.changeDefaultOptions(output, true);
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
+    Logger.info('EpsilonLoggingConfiguration: Updated');
   }
 
   public get epsilon(): EpsilonInstance {
