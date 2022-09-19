@@ -59,8 +59,8 @@ export class ContextUtil {
 
   public static addHeadersToRecord(input: Record<string, any>, depthOffset: number = 0): void {
     if (input) {
-      input[ContextUtil.traceHeaderName()] = ContextUtil.currentTraceId();
-      input[ContextUtil.traceDepthHeaderName()] = ContextUtil.currentTraceDepth() + depthOffset;
+      //input[ContextUtil.traceHeaderName()] = ContextUtil.currentTraceId();
+      //input[ContextUtil.traceDepthHeaderName()] = ContextUtil.currentTraceDepth() + depthOffset;
     } else {
       ErrorRatchet.throwFormattedErr('Cannot add headers to null/undefined input');
     }
