@@ -71,7 +71,7 @@ export class EpsilonGlobalHandler {
 
     Logger.changeDefaultOptions(output, true);
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
-    Logger.info('EpsilonLoggingConfiguration: Updated');
+    Logger.info('EpsilonLoggingConfiguration: Updated to %j', output);
   }
 
   public get epsilon(): EpsilonInstance {
