@@ -9,7 +9,14 @@ import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
-import { LoggerLevelName, LoggerOptions, LoggerOutputFunction, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/common';
+import {
+  LoggerLevelName,
+  LoggerOptions,
+  LoggerOutputFunction,
+  LogMessage,
+  LogMessageFormatType,
+  LogMessageProcessor,
+} from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
@@ -57,8 +64,9 @@ export class EpsilonGlobalHandler {
     output.globalVars = output.globalVars ?? {}; // No extra defaults for now
     output.outputFunction = output.outputFunction ?? LoggerOutputFunction.StdOut;
     output.ringBufferSize = output.ringBufferSize ?? 0;
-    output.preProcessors = output.preProcessors || [];
-    output.preProcessors.push(new EpsilonLoggingExtensionProcessor());
+    const src: LogMessageProcessor[] = overrides.preProcessors || [];
+    output.preProcessors = src.concat([new EpsilonLoggingExtensionProcessor()]);
+    //output.preProcessors.push();
 
     Logger.changeDefaultOptions(output, true);
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
