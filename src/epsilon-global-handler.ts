@@ -24,11 +24,15 @@ import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
  */
 export class EpsilonGlobalHandler {
+  private static LOGGER_CONFIGURED: boolean = false;
   private handlers: EpsilonLambdaEventHandler<any>[] = null;
 
   constructor(private _epsilon: EpsilonInstance) {
-    EpsilonGlobalHandler.configureDefaultLogger();
-    Logger.info('Default logger configured');
+    // We only want to do this if it wasn't explicitly configured earlier
+    if (!EpsilonGlobalHandler.LOGGER_CONFIGURED) {
+      EpsilonGlobalHandler.configureDefaultLogger();
+      Logger.info('Default logger configured');
+    }
 
     this.handlers = [
       this._epsilon.webHandler,
@@ -64,6 +68,7 @@ export class EpsilonGlobalHandler {
     });
 
     Logger.changeDefaultOptions(output, true);
+    EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
   }
 
   public get epsilon(): EpsilonInstance {
