@@ -57,7 +57,7 @@ export class EpsilonGlobalHandler {
     output.globalVars = output.globalVars ?? {}; // No extra defaults for now
     output.outputFunction = output.outputFunction ?? LoggerOutputFunction.StdOut;
     output.ringBufferSize = output.ringBufferSize ?? 0;
-    output.preProcessors = output.preProcessors ?? [];
+    output.preProcessors = output.preProcessors || [];
     output.preProcessors.push(new EpsilonLoggingExtensionProcessor());
 
     Logger.changeDefaultOptions(output, true);
