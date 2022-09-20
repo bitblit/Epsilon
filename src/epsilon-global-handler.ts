@@ -64,7 +64,7 @@ export class EpsilonGlobalHandler {
     output.globalVars = output.globalVars ?? {}; // No extra defaults for now
     output.outputFunction = output.outputFunction ?? LoggerOutputFunction.StdOut;
     output.ringBufferSize = output.ringBufferSize ?? 0;
-    const src: LogMessageProcessor[] = overrides.preProcessors || [];
+    const src: LogMessageProcessor[] = output.preProcessors || [];
     output.preProcessors = src.concat([new EpsilonLoggingExtensionProcessor()]);
     //output.preProcessors.push();
 
@@ -72,7 +72,8 @@ export class EpsilonGlobalHandler {
     Logger.changeDefaultOptions(output, true);
     const post: LoggerOptions = Logger.getOptions();
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
-    Logger.info('EpsilonLoggingConfiguration: Updated to : %j', output);
+    Logger.info('EpsilonLoggingConfiguration: Updated');
+    Logger.dumpConfigurationIntoLog();
   }
 
   public get epsilon(): EpsilonInstance {

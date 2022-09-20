@@ -12,4 +12,7 @@ export class EpsilonLoggingExtensionProcessor implements LogMessageProcessor {
     msg.params['procLabel'] = ContextUtil.currentProcessLabel();
     return msg;
   }
+  public label(): string {
+    return 'EpsilonLoggingExtensionProcessor';
+  }
 }
