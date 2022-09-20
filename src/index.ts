@@ -7,6 +7,7 @@ export * from './epsilon-build-properties';
 export * from './epsilon-constants';
 export * from './epsilon-global-handler';
 export * from './epsilon-instance';
+export * from './epsilon-logging-extension-processor';
 export * from './globally-provided-aws-batch-core';
 export * from './globally-provided-handler-lambda';
 export * from './globally-provided-local-server';

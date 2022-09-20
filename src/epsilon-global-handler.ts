@@ -9,7 +9,14 @@ import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
-import { LoggerLevelName, LoggerOutputFunction, LogMessage, LogMessageFormatType } from '@bitblit/ratchet/common';
+import {
+  LoggerLevelName,
+  LoggerOptions,
+  LoggerOutputFunction,
+  LogMessage,
+  LogMessageFormatType,
+  LogMessageProcessor,
+} from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
@@ -19,11 +26,13 @@ import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsil
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { EpsilonLoggingExtensionProcessor } from './epsilon-logging-extension-processor';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
  */
 export class EpsilonGlobalHandler {
+  private static LOGGER_CONFIGURED: boolean = false;
   private static GLOBAL_INSTANCE_PROVIDER: () => Promise<EpsilonGlobalHandler>;
 
   public static set globalInstanceProvider(input: () => Promise<EpsilonGlobalHandler>) {
@@ -36,8 +45,13 @@ export class EpsilonGlobalHandler {
   private handlers: EpsilonLambdaEventHandler<any>[] = null;
 
   constructor(private _epsilon: EpsilonInstance) {
-    EpsilonGlobalHandler.configureDefaultLogger();
-    Logger.info('Default logger configured');
+    // We only want to do this if it wasn't explicitly configured earlier
+    if (!EpsilonGlobalHandler.LOGGER_CONFIGURED) {
+      EpsilonGlobalHandler.configureDefaultLogger();
+      Logger.info('EpsilonLoggingConfiguration:Default logger configured');
+    } else {
+      Logger.info('EpsilonLoggingConfiguration:Skipping default logger config - already configured');
+    }
 
     this.handlers = [
       this._epsilon.webHandler,
@@ -51,33 +65,24 @@ export class EpsilonGlobalHandler {
     ];
   }
 
-  public static configureDefaultLogger(): void {
-    Logger.changeDefaultOptions(
-      {
-        initialLevel: LoggerLevelName.info,
-        formatType: LogMessageFormatType.StructuredJson,
-        trace: null,
-        globalVars: {
-          ep: '1',
-        },
-        outputFunction: LoggerOutputFunction.StdOut,
-        ringBufferSize: 0,
-        preProcessors: [
-          {
-            process: (msg: LogMessage): LogMessage => {
-              msg.params = Object.assign({}, msg.params || {}, ContextUtil.fetchLogVariables());
-              msg.params['awsRequestId'] = ContextUtil.currentRequestId();
-              //msg.params['epoch'] = msg.timestamp;
-              msg.params['traceId'] = ContextUtil.currentTraceId();
-              msg.params['traceDepth'] = ContextUtil.currentTraceDepth();
-              msg.params['procLabel'] = ContextUtil.currentProcessLabel();
-              return msg;
-            },
-          },
-        ],
-      },
-      true
-    );
+  public static configureDefaultLogger(overrides?: LoggerOptions): void {
+    const output: LoggerOptions = overrides ? Object.assign({}, overrides) : {};
+    output.initialLevel = output.initialLevel ?? LoggerLevelName.info;
+    output.formatType = output.formatType ?? LogMessageFormatType.StructuredJson;
+    //output.trace;
+    output.globalVars = output.globalVars ?? {}; // No extra defaults for now
+    output.outputFunction = output.outputFunction ?? LoggerOutputFunction.StdOut;
+    output.ringBufferSize = output.ringBufferSize ?? 0;
+    const src: LogMessageProcessor[] = output.preProcessors || [];
+    output.preProcessors = src.concat([new EpsilonLoggingExtensionProcessor()]);
+    //output.preProcessors.push();
+
+    const pre: LoggerOptions = Logger.getOptions();
+    Logger.changeDefaultOptions(output, true);
+    const post: LoggerOptions = Logger.getOptions();
+    EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
+    Logger.info('EpsilonLoggingConfiguration: Updated');
+    Logger.dumpConfigurationIntoLog();
   }
 
   public get epsilon(): EpsilonInstance {
