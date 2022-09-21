@@ -500,10 +500,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@2.0.33":
-  version "2.0.33"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.0.33.tgz#077fc9bdc591900959cc20aaf05f2ea178c2bcec"
-  integrity sha512-fzoaQCpJL+PLMUD6tNXZaJPv9hv2CZV/fIVV4yUIrqJdgATXe34zf8vVAf6Bkspm7HtQ+BkfZcKqxBvzIf4h1w==
+"@bitblit/ratchet@2.0.34":
+  version "2.0.34"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.0.34.tgz#4be23295ddadd24fd582b0b48388e45f050335b6"
+  integrity sha512-76Cwbo4kwC8xEnv+dlPHxdbJeP7LHagLD72INrBNtAzOnf5kFzUfiSEKbedvGQZ4OHHz6rPKMXFwtghCbuUCag==
   dependencies:
     browserslist "4.21.4"
     lodash "4.17.21"
@@ -3681,10 +3681,10 @@ jmespath@0.16.0:
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.16.0.tgz#b15b0a85dfd4d930d43e69ed605943c802785076"
   integrity sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==
 
-jose@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/jose/-/jose-2.0.5.tgz#29746a18d9fff7dcf9d5d2a6f62cb0c7cd27abd3"
-  integrity sha512-BAiDNeDKTMgk4tvD0BbxJ8xHEHBZgpeRZ1zGPPsitSyMgjoMWiLGYAE7H7NpP5h0lPppQajQs871E8NHUrzVPA==
+jose@^2.0.5, jose@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/jose/-/jose-2.0.6.tgz#894ba19169af339d3911be933f913dd02fc57c7c"
+  integrity sha512-FVoPY7SflDodE4lknJmbAHSUjLCzE2H1F6MS0RYKMQ8SR+lNccpMf8R4eqkNYyyUjR5qZReOzZo5C5YiHOCjjg==
   dependencies:
     "@panva/asn1.js" "^1.0.0"
 

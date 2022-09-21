@@ -73,7 +73,7 @@ export class EpsilonGlobalHandler {
     const post: LoggerOptions = Logger.getOptions();
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
     Logger.info('EpsilonLoggingConfiguration: Updated');
-    Logger.dumpConfigurationIntoLog();
+    Logger.dumpOptionsIntoLog();
   }
 
   public get epsilon(): EpsilonInstance {
