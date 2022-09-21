@@ -500,10 +500,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@2.0.34":
-  version "2.0.34"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.0.34.tgz#4be23295ddadd24fd582b0b48388e45f050335b6"
-  integrity sha512-76Cwbo4kwC8xEnv+dlPHxdbJeP7LHagLD72INrBNtAzOnf5kFzUfiSEKbedvGQZ4OHHz6rPKMXFwtghCbuUCag==
+"@bitblit/ratchet@2.0.35":
+  version "2.0.35"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.0.35.tgz#d7e4e29fd677d2ee38437cb943ac1289e4f950c9"
+  integrity sha512-+DBQYP6GZtTK1HY1WbAuYvjs+M/QjWpm1IvPe6OiY+wg++EZP+jgQpGnN0U/tb+/UTmL6ue4A5v/IbMLNmEVfw==
   dependencies:
     browserslist "4.21.4"
     lodash "4.17.21"
