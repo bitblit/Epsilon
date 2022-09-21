@@ -58,7 +58,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "2.0.33",
+    "@bitblit/ratchet": "2.0.34",
     "clear": "0.1.0",
     "commander": "5.1.0",
     "cross-fetch": "3.1.5",
@@ -87,6 +87,7 @@
     "follow-redirects": "^1.14.8",
     "ws": "^5.2.3",
     "y18n": "^4.0.1",
+    "jose": "^2.0.6",
     "ansi-regex": "^5.0.1",
     "tmpl": "^1.0.5",
     "nth-check": "^2.0.1",
@@ -95,7 +96,7 @@
     "ajv": "^6.12.6"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "2.0.33",
+    "@bitblit/ratchet": "2.0.34",
     "@types/aws-lambda": "8.10.104",
     "aws-cdk-lib": "2.40.0",
     "aws-sdk": "2.1219.0",
