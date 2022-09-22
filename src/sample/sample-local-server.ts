@@ -6,8 +6,11 @@ import { Logger } from '@bitblit/ratchet/common/logger';
 import { SampleServerComponents } from './sample-server-components';
 import { LocalServer } from '../local-server';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
+import { LocalWebTokenManipulator } from '../http/auth/local-web-token-manipulator';
 
 Logger.setLevel(LoggerLevelName.debug);
+const token: string = new LocalWebTokenManipulator(['abcd1234'], 'sample-server').createJWTString('asdf', {}, ['USER'], 3600);
+Logger.info('Use token: %s', token);
 
 SampleServerComponents.createSampleEpsilonGlobalHandler()
   .then((handler) => {

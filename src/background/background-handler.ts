@@ -47,7 +47,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
       mgr.localBus().subscribe(async (evt) => {
         if (mgr.localMode) {
           Logger.debug('Processing local background entry : %j', evt);
-          const rval: ProxyResult = await this.processEvent(evt, null);
+          const rval: boolean = await this.processSingleBackgroundEntry(evt);
           Logger.info('Processor returned %s', rval);
         } else {
           Logger.silly('Not local mode - ignoring');
