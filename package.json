@@ -98,9 +98,9 @@
   "peerDependencies": {
     "@bitblit/ratchet": "2.0.35",
     "@types/aws-lambda": "8.10.104",
-    "aws-cdk-lib": "2.40.0",
+    "aws-cdk-lib": "2.44.0",
     "aws-sdk": "2.1219.0",
-    "constructs": "10.1.94"
+    "constructs": "10.1.116"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.104",
