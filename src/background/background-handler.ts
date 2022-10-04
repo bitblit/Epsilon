@@ -230,11 +230,13 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
 
     // Do them one at a time since Background is meant to throttle.  Also, it should really
     // only be one per pull anyway
+    Logger.info('Found %d entries - processing', entries.length);
     for (let i = 0; i < entries.length; i++) {
       const e: InternalBackgroundEntry<any> = entries[i];
       const result: boolean = await this.processSingleBackgroundEntry(e);
       rval += result ? 1 : 0;
     }
+    Logger.debug('Returning %d', rval);
 
     return rval;
   }

@@ -58,17 +58,17 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "2.0.35",
+    "@bitblit/ratchet": "2.0.36",
     "clear": "0.1.0",
     "commander": "5.1.0",
     "cross-fetch": "3.1.5",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
     "jwks-rsa": "2.1.4",
-    "luxon": "3.0.3",
+    "luxon": "3.0.4",
     "reflect-metadata": "0.1.13",
     "route-parser": "0.0.5",
-    "rxjs": "7.5.6",
+    "rxjs": "7.5.7",
     "strip-js": "1.2.0",
     "swagger-model-validator": "3.0.21"
   },
@@ -97,13 +97,13 @@
   },
   "peerDependencies": {
     "@bitblit/ratchet": "2.0.35",
-    "@types/aws-lambda": "8.10.104",
+    "@types/aws-lambda": "8.10.106",
     "aws-cdk-lib": "2.44.0",
-    "aws-sdk": "2.1219.0",
-    "constructs": "10.1.116"
+    "aws-sdk": "2.1228.0",
+    "constructs": "10.1.121"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.104",
+    "@types/aws-lambda": "8.10.106",
     "@types/jest": "29.0.3",
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.0.1",
@@ -112,9 +112,9 @@
     "@typescript-eslint/parser": "5.38.0",
     "apollo-server-lambda": "3.10.2",
     "aws-cdk-lib": "2.44.0",
-    "aws-sdk": "2.1219.0",
+    "aws-sdk": "2.1228.0",
     "barrelsby": "2.4.0",
-    "constructs": "10.1.116",
+    "constructs": "10.1.121",
     "eslint": "8.22.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
@@ -130,6 +130,6 @@
     "shx": "0.3.4",
     "ts-jest": "29.0.1",
     "ts-node": "10.9.1",
-    "typescript": "4.8.3"
+    "typescript": "4.8.4"
   }
 }
