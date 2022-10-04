@@ -164,7 +164,15 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
         Logger.warn('Tried to process non-background start / immediate event : %j returning false', event);
       }
     } else {
+      Logger.info('Reading task from background queue');
       procd = await this.takeAndProcessSingleBackgroundSQSMessage();
+      if (procd > 0) {
+        Logger.info('Processed %d elements from background queue, refiring', procd);
+        const refire: string = await this.mgr.fireStartProcessingRequest();
+        Logger.info('Refire returned %s', refire);
+      } else {
+        Logger.info('No items processed - stopping');
+      }
     }
 
     const rval: ProxyResult = {
