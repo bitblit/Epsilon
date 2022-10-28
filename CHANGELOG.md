@@ -18,6 +18,13 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
 
+## [2.1.x] - 2022-10-27
+
+### Changed
+
+- Updated to newer library versions
+- Official release of CDK support for "Standard" Epsilon design
+
 ## [1.0.x] - 2022-08-24
 
 ### Added
