@@ -44,7 +44,7 @@ export class LocalServer {
         return 300000;
       },
     } as Context; //TBD
-    const evt: APIGatewayEvent = await this.messageToApiGatewayEvent(request, context);
+    const evt: APIGatewayEvent = await LocalServer.messageToApiGatewayEvent(request, context);
     const logEventLevel: LoggerLevelName = EventUtil.eventIsAGraphQLIntrospection(evt) ? LoggerLevelName.silly : LoggerLevelName.info;
 
     if (evt.path == '/epsilon-poison-pill') {
@@ -52,12 +52,12 @@ export class LocalServer {
       return true;
     } else {
       const result: ProxyResult = await this.globalHandler.lambdaHandler(evt, context);
-      const written: boolean = await this.writeProxyResultToServerResponse(result, response);
+      const written: boolean = await LocalServer.writeProxyResultToServerResponse(result, response);
       return written;
     }
   }
 
-  private async bodyAsBase64String(request: IncomingMessage): Promise<string> {
+  public static async bodyAsBase64String(request: IncomingMessage): Promise<string> {
     return new Promise<string>((res, rej) => {
       const body = [];
       request.on('data', (chunk) => {
@@ -70,8 +70,8 @@ export class LocalServer {
     });
   }
 
-  private async messageToApiGatewayEvent(request: IncomingMessage, context: Context): Promise<APIGatewayEvent> {
-    const bodyString: string = await this.bodyAsBase64String(request);
+  public static async messageToApiGatewayEvent(request: IncomingMessage, context: Context): Promise<APIGatewayEvent> {
+    const bodyString: string = await LocalServer.bodyAsBase64String(request);
     const stageIdx: number = request.url.indexOf('/', 1);
     const stage: string = request.url.substring(1, stageIdx);
     const path: string = request.url.substring(stageIdx + 1);
@@ -135,7 +135,7 @@ export class LocalServer {
     return rval;
   }
 
-  private async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse): Promise<boolean> {
+  public static async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse): Promise<boolean> {
     const isGraphQLSchemaResponse: boolean = !!proxyResult && !!proxyResult.body && proxyResult.body.indexOf('{"data":{"__schema"') > -1;
 
     if (!isGraphQLSchemaResponse) {

@@ -6,8 +6,6 @@ import { RequestTimeoutError } from '../../http/error/request-timeout-error';
 import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
-import { EventUtil } from '../../http/event-util';
-import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
 import { StringRatchet } from '@bitblit/ratchet/common';
 
 export class ApolloFilter {

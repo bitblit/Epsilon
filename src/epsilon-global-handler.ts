@@ -33,6 +33,15 @@ import { EpsilonLoggingExtensionProcessor } from './epsilon-logging-extension-pr
  */
 export class EpsilonGlobalHandler {
   private static LOGGER_CONFIGURED: boolean = false;
+  private static GLOBAL_INSTANCE_PROVIDER: () => Promise<EpsilonGlobalHandler>;
+
+  public static set globalInstanceProvider(input: () => Promise<EpsilonGlobalHandler>) {
+    EpsilonGlobalHandler.GLOBAL_INSTANCE_PROVIDER = input;
+  }
+
+  public static get globalInstanceProvider(): () => Promise<EpsilonGlobalHandler> {
+    return EpsilonGlobalHandler.GLOBAL_INSTANCE_PROVIDER;
+  }
   private handlers: EpsilonLambdaEventHandler<any>[] = null;
 
   constructor(private _epsilon: EpsilonInstance) {

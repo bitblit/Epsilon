@@ -3,12 +3,18 @@
  */
 
 export * from './background-manager';
+export * from './epsilon-build-properties';
 export * from './epsilon-constants';
 export * from './epsilon-global-handler';
 export * from './epsilon-instance';
 export * from './epsilon-logging-extension-processor';
+export * from './globally-provided-aws-batch-core';
+export * from './globally-provided-handler-lambda';
+export * from './globally-provided-local-server';
 export * from './inter-api-manager';
+export * from './local-container-server';
 export * from './local-server';
+export * from './run-background-process-from-command-line';
 export * from './test-error-server';
 export * from './background/background-dynamo-log-table-handler';
 export * from './background/background-entry';
@@ -70,6 +76,12 @@ export * from './config/inter-api/inter-api-process-mapping';
 export * from './config/open-api/open-api-document-components';
 export * from './config/open-api/open-api-document-path';
 export * from './config/open-api/open-api-document';
+export * from './deployment/cdk/epsilon-api-stack-props';
+export * from './deployment/cdk/epsilon-api-stack';
+export * from './deployment/cdk/epsilon-stack-util';
+export * from './deployment/cdk/epsilon-website-stack-props';
+export * from './deployment/cdk/epsilon-website-stack';
+export * from './deployment/cdk/simple-additional-s3-website-mapping';
 export * from './http/event-util';
 export * from './http/response-util';
 export * from './http/web-handler';
