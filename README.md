@@ -3,6 +3,7 @@
 A tiny library to simplify serving consistent apis from Lambda with OpenAPI
 
 You may wish to read [the changelog](CHANGELOG.md)
+-- attempting global
 
 # TODO:
 
