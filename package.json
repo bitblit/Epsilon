@@ -96,11 +96,11 @@
     "ajv": "^6.12.6"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "2.0.37",
+    "@bitblit/ratchet": "2.1.39",
     "@types/aws-lambda": "8.10.108",
-    "aws-cdk-lib": "2.48.0",
-    "aws-sdk": "2.1242.0",
-    "constructs": "10.1.142"
+    "aws-cdk-lib": "2.50.0",
+    "aws-sdk": "2.1254.0",
+    "constructs": "10.1.160"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.108",
