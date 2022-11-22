@@ -40,6 +40,7 @@ export * from './built-in/http/built-in-filters';
 export * from './built-in/http/built-in-handlers';
 export * from './built-in/http/log-level-manipulation-filter';
 export * from './built-in/http/run-handler-as-filter';
+export * from './cli-bootstrap/epsilon-run-background-process-from-command-line-dry-run';
 export * from './config/dynamo-db-config';
 export * from './config/epsilon-config';
 export * from './config/epsilon-lambda-event-handler';

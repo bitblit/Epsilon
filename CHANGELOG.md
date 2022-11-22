@@ -27,8 +27,7 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 - Refactored local web token manipulator to delegate all actual work to JwtRatchet
 - New JwtRatchet correctly uses the exp field as seconds instead of MS (may log out old tokens, or push exp so far in the
   future that changing keys is advisable)
-
-## [1.0.x] - 2022-08-24
+- Updated Commander to much newer version, breaking old wiring
 
 ## [2.1.x] - 2022-10-27
 

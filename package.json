@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "sideEffects": false,
+  "bin": {
+    "epsilon-run-background-process-from-command-line-dry-run": "./cli-bootstrap/epsilon-run-background-process-from-command-line-dry-run.js"
+  },
   "main": "./index.js",
   "typings": "./index.d.ts",
   "contributors": [
@@ -38,7 +41,8 @@
     "run-local-container-server": "node dist/local-container-server.js",
     "run-sample-server": "yarn compile && node dist/sample/sample-local-server.js",
     "run-test-error-server": "yarn compile && node dist/test-error-server.js",
-    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js"
+    "run-batch-sample-server": "yarn compile && node dist/sample/sample-batch-only-local-server.js",
+    "run-background-process-from-command-line-dry-run": "yarn compile && node dist/cli-bootstrap/epsilon-run-background-process-from-command-line-dry-run.js"
   },
   "repository": {
     "type": "git",
@@ -60,7 +64,7 @@
   "dependencies": {
     "@bitblit/ratchet": "2.2.48",
     "clear": "0.1.0",
-    "commander": "5.1.0",
+    "commander": "9.4.1",
     "cross-fetch": "3.1.5",
     "js-yaml": "4.1.0",
     "jsonwebtoken": "8.5.1",
@@ -98,9 +102,9 @@
   "peerDependencies": {
     "@bitblit/ratchet": "2.2.48",
     "@types/aws-lambda": "8.10.108",
-    "aws-cdk-lib": "2.50.0",
+    "aws-cdk-lib": "2.51.1",
     "aws-sdk": "2.1259.0",
-    "constructs": "10.1.160"
+    "constructs": "10.1.167"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.108",
@@ -108,13 +112,14 @@
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.1.0",
     "@types/node": "14.18.1",
+    "@types/commander": "2.12.2",
     "@typescript-eslint/eslint-plugin": "5.43.0",
     "@typescript-eslint/parser": "5.43.0",
     "apollo-server-lambda": "3.11.1",
-    "aws-cdk-lib": "2.50.0",
+    "aws-cdk-lib": "2.51.1",
     "aws-sdk": "2.1259.0",
     "barrelsby": "2.5.1",
-    "constructs": "10.1.160",
+    "constructs": "10.1.167",
     "eslint": "8.22.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
@@ -130,6 +135,6 @@
     "shx": "0.3.4",
     "ts-jest": "29.0.3",
     "ts-node": "10.9.1",
-    "typescript": "4.8.4"
+    "typescript": "4.9.3"
   }
 }
