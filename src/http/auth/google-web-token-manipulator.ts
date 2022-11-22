@@ -1,28 +1,31 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
-import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import jwt from 'jsonwebtoken';
 import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';
 import fetch from 'cross-fetch';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
 
-export class GoogleWebTokenManipulator implements WebTokenManipulator {
+export class GoogleWebTokenManipulator implements WebTokenManipulator<JwtTokenBase> {
   private static readonly GOOGLE_DISCOVERY_DOCUMENT: string = 'https://accounts.google.com/.well-known/openid-configuration';
   private cacheGoogleDiscoveryDocument: any;
   private jwksClient: any;
 
   constructor(private clientId: string) {}
 
-  public async extractTokenFromAuthorizationHeader<T>(authHeader: string): Promise<CommonJwtToken<T>> {
+  public async extractTokenFromAuthorizationHeader<T extends JwtTokenBase>(authHeader: string): Promise<JwtTokenBase> {
     let tokenString: string = StringRatchet.trimToEmpty(authHeader);
     if (tokenString.toLowerCase().startsWith('bearer ')) {
       tokenString = tokenString.substring(7);
     }
-    const validated: any = !!tokenString ? await this.parseAndValidateGoogleToken(tokenString, false) : null;
-    return validated as CommonJwtToken<T>;
+    const validated: JwtTokenBase = !!tokenString ? await this.parseAndValidateGoogleToken(tokenString, false) : null;
+    return validated;
   }
 
-  public async parseAndValidateGoogleToken<T>(googleToken: string, allowExpired: boolean = false): Promise<CommonJwtToken<T>> {
+  public async parseAndValidateGoogleToken<T extends JwtTokenBase>(
+    googleToken: string,
+    allowExpired: boolean = false
+  ): Promise<JwtTokenBase> {
     Logger.debug('Auth : %s', StringRatchet.obscure(googleToken, 4));
 
     // First decode so we can get the keys
@@ -38,7 +41,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator {
       clockTimestamp: nowEpochSeconds,
     });
 
-    return validated as CommonJwtToken<T>;
+    return validated;
   }
 
   private async fetchSigningKey(kid: string): Promise<string> {

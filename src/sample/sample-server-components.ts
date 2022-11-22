@@ -9,7 +9,7 @@ import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 import fs from 'fs';
 import path from 'path';
-import { CommonJwtToken, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/common';
+import { JwtTokenBase, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/common';
 import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
@@ -70,7 +70,7 @@ export class SampleServerComponents {
       plugins: [ApolloServerPluginLandingPageGraphQLPlayground({ endpoint: '/graphql' })],
       context: async ({ event, context, express }) => {
         const authTokenSt: string = EventUtil.extractBearerTokenFromEvent(event);
-        const token: CommonJwtToken<any> = null;
+        const token: JwtTokenBase = null;
         if (!!authTokenSt && authTokenSt.startsWith('Bearer')) {
           Logger.info('Got : %s', authTokenSt);
         }
@@ -127,7 +127,7 @@ export class SampleServerComponents {
     });
     // GraphQL endpoints are handled by filter and aren't in the OpenAPI spec so no need to wire them here
 
-    const tokenManipulator: LocalWebTokenManipulator = new LocalWebTokenManipulator(['abcd1234'], 'sample.erigir.com')
+    const tokenManipulator: LocalWebTokenManipulator<JwtTokenBase> = new LocalWebTokenManipulator(['abcd1234'], 'sample.erigir.com')
       .withParseFailureLogLevel(LoggerLevelName.debug)
       .withExtraDecryptionKeys(['abcdefabcdef'])
       .withOldKeyUseLogLevel(LoggerLevelName.info);

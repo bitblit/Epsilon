@@ -18,6 +18,18 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
 
+## [3.1.x] - 2022-11-21
+
+### Changed
+
+- Updated to newer library versions
+- (Backwards incompatible) Changed Local web token manipulator to be async to allow keys to be pulled from async source
+- Refactored local web token manipulator to delegate all actual work to JwtRatchet
+- New JwtRatchet correctly uses the exp field as seconds instead of MS (may log out old tokens, or push exp so far in the
+  future that changing keys is advisable)
+
+## [1.0.x] - 2022-08-24
+
 ## [2.1.x] - 2022-10-27
 
 ### Changed

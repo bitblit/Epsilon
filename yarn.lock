@@ -524,10 +524,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@2.1.42":
-  version "2.1.42"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.1.42.tgz#56904855a66c8508898cc381b347f3f9df2b668c"
-  integrity sha512-Zw90gz1IAWaUe9a93Ye5oVAdBLC1HDY+v4vChYXgHn7XwcNR7y6o6YiHS9GGuWyhgnDhnI9DKXjSREnXyAT+Fw==
+"@bitblit/ratchet@2.2.48":
+  version "2.2.48"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-2.2.48.tgz#4c2b824c81419d0b17beb2c612719bdda301425f"
+  integrity sha512-pR3v1ij+w78ZXrLRdroD8o5M9ymYckM7Qn1dQ3S3f7GLUJ6I/zIX1pABjWB9iXWonmNzyvUnZVao4DSx90NT0A==
   dependencies:
     browserslist "4.21.4"
     lodash "4.17.21"
@@ -535,7 +535,7 @@
     ts-enum-util "4.0.2"
   optionalDependencies:
     "@types/aws-lambda" "8.10.108"
-    aws-sdk "2.1254.0"
+    aws-sdk "2.1259.0"
     cross-fetch "3.1.5"
     csv "6.2.2"
     handlebars "4.7.7"
@@ -1654,10 +1654,10 @@ aws-cdk-lib@2.50.0:
     semver "^7.3.8"
     yaml "1.10.2"
 
-aws-sdk@2.1254.0:
-  version "2.1254.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1254.0.tgz#523d65f09c3f25d509e3a2cab87cf901178ea525"
-  integrity sha512-PDBSEskxckCwmfl9GVU+F6JZ9NusgO98DzRRqFv/PzQxkyw6vbdT6N/porUt+mFmGz3HjnGZLeZdywaDMtx7Dg==
+aws-sdk@2.1259.0:
+  version "2.1259.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1259.0.tgz#4b75c7853dc10320eeaa13dc5f0624fd4e05d80a"
+  integrity sha512-ku0sXQ0HOpvhMfu9yszqek4T+xvR9pXemxn3ruG3raIv9Hag0bpZoSqxm6rFtlZV9C26bB47ef5A5+HbkPk8PQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"

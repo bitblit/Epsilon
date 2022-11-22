@@ -7,6 +7,7 @@ import { ForbiddenError } from '../../http/error/forbidden-error';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 import { EventUtil } from '../../http/event-util';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
 
 export class BuiltInAuthFilters {
   public static async requireAllRolesInCommonJwt(fCtx: FilterChainContext, requiredRoleAllOf: string[]): Promise<boolean> {
@@ -61,7 +62,7 @@ export class BuiltInAuthFilters {
 
   public static async parseAuthorizationHeader(
     fCtx: FilterChainContext,
-    webTokenManipulators: WebTokenManipulator | WebTokenManipulator[]
+    webTokenManipulators: WebTokenManipulator<JwtTokenBase> | WebTokenManipulator<JwtTokenBase>[]
   ): Promise<boolean> {
     if (!fCtx?.event || !webTokenManipulators || (Array.isArray(webTokenManipulators) && !webTokenManipulators.length)) {
       throw new MisconfiguredError('Cannot continue - missing event or encryption');
@@ -72,10 +73,10 @@ export class BuiltInAuthFilters {
         webTokenManipulators = [webTokenManipulators];
       }
       for (let i = 0; i < webTokenManipulators.length && !fCtx?.event?.authorization?.auth; i++) {
-        const manipulator: WebTokenManipulator = webTokenManipulators[i];
+        const manipulator: WebTokenManipulator<JwtTokenBase> = webTokenManipulators[i];
         try {
           // We include the prefix (like 'bearer') in case the token wants to code more than one type
-          const token: CommonJwtToken<any> = await manipulator.extractTokenFromAuthorizationHeader(tokenString);
+          const token: JwtTokenBase = await manipulator.extractTokenFromAuthorizationHeader(tokenString);
           fCtx.event.authorization = {
             raw: tokenString,
             auth: token,

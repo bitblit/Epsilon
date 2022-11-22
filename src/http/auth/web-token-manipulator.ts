@@ -1,8 +1,8 @@
-import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
-
 /**
  * Service for handling auth tokens
  */
-export interface WebTokenManipulator {
-  extractTokenFromAuthorizationHeader<T>(header: string): Promise<CommonJwtToken<T>>;
+import { JwtTokenBase } from '@bitblit/ratchet/common';
+
+export interface WebTokenManipulator<T extends JwtTokenBase> {
+  extractTokenFromAuthorizationHeader(header: string): Promise<T>;
 }

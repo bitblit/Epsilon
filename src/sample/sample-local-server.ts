@@ -5,22 +5,30 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { SampleServerComponents } from './sample-server-components';
 import { LocalServer } from '../local-server';
-import { LoggerLevelName } from '@bitblit/ratchet/common';
+import { JwtTokenBase, LoggerLevelName } from '@bitblit/ratchet/common';
 import { LocalWebTokenManipulator } from '../http/auth/local-web-token-manipulator';
 
 Logger.setLevel(LoggerLevelName.debug);
-const token: string = new LocalWebTokenManipulator(['abcd1234'], 'sample-server').createJWTString('asdf', {}, ['USER'], 3600);
-Logger.info('Use token: %s', token);
+const localTokenHandler: LocalWebTokenManipulator<JwtTokenBase> = new LocalWebTokenManipulator<JwtTokenBase>(['abcd1234'], 'sample-server');
 
-SampleServerComponents.createSampleEpsilonGlobalHandler()
-  .then((handler) => {
-    const testServer: LocalServer = new LocalServer(handler);
-    testServer.runServer().then((res) => {
-      Logger.info('Got res server');
-      process.exit(0);
-    });
+localTokenHandler
+  .createJWTStringAsync('asdf', {}, ['USER'], 3600)
+  .then((token) => {
+    Logger.info('Use token: %s', token);
+    SampleServerComponents.createSampleEpsilonGlobalHandler()
+      .then((handler) => {
+        const testServer: LocalServer = new LocalServer(handler);
+        testServer.runServer().then((res) => {
+          Logger.info('Got res server');
+          process.exit(0);
+        });
+      })
+      .catch((err) => {
+        Logger.error('Error: %s', err, err);
+        process.exit(1);
+      });
   })
-  .catch((err) => {
-    Logger.error('Error: %s', err, err);
+  .catch((tokenErr) => {
+    Logger.error('Failed to create token : %s', tokenErr);
     process.exit(1);
   });

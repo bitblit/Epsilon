@@ -19,6 +19,7 @@ import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 import { FilterFunction } from '../../config/http/filter-function';
 import { BuiltInAuthFilters } from '../../built-in/http/built-in-auth-filters';
 import { LogLevelManipulationFilter } from '../../built-in/http/log-level-manipulation-filter';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
 
 /**
  * Endpoints about the api itself
@@ -28,7 +29,9 @@ export class RouterUtil {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(webTokenManipulator: WebTokenManipulator): FilterFunction[] {
+  public static defaultAuthenticationHeaderParsingEpsilonPreFilters(
+    webTokenManipulator: WebTokenManipulator<JwtTokenBase>
+  ): FilterFunction[] {
     return [
       (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
       (fCtx) => BuiltInAuthFilters.applyOpenApiAuthorization(fCtx),
@@ -71,7 +74,7 @@ export class RouterUtil {
   }
 
   public static defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(
-    webTokenManipulator: WebTokenManipulator
+    webTokenManipulator: WebTokenManipulator<JwtTokenBase>
   ): HttpProcessingConfig {
     const defaults: HttpProcessingConfig = {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',

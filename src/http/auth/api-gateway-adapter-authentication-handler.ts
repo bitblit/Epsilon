@@ -1,17 +1,17 @@
 import { AuthResponse, AuthResponseContext, Callback, Context, CustomAuthorizerEvent, PolicyDocument } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common/logger';
-import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { LocalWebTokenManipulator } from './local-web-token-manipulator';
 import { EpsilonConstants } from '../../epsilon-constants';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
 
 /**
  * This class is to simplify if the user wants to use a AWS Gateway authorizer in conjunction with Epsilon
  */
 export class ApiGatewayAdapterAuthenticationHandler {
-  private webTokenManipulator: LocalWebTokenManipulator;
+  private webTokenManipulator: LocalWebTokenManipulator<JwtTokenBase>;
 
   constructor(issuer: string, encryptionKeys: string) {
-    this.webTokenManipulator = new LocalWebTokenManipulator([encryptionKeys], issuer);
+    this.webTokenManipulator = new LocalWebTokenManipulator<JwtTokenBase>([encryptionKeys], issuer);
   }
 
   /**
@@ -29,14 +29,20 @@ export class ApiGatewayAdapterAuthenticationHandler {
     if (srcString) {
       const methodArn = event.methodArn;
 
-      const parsed: CommonJwtToken<any> = this.webTokenManipulator.parseAndValidateJWTString(srcString);
-
-      if (parsed) {
-        callback(null, this.createPolicy(methodArn, srcString, parsed));
-      } else {
-        Logger.info('Invalid bearer token');
-        callback(new Error('Unauthorized')); // Required by Lambda
-      }
+      this.webTokenManipulator
+        .parseAndValidateJWTStringAsync(srcString)
+        .then((parsed) => {
+          if (parsed) {
+            callback(null, this.createPolicy(methodArn, srcString, parsed));
+          } else {
+            Logger.info('Invalid bearer token');
+            callback(new Error('Unauthorized')); // Required by Lambda
+          }
+        })
+        .catch((err) => {
+          Logger.error('Exception parsing token : %s', err);
+          callback(new Error('Unauthorized')); // Required by Lambda
+        });
     } else {
       Logger.info('Token not supplied');
       callback(new Error('Unauthorized')); // Required by Lambda

@@ -1,23 +1,23 @@
-import { CommonJwtToken, Logger, StringRatchet } from '@bitblit/ratchet/common';
+import { JwtTokenBase, Logger, StringRatchet } from '@bitblit/ratchet/common';
 import jwt from 'jsonwebtoken';
 import jwks from 'jwks-rsa';
 import { WebTokenManipulator } from './web-token-manipulator';
 
-export class Auth0WebTokenManipulator implements WebTokenManipulator {
+export class Auth0WebTokenManipulator implements WebTokenManipulator<JwtTokenBase> {
   private jwksClient: any;
 
   constructor(private clientId: string, private jwksUri: string, private issuer: string) {}
 
-  public async extractTokenFromAuthorizationHeader<T>(authHeader: string): Promise<CommonJwtToken<T>> {
+  public async extractTokenFromAuthorizationHeader<T>(authHeader: string): Promise<JwtTokenBase> {
     let tokenString: string = StringRatchet.trimToEmpty(authHeader);
     if (tokenString.toLowerCase().startsWith('bearer ')) {
       tokenString = tokenString.substring(7);
     }
-    const validated: any = tokenString ? await this.parseAndValidateAuth0Token(tokenString, false) : null;
-    return validated as CommonJwtToken<T>;
+    const validated: JwtTokenBase = tokenString ? await this.parseAndValidateAuth0Token(tokenString, false) : null;
+    return validated;
   }
 
-  public async parseAndValidateAuth0Token<T>(auth0Token: string, allowExpired: boolean = false): Promise<CommonJwtToken<T>> {
+  public async parseAndValidateAuth0Token<T>(auth0Token: string, allowExpired: boolean = false): Promise<JwtTokenBase> {
     Logger.debug('Validating Auth0 token : %s', StringRatchet.obscure(auth0Token, 4));
 
     const fullToken: any = jwt.decode(auth0Token, { complete: true });
@@ -32,7 +32,7 @@ export class Auth0WebTokenManipulator implements WebTokenManipulator {
       clockTimestamp: nowEpochSeconds,
     });
 
-    return validated as CommonJwtToken<T>;
+    return validated;
   }
 
   private async fetchSigningKey(kid: string): Promise<string> {

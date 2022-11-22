@@ -1,111 +1,89 @@
 import jwt from 'jsonwebtoken';
 import { Logger } from '@bitblit/ratchet/common/logger';
-import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { WebTokenManipulator } from './web-token-manipulator';
 import { UnauthorizedError } from '../error/unauthorized-error';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
-import { LoggerLevelName } from '@bitblit/ratchet/common';
+import { ExpiredJwtHandling, JwtRatchet, JwtTokenBase, LoggerLevelName } from '@bitblit/ratchet/common';
+import { JwtRatchetLocalWebTokenManipulator } from './jwt-ratchet-local-web-token-manipulator';
+import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 
 /**
  * Service for handling jwt tokens
  */
-export class LocalWebTokenManipulator implements WebTokenManipulator {
-  private decryptionKeys: string[];
-  private oldKeyUseLogLevel: LoggerLevelName = LoggerLevelName.info;
-  private parseFailureLogLevel: LoggerLevelName = LoggerLevelName.debug;
+export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebTokenManipulator<T> {
+  private _ratchet: JwtRatchet;
 
   constructor(private encryptionKeys: string[], private issuer: string) {
     RequireRatchet.notNullOrUndefined(encryptionKeys, 'encryptionKeys');
     RequireRatchet.noNullOrUndefinedValuesInArray(encryptionKeys, encryptionKeys.length);
-    RequireRatchet.true(encryptionKeys.length > 0, 'Encryption keys may not be empty');
-    this.decryptionKeys = encryptionKeys; // Default decryption to same as encryption
+    this._ratchet = new JwtRatchet(Promise.resolve(encryptionKeys));
   }
 
-  public withExtraDecryptionKeys(keys: string[]): LocalWebTokenManipulator {
+  public withExtraDecryptionKeys(keys: string[]): LocalWebTokenManipulator<T> {
     RequireRatchet.notNullOrUndefined(keys, 'keys');
     RequireRatchet.noNullOrUndefinedValuesInArray(keys, keys.length);
-    this.decryptionKeys = this.encryptionKeys.concat(keys || []);
+    this._ratchet = new JwtRatchet(
+      this._ratchet.encryptionKeyPromise,
+      Promise.resolve(keys),
+      this._ratchet.jtiGenerator,
+      this._ratchet.decryptOnlyKeyUseLogLevel,
+      this._ratchet.parseFailureLogLevel
+    );
     return this;
   }
 
-  public withParseFailureLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator {
-    this.parseFailureLogLevel = logLevel;
+  public withParseFailureLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator<T> {
+    this._ratchet = new JwtRatchet(
+      this._ratchet.encryptionKeyPromise,
+      this._ratchet.decryptKeysPromise,
+      this._ratchet.jtiGenerator,
+      this._ratchet.decryptOnlyKeyUseLogLevel,
+      logLevel
+    );
     return this;
   }
 
-  public withOldKeyUseLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator {
-    this.oldKeyUseLogLevel = logLevel;
+  public withOldKeyUseLogLevel(logLevel: LoggerLevelName): LocalWebTokenManipulator<T> {
+    this._ratchet = new JwtRatchet(
+      this._ratchet.encryptionKeyPromise,
+      this._ratchet.decryptKeysPromise,
+      this._ratchet.jtiGenerator,
+      logLevel,
+      this._ratchet.parseFailureLogLevel
+    );
     return this;
   }
 
-  public get randomEncryptionKey(): string {
-    return this.encryptionKeys[Math.floor(Math.random() * this.encryptionKeys.length)];
+  public get jwtRatchet(): JwtRatchet {
+    return this._ratchet;
   }
 
-  public refreshJWTString<T>(tokenString: string, expirationSeconds: number): string {
-    const now = new Date().getTime();
-    const payload: CommonJwtToken<T> = this.parseAndValidateJWTString(tokenString, now);
-    let time = payload['exp'] - payload['iat'];
-    time = expirationSeconds || time;
-    const expires = now + time;
-    payload['exp'] = expires;
-    payload['iat'] = now;
-    Logger.debug('Signing new payload : %j', payload);
-    const token = jwt.sign(payload, this.randomEncryptionKey); // , algorithm = 'HS256')
-    return token;
+  public get selectRandomEncryptionKey(): Promise<string> {
+    return this._ratchet.selectRandomEncryptionKey();
   }
 
-  public parseAndValidateJWTString<T>(tokenString: string, now: number = new Date().getTime()): CommonJwtToken<T> {
-    const payload: CommonJwtToken<T> = this.parseJWTString(tokenString);
+  public createRefreshedJWTString(tokenString: string, expirationSeconds: number, allowExpired?: boolean): Promise<string> {
+    return this._ratchet.refreshJWTString(tokenString, allowExpired || false, expirationSeconds);
+  }
 
-    if (payload['exp'] != null && now < payload['exp']) {
-      return payload;
+  public async parseAndValidateJWTStringAsync<T extends JwtTokenBase>(tokenString: string): Promise<T> {
+    const payload: T = await this._ratchet.decodeToken(tokenString, ExpiredJwtHandling.ADD_FLAG);
+
+    if (JwtRatchet.hasExpiredFlag(payload)) {
+      throw new UnauthorizedError('Failing JWT token read/validate - token expired on ' + payload.exp);
     } else {
-      const age: number = now - payload['exp'];
-      throw new UnauthorizedError('Failing JWT token read/validate - token expired on ' + payload['exp'] + ', ' + age + ' ms ago');
+      return payload;
     }
   }
 
-  public parseJWTString<T>(tokenString: string): CommonJwtToken<T> {
-    let payload: CommonJwtToken<T> = null;
-    payload = this.verifyJWTWithAnyToken<T>(tokenString);
-
-    if (!payload) {
-      throw new UnauthorizedError('Unable to parse a token from this string');
-    }
-
-    Logger.debug('Got Payload : %j', payload);
-    return payload;
-  }
-
-  public verifyJWTWithAnyToken<T>(tokenString: string): CommonJwtToken<T> {
-    let rval: CommonJwtToken<T> = null;
-    for (let i = 0; i < this.decryptionKeys.length && !rval; i++) {
-      try {
-        const testKey: string = this.decryptionKeys[i];
-        rval = jwt.verify(tokenString, testKey) as CommonJwtToken<T>;
-        if (rval && !this.encryptionKeys.includes(testKey) && this.oldKeyUseLogLevel) {
-          Logger.logByLevel(this.oldKeyUseLogLevel, 'Used old key to decode token : %s', testKey);
-        }
-      } catch (err) {
-        // Only Log on the last one since it might have just been an old key
-        if (this.parseFailureLogLevel && i === this.decryptionKeys.length - 1) {
-          Logger.logByLevel(this.parseFailureLogLevel, 'Failed to parse JWT token : %s : %s', err['message'], tokenString);
-        }
-        rval = null;
-      }
-    }
-    return rval;
-  }
-
-  public createJWTString<T>(
+  public async createJWTStringAsync<T>(
     principal: string,
     userObject: T,
     roles: string[] = ['USER'],
     expirationSeconds: number = 3600,
     proxyUser: T = null
-  ): string {
+  ): Promise<string> {
     Logger.info('Creating JWT token for %s  that expires in %s', principal, expirationSeconds);
     const now = new Date().getTime();
     const expires = now + expirationSeconds * 1000;
@@ -120,18 +98,18 @@ export class LocalWebTokenManipulator implements WebTokenManipulator {
       user: userObject,
       proxy: proxyUser,
       roles: roles,
-    } as CommonJwtToken<T>;
+    };
 
-    const token = jwt.sign(tokenData, this.randomEncryptionKey); // , algorithm = 'HS256')
+    const token: string = await this._ratchet.createTokenString(tokenData, expirationSeconds);
     return token;
   }
 
-  public async extractTokenFromAuthorizationHeader<T>(header: string): Promise<CommonJwtToken<T>> {
+  public async extractTokenFromAuthorizationHeader<T extends JwtTokenBase>(header: string): Promise<T> {
     let tokenString: string = StringRatchet.trimToEmpty(header);
     if (tokenString.toLowerCase().startsWith('bearer ')) {
       tokenString = tokenString.substring(7);
     }
-    const validated: any = !!tokenString ? await this.parseAndValidateJWTString(tokenString) : null;
-    return validated as CommonJwtToken<T>;
+    const validated: T = !!tokenString ? await this.parseAndValidateJWTStringAsync(tokenString) : null;
+    return validated;
   }
 }
