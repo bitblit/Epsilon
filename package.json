@@ -100,7 +100,7 @@
     "ajv": "^6.12.6"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "2.3.54",
+    "@bitblit/ratchet": "2.3.55",
     "@types/aws-lambda": "8.10.109",
     "aws-cdk-lib": "2.53.0",
     "aws-sdk": "2.1267.0",
