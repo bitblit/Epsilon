@@ -43,8 +43,8 @@ export class ResponseUtil {
   }
 
   public static redirect(target: string, code: number = 301, queryParams: any = null): ProxyResult {
-    if (code !== 301 && code !== 302) {
-      throw new Error('Code must be 301 or 302 for a redirect');
+    if (code !== 301 && code !== 302 && code !== 307) {
+      throw new Error('Code must be 301 or 302 or 307 for a redirect');
     }
 
     let redirectTarget: string = target;

@@ -18,6 +18,13 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
 
+## [3.2.x] - 2022-11-21
+
+### Changed
+
+- Updated to newer library versions
+- Updated minimal Node version to 16.x
+
 ## [3.1.x] - 2022-11-21
 
 ### Changed
