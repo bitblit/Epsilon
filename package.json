@@ -101,7 +101,7 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.0.58",
+    "@bitblit/ratchet": "3.0.60",
     "@types/aws-lambda": "8.10.109",
     "aws-cdk-lib": "2.56.1",
     "aws-sdk": "2.1282.0",
