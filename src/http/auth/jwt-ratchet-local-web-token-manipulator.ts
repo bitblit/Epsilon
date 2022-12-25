@@ -1,18 +1,18 @@
 import { WebTokenManipulator } from './web-token-manipulator';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
-import { ExpiredJwtHandling, JwtRatchet, JwtTokenBase, LoggerLevelName } from '@bitblit/ratchet/common';
+import { ExpiredJwtHandling, JwtRatchet, JwtRatchetLike, JwtTokenBase } from '@bitblit/ratchet/common';
 
 /**
  * Service for handling jwt tokens
  */
 export class JwtRatchetLocalWebTokenManipulator<T extends JwtTokenBase> implements WebTokenManipulator<T> {
-  constructor(private _jwtRatchet: JwtRatchet, private _issuer: string) {
+  constructor(private _jwtRatchet: JwtRatchetLike, private _issuer: string) {
     RequireRatchet.notNullOrUndefined(_jwtRatchet, '_jwtRatchet');
     RequireRatchet.notNullOrUndefined(StringRatchet.trimToNull(_issuer), '_issuer');
   }
 
-  public get jwtRatchet(): JwtRatchet {
+  public get jwtRatchet(): JwtRatchetLike {
     return this._jwtRatchet;
   }
 

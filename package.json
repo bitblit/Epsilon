@@ -62,7 +62,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "3.0.58",
+    "@bitblit/ratchet": "3.0.60",
     "clear": "0.1.0",
     "commander": "9.4.1",
     "cross-fetch": "3.1.5",
@@ -105,11 +105,10 @@
     "@types/aws-lambda": "8.10.109",
     "aws-cdk-lib": "2.56.1",
     "aws-sdk": "2.1282.0",
-    "constructs": "2.1282.0"
+    "constructs": "10.1.200"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.109",
-    "@types/commander": "2.12.2",
     "@types/jest": "29.2.4",
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.1.0",
@@ -120,7 +119,7 @@
     "aws-cdk-lib": "2.56.1",
     "aws-sdk": "2.1282.0",
     "barrelsby": "2.5.1",
-    "constructs": "2.1282.0",
+    "constructs": "10.1.200",
     "eslint": "8.22.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",

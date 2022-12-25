@@ -1,8 +1,7 @@
 import { BackgroundExecutionListener } from './background-execution-listener';
 import { BackgroundExecutionEvent } from './background-execution-event';
 import { BackgroundExecutionEventType } from './background-execution-event-type';
-import { DynamoRatchet } from '@bitblit/ratchet/aws';
-import { ErrorRatchet } from '@bitblit/ratchet/common';
+import { DynamoRatchetLike } from '@bitblit/ratchet/aws';
 import { BackgroundProcessLogTableEntry } from './background-process-log-table-entry';
 import { ContextUtil } from '../util/context-util';
 
@@ -12,7 +11,7 @@ Table should be
 - Range key: timestamp
  */
 export class BackgroundDynamoLogTableHandler<T> implements BackgroundExecutionListener<T> {
-  constructor(private dynamo: DynamoRatchet, private tableName: string, private env: string, private backgroundQueueName: string) {}
+  constructor(private dynamo: DynamoRatchetLike, private tableName: string, private env: string, private backgroundQueueName: string) {}
 
   async onEvent(event: BackgroundExecutionEvent<T>): Promise<void> {
     const entry: BackgroundProcessLogTableEntry = {
