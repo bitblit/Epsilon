@@ -58,11 +58,11 @@
   },
   "homepage": "https://github.com/bitblit/Epsilon#readme",
   "engines": {
-    "node": ">=16.15"
+    "node": ">=14.18"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "3.0.60",
+    "@bitblit/ratchet": "3.0.61",
     "clear": "0.1.0",
     "commander": "9.4.1",
     "cross-fetch": "3.1.5",
@@ -101,7 +101,7 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.0.60",
+    "@bitblit/ratchet": "3.0.61",
     "@types/aws-lambda": "8.10.109",
     "aws-cdk-lib": "2.56.1",
     "aws-sdk": "2.1282.0",
