@@ -62,7 +62,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "3.0.61",
+    "@bitblit/ratchet": "3.0.62",
     "clear": "0.1.0",
     "commander": "9.4.1",
     "cross-fetch": "3.1.5",
@@ -101,17 +101,21 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.0.61",
+    "@bitblit/ratchet": "3.0.62",
     "@types/aws-lambda": "8.10.109",
-    "aws-cdk-lib": "2.56.1",
+    "aws-cdk-lib": "2.57.0",
     "aws-sdk": "2.1282.0",
-    "constructs": "10.1.200"
+    "constructs": "10.1.202",
+    "graphql": "16.6.0"
   },
   "peerDependenciesMeta": {
     "aws-cdk-lib": {
       "optional": true
     },
     "constructs": {
+      "optional": true
+    },
+    "graphql": {
       "optional": true
     }
   },
@@ -121,13 +125,13 @@
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.1.0",
     "@types/node": "16.11.58",
-    "@typescript-eslint/eslint-plugin": "5.47.0",
-    "@typescript-eslint/parser": "5.47.0",
+    "@typescript-eslint/eslint-plugin": "5.47.1",
+    "@typescript-eslint/parser": "5.47.1",
     "apollo-server-lambda": "3.11.1",
-    "aws-cdk-lib": "2.56.1",
-    "aws-sdk": "2.1282.0",
+    "aws-cdk-lib": "2.57.0",
+    "aws-sdk": "2.1284.0",
     "barrelsby": "2.5.1",
-    "constructs": "10.1.200",
+    "constructs": "10.1.202",
     "eslint": "8.22.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
