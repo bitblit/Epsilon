@@ -18,12 +18,21 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
 
+## [3.3.x] - 2023-01-02
+
+### Added
+
+- DaemonHandler and associated classes to make it easy to expose Ratchet Daemons through your REST API
+
+### Changed
+
+- Changed the index files to move all deployment to its own barrel, so that if you don't use CDK you don't have to have it in your build
+
 ## [3.2.x] - 2022-12-12
 
 ### Changed
 
 - Updated to newer library versions
-- Updated minimal Node version to 16.x
 
 ## [3.1.x] - 2022-11-21
 
