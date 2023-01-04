@@ -30,6 +30,7 @@ export class DaemonHandler {
     this.groupSelectionFunction = config?.groupSelector || ((evt: ExtendedAPIGatewayEvent) => Promise.resolve(daemon.defaultGroup));
   }
 
+  // If you are going to map this function, be sure that your Daemon is setup with a JwtRatchet...
   public async fetchDaemonStatusByPublicToken(evt: ExtendedAPIGatewayEvent): Promise<DaemonProcessState> {
     // TODO: verify has access to this key
     const publicToken: string = evt.pathParameters['publicToken'];
