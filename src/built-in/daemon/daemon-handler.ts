@@ -7,6 +7,7 @@ import { NotFoundError } from '../../http/error/not-found-error';
 import { DaemonProcessStateList } from './daemon-process-state-list';
 import { DaemonGroupSelectionFunction } from './daemon-group-selection-function';
 import { DaemonConfig } from './daemon-config';
+import { JwtRatchetLike } from '@bitblit/ratchet/common';
 
 /**
  * A helper class to simplify adding Ratchet "Daemon" handling to your application
@@ -29,12 +30,28 @@ export class DaemonHandler {
     this.groupSelectionFunction = config?.groupSelector || ((evt: ExtendedAPIGatewayEvent) => Promise.resolve(daemon.defaultGroup));
   }
 
+  public async fetchDaemonStatusByPublicToken(evt: ExtendedAPIGatewayEvent): Promise<DaemonProcessState> {
+    // TODO: verify has access to this key
+    const publicToken: string = evt.pathParameters['publicToken'];
+    Logger.info('Fetching daemon status for token: %s', publicToken);
+
+    let rval: DaemonProcessState = await this.daemon.statFromPublicToken(publicToken);
+    const canRead: boolean = rval ? await this.authorizer(evt, rval) : false;
+    rval = canRead ? rval : null;
+    if (rval === null) {
+      throw new NotFoundError('No such token : ' + publicToken);
+    }
+    return rval;
+  }
+
   public async fetchDaemonStatus(evt: ExtendedAPIGatewayEvent): Promise<DaemonProcessState> {
     // TODO: verify has access to this key
     const daemonKey: string = evt.pathParameters['key'];
     Logger.info('Fetching daemon status for : %s', daemonKey);
 
-    const rval: DaemonProcessState = await this.daemon.stat(daemonKey);
+    let rval: DaemonProcessState = await this.daemon.stat(daemonKey);
+    const canRead: boolean = rval ? await this.authorizer(evt, rval) : false;
+    rval = canRead ? rval : null;
     if (rval === null) {
       throw new NotFoundError('No such key : ' + daemonKey);
     }
