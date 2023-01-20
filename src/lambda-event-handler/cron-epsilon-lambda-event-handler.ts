@@ -1,16 +1,15 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { Context, ProxyResult, S3Event, ScheduledEvent } from 'aws-lambda';
-import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
+import { Context, ProxyResult, ScheduledEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
 import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
 import { CronConfig } from '../config/cron/cron-config';
-import { BackgroundManager } from '../background-manager';
 import { BackgroundHandler } from '../background/background-handler';
 import { BackgroundEntry } from '../background/background-entry';
 import { CronBackgroundEntry } from '../config/cron/cron-background-entry';
 import { CronUtil } from '../util/cron-util';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 
 export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<ScheduledEvent> {
   constructor(private _epsilon: EpsilonInstance) {}
@@ -52,7 +51,7 @@ export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<
   public static async processCronEvent(
     evt: ScheduledEvent,
     cronConfig: CronConfig,
-    backgroundManager: BackgroundManager,
+    backgroundManager: BackgroundManagerLike,
     background: BackgroundHandler
   ): Promise<boolean> {
     let rval: boolean = false;

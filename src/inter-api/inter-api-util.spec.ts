@@ -2,13 +2,12 @@ import { SNSEvent } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import { InterApiUtil } from './inter-api-util';
 import { InterApiConfig } from '../config/inter-api/inter-api-config';
-import { BackgroundManager } from '../background-manager';
-
-jest.mock('../background-manager');
-jest.mock('aws-sdk');
+import { JestRatchet } from '@bitblit/ratchet/jest';
+import { AwsSqsSnsBackgroundManager } from '../background/manager/aws-sqs-sns-background-manager';
 
 describe('#interApiUtil', function () {
   let mockSns;
+  let mockSqs;
   let mockBgMgr;
 
   const evt: SNSEvent = {
@@ -37,8 +36,9 @@ describe('#interApiUtil', function () {
   };
 
   beforeEach(() => {
-    mockSns = new AWS.SNS();
-    mockBgMgr = new BackgroundManager(null, null, null);
+    mockSns = JestRatchet.mock<AWS.SNS>();
+    mockSqs = JestRatchet.mock<AWS.SQS>();
+    mockBgMgr = new AwsSqsSnsBackgroundManager(null, mockSqs, mockSns);
   });
 
   it('should translate processes', async () => {

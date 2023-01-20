@@ -11,20 +11,22 @@ import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { WebHandler } from '../http/web-handler';
 import { MisconfiguredError } from '../http/error/misconfigured-error';
-import { BackgroundManager } from '../background-manager';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
-import { InterApiManager } from '../inter-api-manager';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  public static epsilonConfigToEpsilonGlobalHandler(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonGlobalHandler {
+  public static epsilonConfigToEpsilonGlobalHandler(
+    config: EpsilonConfig,
+    backgroundManager?: BackgroundManagerLike
+  ): EpsilonGlobalHandler {
     return new EpsilonGlobalHandler(EpsilonConfigParser.epsilonConfigToEpsilonInstance(config, backgroundManager));
   }
 
-  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonInstance {
+  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManagerLike): EpsilonInstance {
     this.validateGlobalConfig(config);
     Logger.info('Creating epsilon : BM : %j', backgroundManager);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);

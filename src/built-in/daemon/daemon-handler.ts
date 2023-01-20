@@ -65,7 +65,7 @@ export class DaemonHandler {
 
   public async listDaemonStatus(evt: ExtendedAPIGatewayEvent): Promise<DaemonProcessStateList> {
     const group: string = await this.config.groupSelector(evt);
-    let keys: DaemonProcessState[] = await this.daemon.list(group);
+    const keys: DaemonProcessState[] = await this.daemon.list(group);
     const allowed: DaemonProcessState[] = [];
     for (let i = 0; i < keys.length; i++) {
       const canRead: boolean = await this.config.authorizer(evt, keys[i]);

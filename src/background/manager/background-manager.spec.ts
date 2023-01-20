@@ -2,16 +2,16 @@ import { Logger } from '@bitblit/ratchet/common';
 import AWS from 'aws-sdk';
 import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
-import { BackgroundManager } from './background-manager';
-import { BackgroundConfig } from './config/background/background-config';
-import { EchoProcessor } from './built-in/background/echo-processor';
-import { NoOpProcessor } from './built-in/background/no-op-processor';
+import { AwsSqsSnsBackgroundManager } from './aws-sqs-sns-background-manager';
+import { BackgroundConfig } from '../../config/background/background-config';
+import { EchoProcessor } from '../../built-in/background/echo-processor';
+import { NoOpProcessor } from '../../built-in/background/no-op-processor';
 import { JestRatchet } from '@bitblit/ratchet/jest';
 
 describe('#createEntry', function () {
   let mockSqs;
   let mockSns;
-  let backgroundMgr: BackgroundManager;
+  let backgroundMgr: AwsSqsSnsBackgroundManager;
   const fakeAccountNumber: string = '123456789012';
   let backgroundConfig: BackgroundConfig;
   const fakeModelValidator: ModelValidator = new ModelValidator({ BackgroundBuiltInSampleInputValidatedProcessor: {} });
@@ -34,7 +34,7 @@ describe('#createEntry', function () {
       },
     };
 
-    backgroundMgr = new BackgroundManager(backgroundConfig.aws, mockSqs, mockSns);
+    backgroundMgr = new AwsSqsSnsBackgroundManager(backgroundConfig.aws, mockSqs, mockSns);
   });
 
   it('Should return queue attributes', async () => {
@@ -57,28 +57,28 @@ describe('#createEntry', function () {
 
   it('Should round-trip guids with prefix no slash', async () => {
     const prefix: string = 'test';
-    const guid: string = BackgroundManager.generateBackgroundGuid();
+    const guid: string = AwsSqsSnsBackgroundManager.generateBackgroundGuid();
     expect(guid).toBeTruthy();
-    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
-    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    const path: string = AwsSqsSnsBackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = AwsSqsSnsBackgroundManager.pathToBackgroundGuid(prefix, path);
     expect(outGuid).toEqual(guid);
   });
 
   it('Should round-trip guids with prefix with slash', async () => {
     const prefix: string = 'test/';
-    const guid: string = BackgroundManager.generateBackgroundGuid();
+    const guid: string = AwsSqsSnsBackgroundManager.generateBackgroundGuid();
     expect(guid).toBeTruthy();
-    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
-    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    const path: string = AwsSqsSnsBackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = AwsSqsSnsBackgroundManager.pathToBackgroundGuid(prefix, path);
     expect(outGuid).toEqual(guid);
   });
 
   it('Should round-trip guids with no prefix', async () => {
     const prefix: string = null;
-    const guid: string = BackgroundManager.generateBackgroundGuid();
+    const guid: string = AwsSqsSnsBackgroundManager.generateBackgroundGuid();
     expect(guid).toBeTruthy();
-    const path: string = BackgroundManager.backgroundGuidToPath(prefix, guid);
-    const outGuid: string = BackgroundManager.pathToBackgroundGuid(prefix, path);
+    const path: string = AwsSqsSnsBackgroundManager.backgroundGuidToPath(prefix, guid);
+    const outGuid: string = AwsSqsSnsBackgroundManager.pathToBackgroundGuid(prefix, path);
     expect(outGuid).toEqual(guid);
   });
 });

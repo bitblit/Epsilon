@@ -6,7 +6,7 @@ import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from '../config/background/background-config';
-import { BackgroundManager } from '../background-manager';
+import { AwsSqsSnsBackgroundManager } from './manager/aws-sqs-sns-background-manager';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
@@ -16,6 +16,7 @@ import { S3CacheRatchet } from '@bitblit/ratchet/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
+import { BackgroundManagerLike } from './manager/background-manager-like';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -27,7 +28,7 @@ export class BackgroundHttpAdapterHandler {
   constructor(
     private backgroundConfig: BackgroundConfig,
     private modelValidator: ModelValidator,
-    private backgroundManager: BackgroundManager,
+    private backgroundManager: BackgroundManagerLike,
     private maxWaitInMsForBackgroundJobToStart: number = 10_000
   ) {
     if (this?.backgroundConfig?.s3TransactionLoggingConfig?.s3 && this?.backgroundConfig?.s3TransactionLoggingConfig?.bucket) {
@@ -62,7 +63,7 @@ export class BackgroundHttpAdapterHandler {
       const guid: string =
         StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
       if (guid) {
-        const path: string = BackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
+        const path: string = AwsSqsSnsBackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
         const sw: StopWatch = new StopWatch(true);
         let log: BackgroundTransactionLog = null;
         while (!log && sw.elapsedMS() < this.maxWaitInMsForBackgroundJobToStart) {
@@ -95,13 +96,13 @@ export class BackgroundHttpAdapterHandler {
     const rval: BackgroundMetaResponseInternal = {
       currentQueueLength: currentCount,
       validTypes: valid,
-      localMode: this.backgroundManager.localMode,
+      backgroundManagerName: this.backgroundManager.backgroundManagerName,
     };
     return rval;
   }
 
   public async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundQueueResponseInternal> {
-    Logger.info('handleBackgroundSubmission : %j (local:%s)', evt.parsedBody, this.backgroundManager.localMode);
+    Logger.info('handleBackgroundSubmission : %j (mgr:%s)', evt.parsedBody, this.backgroundManager.backgroundManagerName);
 
     let rval: BackgroundQueueResponseInternal = null;
 

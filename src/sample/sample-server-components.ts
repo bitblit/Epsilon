@@ -27,7 +27,6 @@ import { EpsilonInstance } from '../epsilon-instance';
 import { EpsilonConfigParser } from '../util/epsilon-config-parser';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
-import { BackgroundManager } from '../background-manager';
 import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
@@ -37,6 +36,8 @@ import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EventUtil } from '../http/event-util';
 import { LogMessageBackgroundErrorProcessor } from '../built-in/background/log-message-background-error-processor';
+import { SingleThreadLocalBackgroundManager } from '../background/manager/single-thread-local-background-manager';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -196,8 +197,7 @@ export class SampleServerComponents {
 
   public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
     const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
-    backgroundManager.localMode = true;
+    const backgroundManager: SingleThreadLocalBackgroundManager = new SingleThreadLocalBackgroundManager();
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;
@@ -220,8 +220,7 @@ export class SampleServerComponents {
     ];
     epsilonConfig.httpConfig.filterHandledRouteMatches = ['.*']; // Only want the batch handling
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
-    backgroundManager.localMode = true;
+    const backgroundManager: BackgroundManagerLike = new SingleThreadLocalBackgroundManager();
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;

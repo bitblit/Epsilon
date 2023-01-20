@@ -2,12 +2,12 @@ import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 import { SNSEvent } from 'aws-lambda';
 import { EpsilonConstants } from '../epsilon-constants';
 import { InterApiEntry } from './inter-api-entry';
-import { BackgroundManager } from '../background-manager';
 import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
 import { Logger, StringRatchet } from '@bitblit/ratchet/common';
 import { BackgroundEntry } from '../background/background-entry';
 import { InterApiConfig } from '../config/inter-api/inter-api-config';
 import { ContextUtil } from '../util/context-util';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 
 export class InterApiUtil {
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
@@ -34,7 +34,7 @@ export class InterApiUtil {
     return rval;
   }
 
-  public static async processInterApiEvent(evt: SNSEvent, cfg: InterApiConfig, mgr: BackgroundManager): Promise<string[]> {
+  public static async processInterApiEvent(evt: SNSEvent, cfg: InterApiConfig, mgr: BackgroundManagerLike): Promise<string[]> {
     let rval: string[] = [];
     RequireRatchet.notNullOrUndefined(evt, 'InterApiEntry');
     RequireRatchet.notNullOrUndefined(mgr, 'BackgroundManager');
