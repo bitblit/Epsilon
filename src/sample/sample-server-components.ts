@@ -170,10 +170,10 @@ export class SampleServerComponents {
     };
 
     const background: BackgroundConfig = {
-      aws: {
-        queueUrl: 'FAKE-LOCAL',
-        notificationArn: 'FAKE-LOCAL',
-      },
+      //aws: {
+      //  queueUrl: 'FAKE-LOCAL',
+      //  notificationArn: 'FAKE-LOCAL',
+      //},
       httpMetaEndpoint: '/background/meta',
       httpSubmissionPath: '/background',
       implyTypeFromPathSuffix: false,

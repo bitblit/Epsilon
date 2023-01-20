@@ -8,6 +8,8 @@ import { InternalBackgroundEntry } from '../internal-background-entry';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { AWSError } from 'aws-sdk/lib/error';
 import { AbstractBackgroundManager } from './abstract-background-manager';
+import { BackgroundValidator } from '../background-validator';
+import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -19,6 +21,10 @@ import { AbstractBackgroundManager } from './abstract-background-manager';
 export class AwsSqsSnsBackgroundManager extends AbstractBackgroundManager {
   constructor(private _awsConfig: BackgroundAwsConfig, private _sqs: AWS.SQS, private _sns: AWS.SNS) {
     super();
+    const cfgErrors: string[] = BackgroundValidator.validateAwsConfig(_awsConfig);
+    if (cfgErrors.length) {
+      ErrorRatchet.throwFormattedErr('Cannot start - invalid AWS config : %j', cfgErrors);
+    }
   }
 
   public get backgroundManagerName(): string {

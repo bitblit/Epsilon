@@ -5,6 +5,7 @@ import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundEntry } from './background-entry';
 import { BackgroundProcessor } from '../config/background/background-processor';
+import { BackgroundAwsConfig } from '../config/background/background-aws-config';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -66,6 +67,27 @@ export class BackgroundValidator {
     return rval;
   }
 
+  public static validateAwsConfig(cfg: BackgroundAwsConfig): string[] {
+    const rval: string[] = [];
+    if (!cfg) {
+      rval.push('Null config');
+    } else {
+      if (!cfg.notificationArn) {
+        rval.push('AWS config missing notificationArn');
+      }
+      if (!cfg.queueUrl) {
+        rval.push('AWS config missing queueUrl');
+      }
+      if (
+        (cfg.sendNotificationOnBackgroundError || cfg.sendNotificationOnBackgroundValidationFailure) &&
+        !cfg.backgroundProcessFailureSnsArn
+      ) {
+        rval.push('At least one send notification flag set to true but no sns arn set');
+      }
+    }
+    return rval;
+  }
+
   public static validateConfig(cfg: BackgroundConfig): string[] {
     const rval: string[] = [];
     if (!cfg) {
@@ -73,33 +95,6 @@ export class BackgroundValidator {
     } else {
       if (!cfg.processors || cfg.processors.length === 0) {
         rval.push('No processes specified');
-      }
-      if (!cfg.aws) {
-        rval.push('AWS config not defined');
-      } else {
-        if (!cfg.aws.notificationArn) {
-          rval.push('AWS config missing notificationArn');
-        }
-        if (!cfg.aws.queueUrl) {
-          rval.push('AWS config missing queueUrl');
-        }
-        if (
-          (cfg.aws.sendNotificationOnBackgroundError || cfg.aws.sendNotificationOnBackgroundValidationFailure) &&
-          !cfg.aws.backgroundProcessFailureSnsArn
-        ) {
-          rval.push('At least one send notification flag set to true but no sns arn set');
-        }
-      }
-      if (cfg.s3TransactionLoggingConfig) {
-        if (!cfg.s3TransactionLoggingConfig.s3) {
-          rval.push('If you define s3TransactionLoggingConfig you must supply an S3 object');
-        }
-        if (!cfg.s3TransactionLoggingConfig.bucket) {
-          rval.push('If you define s3TransactionLoggingConfig you must supply a bucket');
-        }
-        if (!cfg.s3TransactionLoggingConfig.timeToLiveDays) {
-          rval.push('If you define s3TransactionLoggingConfig you must supply a timeToLiveDays');
-        }
       }
     }
     return rval;

@@ -23,7 +23,6 @@ import { AbstractBackgroundManager } from './manager/abstract-background-manager
 export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   private processors: Map<string, BackgroundProcessor<any>>;
   private validator: BackgroundValidator;
-  private s3TransactionLogCacheRatchet: S3CacheRatchet;
 
   constructor(private cfg: BackgroundConfig, private mgr: BackgroundManagerLike, private modelValidator?: ModelValidator) {
     const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);
@@ -33,12 +32,6 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     Logger.silly('Starting Background processor, %d processors', cfg.processors.length);
     this.validator = new BackgroundValidator(cfg, modelValidator);
     this.processors = BackgroundValidator.validateAndMapProcessors(cfg.processors, modelValidator);
-    if (this.cfg.s3TransactionLoggingConfig) {
-      this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
-        this.cfg.s3TransactionLoggingConfig.s3,
-        this.cfg.s3TransactionLoggingConfig.bucket
-      );
-    }
 
     // If there is an immediate processing queue, wire me up to use it
     if (mgr?.immediateProcessQueue && mgr.immediateProcessQueue()) {
@@ -199,27 +192,30 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     return rval;
   }
 
-  private async conditionallyStartTransactionLog(e: InternalBackgroundEntry<any>): Promise<void> {
-    try {
-      if (this.cfg.s3TransactionLoggingConfig) {
-        if (!StringRatchet.trimToNull(e.guid)) {
-          Logger.warn('No guid found - creating');
-          e.guid = AbstractBackgroundManager.generateBackgroundGuid();
-
-          const log: BackgroundTransactionLog = {
-            request: e,
-            running: true,
-          };
-          await this.s3TransactionLogCacheRatchet.writeObjectToCacheFile(
-            AbstractBackgroundManager.backgroundGuidToPath(this.cfg.s3TransactionLoggingConfig.prefix, e.guid),
-            log
-          );
-        }
-        Logger.debug('Starting transaction log');
+  private async safeWriteToLogger(entry: BackgroundTransactionLog): Promise<void> {
+    if (this.cfg.transactionLogger) {
+      try {
+        await this.cfg.transactionLogger.logTransaction(entry);
+      } catch (err) {
+        Logger.error('Failed to write to transaction logger : %j : %s', entry, err, err);
       }
-    } catch (err) {
-      Logger.error('Background : BAD - Failed to start transaction : %s', err, err);
+    } else {
+      Logger.silly('Skipping - no logger defined');
     }
+  }
+
+  private async conditionallyStartTransactionLog(e: InternalBackgroundEntry<any>): Promise<void> {
+    if (!StringRatchet.trimToNull(e.guid)) {
+      Logger.warn('No guid found - creating');
+      e.guid = AbstractBackgroundManager.generateBackgroundGuid();
+
+      const log: BackgroundTransactionLog = {
+        request: e,
+        running: true,
+      };
+      await this.safeWriteToLogger(log);
+    }
+    Logger.debug('Starting transaction log');
   }
 
   private async conditionallyCompleteTransactionLog(
@@ -228,28 +224,15 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     error: any,
     runtimeMS: number
   ): Promise<void> {
-    try {
-      if (this.cfg.s3TransactionLoggingConfig) {
-        if (!StringRatchet.trimToNull(e.guid)) {
-          Logger.error('Background : BAD - should not happen - no guid found for %j', e);
-        } else {
-          Logger.debug('Completing transaction log');
-          const log: BackgroundTransactionLog = {
-            request: e,
-            result: result,
-            error: error ? ErrorRatchet.safeStringifyErr(error) : null,
-            running: false,
-            runtimeMS: runtimeMS,
-          };
-          await this.s3TransactionLogCacheRatchet.writeObjectToCacheFile(
-            AbstractBackgroundManager.backgroundGuidToPath(this.cfg.s3TransactionLoggingConfig.prefix, e.guid),
-            log
-          );
-        }
-      }
-    } catch (err) {
-      Logger.error('Background : BAD - Failed to complete transaction : %s', err, err);
-    }
+    Logger.debug('Completing transaction log');
+    const log: BackgroundTransactionLog = {
+      request: e,
+      result: result,
+      error: error ? ErrorRatchet.safeStringifyErr(error) : null,
+      running: false,
+      runtimeMS: runtimeMS,
+    };
+    await this.safeWriteToLogger(log);
   }
 
   private async conditionallyRunErrorProcessor(e: InternalBackgroundEntry<any>, error: any): Promise<void> {

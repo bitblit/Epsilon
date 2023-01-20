@@ -52,7 +52,6 @@ describe('#cronEpsilonLambdaEventHandler', function () {
       httpSubmissionPath: '/background/',
       implyTypeFromPathSuffix: true,
       httpMetaEndpoint: '/background-meta',
-      aws: null,
     };
     const background = new BackgroundHandler(null, null);
     background.getConfig = jest.fn(() => smConfig);

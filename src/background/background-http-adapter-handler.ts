@@ -23,21 +23,12 @@ import { BackgroundManagerLike } from './manager/background-manager-like';
  * thing at the same time.
  */
 export class BackgroundHttpAdapterHandler {
-  private s3TransactionLogCacheRatchet: S3CacheRatchet;
-
   constructor(
     private backgroundConfig: BackgroundConfig,
     private modelValidator: ModelValidator,
     private backgroundManager: BackgroundManagerLike,
     private maxWaitInMsForBackgroundJobToStart: number = 10_000
-  ) {
-    if (this?.backgroundConfig?.s3TransactionLoggingConfig?.s3 && this?.backgroundConfig?.s3TransactionLoggingConfig?.bucket) {
-      this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
-        this.backgroundConfig.s3TransactionLoggingConfig.s3,
-        this.backgroundConfig.s3TransactionLoggingConfig.bucket
-      );
-    }
-  }
+  ) {}
 
   public get httpMetaEndpoint(): string {
     return this.backgroundConfig.httpMetaEndpoint;
@@ -57,17 +48,16 @@ export class BackgroundHttpAdapterHandler {
 
   public async handleBackgroundStatusRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundTransactionLog> {
     Logger.info('handleBackgroundStatusRequest called');
-    if (!this.s3TransactionLogCacheRatchet) {
+    if (!this.backgroundConfig.transactionLogger) {
       throw new BadRequestError('Process logging not enabled');
     } else {
       const guid: string =
         StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
       if (guid) {
-        const path: string = AwsSqsSnsBackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
         const sw: StopWatch = new StopWatch(true);
         let log: BackgroundTransactionLog = null;
         while (!log && sw.elapsedMS() < this.maxWaitInMsForBackgroundJobToStart) {
-          log = await this.s3TransactionLogCacheRatchet.readCacheFileToObject<BackgroundTransactionLog>(path);
+          log = await this.backgroundConfig.transactionLogger.readTransactionLog(guid);
           if (!log) {
             Logger.debug(
               'No log found yet, waiting 500 ms and retrying (%s of %d waited so far)',

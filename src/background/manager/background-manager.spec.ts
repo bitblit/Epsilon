@@ -7,6 +7,7 @@ import { BackgroundConfig } from '../../config/background/background-config';
 import { EchoProcessor } from '../../built-in/background/echo-processor';
 import { NoOpProcessor } from '../../built-in/background/no-op-processor';
 import { JestRatchet } from '@bitblit/ratchet/jest';
+import { BackgroundAwsConfig } from '../../config/background/background-aws-config';
 
 describe('#createEntry', function () {
   let mockSqs;
@@ -14,6 +15,7 @@ describe('#createEntry', function () {
   let backgroundMgr: AwsSqsSnsBackgroundManager;
   const fakeAccountNumber: string = '123456789012';
   let backgroundConfig: BackgroundConfig;
+  let backgroundAwsConfig: BackgroundAwsConfig;
   const fakeModelValidator: ModelValidator = new ModelValidator({ BackgroundBuiltInSampleInputValidatedProcessor: {} });
 
   const echoProcessor: EchoProcessor = new EchoProcessor();
@@ -28,13 +30,14 @@ describe('#createEntry', function () {
       httpSubmissionPath: '/background/',
       implyTypeFromPathSuffix: true,
       httpMetaEndpoint: '/background-meta',
-      aws: {
-        queueUrl: 'https://fake-sqs.fake-availability-zone.test.com/' + fakeAccountNumber + '/fakeQueue.fifo',
-        notificationArn: 'arn:aws:sns:fake-availability-zone:' + fakeAccountNumber + ':fakeSnsTopicName',
-      },
     };
 
-    backgroundMgr = new AwsSqsSnsBackgroundManager(backgroundConfig.aws, mockSqs, mockSns);
+    backgroundAwsConfig = {
+      queueUrl: 'https://fake-sqs.fake-availability-zone.test.com/' + fakeAccountNumber + '/fakeQueue.fifo',
+      notificationArn: 'arn:aws:sns:fake-availability-zone:' + fakeAccountNumber + ':fakeSnsTopicName',
+    };
+
+    backgroundMgr = new AwsSqsSnsBackgroundManager(backgroundAwsConfig, mockSqs, mockSns);
   });
 
   it('Should return queue attributes', async () => {
