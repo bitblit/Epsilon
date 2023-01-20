@@ -86,6 +86,7 @@
     "glob-parent": "^6.0.2",
     "hosted-git-info": "^6.1.1",
     "jose": "^4.11.2",
+    "json5": "^1.0.2",
     "lodash": "^4.17.21",
     "minimist": "^1.2.7",
     "nanoid": "^4.0.0",
