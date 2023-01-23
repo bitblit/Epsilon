@@ -1,12 +1,14 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
+import https from 'https';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { DateTime } from 'luxon';
 import qs from 'querystring';
 import { EventUtil } from './http/event-util';
 import { EpsilonGlobalHandler } from './epsilon-global-handler';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
+import { LocalServerCert } from './local-server-cert';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -15,13 +17,25 @@ export class LocalServer {
   private server: Server;
   private aborted: boolean = false;
 
-  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888) {}
+  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888, https: boolean = false) {}
 
   async runServer(): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {
       try {
         Logger.info('Starting Epsilon server on port %d', this.port);
-        this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+
+        if (https) {
+          const options = {
+            key: LocalServerCert.CLIENT_KEY_PEM,
+            cert: LocalServerCert.CLIENT_CERT_PEM,
+          };
+          Logger.info(
+            'Starting https server - THIS SERVER IS NOT SECURE!  The KEYS are in the code!  Testing Server Only - Use at your own risk!'
+          );
+          this.server = https.createServer(options, this.requestHandler.bind(this)).listen(this.port);
+        } else {
+          this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+        }
         Logger.info('Epsilon server is listening');
 
         // Also listen for SIGINT

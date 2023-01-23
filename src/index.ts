@@ -9,6 +9,7 @@ export * from './epsilon-instance';
 export * from './epsilon-logging-extension-processor';
 export * from './inter-api-manager';
 export * from './local-container-server';
+export * from './local-server-cert';
 export * from './local-server';
 export * from './run-background-process-from-command-line';
 export * from './test-error-server';

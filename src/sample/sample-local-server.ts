@@ -17,7 +17,7 @@ localTokenHandler
     Logger.info('Use token: %s', token);
     SampleServerComponents.createSampleEpsilonGlobalHandler()
       .then((handler) => {
-        const testServer: LocalServer = new LocalServer(handler);
+        const testServer: LocalServer = new LocalServer(handler, 8888, true);
         testServer.runServer().then((res) => {
           Logger.info('Got res server');
           process.exit(0);

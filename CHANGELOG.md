@@ -18,6 +18,10 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
 
+## [4.0.x] - In Process
+
+- Added ability to serve HTTPS from the sample local server
+
 ## [3.3.x] - 2023-01-02
 
 ### Added
