@@ -62,7 +62,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "3.0.69",
+    "@bitblit/ratchet": "3.1.70",
     "clear": "0.1.0",
     "commander": "10.0.0",
     "cross-fetch": "3.1.5",
@@ -102,10 +102,10 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.0.69",
+    "@bitblit/ratchet": "3.1.70",
     "@types/aws-lambda": "8.10.109",
     "aws-cdk-lib": "2.61.1",
-    "aws-sdk": "2.1301.0",
+    "aws-sdk": "2.1302.0",
     "constructs": "10.1.229",
     "graphql": "16.6.0"
   },
@@ -130,7 +130,7 @@
     "@typescript-eslint/parser": "5.49.0",
     "apollo-server-lambda": "3.11.1",
     "aws-cdk-lib": "2.61.1",
-    "aws-sdk": "2.1301.0",
+    "aws-sdk": "2.1302.0",
     "barrelsby": "2.5.1",
     "constructs": "10.1.229",
     "eslint": "8.22.0",
