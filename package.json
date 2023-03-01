@@ -106,8 +106,8 @@
     "@aws-sdk/client-sqs": "3.279.0",
     "@bitblit/ratchet": "4.0.49-alpha",
     "@types/aws-lambda": "8.10.111",
-    "aws-cdk-lib": "2.65.0",
-    "constructs": "10.1.252",
+    "aws-cdk-lib": "2.66.1",
+    "constructs": "10.1.264",
     "graphql": "16.6.0"
   },
   "peerDependenciesMeta": {
