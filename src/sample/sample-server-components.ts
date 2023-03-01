@@ -10,7 +10,6 @@ import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 import fs from 'fs';
 import path from 'path';
 import { JwtTokenBase, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/common';
-import AWS from 'aws-sdk';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
 import { HandlerFunction } from '../config/http/handler-function';

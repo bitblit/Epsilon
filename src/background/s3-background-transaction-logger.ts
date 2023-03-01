@@ -4,6 +4,7 @@ import { BackgroundTransactionLog } from '../config/background/background-transa
 import { AbstractBackgroundManager } from './manager/abstract-background-manager';
 import { Logger } from '@bitblit/ratchet/common';
 import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
+import { S3Client } from '@aws-sdk/client-s3';
 
 export class S3BackgroundTransactionLogger implements BackgroundTransactionLogger {
   private s3TransactionLogCacheRatchet: S3CacheRatchet;
@@ -57,7 +58,7 @@ export class S3BackgroundTransactionLogger implements BackgroundTransactionLogge
 }
 
 export interface BackgroundS3TransactionLoggingConfig {
-  s3: AWS.S3;
+  s3: S3Client;
   bucket: string;
   timeToLiveDays: number;
   prefix?: string;

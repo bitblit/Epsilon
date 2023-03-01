@@ -1,13 +1,13 @@
 import { ScheduledEvent } from 'aws-lambda';
 import { BackgroundHandler } from '../background/background-handler';
-import { AwsSqsSnsBackgroundManager } from '../background/manager/aws-sqs-sns-background-manager';
 import { CronConfig } from '../config/cron/cron-config';
 import { BackgroundConfig } from '../config/background/background-config';
-import AWS from 'aws-sdk';
 import { JestRatchet } from '@bitblit/ratchet/jest';
 import { CronEpsilonLambdaEventHandler } from './cron-epsilon-lambda-event-handler';
 import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 import { SingleThreadLocalBackgroundManager } from '../background/manager/single-thread-local-background-manager';
+import { SQSClient } from '@aws-sdk/client-sqs';
+import { SNSClient } from '@aws-sdk/client-sns';
 
 // jest.mock('@bitblit/background');
 
@@ -16,8 +16,8 @@ describe('#cronEpsilonLambdaEventHandler', function () {
   let mockSns;
 
   beforeEach(() => {
-    mockSqs = JestRatchet.mock<AWS.SQS>();
-    mockSns = JestRatchet.mock<AWS.SNS>();
+    mockSqs = JestRatchet.mock<SQSClient>();
+    mockSns = JestRatchet.mock<SNSClient>();
   });
 
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why

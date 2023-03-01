@@ -1,21 +1,21 @@
 import { Logger } from '@bitblit/ratchet/common';
-import AWS from 'aws-sdk';
 import { EpsilonConstants } from './epsilon-constants';
 import { InterApiEntry } from './inter-api/inter-api-entry';
 import { InterApiAwsConfig } from './config/inter-api/inter-api-aws-config';
 import { InterApiUtil } from './inter-api/inter-api-util';
+import { PublishCommand, PublishCommandOutput, SNSClient } from '@aws-sdk/client-sns';
 
 /**
  * Handles all submission of events to the inter-api SNS topic (if any)
  */
 export class InterApiManager {
-  constructor(private _aws: InterApiAwsConfig, private _sns: AWS.SNS) {}
+  constructor(private _aws: InterApiAwsConfig, private _sns: SNSClient) {}
 
   public get config(): InterApiAwsConfig {
     return this._aws;
   }
 
-  public get sns(): AWS.SNS {
+  public get sns(): SNSClient {
     return this._sns;
   }
 
@@ -65,7 +65,7 @@ export class InterApiManager {
     };
 
     Logger.debug('Writing message to SNS topic : j', params);
-    const result: AWS.SNS.Types.PublishResponse = await this.sns.publish(params).promise();
+    const result: PublishCommandOutput = await this.sns.send(new PublishCommand(params));
     rval = result.MessageId;
     return rval;
   }

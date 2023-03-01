@@ -1,6 +1,18 @@
 import { Logger } from '@bitblit/ratchet/common';
-import AWS from 'aws-sdk';
-import { GetQueueAttributesResult } from 'aws-sdk/clients/sqs';
+import {
+  DeleteMessageCommand,
+  DeleteMessageCommandOutput,
+  GetQueueAttributesCommand,
+  GetQueueAttributesCommandOutput,
+  GetQueueAttributesRequest,
+  GetQueueAttributesResult,
+  Message,
+  ReceiveMessageCommand,
+  ReceiveMessageCommandOutput,
+  SendMessageCommand,
+  SendMessageCommandOutput,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { AwsSqsSnsBackgroundManager } from './aws-sqs-sns-background-manager';
 import { BackgroundConfig } from '../../config/background/background-config';
@@ -8,6 +20,7 @@ import { EchoProcessor } from '../../built-in/background/echo-processor';
 import { NoOpProcessor } from '../../built-in/background/no-op-processor';
 import { JestRatchet } from '@bitblit/ratchet/jest';
 import { BackgroundAwsConfig } from '../../config/background/background-aws-config';
+import { SNSClient } from '@aws-sdk/client-sns';
 
 describe('#createEntry', function () {
   let mockSqs;
@@ -22,8 +35,8 @@ describe('#createEntry', function () {
   const noOpProcessor: NoOpProcessor = new NoOpProcessor();
 
   beforeEach(() => {
-    mockSqs = JestRatchet.mock<AWS.SQS>();
-    mockSns = JestRatchet.mock<AWS.SNS>();
+    mockSqs = JestRatchet.mock<SQSClient>();
+    mockSns = JestRatchet.mock<SNSClient>();
 
     backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],

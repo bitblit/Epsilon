@@ -21,6 +21,7 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 ## [4.0.x] - In Process
 
 - Added ability to serve HTTPS from the sample local server
+- Switched to AWS SDK version 3
 
 ## [3.3.x] - 2023-01-02
 
