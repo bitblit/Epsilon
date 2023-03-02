@@ -1,6 +1,6 @@
 import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
-import { LambdaEventDetector, S3CacheRatchet } from '@bitblit/ratchet/aws';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 import { EpsilonConstants } from '../epsilon-constants';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundValidator } from './background-validator';
@@ -264,7 +264,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     // Set the trace ids appropriately
     ContextUtil.setOverrideTraceFromInternalBackgroundEntry(e);
     Logger.info('Background Process Start: %j', e);
-    const sw: StopWatch = new StopWatch(true);
+    const sw: StopWatch = new StopWatch();
     await this.conditionallyStartTransactionLog(e);
     let rval: boolean = false;
     try {
@@ -326,7 +326,6 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
         guid: e.guid,
       });
     }
-    sw.stop();
     Logger.info('Background Process Stop: %j : %s', e, sw.dump());
     return rval;
   }

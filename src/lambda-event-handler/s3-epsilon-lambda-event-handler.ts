@@ -4,7 +4,7 @@ import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-hand
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 export class S3EpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<S3Event> {
   constructor(private _epsilon: EpsilonInstance) {}

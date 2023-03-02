@@ -4,8 +4,6 @@ import { EpsilonInstance } from '../epsilon-instance';
 import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
 import { LoggingTraceIdGenerator } from '../config/logging-trace-id-generator';
 import { BuiltInTraceIdGenerators } from '../built-in/built-in-trace-id-generators';
-import { BackgroundEntry } from '../background/background-entry';
-import { Logger } from '@bitblit/ratchet/common/logger';
 import { InternalBackgroundEntry } from '../background/internal-background-entry';
 import { InterApiEntry } from '../inter-api/inter-api-entry';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';

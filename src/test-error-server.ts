@@ -1,6 +1,5 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
-import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
+import { IncomingMessage, Server, ServerResponse } from 'http';
 import { CliRatchet } from '@bitblit/ratchet/node-only/common/cli-ratchet';
 import net from 'net';
 

@@ -1,8 +1,8 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { APIGatewayEvent } from 'aws-lambda';
-import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 import { RouteMapping } from '../../http/route/route-mapping';
 import { EpsilonAuthorizationContext } from '../../config/http/epsilon-authorization-context';
+import { CommonJwtToken } from '@bitblit/ratchet/common';
 
 export class BuiltInAuthorizers {
   public static async simpleNoAuthenticationLogAccess(

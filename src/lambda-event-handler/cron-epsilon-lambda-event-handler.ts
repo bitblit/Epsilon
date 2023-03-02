@@ -3,13 +3,13 @@ import { Context, ProxyResult, ScheduledEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
 import { CronConfig } from '../config/cron/cron-config';
 import { BackgroundHandler } from '../background/background-handler';
 import { BackgroundEntry } from '../background/background-entry';
 import { CronBackgroundEntry } from '../config/cron/cron-background-entry';
 import { CronUtil } from '../util/cron-util';
 import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<ScheduledEvent> {
   constructor(private _epsilon: EpsilonInstance) {}

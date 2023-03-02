@@ -14,8 +14,8 @@ import { RunHandlerAsFilter } from '../built-in/http/run-handler-as-filter';
 import { FilterChainContext } from '../config/http/filter-chain-context';
 import { ContextUtil } from '../util/context-util';
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 /**
  * This class functions as the adapter from a default lambda function to the handlers exposed via Epsilon

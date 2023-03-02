@@ -6,13 +6,11 @@ import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from '../config/background/background-config';
-import { AwsSqsSnsBackgroundManager } from './manager/aws-sqs-sns-background-manager';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
-import { S3CacheRatchet } from '@bitblit/ratchet/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
@@ -54,7 +52,7 @@ export class BackgroundHttpAdapterHandler {
       const guid: string =
         StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
       if (guid) {
-        const sw: StopWatch = new StopWatch(true);
+        const sw: StopWatch = new StopWatch();
         let log: BackgroundTransactionLog = null;
         while (!log && sw.elapsedMS() < this.maxWaitInMsForBackgroundJobToStart) {
           log = await this.backgroundConfig.transactionLogger.readTransactionLog(guid);

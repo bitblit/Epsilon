@@ -9,14 +9,7 @@ import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
-import {
-  LoggerLevelName,
-  LoggerOptions,
-  LoggerOutputFunction,
-  LogMessage,
-  LogMessageFormatType,
-  LogMessageProcessor,
-} from '@bitblit/ratchet/common';
+import { LoggerLevelName, LoggerOptions, LoggerOutputFunction, LogMessageFormatType, LogMessageProcessor } from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';

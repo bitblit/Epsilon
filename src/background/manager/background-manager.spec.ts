@@ -1,30 +1,21 @@
 import { Logger } from '@bitblit/ratchet/common';
-import {
-  DeleteMessageCommand,
-  DeleteMessageCommandOutput,
-  GetQueueAttributesCommand,
-  GetQueueAttributesCommandOutput,
-  GetQueueAttributesRequest,
-  GetQueueAttributesResult,
-  Message,
-  ReceiveMessageCommand,
-  ReceiveMessageCommandOutput,
-  SendMessageCommand,
-  SendMessageCommandOutput,
-  SQSClient,
-} from '@aws-sdk/client-sqs';
+import { GetQueueAttributesCommand, GetQueueAttributesResult, SQSClient } from '@aws-sdk/client-sqs';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { AwsSqsSnsBackgroundManager } from './aws-sqs-sns-background-manager';
 import { BackgroundConfig } from '../../config/background/background-config';
 import { EchoProcessor } from '../../built-in/background/echo-processor';
 import { NoOpProcessor } from '../../built-in/background/no-op-processor';
-import { JestRatchet } from '@bitblit/ratchet/jest';
 import { BackgroundAwsConfig } from '../../config/background/background-aws-config';
 import { SNSClient } from '@aws-sdk/client-sns';
+import { mockClient } from 'aws-sdk-client-mock';
+
+let mockSqs;
+let mockSns;
 
 describe('#createEntry', function () {
-  let mockSqs;
-  let mockSns;
+  mockSns = mockClient(SNSClient);
+  mockSqs = mockClient(SQSClient);
+
   let backgroundMgr: AwsSqsSnsBackgroundManager;
   const fakeAccountNumber: string = '123456789012';
   let backgroundConfig: BackgroundConfig;
@@ -35,8 +26,8 @@ describe('#createEntry', function () {
   const noOpProcessor: NoOpProcessor = new NoOpProcessor();
 
   beforeEach(() => {
-    mockSqs = JestRatchet.mock<SQSClient>();
-    mockSns = JestRatchet.mock<SNSClient>();
+    mockSqs.reset();
+    mockSns.reset();
 
     backgroundConfig = {
       processors: [echoProcessor, noOpProcessor],
@@ -54,13 +45,10 @@ describe('#createEntry', function () {
   });
 
   it('Should return queue attributes', async () => {
-    mockSqs.getQueueAttributes.mockReturnValue({
-      promise: () =>
-        Promise.resolve({
-          Attributes: {
-            ApproximateNumberOfMessages: 1,
-          },
-        }),
+    mockSqs.on(GetQueueAttributesCommand).resolves({
+      Attributes: {
+        ApproximateNumberOfMessages: 1,
+      },
     });
 
     const queueAttr: GetQueueAttributesResult = await backgroundMgr.fetchCurrentQueueAttributes();
