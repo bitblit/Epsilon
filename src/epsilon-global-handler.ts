@@ -147,6 +147,15 @@ export class EpsilonGlobalHandler {
   public async innerLambdaHandler(event: any, context: Context): Promise<any> {
     ContextUtil.initContext(this._epsilon, event, context, 'TBD');
     let rval: ProxyResult = null;
+
+    // By default, let's err on the safe side: unless we have confirmed our event handler
+    // DOES exist and DOES NOT want uncaught errors raised, presume errors SHOULD be raised.
+    //
+    // This will ensure that if we catch an error before that point, and the Lambda function
+    // is acting as an async event handler, the error will be raised, and Lambda will retry
+    // those async events.
+    let allowUncaughtErrors: boolean = true;
+
     try {
       if (!this._epsilon) {
         Logger.error('Config not found, abandoning');
@@ -190,9 +199,19 @@ export class EpsilonGlobalHandler {
             label
           );
           Logger.silly('EvtEnd:Value: %s Value: %j', label, rval);
+
+          // Unless the handler specifically implements the `allowUncaughtErrors` method and it returns
+          // true, presume it does NOT want uncaught errors thrown. This will result in uncaught errors
+          // being wrapped in an HTTP 500 response.
+          if (!(handler.hasOwnProperty('allowUncaughtErrors') && handler.allowUncaughtErrors())) {
+            allowUncaughtErrors = false;
+          }
         }
       }
     } catch (err) {
+      if (allowUncaughtErrors) {
+        throw err;
+      }
       Logger.error('Error slipped out to outer edge.  Logging and returning false : %s', err, err);
       rval = {
         statusCode: 500,

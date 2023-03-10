@@ -1,3 +1,3 @@
 export interface GenericAwsEventHandlerFunction<T> {
-  (event: T): Promise<void>;
+  (event: T): Promise<any>;
 }

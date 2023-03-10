@@ -32,4 +32,10 @@ export class DynamoEpsilonLambdaEventHandler implements EpsilonLambdaEventHandle
     }
     return rval;
   }
+
+  // For DynamoDB event stream events, we want errors to be raised to Lambda, so it
+  // knows to retry if an uncaught processing error occurs.
+  public allowUncaughtErrors(): boolean {
+    return true;
+  }
 }

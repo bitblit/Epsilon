@@ -4,4 +4,5 @@ export interface EpsilonLambdaEventHandler<T> {
   handlesEvent(evt: any): boolean;
   extractLabel(evt: T, context: Context): string;
   processEvent(evt: T, context: Context): Promise<ProxyResult>;
+  allowUncaughtErrors?(): boolean;
 }
