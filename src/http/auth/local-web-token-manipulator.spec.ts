@@ -1,6 +1,6 @@
 import { LocalWebTokenManipulator } from './local-web-token-manipulator';
 import { Logger } from '@bitblit/ratchet/common/logger';
-import { JwtTokenBase, LoggerLevelName } from '@bitblit/ratchet/common';
+import { LoggerLevelName } from '@bitblit/ratchet/common';
 import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 
 describe('#localWebTokenManipulator', function () {

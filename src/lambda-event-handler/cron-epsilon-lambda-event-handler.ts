@@ -1,6 +1,5 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { Context, ProxyResult, S3Event, ScheduledEvent } from 'aws-lambda';
-import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
+import { Context, ProxyResult, ScheduledEvent } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';

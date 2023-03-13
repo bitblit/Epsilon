@@ -1,5 +1,5 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { Context, DynamoDBStreamEvent, ProxyResult, S3Event } from 'aws-lambda';
+import { Context, DynamoDBStreamEvent, ProxyResult } from 'aws-lambda';
 import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { AwsUtil } from '../util/aws-util';
@@ -31,5 +31,10 @@ export class DynamoEpsilonLambdaEventHandler implements EpsilonLambdaEventHandle
       }
     }
     return rval;
+  }
+
+  public async processUncaughtError(event: DynamoDBStreamEvent, context: Context, err: any): Promise<ProxyResult> {
+    Logger.error('Error slipped out to outer edge (Dynamo).  Logging and rethrowing : %s', err, err);
+    throw err;
   }
 }

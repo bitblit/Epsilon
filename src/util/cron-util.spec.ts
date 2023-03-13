@@ -4,7 +4,6 @@ import path from 'path';
 import { CronUtil } from './cron-util';
 import { CronConfig } from '../config/cron/cron-config';
 import { AbstractCronEntry } from '../config/cron/abstract-cron-entry';
-import { DateTime } from 'luxon';
 
 describe('#cronUtil', function () {
   it('should test matching event to entry', async () => {
