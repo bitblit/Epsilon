@@ -9,7 +9,14 @@ import { ResponseUtil } from './http/response-util';
 import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
-import { LoggerLevelName, LoggerOptions, LoggerOutputFunction, LogMessageFormatType, LogMessageProcessor } from '@bitblit/ratchet/common';
+import {
+  ErrorRatchet,
+  LoggerLevelName,
+  LoggerOptions,
+  LoggerOutputFunction,
+  LogMessageFormatType,
+  LogMessageProcessor,
+} from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
@@ -18,7 +25,6 @@ import { GenericSnsEpsilonLambdaEventHandler } from './lambda-event-handler/gene
 import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsilon-lambda-event-handler';
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
-import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { EpsilonLoggingExtensionProcessor } from './epsilon-logging-extension-processor';
 
 /**
@@ -140,6 +146,7 @@ export class EpsilonGlobalHandler {
   public async innerLambdaHandler(event: any, context: Context): Promise<any> {
     ContextUtil.initContext(this._epsilon, event, context, 'TBD');
     let rval: ProxyResult = null;
+    let errorHandler: (evt: any, context: Context, err: any) => Promise<ProxyResult> = EpsilonGlobalHandler.defaultProcessUncaughtError;
     try {
       if (!this._epsilon) {
         Logger.error('Config not found, abandoning');
@@ -169,6 +176,7 @@ export class EpsilonGlobalHandler {
         const handler: EpsilonLambdaEventHandler<any> = this.handlers[i];
         if (handler.handlesEvent(event)) {
           found = true;
+          errorHandler = handler.processUncaughtError || errorHandler; // Override it, if the handler supports that
           const label: string = handler.extractLabel(event, context);
           ContextUtil.setProcessLabel(label);
           Logger.logByLevel(
@@ -186,13 +194,20 @@ export class EpsilonGlobalHandler {
         }
       }
     } catch (err) {
-      Logger.error('Error slipped out to outer edge.  Logging and returning false : %s', err, err);
-      rval = {
-        statusCode: 500,
-        body: JSON.stringify({ error: StringRatchet.safeString(err) }),
-        isBase64Encoded: false,
-      };
+      // Note: If your errorHandler throws an error its just gonna get thrown up, which is what we want
+      // since some of them actually NEED to rethrow errors to get auto-retries (eg, Dynamo)
+      rval = await errorHandler(event, context, err);
     }
+    return rval;
+  }
+
+  public static async defaultProcessUncaughtError(event: any, context: Context, err: any): Promise<ProxyResult> {
+    Logger.error('Error slipped out to outer edge (Default).  Logging and returning log : %s', err, err);
+    const rval: ProxyResult = {
+      statusCode: 500,
+      body: JSON.stringify({ error: ErrorRatchet.safeStringifyErr(err) }),
+      isBase64Encoded: false,
+    };
     return rval;
   }
 }

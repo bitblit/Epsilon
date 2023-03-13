@@ -32,4 +32,9 @@ export class DynamoEpsilonLambdaEventHandler implements EpsilonLambdaEventHandle
     }
     return rval;
   }
+
+  public async processUncaughtError(event: DynamoDBStreamEvent, context: Context, err: any): Promise<ProxyResult> {
+    Logger.error('Error slipped out to outer edge (Dynamo).  Logging and rethrowing : %s', err, err);
+    throw err;
+  }
 }
