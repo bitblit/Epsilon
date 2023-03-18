@@ -63,7 +63,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "3.2.77",
+    "@bitblit/ratchet": "3.2.78",
     "clear": "0.1.0",
     "commander": "10.0.0",
     "cross-fetch": "3.1.5",
@@ -81,7 +81,7 @@
     "ansi-regex": "^5.0.1",
     "ajv": "^6.12.6",
     "axios": "^1.2.3",
-    "browserslist": "^4.21.4",
+    "browserslist": "^4.21.5",
     "express": "^4.18.2",
     "follow-redirects": "^1.15.2",
     "glob-parent": "^6.0.2",
@@ -89,7 +89,7 @@
     "jose": "^4.11.2",
     "json5": "^1.0.2",
     "lodash": "^4.17.21",
-    "minimist": "^1.2.7",
+    "minimist": "^1.2.8",
     "nanoid": "^4.0.0",
     "node-fetch": "^2.6.7",
     "nth-check": "^2.1.1",
@@ -103,10 +103,10 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.2.77",
-    "@types/aws-lambda": "8.10.111",
+    "@bitblit/ratchet": "3.2.78",
+    "@types/aws-lambda": "8.10.114",
     "aws-cdk-lib": "2.68.0",
-    "aws-sdk": "2.1333.0",
+    "aws-sdk": "2.1338.0",
     "constructs": "10.1.276",
     "graphql": "16.6.0"
   },
@@ -122,7 +122,7 @@
     }
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.111",
+    "@types/aws-lambda": "8.10.114",
     "@types/jest": "29.4.0",
     "@types/js-yaml": "4.0.5",
     "@types/luxon": "3.2.0",
@@ -131,7 +131,7 @@
     "@typescript-eslint/parser": "5.54.1",
     "apollo-server-lambda": "3.12.0",
     "aws-cdk-lib": "2.68.0",
-    "aws-sdk": "2.1333.0",
+    "aws-sdk": "2.1338.0",
     "barrelsby": "2.5.1",
     "constructs": "10.1.276",
     "eslint": "8.36.0",

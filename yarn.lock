@@ -446,10 +446,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@3.2.77":
-  version "3.2.77"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-3.2.77.tgz#3ea156ca206bf99dcce5f0fb31d54a2d7d3efb26"
-  integrity sha512-ebvN1kRkH/HJFFkH8/ceydRWUh+ugK53ImBjNMFM/wRN5Tl/LazruK88qtZ3+nn2t9JEeTsVfzcPEqx+nGybUg==
+"@bitblit/ratchet@3.2.78":
+  version "3.2.78"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-3.2.78.tgz#ebb5d41001ec8ed0b7c0ddfa7aeccd19e351eb6c"
+  integrity sha512-UfcwkciEXo92UJZoEe+XX5t0uSckCBKNMLsslMkHuOi0UuFL9A5BAybjCYPA9uybq+r3MqE64VcfMcIqsmBInA==
   dependencies:
     browserslist "4.21.5"
     lodash "4.17.21"
@@ -457,8 +457,8 @@
     ts-enum-util "4.0.2"
   optionalDependencies:
     "@apollo/client" "3.7.10"
-    "@types/aws-lambda" "8.10.111"
-    aws-sdk "2.1333.0"
+    "@types/aws-lambda" "8.10.114"
+    aws-sdk "2.1338.0"
     cross-fetch "3.1.5"
     csv "6.2.8"
     graphql "16.6.0"
@@ -987,7 +987,12 @@
   dependencies:
     "@types/node" "*"
 
-"@types/aws-lambda@8.10.111", "@types/aws-lambda@^8.10.76":
+"@types/aws-lambda@8.10.114":
+  version "8.10.114"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.114.tgz#4048273ebcd517dd118ecaa34b1368d275b6c7ad"
+  integrity sha512-M8WpEGfC9iQ6V2Ccq6nGIXoQgeVc6z0Ngk8yCOL5V/TYIxshvb0MWQYLFFTZDesL0zmsoBc4OBjG9DB/4rei6w==
+
+"@types/aws-lambda@^8.10.76":
   version "8.10.111"
   resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.111.tgz#9107c405f3011a5c423b5ac93fbf279439558571"
   integrity sha512-8HR9UjIKmoemEzE2BviVtFkeenxfbizSu8raFjnT2VXxguZZ2JTlNww7INOH7IA0J/zRa3TjOftkYq6hVNkxDA==
@@ -1618,10 +1623,10 @@ aws-cdk-lib@2.68.0:
     semver "^7.3.8"
     yaml "1.10.2"
 
-aws-sdk@2.1333.0:
-  version "2.1333.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1333.0.tgz#02ecd59499e364584efb08196d6147873d6328a9"
-  integrity sha512-MvOuleNeRryJtkCGXGEWDHPqqgxuqdi4/hGzJEpn9tnjsW9LNK8UgFPpYzUZ24ZO/3S+jiUh8DMMrL5nVGnagg==
+aws-sdk@2.1338.0:
+  version "2.1338.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1338.0.tgz#e9272a0563940ceebed5910d271c944f31dbae00"
+  integrity sha512-apxv53ABuvi87UQHAUqRrJOaGNMiPXAe6bizzJhOnsaNqasg2KjDDit7QSCi6HlLNG44n1ApIvMtR/k+NnxU4Q==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1785,7 +1790,7 @@ braces@^3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-browserslist@4.21.5, browserslist@^4.21.3, browserslist@^4.21.4:
+browserslist@4.21.5, browserslist@^4.21.3, browserslist@^4.21.5:
   version "4.21.5"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.21.5.tgz#75c5dae60063ee641f977e00edd3cfb2fb7af6a7"
   integrity sha512-tUkiguQGW7S3IhB7N+c2MV/HZPSCPAAiYBZXLsBhFB/PCy6ZKKsZrmBayHV9fdGV/ARIfJ14NkxKzRDjvp7L6w==
@@ -4313,7 +4318,7 @@ minimatch@^7.4.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimist@^1.2.0, minimist@^1.2.3, minimist@^1.2.5, minimist@^1.2.6, minimist@^1.2.7:
+minimist@^1.2.0, minimist@^1.2.3, minimist@^1.2.5, minimist@^1.2.6, minimist@^1.2.8:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
