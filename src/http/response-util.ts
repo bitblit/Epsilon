@@ -131,7 +131,7 @@ export class ResponseUtil {
       if (bigEnough && !exemptContent) {
         const asBuffer: Buffer = proxyResult.isBase64Encoded ? Buffer.from(proxyResult.body, 'base64') : Buffer.from(proxyResult.body);
         const zipped: Buffer = await this.gzip(asBuffer);
-        Logger.info('Comp from %s to %d bytes', asBuffer.length, zipped.length);
+        Logger.debug('Comp from %s to %d bytes', asBuffer.length, zipped.length);
         const zipped64: string = zipped.toString('base64');
 
         rval.body = zipped64;
