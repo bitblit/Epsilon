@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
-import { LambdaEventDetector, S3CacheRatchet } from '@bitblit/ratchet/aws';
+import {LambdaEventDetector, S3CacheRatchet, S3CacheRatchetLike} from '@bitblit/ratchet/aws';
 import { EpsilonConstants } from '../epsilon-constants';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundManager } from '../background-manager';
@@ -23,7 +23,7 @@ import { ContextUtil } from '../util/context-util';
 export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   private processors: Map<string, BackgroundProcessor<any>>;
   private validator: BackgroundValidator;
-  private s3TransactionLogCacheRatchet: S3CacheRatchet;
+  private s3TransactionLogCacheRatchet: S3CacheRatchetLike;
 
   constructor(private cfg: BackgroundConfig, private mgr: BackgroundManager, private modelValidator?: ModelValidator) {
     const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);

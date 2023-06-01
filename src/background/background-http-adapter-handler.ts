@@ -12,7 +12,7 @@ import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
-import { S3CacheRatchet } from '@bitblit/ratchet/aws';
+import { S3CacheRatchet,S3CacheRatchetLike } from '@bitblit/ratchet/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
@@ -22,7 +22,7 @@ import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
  * thing at the same time.
  */
 export class BackgroundHttpAdapterHandler {
-  private s3TransactionLogCacheRatchet: S3CacheRatchet;
+  private s3TransactionLogCacheRatchet: S3CacheRatchetLike;
 
   constructor(
     private backgroundConfig: BackgroundConfig,
