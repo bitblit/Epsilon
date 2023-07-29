@@ -64,7 +64,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "4.1.192-alpha",
+    "@bitblit/ratchet": "4.1.193-alpha",
     "@aws-sdk/abort-controller": "3.370.0",
     "@aws-sdk/smithy-client": "3.370.0",
     "@aws-sdk/types": "3.370.0",
