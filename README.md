@@ -112,7 +112,7 @@ if [ -z "${EPSILON_RUNNING_IN_AWS_BATCH}" ]; then
     fi
   else
     echo "Running Epsilon inside AWS batch - triggering direct $1 $2"
-    exec node dist/aws-batch-cli.js --process $1 --data $2
+    exec node dist/aws-batch-epsilon-cli.ts --process $1 --data $2
 fi
 ```
 

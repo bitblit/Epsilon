@@ -4,7 +4,7 @@
   "description": "Tiny adapter to simplify building API gateway Lambda APIS",
   "sideEffects": false,
   "bin": {
-    "epsilon-cli": "./bin/cli.js"
+    "epsilon-cli": "./epsilon-cli.js"
   },
   "main": "./index.js",
   "typings": "./index.d.ts",
@@ -26,7 +26,7 @@
   },
   "config": {},
   "scripts": {
-    "prepare-to-publish": "yarn build && cp package.json README.md CHANGELOG.md License.txt dist && yarn run apply-ci-vars && yarn remove-compiled-tests",
+    "prepare-to-publish": "yarn build && cp package.json README.md CHANGELOG.md License.txt src/epsilon-cli.ts dist && yarn run apply-ci-vars && yarn remove-compiled-tests",
     "copy-static-files": "shx cp -R src/static dist",
     "build": "yarn run clean && yarn run generate-barrels && yarn run compile",
     "compile": "tsc && yarn copy-static-files",
@@ -35,16 +35,16 @@
     "clean": "shx rm -Rf dist",
     "compile-test": "yarn compile && yarn test",
     "test": "jest",
-    "apply-ci-vars": "yarn ratchet-apply-ci-env-variables-to-files github dist/static/build-properties.json",
+    "apply-ci-vars": "yarn ratchet-cli apply-ci-env-variables-to-files github dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.* -e deployment/.* && barrelsby -q --delete -d src/deployment -e .*\\.spec\\.ts ",
-    "run-local-container-server": "yarn build && node bin/cli.js run-local-container-server",
-    "run-build-sample-server": "yarn build && node bin/cli.js run-sample-local-server",
-    "run-sample-server": "node bin/cli.js run-sample-local-server",
-    "run-test-error-server": "yarn build && node bin/cli.js run-test-error-server",
-    "run-batch-sample-server": "yarn build && node bin/cli.js run-sample-local-batch-server",
-    "run-background-process-from-command-line-dry-run": "yarn build && node bin/cli.js run-background-process"
+    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.* -e deployment/.* -e epsilon-cli.* && barrelsby -q --delete -d src/deployment -e .*\\.spec\\.ts ",
+    "run-local-container-server": "yarn build && node dist/epsilon-cli.js run-local-container-server",
+    "run-build-sample-server": "yarn build && node dist/epsilon-cli.js run-sample-local-server",
+    "run-sample-server": "node dist/epsilon-cli.js run-sample-local-server",
+    "run-test-error-server": "yarn build && node dist/epsilon-cli.js run-test-error-server",
+    "run-batch-sample-server": "yarn build && node dist/epsilon-cli.js run-sample-local-batch-server",
+    "run-background-process-from-command-line-dry-run": "yarn build && node dist/epsilon-cli.js run-background-process"
   },
   "repository": {
     "type": "git",
@@ -64,7 +64,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "4.1.189-alpha",
+    "@bitblit/ratchet": "4.1.192-alpha",
     "@aws-sdk/abort-controller": "3.370.0",
     "@aws-sdk/smithy-client": "3.370.0",
     "@aws-sdk/types": "3.370.0",
