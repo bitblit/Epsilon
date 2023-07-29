@@ -8,9 +8,9 @@ import { ResponseUtil } from '../../http/response-util';
 import { NotFoundError } from '../../http/error/not-found-error';
 import { RouteAndParse } from '../../http/web-handler';
 import { NullReturnedObjectHandling } from '../../config/http/null-returned-object-handling';
-import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
 export class RunHandlerAsFilter {
   public static async runHandler(fCtx: FilterChainContext, rm: RouteAndParse): Promise<boolean> {
@@ -36,14 +36,14 @@ export class RunHandlerAsFilter {
     if (result === null || result === undefined) {
       if (handling === NullReturnedObjectHandling.Error) {
         Logger.error('Null object returned and Error specified, throwing 500');
-        throw new EpsilonHttpError('Null object').withHttpStatusCode(500);
+        throw new RestfulApiHttpError('Null object').withHttpStatusCode(500);
       } else if (handling === NullReturnedObjectHandling.Return404NotFoundResponse) {
         throw new NotFoundError('Resource not found');
       } else if (handling === NullReturnedObjectHandling.ConvertToEmptyString) {
         Logger.warn('Null object returned from handler and convert not specified, converting to empty string');
         rval = '';
       } else {
-        throw new EpsilonHttpError('Cant happen - failed enum check').withHttpStatusCode(500);
+        throw new RestfulApiHttpError('Cant happen - failed enum check').withHttpStatusCode(500);
       }
     }
     return rval;
@@ -53,7 +53,7 @@ export class RunHandlerAsFilter {
     rm: RouteAndParse,
     event: ExtendedAPIGatewayEvent,
     context: Context,
-    add404OnMissing: boolean = true
+    add404OnMissing: boolean = true,
   ): Promise<any> {
     let rval: Promise<any> = null;
     // Execute
@@ -64,7 +64,7 @@ export class RunHandlerAsFilter {
       rval = PromiseRatchet.timeout(
         rm.mapping.function(event, context),
         'Timed out after ' + rm.mapping.metaProcessingConfig.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
-        rm.mapping.metaProcessingConfig.timeoutMS
+        rm.mapping.metaProcessingConfig.timeoutMS,
       );
     } else if (add404OnMissing) {
       throw new NotFoundError('No such endpoint');

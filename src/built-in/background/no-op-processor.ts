@@ -1,5 +1,5 @@
 import { BackgroundProcessor } from '../../config/background/background-processor';
-import { BackgroundManager } from '../../background-manager';
+import { BackgroundManagerLike } from '../../background/manager/background-manager-like';
 import { Logger } from '@bitblit/ratchet/common/logger';
 
 export class NoOpProcessor implements BackgroundProcessor<any> {
@@ -7,7 +7,7 @@ export class NoOpProcessor implements BackgroundProcessor<any> {
     return 'EpsilonNoOp';
   }
 
-  public async handleEvent(data: any, mgr?: BackgroundManager): Promise<void> {
+  public async handleEvent(data: any, mgr?: BackgroundManagerLike): Promise<void> {
     // Does nothing
     Logger.silly('Hit the no-op proc');
   }

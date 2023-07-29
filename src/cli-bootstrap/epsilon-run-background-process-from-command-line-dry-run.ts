@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { RunBackgroundProcessFromCommandLine } from '../run-background-process-from-command-line';
-import { CliRatchet } from '@bitblit/ratchet/node-only/common/cli-ratchet';
 import { Logger } from '@bitblit/ratchet/common';
+import { CliRatchet } from '@bitblit/ratchet/node-only';
 
 if (
   process?.argv?.length &&

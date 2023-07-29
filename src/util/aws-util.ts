@@ -26,7 +26,7 @@ export class AwsUtil {
   }
 
   public static apiGatewayV2RequestContextToApiGatewayV1RequestContext(
-    srcEvt: APIGatewayEventRequestContextV2
+    srcEvt: APIGatewayEventRequestContextV2,
   ): APIGatewayEventRequestContextWithAuthorizer<any> {
     const rval: APIGatewayEventRequestContextWithAuthorizer<any> = {
       accountId: srcEvt.accountId,

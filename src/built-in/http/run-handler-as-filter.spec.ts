@@ -9,7 +9,7 @@ import { RouterUtil } from '../../http/route/router-util';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should find the most specific route and the least specific', async () => {
-    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler();
+    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('jest-most specific route');
 
     expect(inst.epsilon.modelValidator).toBeTruthy();
 

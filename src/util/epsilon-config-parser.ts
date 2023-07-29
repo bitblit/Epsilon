@@ -1,7 +1,6 @@
-import { Logger } from '@bitblit/ratchet/common/logger';
-import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
+import { Logger } from '@bitblit/ratchet/common';
+import { ErrorRatchet } from '@bitblit/ratchet/common';
 import yaml from 'js-yaml';
-import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundHttpAdapterHandler } from '../background/background-http-adapter-handler';
 import { OpenApiDocument } from '../config/open-api/open-api-document';
 import { EpsilonConfig } from '../config/epsilon-config';
@@ -11,27 +10,32 @@ import { EpsilonRouter } from '../http/route/epsilon-router';
 import { RouterUtil } from '../http/route/router-util';
 import { WebHandler } from '../http/web-handler';
 import { MisconfiguredError } from '../http/error/misconfigured-error';
-import { BackgroundManager } from '../background-manager';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 
 export class EpsilonConfigParser {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  public static epsilonConfigToEpsilonGlobalHandler(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonGlobalHandler {
+  public static epsilonConfigToEpsilonGlobalHandler(
+    config: EpsilonConfig,
+    backgroundManager?: BackgroundManagerLike,
+  ): EpsilonGlobalHandler {
     return new EpsilonGlobalHandler(EpsilonConfigParser.epsilonConfigToEpsilonInstance(config, backgroundManager));
   }
 
-  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManager): EpsilonInstance {
+  public static epsilonConfigToEpsilonInstance(config: EpsilonConfig, backgroundManager?: BackgroundManagerLike): EpsilonInstance {
     this.validateGlobalConfig(config);
-    Logger.info('Creating epsilon : BM : %j', backgroundManager);
+    const label: string = config?.label || 'NO EPSILON CONFIG LABEL SET';
+    Logger.info('Creating epsilon : %s : BM : %j', label, backgroundManager);
     const parsed: OpenApiDocument = EpsilonConfigParser.parseOpenApiDocument(config.openApiYamlString);
     const modelValidator: ModelValidator = EpsilonConfigParser.openApiDocToValidator(parsed);
     const backgroundHttpAdapter: BackgroundHttpAdapterHandler = new BackgroundHttpAdapterHandler(
       config.backgroundConfig,
       modelValidator,
-      backgroundManager
+      backgroundManager,
     );
     const backgroundHandler: BackgroundHandler = config.backgroundConfig
       ? new BackgroundHandler(config.backgroundConfig, backgroundManager, modelValidator)

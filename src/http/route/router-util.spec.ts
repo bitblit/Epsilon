@@ -6,7 +6,7 @@ import { SampleServerComponents } from '../../sample/sample-server-components';
 
 describe('#routerUtilApplyOpenApiDoc', function () {
   it('should create a router config from a yaml file', async () => {
-    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler();
+    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('routerUtilApplyOpenApiDoc-jest');
 
     expect(inst.epsilon.modelValidator).toBeTruthy();
     expect(inst.epsilon.modelValidator.fetchModel('AccessTokenRequest')).toBeTruthy();

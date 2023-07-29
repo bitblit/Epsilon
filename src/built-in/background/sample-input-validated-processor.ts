@@ -1,6 +1,6 @@
 import { Logger } from '@bitblit/ratchet/common';
 import { BackgroundProcessor } from '../../config/background/background-processor';
-import { BackgroundManager } from '../../background-manager';
+import { BackgroundManagerLike } from '../../background/manager/background-manager-like';
 import { SampleInputValidatedProcessorData } from './sample-input-validated-processor-data';
 
 export class SampleInputValidatedProcessor implements BackgroundProcessor<SampleInputValidatedProcessorData> {
@@ -8,7 +8,7 @@ export class SampleInputValidatedProcessor implements BackgroundProcessor<Sample
     return 'EpsilonSampleInputValidated';
   }
 
-  public async handleEvent(data: SampleInputValidatedProcessorData, mgr?: BackgroundManager): Promise<void> {
+  public async handleEvent(data: SampleInputValidatedProcessorData, mgr?: BackgroundManagerLike): Promise<void> {
     Logger.info('Running SampleInputValidatedProcessor, data was : %j', data);
   }
 

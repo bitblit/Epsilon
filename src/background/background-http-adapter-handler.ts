@@ -1,42 +1,29 @@
-import { Logger, StopWatch } from '@bitblit/ratchet/common';
+import { BooleanRatchet, Logger, PromiseRatchet, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
 import { BackgroundEntry } from './background-entry';
 import { Context } from 'aws-lambda';
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
-import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
 import { BackgroundQueueResponseInternal } from './background-queue-response-internal';
 import { BackgroundProcessHandling } from './background-process-handling';
 import { BackgroundConfig } from '../config/background/background-config';
-import { BackgroundManager } from '../background-manager';
-import { ModelValidator } from '@bitblit/ratchet/model-validator';
-import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BadRequestError } from '../http/error/bad-request-error';
 import { BackgroundProcessor } from '../config/background/background-processor';
 import { BackgroundMetaResponseInternal } from './background-meta-response-internal';
-import { S3CacheRatchet,S3CacheRatchetLike } from '@bitblit/ratchet/aws';
 import { BackgroundTransactionLog } from '../config/background/background-transaction-log';
 import { NotFoundError } from '../http/error/not-found-error';
-import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
+import { BackgroundManagerLike } from './manager/background-manager-like';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
  * thing at the same time.
  */
 export class BackgroundHttpAdapterHandler {
-  private s3TransactionLogCacheRatchet: S3CacheRatchetLike;
-
   constructor(
     private backgroundConfig: BackgroundConfig,
     private modelValidator: ModelValidator,
-    private backgroundManager: BackgroundManager,
-    private maxWaitInMsForBackgroundJobToStart: number = 10_000
-  ) {
-    if (this?.backgroundConfig?.s3TransactionLoggingConfig?.s3 && this?.backgroundConfig?.s3TransactionLoggingConfig?.bucket) {
-      this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
-        this.backgroundConfig.s3TransactionLoggingConfig.s3,
-        this.backgroundConfig.s3TransactionLoggingConfig.bucket
-      );
-    }
-  }
+    private backgroundManager: BackgroundManagerLike,
+    private maxWaitInMsForBackgroundJobToStart: number = 10_000,
+  ) {}
 
   public get httpMetaEndpoint(): string {
     return this.backgroundConfig.httpMetaEndpoint;
@@ -56,22 +43,21 @@ export class BackgroundHttpAdapterHandler {
 
   public async handleBackgroundStatusRequest(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundTransactionLog> {
     Logger.info('handleBackgroundStatusRequest called');
-    if (!this.s3TransactionLogCacheRatchet) {
+    if (!this.backgroundConfig.transactionLogger) {
       throw new BadRequestError('Process logging not enabled');
     } else {
       const guid: string =
         StringRatchet.trimToNull(evt.pathParameters['guid']) || StringRatchet.trimToNull(evt.queryStringParameters['guid']);
       if (guid) {
-        const path: string = BackgroundManager.backgroundGuidToPath(this.backgroundConfig.s3TransactionLoggingConfig.prefix, guid);
-        const sw: StopWatch = new StopWatch(true);
+        const sw: StopWatch = new StopWatch();
         let log: BackgroundTransactionLog = null;
         while (!log && sw.elapsedMS() < this.maxWaitInMsForBackgroundJobToStart) {
-          log = await this.s3TransactionLogCacheRatchet.readCacheFileToObject<BackgroundTransactionLog>(path);
+          log = await this.backgroundConfig.transactionLogger.readTransactionLog(guid);
           if (!log) {
             Logger.debug(
               'No log found yet, waiting 500 ms and retrying (%s of %d waited so far)',
               sw.dump(),
-              this.maxWaitInMsForBackgroundJobToStart
+              this.maxWaitInMsForBackgroundJobToStart,
             );
             await PromiseRatchet.wait(500);
           }
@@ -95,13 +81,13 @@ export class BackgroundHttpAdapterHandler {
     const rval: BackgroundMetaResponseInternal = {
       currentQueueLength: currentCount,
       validTypes: valid,
-      localMode: this.backgroundManager.localMode,
+      backgroundManagerName: this.backgroundManager.backgroundManagerName,
     };
     return rval;
   }
 
   public async handleBackgroundSubmission(evt: ExtendedAPIGatewayEvent, context: Context): Promise<BackgroundQueueResponseInternal> {
-    Logger.info('handleBackgroundSubmission : %j (local:%s)', evt.parsedBody, this.backgroundManager.localMode);
+    Logger.info('handleBackgroundSubmission : %j (mgr:%s)', evt.parsedBody, this.backgroundManager.backgroundManagerName);
 
     let rval: BackgroundQueueResponseInternal = null;
 
@@ -137,7 +123,7 @@ export class BackgroundHttpAdapterHandler {
     }
 
     const foundProc: BackgroundProcessor<any> = this.backgroundConfig.processors.find(
-      (s) => s.typeName.toLowerCase() === entry.type.toLowerCase()
+      (s) => s.typeName.toLowerCase() === entry.type.toLowerCase(),
     );
     const immediate: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['immediate']);
     const startProcessor: boolean = BooleanRatchet.parseBool(evt.queryStringParameters['startProcessor']);

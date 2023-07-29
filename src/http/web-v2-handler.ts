@@ -2,7 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyEventV2, Context, ProxyResult } from 'a
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 import { WebHandler } from './web-handler';
 
 /**
@@ -26,7 +26,7 @@ export class WebV2Handler implements EpsilonLambdaEventHandler<APIGatewayProxyEv
     const asExtended: ExtendedAPIGatewayEvent = Object.assign(
       {},
       { parsedBody: null, authorization: null, convertedFromV2Event: true },
-      conv
+      conv,
     );
     const rval: ProxyResult = await this.webHandler.openApiLambdaHandler(asExtended, context);
     return rval;

@@ -1,4 +1,4 @@
-import { BackgroundManager } from '../../background-manager';
+import { BackgroundManagerLike } from '../../background/manager/background-manager-like';
 
 export interface BackgroundProcessor<T> {
   typeName: string; // The name for this processor
@@ -10,5 +10,5 @@ export interface BackgroundProcessor<T> {
   dataSchemaName?: string;
 
   // Allowed to return since it may be logged
-  handleEvent(data: T, mgr: BackgroundManager): Promise<any>;
+  handleEvent(data: T, mgr: BackgroundManagerLike): Promise<any>;
 }

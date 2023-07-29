@@ -5,10 +5,10 @@ import { EventUtil } from '../../http/event-util';
 import { BadRequestError } from '../../http/error/bad-request-error';
 import { FilterFunction } from '../../config/http/filter-function';
 import { ResponseUtil } from '../../http/response-util';
-import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { MisconfiguredError } from '../../http/error/misconfigured-error';
 import { APIGatewayProxyResult } from 'aws-lambda';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
 export class BuiltInFilters {
   public static readonly MAXIMUM_LAMBDA_BODY_SIZE_BYTES: number = 1024 * 1024 * 5 - 1024 * 100; // 5Mb - 100k buffer
@@ -127,7 +127,7 @@ export class BuiltInFilters {
       try {
         fCtx.event.parsedBody = EventUtil.jsonBodyToObject(fCtx.event);
       } catch (err) {
-        throw new EpsilonHttpError('Supplied body was not parsable as valid JSON').withHttpStatusCode(400);
+        throw new RestfulApiHttpError('Supplied body was not parsable as valid JSON').withHttpStatusCode(400);
       }
     }
     return true;
@@ -136,8 +136,8 @@ export class BuiltInFilters {
   public static async checkMaximumLambdaBodySize(fCtx: FilterChainContext): Promise<boolean> {
     if (fCtx.result?.body && fCtx.result.body.length > BuiltInFilters.MAXIMUM_LAMBDA_BODY_SIZE_BYTES) {
       const delta: number = fCtx.result.body.length - BuiltInFilters.MAXIMUM_LAMBDA_BODY_SIZE_BYTES;
-      throw new EpsilonHttpError(
-        'Response size is ' + fCtx.result.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler'
+      throw new RestfulApiHttpError(
+        'Response size is ' + fCtx.result.body.length + ' bytes, which is ' + delta + ' bytes too large for this handler',
       ).withHttpStatusCode(500);
     }
     return true;
@@ -153,7 +153,7 @@ export class BuiltInFilters {
           fCtx.routeAndParse.mapping.validation.modelName,
           fCtx.event.parsedBody,
           fCtx.routeAndParse.mapping.validation.emptyAllowed,
-          fCtx.routeAndParse.mapping.validation.extraPropertiesAllowed
+          fCtx.routeAndParse.mapping.validation.extraPropertiesAllowed,
         );
         if (errors.length > 0) {
           Logger.info('Found errors while validating %s object %j', fCtx.routeAndParse.mapping.validation.modelName, errors);
@@ -186,16 +186,16 @@ export class BuiltInFilters {
           fCtx.routeAndParse.mapping.outboundValidation.modelName,
           fCtx.rawResult,
           fCtx.routeAndParse.mapping.outboundValidation.emptyAllowed,
-          fCtx.routeAndParse.mapping.outboundValidation.extraPropertiesAllowed
+          fCtx.routeAndParse.mapping.outboundValidation.extraPropertiesAllowed,
         );
         if (errors.length > 0) {
           Logger.error(
             'Found outbound errors while validating %s object %j',
             fCtx.routeAndParse.mapping.outboundValidation.modelName,
-            errors
+            errors,
           );
           errors.unshift('Server sent object invalid according to spec');
-          throw new EpsilonHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(fCtx.rawResult);
+          throw new RestfulApiHttpError().withErrors(errors).withHttpStatusCode(500).withDetails(fCtx.rawResult);
         }
       } else {
         Logger.debug('Applied no outbound validation because none set');
@@ -233,12 +233,12 @@ export class BuiltInFilters {
   public static async secureOutboundServerErrorForProduction(
     fCtx: FilterChainContext,
     errorMessage: string,
-    errCode: number
+    errCode: number,
   ): Promise<boolean> {
     if (fCtx?.result?.statusCode) {
       if (errCode === null || fCtx.result.statusCode === errCode) {
         Logger.warn('Securing outbound error info (was : %j)', fCtx.result.body);
-        fCtx.rawResult = new EpsilonHttpError(errorMessage).withHttpStatusCode(fCtx.result.statusCode);
+        fCtx.rawResult = new RestfulApiHttpError(errorMessage).withHttpStatusCode(fCtx.result.statusCode);
         const oldResult: APIGatewayProxyResult = fCtx.result;
         fCtx.result = ResponseUtil.errorResponse(fCtx.rawResult);
         // Need this to preserve any CORS headers, etc

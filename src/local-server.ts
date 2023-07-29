@@ -15,7 +15,10 @@ export class LocalServer {
   private server: Server;
   private aborted: boolean = false;
 
-  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888) {}
+  constructor(
+    private globalHandler: EpsilonGlobalHandler,
+    private port: number = 8888,
+  ) {}
 
   async runServer(): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {

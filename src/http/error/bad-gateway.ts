@@ -1,6 +1,6 @@
-import { EpsilonHttpError } from './epsilon-http-error';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
-export class BadGateway<T = void> extends EpsilonHttpError<T> {
+export class BadGateway<T = void> extends RestfulApiHttpError<T> {
   public static readonly HTTP_CODE: number = 502;
 
   constructor(...errors: string[]) {

@@ -7,7 +7,10 @@ import { ExpiredJwtHandling, JwtRatchetLike, JwtTokenBase } from '@bitblit/ratch
  * Service for handling jwt tokens
  */
 export class JwtRatchetLocalWebTokenManipulator<T extends JwtTokenBase> implements WebTokenManipulator<T> {
-  constructor(private _jwtRatchet: JwtRatchetLike, private _issuer: string) {
+  constructor(
+    private _jwtRatchet: JwtRatchetLike,
+    private _issuer: string,
+  ) {
     RequireRatchet.notNullOrUndefined(_jwtRatchet, '_jwtRatchet');
     RequireRatchet.notNullOrUndefined(StringRatchet.trimToNull(_issuer), '_issuer');
   }

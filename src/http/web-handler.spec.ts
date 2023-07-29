@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common/logger';
+import { Logger } from '@bitblit/ratchet/common';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { SampleServerComponents } from '../sample/sample-server-components';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
@@ -65,7 +65,7 @@ describe('#errorToProxyResult', function () {
     */
 
   it('should gzip responses correctly', async () => {
-    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler();
+    const inst: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('jest-gzip');
 
     expect(inst.epsilon.modelValidator).toBeTruthy();
 

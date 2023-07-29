@@ -1,10 +1,5 @@
-import AWS from 'aws-sdk';
-import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
-import {LambdaEventDetector, S3CacheRatchet, S3CacheRatchetLike} from '@bitblit/ratchet/aws';
 import { EpsilonConstants } from '../epsilon-constants';
-import { ModelValidator } from '@bitblit/ratchet/model-validator';
-import { BackgroundManager } from '../background-manager';
 import { BackgroundValidator } from './background-validator';
 import { BackgroundConfig } from '../config/background/background-config';
 import { BackgroundProcessor } from '../config/background/background-processor';
@@ -15,6 +10,11 @@ import { BackgroundExecutionListener } from './background-execution-listener';
 import { BackgroundExecutionEventType } from './background-execution-event-type';
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { ContextUtil } from '../util/context-util';
+import { BackgroundManagerLike } from './manager/background-manager-like';
+import { AbstractBackgroundManager } from './manager/abstract-background-manager';
+import { ErrorRatchet, Logger, StopWatch, StringRatchet } from '@bitblit/ratchet/common';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 /**
  * We use a FIFO queue so that 2 different Lambdas don't both work on the same
@@ -23,9 +23,12 @@ import { ContextUtil } from '../util/context-util';
 export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   private processors: Map<string, BackgroundProcessor<any>>;
   private validator: BackgroundValidator;
-  private s3TransactionLogCacheRatchet: S3CacheRatchetLike;
 
-  constructor(private cfg: BackgroundConfig, private mgr: BackgroundManager, private modelValidator?: ModelValidator) {
+  constructor(
+    private cfg: BackgroundConfig,
+    private mgr: BackgroundManagerLike,
+    private modelValidator?: ModelValidator,
+  ) {
     const cfgErrors: string[] = BackgroundValidator.validateConfig(cfg);
     if (cfgErrors.length > 0) {
       ErrorRatchet.throwFormattedErr('Invalid background config : %j', cfgErrors);
@@ -33,25 +36,14 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     Logger.silly('Starting Background processor, %d processors', cfg.processors.length);
     this.validator = new BackgroundValidator(cfg, modelValidator);
     this.processors = BackgroundValidator.validateAndMapProcessors(cfg.processors, modelValidator);
-    if (this.cfg.s3TransactionLoggingConfig) {
-      this.s3TransactionLogCacheRatchet = new S3CacheRatchet(
-        this.cfg.s3TransactionLoggingConfig.s3,
-        this.cfg.s3TransactionLoggingConfig.bucket
-      );
-    }
 
-    if (mgr) {
-      // We always subscribe, but check on a case-by-case basis so we can attach/detach
-      // local mode at runtime
-      Logger.info('Attaching local-mode background manager bus');
-      mgr.localBus().subscribe(async (evt) => {
-        if (mgr.localMode) {
-          Logger.debug('Processing local background entry : %j', evt);
-          const rval: boolean = await this.processSingleBackgroundEntry(evt);
-          Logger.info('Processor returned %s', rval);
-        } else {
-          Logger.silly('Not local mode - ignoring');
-        }
+    // If there is an immediate processing queue, wire me up to use it
+    if (mgr?.immediateProcessQueue && mgr.immediateProcessQueue()) {
+      Logger.info('Attaching to immediate processing queue');
+      mgr.immediateProcessQueue().subscribe(async (evt) => {
+        Logger.debug('Processing local background entry : %j', evt);
+        const rval: boolean = await this.processSingleBackgroundEntry(evt);
+        Logger.info('Processor returned %s', rval);
       });
     }
   }
@@ -129,6 +121,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     return rval;
   }
 
+  /*
   public isBackgroundSqsMessage(message: AWS.SQS.Types.ReceiveMessageResult): boolean {
     let rval: boolean = false;
     if (message && message.Messages && message.Messages.length > 0) {
@@ -150,6 +143,8 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     return rval;
   }
 
+   */
+
   // Either trigger a pull of the SQS queue, or process immediately
   // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
   public async processEvent(event: any, context: Context): Promise<ProxyResult> {
@@ -165,7 +160,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
       }
     } else {
       Logger.info('Reading task from background queue');
-      procd = await this.takeAndProcessSingleBackgroundSQSMessage();
+      procd = await this.takeAndProcessSingleBackgroundQueueEntry();
       if (procd > 0) {
         Logger.info('Processed %d elements from background queue, refiring', procd);
         const refire: string = await this.mgr.fireStartProcessingRequest();
@@ -184,49 +179,9 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     return rval;
   }
 
-  private async takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]> {
-    const rval: InternalBackgroundEntry<any>[] = [];
-
-    const params = {
-      MaxNumberOfMessages: 1,
-      QueueUrl: this.cfg.aws.queueUrl,
-      VisibilityTimeout: 300,
-      WaitTimeSeconds: 0,
-    };
-
-    const message: AWS.SQS.ReceiveMessageResult = await this.mgr.sqs.receiveMessage(params).promise();
-    if (message && message.Messages && message.Messages.length > 0) {
-      for (let i = 0; i < message.Messages.length; i++) {
-        const m: AWS.SQS.Message = message.Messages[i];
-        try {
-          const parsedBody: InternalBackgroundEntry<any> = JSON.parse(m.Body);
-          if (!parsedBody.type) {
-            Logger.warn('Dropping invalid background entry : %j', parsedBody);
-          } else {
-            rval.push(parsedBody);
-          }
-
-          Logger.debug('Removing message from queue');
-          const delParams = {
-            QueueUrl: this.cfg.aws.queueUrl,
-            ReceiptHandle: m.ReceiptHandle,
-          };
-          const delResult: any = await this.mgr.sqs.deleteMessage(delParams).promise();
-          Logger.silly('Delete result : %j', delResult);
-        } catch (err) {
-          Logger.warn('Error parsing message, dropping : %j', m);
-        }
-      }
-    } else {
-      Logger.debug('No messages found (likely end of recursion)');
-    }
-
-    return rval;
-  }
-
-  private async takeAndProcessSingleBackgroundSQSMessage(): Promise<number> {
+  private async takeAndProcessSingleBackgroundQueueEntry(): Promise<number> {
     let rval: number = null;
-    const entries: InternalBackgroundEntry<any>[] = await this.takeEntryFromBackgroundQueue();
+    const entries: InternalBackgroundEntry<any>[] = await this.mgr.takeEntryFromBackgroundQueue();
 
     // Do them one at a time since Background is meant to throttle.  Also, it should really
     // only be one per pull anyway
@@ -241,57 +196,47 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     return rval;
   }
 
-  private async conditionallyStartTransactionLog(e: InternalBackgroundEntry<any>): Promise<void> {
-    try {
-      if (this.cfg.s3TransactionLoggingConfig) {
-        if (!StringRatchet.trimToNull(e.guid)) {
-          Logger.warn('No guid found - creating');
-          e.guid = BackgroundManager.generateBackgroundGuid();
-
-          const log: BackgroundTransactionLog = {
-            request: e,
-            running: true,
-          };
-          await this.s3TransactionLogCacheRatchet.writeObjectToCacheFile(
-            BackgroundManager.backgroundGuidToPath(this.cfg.s3TransactionLoggingConfig.prefix, e.guid),
-            log
-          );
-        }
-        Logger.debug('Starting transaction log');
+  private async safeWriteToLogger(entry: BackgroundTransactionLog): Promise<void> {
+    if (this.cfg.transactionLogger) {
+      try {
+        await this.cfg.transactionLogger.logTransaction(entry);
+      } catch (err) {
+        Logger.error('Failed to write to transaction logger : %j : %s', entry, err, err);
       }
-    } catch (err) {
-      Logger.error('Background : BAD - Failed to start transaction : %s', err, err);
+    } else {
+      Logger.silly('Skipping - no logger defined');
     }
+  }
+
+  private async conditionallyStartTransactionLog(e: InternalBackgroundEntry<any>): Promise<void> {
+    if (!StringRatchet.trimToNull(e.guid)) {
+      Logger.warn('No guid found - creating');
+      e.guid = AbstractBackgroundManager.generateBackgroundGuid();
+
+      const log: BackgroundTransactionLog = {
+        request: e,
+        running: true,
+      };
+      await this.safeWriteToLogger(log);
+    }
+    Logger.debug('Starting transaction log');
   }
 
   private async conditionallyCompleteTransactionLog(
     e: InternalBackgroundEntry<any>,
     result: any,
     error: any,
-    runtimeMS: number
+    runtimeMS: number,
   ): Promise<void> {
-    try {
-      if (this.cfg.s3TransactionLoggingConfig) {
-        if (!StringRatchet.trimToNull(e.guid)) {
-          Logger.error('Background : BAD - should not happen - no guid found for %j', e);
-        } else {
-          Logger.debug('Completing transaction log');
-          const log: BackgroundTransactionLog = {
-            request: e,
-            result: result,
-            error: error ? ErrorRatchet.safeStringifyErr(error) : null,
-            running: false,
-            runtimeMS: runtimeMS,
-          };
-          await this.s3TransactionLogCacheRatchet.writeObjectToCacheFile(
-            BackgroundManager.backgroundGuidToPath(this.cfg.s3TransactionLoggingConfig.prefix, e.guid),
-            log
-          );
-        }
-      }
-    } catch (err) {
-      Logger.error('Background : BAD - Failed to complete transaction : %s', err, err);
-    }
+    Logger.debug('Completing transaction log');
+    const log: BackgroundTransactionLog = {
+      request: e,
+      result: result,
+      error: error ? ErrorRatchet.safeStringifyErr(error) : null,
+      running: false,
+      runtimeMS: runtimeMS,
+    };
+    await this.safeWriteToLogger(log);
   }
 
   private async conditionallyRunErrorProcessor(e: InternalBackgroundEntry<any>, error: any): Promise<void> {
@@ -323,7 +268,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     // Set the trace ids appropriately
     ContextUtil.setOverrideTraceFromInternalBackgroundEntry(e);
     Logger.info('Background Process Start: %j', e);
-    const sw: StopWatch = new StopWatch(true);
+    const sw: StopWatch = new StopWatch();
     await this.conditionallyStartTransactionLog(e);
     let rval: boolean = false;
     try {
@@ -385,7 +330,6 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
         guid: e.guid,
       });
     }
-    sw.stop();
     Logger.info('Background Process Stop: %j : %s', e, sw.dump());
     return rval;
   }

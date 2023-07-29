@@ -4,7 +4,7 @@ import { Logger } from '@bitblit/ratchet/common/logger';
 export class EpsilonConstants {
   public static readonly EPSILON_FINDER_DYNAMIC_IMPORT_PATH_ENV_NAME = 'EPSILON_FINDER_DYNAMIC_IMPORT_PATH';
   public static readonly EPSILON_FINDER_FUNCTION_NAME_ENV_NAME = 'EPSILON_FINDER_FUNCTION_NAME';
-  public static readonly DEFAULT_EPSILON_FINDER_DYNAMIC_IMPORT_PATH = 'epsilon-global-handler-provider.js';
+  public static readonly DEFAULT_EPSILON_FINDER_DYNAMIC_IMPORT_PATH = 'epsilon-global-handler-provider';
   public static readonly DEFAULT_EPSILON_FINDER_FUNCTION_NAME = 'findEpsilonGlobalHandler';
 
   public static readonly AUTH_HEADER_PREFIX: string = 'Bearer ';

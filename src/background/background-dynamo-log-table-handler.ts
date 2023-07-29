@@ -11,7 +11,12 @@ Table should be
 - Range key: timestamp
  */
 export class BackgroundDynamoLogTableHandler<T> implements BackgroundExecutionListener<T> {
-  constructor(private dynamo: DynamoRatchetLike, private tableName: string, private env: string, private backgroundQueueName: string) {}
+  constructor(
+    private dynamo: DynamoRatchetLike,
+    private tableName: string,
+    private env: string,
+    private backgroundQueueName: string,
+  ) {}
 
   async onEvent(event: BackgroundExecutionEvent<T>): Promise<void> {
     const entry: BackgroundProcessLogTableEntry = {

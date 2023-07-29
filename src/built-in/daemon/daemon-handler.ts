@@ -14,7 +14,7 @@ import { StringRatchet } from '@bitblit/ratchet/common';
 export class DaemonHandler {
   public static readonly ALLOW_EVERYTHING_AUTHORIZER: DaemonAuthorizerFunction = async (
     evt: ExtendedAPIGatewayEvent,
-    proc: DaemonProcessState
+    proc: DaemonProcessState,
   ) => {
     return true;
   };
@@ -25,7 +25,10 @@ export class DaemonHandler {
   /**
    * Initialize the Router
    */
-  constructor(private daemon: DaemonLike, private inConfig?: DaemonConfig) {
+  constructor(
+    private daemon: DaemonLike,
+    private inConfig?: DaemonConfig,
+  ) {
     this.config = inConfig || {};
     this.config.authorizer = this.config.authorizer || DaemonHandler.ALLOW_EVERYTHING_AUTHORIZER;
     this.config.groupSelector = this.config.groupSelector || ((evt: ExtendedAPIGatewayEvent) => Promise.resolve(daemon.defaultGroup));
@@ -65,7 +68,7 @@ export class DaemonHandler {
 
   public async listDaemonStatus(evt: ExtendedAPIGatewayEvent): Promise<DaemonProcessStateList> {
     const group: string = await this.config.groupSelector(evt);
-    let keys: DaemonProcessState[] = await this.daemon.list(group);
+    const keys: DaemonProcessState[] = await this.daemon.list(group);
     const allowed: DaemonProcessState[] = [];
     for (let i = 0; i < keys.length; i++) {
       const canRead: boolean = await this.config.authorizer(evt, keys[i]);

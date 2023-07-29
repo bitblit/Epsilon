@@ -62,7 +62,7 @@ export class BuiltInAuthFilters {
 
   public static async parseAuthorizationHeader(
     fCtx: FilterChainContext,
-    webTokenManipulators: WebTokenManipulator<JwtTokenBase> | WebTokenManipulator<JwtTokenBase>[]
+    webTokenManipulators: WebTokenManipulator<JwtTokenBase> | WebTokenManipulator<JwtTokenBase>[],
   ): Promise<boolean> {
     if (!fCtx?.event || !webTokenManipulators || (Array.isArray(webTokenManipulators) && !webTokenManipulators.length)) {
       throw new MisconfiguredError('Cannot continue - missing event or encryption');
@@ -111,7 +111,7 @@ export class BuiltInAuthFilters {
       } else {
         throw new MisconfiguredError().withFormattedErrorMessage(
           'Authorizer %s requested but not found',
-          fCtx.routeAndParse.mapping.authorizerName
+          fCtx.routeAndParse.mapping.authorizerName,
         );
       }
     } else {

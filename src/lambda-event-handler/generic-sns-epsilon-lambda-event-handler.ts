@@ -1,10 +1,10 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
 import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
-import { Logger } from '@bitblit/ratchet/common/logger';
+import { Logger } from '@bitblit/ratchet/common';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 export class GenericSnsEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   constructor(private _epsilon: EpsilonInstance) {}
@@ -23,7 +23,7 @@ export class GenericSnsEpsilonLambdaEventHandler implements EpsilonLambdaEventHa
       const finder: string = evt.Records[0].Sns.TopicArn;
       const handler: GenericAwsEventHandlerFunction<SNSEvent> = AwsUtil.findInMap<GenericAwsEventHandlerFunction<SNSEvent>>(
         finder,
-        this._epsilon.config.sns.handlers
+        this._epsilon.config.sns.handlers,
       );
       if (handler) {
         rval = await handler(evt);

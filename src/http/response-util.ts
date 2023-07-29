@@ -1,15 +1,13 @@
 import { ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common/logger';
-import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
+import { Logger, MapRatchet, RestfulApiHttpError } from '@bitblit/ratchet/common';
 import zlib from 'zlib';
-import { EpsilonHttpError } from './error/epsilon-http-error';
 
 export class ResponseUtil {
   // Prevent instantiation
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static errorResponse<T>(err: EpsilonHttpError<T>): ProxyResult {
+  public static errorResponse<T>(err: RestfulApiHttpError<T>): ProxyResult {
     const body: any = {
       errors: err.errors,
       httpStatusCode: err.httpStatusCode,

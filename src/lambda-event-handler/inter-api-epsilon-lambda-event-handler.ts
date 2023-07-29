@@ -20,7 +20,7 @@ export class InterApiEpsilonLambdaEventHandler implements EpsilonLambdaEventHand
     const tmp: string[] = await InterApiUtil.processInterApiEvent(
       evt,
       this._epsilon.config.interApiConfig,
-      this._epsilon.backgroundManager
+      this._epsilon.backgroundManager,
     );
     const rval: ProxyResult = {
       statusCode: 200,

@@ -1,15 +1,15 @@
 import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { Context, ProxyResult, ScheduledEvent } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common/logger';
+import { Logger } from '@bitblit/ratchet/common';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
-import { LambdaEventDetector } from '@bitblit/ratchet/aws/lambda-event-detector';
 import { CronConfig } from '../config/cron/cron-config';
-import { BackgroundManager } from '../background-manager';
 import { BackgroundHandler } from '../background/background-handler';
 import { BackgroundEntry } from '../background/background-entry';
 import { CronBackgroundEntry } from '../config/cron/cron-background-entry';
 import { CronUtil } from '../util/cron-util';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { LambdaEventDetector } from '@bitblit/ratchet/aws';
 
 export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<ScheduledEvent> {
   constructor(private _epsilon: EpsilonInstance) {}
@@ -37,7 +37,7 @@ export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<
         evt,
         this._epsilon.config.cron,
         this._epsilon.backgroundManager,
-        this._epsilon.backgroundHandler
+        this._epsilon.backgroundHandler,
       );
       rval = {
         statusCode: 200,
@@ -51,8 +51,8 @@ export class CronEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<
   public static async processCronEvent(
     evt: ScheduledEvent,
     cronConfig: CronConfig,
-    backgroundManager: BackgroundManager,
-    background: BackgroundHandler
+    backgroundManager: BackgroundManagerLike,
+    background: BackgroundHandler,
   ): Promise<boolean> {
     let rval: boolean = false;
     if (cronConfig && evt && evt.resources[0]) {

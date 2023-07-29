@@ -2,8 +2,8 @@ import { EpsilonConfig } from './config/epsilon-config';
 import { WebHandler } from './http/web-handler';
 import { BackgroundHandler } from './background/background-handler';
 import { OpenApiDocument } from './config/open-api/open-api-document';
+import { BackgroundManagerLike } from './background/manager/background-manager-like';
 import { ModelValidator } from '@bitblit/ratchet/model-validator';
-import { BackgroundManager } from './background-manager';
 
 /**
  * This interface just wraps up everything that gets created by the config parsing process so that
@@ -16,5 +16,5 @@ export interface EpsilonInstance {
   modelValidator: ModelValidator;
   webHandler: WebHandler;
   backgroundHandler: BackgroundHandler;
-  backgroundManager: BackgroundManager;
+  backgroundManager: BackgroundManagerLike;
 }

@@ -1,11 +1,14 @@
 import { ScheduledEvent } from 'aws-lambda';
 import { BackgroundHandler } from '../background/background-handler';
-import { BackgroundManager } from '../background-manager';
 import { CronConfig } from '../config/cron/cron-config';
 import { BackgroundConfig } from '../config/background/background-config';
-import AWS from 'aws-sdk';
 import { JestRatchet } from '@bitblit/ratchet/jest';
 import { CronEpsilonLambdaEventHandler } from './cron-epsilon-lambda-event-handler';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { SingleThreadLocalBackgroundManager } from '../background/manager/single-thread-local-background-manager';
+import { SQSClient } from '@aws-sdk/client-sqs';
+import { SNSClient } from '@aws-sdk/client-sns';
+import { jest } from '@jest/globals';
 
 // jest.mock('@bitblit/background');
 
@@ -14,8 +17,8 @@ describe('#cronEpsilonLambdaEventHandler', function () {
   let mockSns;
 
   beforeEach(() => {
-    mockSqs = JestRatchet.mock<AWS.SQS>();
-    mockSns = JestRatchet.mock<AWS.SNS>();
+    mockSqs = JestRatchet.mock<SQSClient>(jest.fn);
+    mockSns = JestRatchet.mock<SNSClient>(jest.fn);
   });
 
   // CAW 2021-03-10 : Disabling for now since jest mock not working when run in batch from command line...unclear why
@@ -50,13 +53,11 @@ describe('#cronEpsilonLambdaEventHandler', function () {
       httpSubmissionPath: '/background/',
       implyTypeFromPathSuffix: true,
       httpMetaEndpoint: '/background-meta',
-      aws: null,
     };
     const background = new BackgroundHandler(null, null);
     background.getConfig = jest.fn(() => smConfig);
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(smConfig.aws, mockSqs, mockSns);
-    backgroundManager.localMode = true;
+    const backgroundManager: BackgroundManagerLike = new SingleThreadLocalBackgroundManager();
 
     const res: boolean = await CronEpsilonLambdaEventHandler.processCronEvent(evt, cronConfig, backgroundManager, background);
     expect(res).toBeTruthy();

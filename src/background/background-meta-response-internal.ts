@@ -1,5 +1,5 @@
 export interface BackgroundMetaResponseInternal {
-  localMode: boolean;
+  backgroundManagerName: string;
   currentQueueLength: number;
   validTypes: string[];
 }

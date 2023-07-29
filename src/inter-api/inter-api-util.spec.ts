@@ -1,14 +1,15 @@
 import { SNSEvent } from 'aws-lambda';
-import AWS from 'aws-sdk';
 import { InterApiUtil } from './inter-api-util';
 import { InterApiConfig } from '../config/inter-api/inter-api-config';
-import { BackgroundManager } from '../background-manager';
-
-jest.mock('../background-manager');
-jest.mock('aws-sdk');
+import { JestRatchet } from '@bitblit/ratchet/jest';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { SNSClient } from '@aws-sdk/client-sns';
+import { SQSClient } from '@aws-sdk/client-sqs';
+import { jest } from '@jest/globals';
 
 describe('#interApiUtil', function () {
   let mockSns;
+  let mockSqs;
   let mockBgMgr;
 
   const evt: SNSEvent = {
@@ -27,8 +28,8 @@ describe('#interApiUtil', function () {
           Timestamp: '2021-11-04T07:37:08.241Z',
           SignatureVersion: '1',
           Signature: 'LyS2ybM/Epsq5sFqPJd==',
-          SigningCertUrl: 'https://sns.us-east-1.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem',
-          UnsubscribeUrl:
+          SigningCertURL: 'https://sns.us-east-1.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem',
+          UnsubscribeURL:
             'https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:012345678901:GenericApiEventTopicDev:6efec6a5-1f02-4fc5-b0f7-fa7c013cf8bb',
           MessageAttributes: {},
         },
@@ -37,17 +38,14 @@ describe('#interApiUtil', function () {
   };
 
   beforeEach(() => {
-    mockSns = new AWS.SNS();
-    mockBgMgr = new BackgroundManager(null, null, null);
+    mockSns = JestRatchet.mock<SNSClient>(jest.fn);
+    mockSqs = JestRatchet.mock<SQSClient>(jest.fn);
+    mockBgMgr = JestRatchet.mock<BackgroundManagerLike>(jest.fn); //new AwsSqsSnsBackgroundManager({} as BackgroundAwsConfig, mockSqs, mockSns);
   });
 
   it('should translate processes', async () => {
-    mockBgMgr.createEntry = jest.fn((a, b) => {
-      return { t: 1 };
-    });
-    mockBgMgr.addEntriesToQueue = jest.fn((a, b) => {
-      return Promise.resolve(['a']);
-    });
+    mockBgMgr.createEntry.mockResolvedValue({ t: 1 });
+    mockBgMgr.addEntriesToQueue.mockResolvedValue(['a]']);
 
     const cfg: InterApiConfig = {
       aws: {

@@ -12,7 +12,10 @@ import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebTokenManipulator<T> {
   private _ratchet: JwtRatchet;
 
-  constructor(private encryptionKeys: string[], private issuer: string) {
+  constructor(
+    private encryptionKeys: string[],
+    private issuer: string,
+  ) {
     RequireRatchet.notNullOrUndefined(encryptionKeys, 'encryptionKeys');
     RequireRatchet.noNullOrUndefinedValuesInArray(encryptionKeys, encryptionKeys.length);
     this._ratchet = new JwtRatchet(Promise.resolve(encryptionKeys));
@@ -26,7 +29,7 @@ export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebToke
       Promise.resolve(keys),
       this._ratchet.jtiGenerator,
       this._ratchet.decryptOnlyKeyUseLogLevel,
-      this._ratchet.parseFailureLogLevel
+      this._ratchet.parseFailureLogLevel,
     );
     return this;
   }
@@ -37,7 +40,7 @@ export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebToke
       this._ratchet.decryptKeysPromise,
       this._ratchet.jtiGenerator,
       this._ratchet.decryptOnlyKeyUseLogLevel,
-      logLevel
+      logLevel,
     );
     return this;
   }
@@ -48,7 +51,7 @@ export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebToke
       this._ratchet.decryptKeysPromise,
       this._ratchet.jtiGenerator,
       logLevel,
-      this._ratchet.parseFailureLogLevel
+      this._ratchet.parseFailureLogLevel,
     );
     return this;
   }
@@ -80,7 +83,7 @@ export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebToke
     userObject: T,
     roles: string[] = ['USER'],
     expirationSeconds: number = 3600,
-    proxyUser: T = null
+    proxyUser: T = null,
   ): Promise<string> {
     Logger.info('Creating JWT token for %s  that expires in %s', principal, expirationSeconds);
     const now = new Date().getTime();

@@ -4,19 +4,19 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
 import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 import { ExtendedAPIGatewayEvent } from '../../config/http/extended-api-gateway-event';
 import { BadRequestError } from '../../http/error/bad-request-error';
-import { EpsilonHttpError } from '../../http/error/epsilon-http-error';
 import { EpsilonRouter } from '../../http/route/epsilon-router';
 import { UnauthorizedError } from '../../http/error/unauthorized-error';
 import { NotFoundError } from '../../http/error/not-found-error';
 import { ForbiddenError } from '../../http/error/forbidden-error';
 import { NotImplemented } from '../../http/error/not-implemented';
 import { MisconfiguredError } from '../../http/error/misconfigured-error';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
 export class BuiltInHandlers {
   public static async expectedHandledByFilter(evt: ExtendedAPIGatewayEvent, flag?: string): Promise<any> {
     throw new MisconfiguredError().withFormattedErrorMessage(
       'Should not happen - it was expected that route %s would be handled by a filter',
-      evt.path
+      evt.path,
     );
   }
 
@@ -60,7 +60,7 @@ export class BuiltInHandlers {
         case 501:
           throw new NotImplemented('Not Implemented');
         default:
-          throw new EpsilonHttpError<any>()
+          throw new RestfulApiHttpError<any>()
             .withFormattedErrorMessage('Default error - %s', errNumber)
             .withHttpStatusCode(500)
             .withDetails({ src: errNumber })

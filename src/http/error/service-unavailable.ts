@@ -1,6 +1,6 @@
-import { EpsilonHttpError } from './epsilon-http-error';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
-export class ServiceUnavailable<T = void> extends EpsilonHttpError<T> {
+export class ServiceUnavailable<T = void> extends RestfulApiHttpError<T> {
   public static readonly HTTP_CODE: number = 503;
 
   constructor(...errors: string[]) {

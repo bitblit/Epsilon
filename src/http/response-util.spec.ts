@@ -6,6 +6,7 @@ import { FilterChainContext } from '../config/http/filter-chain-context';
 import { ExtendedAPIGatewayEvent } from '../config/http/extended-api-gateway-event';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { EpsilonConstants } from '../epsilon-constants';
+import { EsmRatchet } from '@bitblit/ratchet/common';
 
 describe('#responseUtil', function () {
   it('should correctly combine a redirect url and query params', function () {
@@ -62,7 +63,7 @@ describe('#responseUtil', function () {
 
   it('should add cors to proxy result MATCH 1', async () => {
     const evt: ExtendedAPIGatewayEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-1.json')).toString(),
     );
     const proxy: ProxyResult = {} as ProxyResult;
     const fCtx: FilterChainContext = {
@@ -85,7 +86,7 @@ describe('#responseUtil', function () {
 
   it('should add cors to proxy result MATCH 2', async () => {
     const evt: ExtendedAPIGatewayEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-request-2.json')).toString(),
     );
     const proxy: ProxyResult = {} as ProxyResult;
     const fCtx: FilterChainContext = {

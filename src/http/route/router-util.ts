@@ -1,11 +1,11 @@
 import { EpsilonRouter } from './epsilon-router';
 import { MisconfiguredError } from '../error/misconfigured-error';
-import { Logger } from '@bitblit/ratchet/common/logger';
+import { Logger } from '@bitblit/ratchet/common';
 import { RouteMapping } from './route-mapping';
 import { RouteValidatorConfig } from './route-validator-config';
-import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
+import { BooleanRatchet } from '@bitblit/ratchet/common';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
 import { OpenApiDocument } from '../../config/open-api/open-api-document';
-import { ModelValidator } from '@bitblit/ratchet/model-validator';
 import { BackgroundHttpAdapterHandler } from '../../background/background-http-adapter-handler';
 import { HandlerFunction } from '../../config/http/handler-function';
 import { HttpConfig } from '../../config/http/http-config';
@@ -19,7 +19,7 @@ import { BuiltInHandlers } from '../../built-in/http/built-in-handlers';
 import { FilterFunction } from '../../config/http/filter-function';
 import { BuiltInAuthFilters } from '../../built-in/http/built-in-auth-filters';
 import { LogLevelManipulationFilter } from '../../built-in/http/log-level-manipulation-filter';
-import { JwtTokenBase } from '@bitblit/ratchet/common';
+import { ModelValidator } from '@bitblit/ratchet/model-validator';
 
 /**
  * Endpoints about the api itself
@@ -30,7 +30,7 @@ export class RouterUtil {
   private constructor() {}
 
   public static defaultAuthenticationHeaderParsingEpsilonPreFilters(
-    webTokenManipulator: WebTokenManipulator<JwtTokenBase>
+    webTokenManipulator: WebTokenManipulator<JwtTokenBase>,
   ): FilterFunction[] {
     return [
       (fCtx) => BuiltInAuthFilters.parseAuthorizationHeader(fCtx, webTokenManipulator),
@@ -74,7 +74,7 @@ export class RouterUtil {
   }
 
   public static defaultHttpMetaProcessingConfigWithAuthenticationHeaderParsing(
-    webTokenManipulator: WebTokenManipulator<JwtTokenBase>
+    webTokenManipulator: WebTokenManipulator<JwtTokenBase>,
   ): HttpProcessingConfig {
     const defaults: HttpProcessingConfig = {
       configName: 'EpsilonDefaultHttpMetaProcessingConfig',
@@ -144,7 +144,7 @@ export class RouterUtil {
     httpConfig: HttpConfig,
     openApiDoc: OpenApiDocument,
     modelValidator: ModelValidator,
-    backgroundHttpAdapterHandler: BackgroundHttpAdapterHandler
+    backgroundHttpAdapterHandler: BackgroundHttpAdapterHandler,
   ): EpsilonRouter {
     if (!openApiDoc || !httpConfig) {
       throw new MisconfiguredError('Cannot configure, missing either yaml or cfg');
@@ -230,7 +230,7 @@ export class RouterUtil {
               method,
               path,
               schema,
-              rval.config.overrideModelValidator || rval.openApiModelValidator
+              rval.config.overrideModelValidator || rval.openApiModelValidator,
             );
             const required: boolean = BooleanRatchet.parseBool(entry['requestBody']['required']);
             const validation: RouteValidatorConfig = {
@@ -257,7 +257,7 @@ export class RouterUtil {
               method,
               path,
               schema,
-              rval.config.overrideModelValidator || rval.openApiModelValidator
+              rval.config.overrideModelValidator || rval.openApiModelValidator,
             );
             const validation: RouteValidatorConfig = {
               extraPropertiesAllowed: false,

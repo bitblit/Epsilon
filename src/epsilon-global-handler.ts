@@ -6,7 +6,6 @@ import { EpsilonInstance } from './epsilon-instance';
 import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
 import { ResponseUtil } from './http/response-util';
-import { EpsilonHttpError } from './http/error/epsilon-http-error';
 import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import {
@@ -16,6 +15,7 @@ import {
   LoggerOutputFunction,
   LogMessageFormatType,
   LogMessageProcessor,
+  RestfulApiHttpError,
 } from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
 import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
@@ -92,7 +92,7 @@ export class EpsilonGlobalHandler {
     type: string,
     data?: T,
     overrideTraceId?: string,
-    overrideTraceDepth?: number
+    overrideTraceDepth?: number,
   ): Promise<boolean> {
     return this.processSingleBackgroundEntry(this._epsilon.backgroundManager.createEntry(type, data), overrideTraceId, overrideTraceDepth);
   }
@@ -100,14 +100,14 @@ export class EpsilonGlobalHandler {
   public async processSingleBackgroundEntry(
     e: BackgroundEntry<any>,
     overrideTraceId?: string,
-    overrideTraceDepth?: number
+    overrideTraceDepth?: number,
   ): Promise<boolean> {
     let rval: boolean = false;
     if (e?.type) {
       const internal: InternalBackgroundEntry<any> = this._epsilon.backgroundManager.wrapEntryForInternal(
         e,
         overrideTraceId,
-        overrideTraceDepth
+        overrideTraceDepth,
       );
       rval = await this._epsilon.backgroundHandler.processSingleBackgroundEntry(internal);
       Logger.info('Direct processed request %j to %s', e, rval);
@@ -127,12 +127,12 @@ export class EpsilonGlobalHandler {
         const tmp: any = await PromiseRatchet.timeout<ProxyResult>(
           this.innerLambdaHandler(event, context),
           'EpsilonLastResortTimeout',
-          context.getRemainingTimeInMillis() - 1000
+          context.getRemainingTimeInMillis() - 1000,
         ); // Reserve 1 second for cleanup
         if (TimeoutToken.isTimeoutToken(tmp)) {
           (tmp as TimeoutToken).writeToLog();
           // Using the HTTP version since it can use it, and the background ones dont care about the response format
-          rval = ResponseUtil.errorResponse(EpsilonHttpError.wrapError(new RequestTimeoutError('Timed out')));
+          rval = ResponseUtil.errorResponse(RestfulApiHttpError.wrapError(new RequestTimeoutError('Timed out')));
         } else {
           rval = tmp;
         }
@@ -157,7 +157,7 @@ export class EpsilonGlobalHandler {
       const logLevel: LoggerLevelName = EventUtil.calcLogLevelViaEventOrEnvParam(
         Logger.getLevel(),
         event,
-        this._epsilon.config.loggerConfig
+        this._epsilon.config.loggerConfig,
       );
       Logger.setLevel(logLevel);
 
@@ -182,13 +182,13 @@ export class EpsilonGlobalHandler {
           Logger.logByLevel(
             this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
             'EvtStart: %s',
-            label
+            label,
           );
           rval = await handler.processEvent(event, context);
           Logger.logByLevel(
             this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
             'EvtEnd: %s',
-            label
+            label,
           );
           Logger.silly('EvtEnd:Value: %s Value: %j', label, rval);
         }

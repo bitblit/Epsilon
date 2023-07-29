@@ -27,7 +27,7 @@ export class EpsilonStackUtil {
     props: EpsilonApiStackProps,
     backgroundLambdaSqs: Queue,
     backgroundLambdaSns: Topic,
-    interApiSns: Topic
+    interApiSns: Topic,
   ): PolicyStatement[] {
     const rval: PolicyStatement[] = (props.additionalPolicyStatements || []).concat([
       new PolicyStatement({

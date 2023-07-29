@@ -6,7 +6,11 @@ import { WebTokenManipulator } from './web-token-manipulator';
 export class Auth0WebTokenManipulator implements WebTokenManipulator<JwtTokenBase> {
   private jwksClient: any;
 
-  constructor(private clientId: string, private jwksUri: string, private issuer: string) {}
+  constructor(
+    private clientId: string,
+    private jwksUri: string,
+    private issuer: string,
+  ) {}
 
   public async extractTokenFromAuthorizationHeader<T>(authHeader: string): Promise<JwtTokenBase> {
     let tokenString: string = StringRatchet.trimToEmpty(authHeader);

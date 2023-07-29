@@ -1,62 +1,103 @@
-import { Logger } from '@bitblit/ratchet/common/logger';
-import { APIGatewayEvent, APIGatewayProxyEvent, Context, Handler, ProxyResult } from 'aws-lambda';
-import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
-import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
+import {
+  Base64Ratchet,
+  Logger,
+  PromiseRatchet,
+  RequireRatchet,
+  StringRatchet,
+  TimeoutToken,
+  RestfulApiHttpError,
+} from '@bitblit/ratchet/common';
+import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { RequestTimeoutError } from '../../http/error/request-timeout-error';
-import { ApolloServer, CreateHandlerOptions } from 'apollo-server-lambda';
 import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
-import { StringRatchet } from '@bitblit/ratchet/common';
+import { ApolloServer, BaseContext, ContextFunction, HeaderMap, HTTPGraphQLRequest, HTTPGraphQLResponse } from '@apollo/server';
+import { ContextUtil } from '../../util/context-util';
+import { EpsilonLambdaApolloOptions } from './apollo/epsilon-lambda-apollo-options';
+import { EpsilonLambdaApolloContextFunctionArgument } from './apollo/epsilon-lambda-apollo-context-function-argument';
+import { ApolloUtil } from './apollo/apollo-util';
+import { EpsilonApolloCorsMethod } from './apollo/epsilon-apollo-cors-method';
+import { BuiltInFilters } from './built-in-filters';
 
 export class ApolloFilter {
-  private static CACHE_APOLLO_HANDLER: Handler<APIGatewayProxyEvent, ProxyResult>;
-
-  public static async handlePathWithApollo(
+  public static async handlePathWithApollo<T>(
     fCtx: FilterChainContext,
     apolloPathRegex: RegExp,
-    apolloServer: ApolloServer,
-    createHandlerOptions: CreateHandlerOptions
+    apolloServer: ApolloServer<T>,
+    options?: EpsilonLambdaApolloOptions<T>,
   ): Promise<boolean> {
+    let rval: boolean = false;
+
     if (fCtx.event?.path && apolloPathRegex && apolloPathRegex.test(fCtx.event.path)) {
-      fCtx.result = await ApolloFilter.processApolloRequest(fCtx.event, fCtx.context, apolloServer, createHandlerOptions);
-      return false;
+      fCtx.result = await ApolloFilter.processApolloRequest(fCtx.event, fCtx.context, apolloServer, options);
+
+      if (options?.corsMethod) {
+        switch (options.corsMethod) {
+          case EpsilonApolloCorsMethod.All:
+            await BuiltInFilters.addAllowEverythingCORSHeaders(fCtx);
+            break;
+          case EpsilonApolloCorsMethod.Reflective:
+            await BuiltInFilters.addAllowReflectionCORSHeaders(fCtx);
+            break;
+          default:
+          // Do nothing
+        }
+      }
     } else {
       // Not handled by apollo
-      return true;
+      rval = true;
     }
+
+    return rval;
   }
 
-  public static async processApolloRequest(
+  public static async processApolloRequest<T>(
     event: APIGatewayEvent,
     context: Context,
-    apolloServer: ApolloServer,
-    createHandlerOptions: CreateHandlerOptions
+    apolloServer: ApolloServer<T>,
+    options?: EpsilonLambdaApolloOptions<T>,
   ): Promise<ProxyResult> {
     Logger.silly('Processing event with apollo: %j', event);
     let rval: ProxyResult = null;
-    if (!ApolloFilter.CACHE_APOLLO_HANDLER) {
-      ApolloFilter.CACHE_APOLLO_HANDLER = apolloServer.createHandler(createHandlerOptions);
+    RequireRatchet.notNullOrUndefined(apolloServer, 'apolloServer');
+    apolloServer.assertStarted('Cannot process with apollo - instance not started');
+
+    const headerMap: HeaderMap = new HeaderMap();
+    for (const headersKey in event.headers) {
+      headerMap.set(headersKey, event.headers[headersKey]);
+    }
+    const eventMethod: string = StringRatchet.trimToEmpty(event.httpMethod).toUpperCase();
+    let body: any = null;
+    if (StringRatchet.trimToNull(event.body)) {
+      const bodyString: string = event.isBase64Encoded ? Base64Ratchet.base64StringToString(event.body) : event.body;
+      body = JSON.parse(bodyString);
     }
 
-    // Apollo V3 requires all values to ALSO be in the multiValuesHeader fields or it craps out
-    // as of 2022-01-16.  See https://github.com/apollographql/apollo-server/issues/5504#issuecomment-883376139
-    event.multiValueHeaders = event.multiValueHeaders || {};
-    Object.keys(event.headers).forEach((k) => {
-      event.multiValueHeaders[k] = [event.headers[k]];
-    });
-    //event.headers['Content-Type'] = MapRatchet.caseInsensitiveAccess<string>(event.headers, 'Content-Type'); // || 'application/json';
-    event.httpMethod = event.httpMethod.toUpperCase();
-    if (event.isBase64Encoded && !!event.body) {
-      event.body = Buffer.from(event.body, 'base64').toString();
-      event.isBase64Encoded = false;
-    }
-
-    const apolloPromise: Promise<ProxyResult> = ApolloFilter.CACHE_APOLLO_HANDLER(event, context, null) || Promise.resolve(null);
+    const aRequest: HTTPGraphQLRequest = {
+      method: eventMethod,
+      headers: headerMap,
+      search:
+        eventMethod === 'GET' && event?.queryStringParameters
+          ? Object.keys(event.queryStringParameters)
+              .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(event.queryStringParameters[k]))
+              .join('&')
+          : null,
+      body: body,
+    };
 
     // We do this because fully timing out on Lambda is never a good thing
-    const timeoutMS: number = context.getRemainingTimeInMillis() - 500;
+    const timeoutMS: number = options?.timeoutMS ?? context.getRemainingTimeInMillis() - 500;
 
-    let result: any = null;
+    //const defaultContextFn: ContextFunction<[EpsilonLambdaApolloContextFunctionArgument], any> = async () => ({});
+
+    const contextFn: ContextFunction<[EpsilonLambdaApolloContextFunctionArgument], T> = options?.context ?? ApolloUtil.emptyContext;
+
+    const apolloPromise = apolloServer.executeHTTPGraphQLRequest({
+      httpGraphQLRequest: aRequest,
+      context: () => contextFn({ lambdaContext: context, lambdaEvent: event }),
+    });
+
+    let result: HTTPGraphQLResponse | TimeoutToken = null;
     if (timeoutMS) {
       result = await PromiseRatchet.timeout(apolloPromise, 'Apollo timed out after ' + timeoutMS + ' ms.', timeoutMS);
     } else {
@@ -69,15 +110,38 @@ export class ApolloFilter {
       throw new RequestTimeoutError('Timed out');
     }
 
-    // If we made it here, we didn't time out
-    rval = result;
+    // If we reach here we didn't time out
+    const httpGraphQLResponse: HTTPGraphQLResponse = result as HTTPGraphQLResponse; // TODO: Use typeguard here instead
+
+    const outHeaders: Record<string, string> = {};
+
+    for (const [headersKey, headersValue] of httpGraphQLResponse.headers.entries()) {
+      outHeaders[headersKey] = headersValue;
+    }
+
+    if (httpGraphQLResponse.body.kind === 'chunked') {
+      // This is legal according to https://www.apollographql.com/docs/apollo-server/integrations/building-integrations/
+      throw new RestfulApiHttpError('Apollo returned chunked result').withHttpStatusCode(500).withRequestId(ContextUtil.currentRequestId());
+    }
+
+    const bodyAsString: string = StringRatchet.trimToEmpty(httpGraphQLResponse?.body?.string);
+
+    rval = {
+      body: Base64Ratchet.generateBase64VersionOfString(bodyAsString),
+      headers: outHeaders,
+      multiValueHeaders: {}, // TODO: Need setting?
+      isBase64Encoded: true,
+      statusCode: httpGraphQLResponse.status || 200,
+    };
 
     // Finally, a double check to set the content type correctly if the browser page was shown
-    if (StringRatchet.trimToEmpty(rval?.body).startsWith('<!DOCTYPE html>')) {
-      Logger.info('Forcing content type to html');
+    // Since otherwise Apollo defaults it to application/json for some reason
+    if (eventMethod === 'GET' && rval.headers['content-type'] !== 'text/html' && bodyAsString.indexOf('<!DOCTYPE html>') >= 0) {
+      Logger.info('Forcing content type to html for the sandbox page');
       rval.headers = rval.headers || {};
       rval.headers['content-type'] = 'text/html';
     }
+
     return rval;
   }
 
@@ -85,17 +149,10 @@ export class ApolloFilter {
     filters: FilterFunction[],
     apolloPathRegex: RegExp,
     apolloServer: ApolloServer,
-    createHandlerOptions: CreateHandlerOptions
+    options?: EpsilonLambdaApolloOptions<BaseContext>,
   ): void {
     if (filters) {
-      filters.push((fCtx) => ApolloFilter.handlePathWithApollo(fCtx, apolloPathRegex, apolloServer, createHandlerOptions));
+      filters.push((fCtx) => ApolloFilter.handlePathWithApollo(fCtx, apolloPathRegex, apolloServer, options));
     }
   }
 }
-
-/*
-export interface ApolloHandlerFunction {
-  (event: APIGatewayProxyEvent, context: any, callback: APIGatewayProxyCallback): void;
-}
-
- */

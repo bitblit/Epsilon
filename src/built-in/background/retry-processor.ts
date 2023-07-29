@@ -1,19 +1,22 @@
 import { DurationRatchet, Logger, PromiseRatchet } from '@bitblit/ratchet/common';
 import { BackgroundProcessor } from '../../config/background/background-processor';
-import { BackgroundManager } from '../../background-manager';
+import { BackgroundManagerLike } from '../../background/manager/background-manager-like';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
 
 export class RetryProcessor implements BackgroundProcessor<any> {
   private static readonly RETRY_FIELD_NAME: string = '___RetryProcessorTryNumber';
 
-  constructor(private delegate: BackgroundProcessor<any>, private opts: RetryProcessorOptions) {}
+  constructor(
+    private delegate: BackgroundProcessor<any>,
+    private opts: RetryProcessorOptions,
+  ) {}
 
   public get typeName(): string {
     return StringRatchet.trimToEmpty(this.opts?.typePrefix) + this.delegate.typeName + StringRatchet.trimToEmpty(this.opts?.typeSuffix);
   }
 
-  public async handleEvent(data: any, mgr: BackgroundManager): Promise<void> {
+  public async handleEvent(data: any, mgr: BackgroundManagerLike): Promise<void> {
     const tryNumber: number =
       data && data[RetryProcessor.RETRY_FIELD_NAME] ? NumberRatchet.safeNumber(data[RetryProcessor.RETRY_FIELD_NAME]) : 1;
     const dataCopy: any = data ? Object.assign({}, data) : null;

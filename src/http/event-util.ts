@@ -1,16 +1,13 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, AuthResponseContext } from 'aws-lambda';
 import { UnauthorizedError } from './error/unauthorized-error';
-import { Logger } from '@bitblit/ratchet/common/logger';
 import { BadRequestError } from './error/bad-request-error';
 import { EpsilonLoggerConfig } from '../config/epsilon-logger-config';
-import { MapRatchet } from '@bitblit/ratchet/common/map-ratchet';
+import { Base64Ratchet, EnumRatchet, Logger, LoggerLevelName, MapRatchet, StringRatchet } from '@bitblit/ratchet/common';
+
 import jwt from 'jsonwebtoken';
 import { ExtendedAuthResponseContext } from './route/extended-auth-response-context';
 import { BasicAuthToken } from './auth/basic-auth-token';
-import { Base64Ratchet } from '@bitblit/ratchet/common/base64-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { EpsilonConstants } from '../epsilon-constants';
-import { EnumRatchet, LoggerLevelName } from '@bitblit/ratchet/common';
 
 /**
  * Endpoints about the api itself
@@ -101,7 +98,7 @@ export class EventUtil {
   public static calcLogLevelViaEventOrEnvParam(
     curLevel: LoggerLevelName,
     event: APIGatewayEvent,
-    rConfig: EpsilonLoggerConfig
+    rConfig: EpsilonLoggerConfig,
   ): LoggerLevelName {
     let rval: LoggerLevelName = curLevel;
     if (rConfig?.envParamLogLevelName && process.env[rConfig.envParamLogLevelName]) {
@@ -232,6 +229,36 @@ export class EventUtil {
     const authHeader: string = StringRatchet.trimToEmpty(EventUtil.extractAuthorizationHeaderCaseInsensitive(evt));
     if (authHeader.toLowerCase().startsWith('bearer ')) {
       rval = authHeader.substring(7);
+    }
+    return rval;
+  }
+
+  public static hostIsLocal(host: string): boolean {
+    let rval: boolean = false;
+    if (StringRatchet.trimToNull(host)) {
+      host = host.includes(':') ? host.substring(0, host.indexOf(':')) : host;
+      host = host.toLowerCase();
+      if (host === 'localhost' || host === '127.0.0.1') {
+        rval = true;
+      }
+    }
+    return rval;
+  }
+
+  public static hostIsLocalOrNotRoutableIP4(host: string): boolean {
+    let rval: boolean = false;
+    if (StringRatchet.trimToNull(host)) {
+      host = host.includes(':') ? host.substring(0, host.indexOf(':')) : host;
+      host = host.toLowerCase();
+      if (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.') ||
+        host.startsWith('172.16.')
+      ) {
+        rval = true;
+      }
     }
     return rval;
   }

@@ -8,7 +8,7 @@ import { AbstractCronEntry } from '../config/cron/abstract-cron-entry';
 describe('#cronUtil', function () {
   it('should test matching event to entry', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString(),
     );
 
     const cfg: CronConfig = {
@@ -48,7 +48,7 @@ describe('#cronUtil', function () {
 
   it('should match times', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString(),
     );
     const cfg: CronConfig = {
       context: 'prod',
@@ -89,7 +89,7 @@ describe('#cronUtil', function () {
 
   it('should match time with override', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString(),
     );
     const cfg: CronConfig = {
       context: 'prod',
@@ -120,7 +120,7 @@ describe('#cronUtil', function () {
 
   it('should match day of month filters', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString(),
     );
     const cfg: CronConfig = {
       context: 'prod',
@@ -144,7 +144,7 @@ describe('#cronUtil', function () {
 
   it('should match month of year filter', async () => {
     const sEvent: ScheduledEvent = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString()
+      fs.readFileSync(path.join(__dirname, '../../test-data/sample-json/sample-schedule-event-1.json')).toString(),
     );
     const cfg: CronConfig = {
       context: 'prod',

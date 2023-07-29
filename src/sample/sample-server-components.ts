@@ -2,15 +2,19 @@
  * This is an example of how to setup a local server for testing.  Replace the createRouterConfig function
  * with your own.
  */
-import { Logger } from '@bitblit/ratchet/common/logger';
-import { ApolloServer, CreateHandlerOptions, gql } from 'apollo-server-lambda';
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
-import { ErrorRatchet } from '@bitblit/ratchet/common/error-ratchet';
-import { NumberRatchet } from '@bitblit/ratchet/common/number-ratchet';
-import fs from 'fs';
-import path from 'path';
-import { JwtTokenBase, LoggerLevelName, PromiseRatchet } from '@bitblit/ratchet/common';
-import AWS from 'aws-sdk';
+import {
+  BooleanRatchet,
+  ErrorRatchet,
+  JwtTokenBase,
+  Logger,
+  LoggerLevelName,
+  NumberRatchet,
+  PromiseRatchet,
+  StringRatchet,
+} from '@bitblit/ratchet/common';
+import { ApolloServer } from '@apollo/server';
+import { gql } from 'graphql-tag';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { EpsilonGlobalHandler } from '../epsilon-global-handler';
 import { AuthorizerFunction } from '../config/http/authorizer-function';
 import { HandlerFunction } from '../config/http/handler-function';
@@ -27,16 +31,17 @@ import { EpsilonInstance } from '../epsilon-instance';
 import { EpsilonConfigParser } from '../util/epsilon-config-parser';
 import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
-import { BackgroundManager } from '../background-manager';
 import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
 import { ApolloFilter } from '../built-in/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
-import { BooleanRatchet } from '@bitblit/ratchet/common/boolean-ratchet';
-import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
-import { EventUtil } from '../http/event-util';
 import { LogMessageBackgroundErrorProcessor } from '../built-in/background/log-message-background-error-processor';
+import { SingleThreadLocalBackgroundManager } from '../background/manager/single-thread-local-background-manager';
+import { BackgroundManagerLike } from '../background/manager/background-manager-like';
+import { SampleServerStaticFiles } from './sample-server-static-files';
+import { ApolloUtil } from '../built-in/http/apollo/apollo-util';
+import { EpsilonApolloCorsMethod } from '../built-in/http/apollo/epsilon-apollo-cors-method';
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -44,7 +49,7 @@ export class SampleServerComponents {
   private constructor() {}
 
   public static async createSampleApollo(): Promise<ApolloServer> {
-    const gqlString: string = SampleServerComponents.loadSampleServerGQL();
+    const gqlString: string = SampleServerStaticFiles.SAMPLE_SERVER_GRAPHQL;
     Logger.silly('Creating apollo from : %s', gqlString);
     const typeDefs = gql(gqlString);
 
@@ -63,34 +68,32 @@ export class SampleServerComponents {
     };
 
     const server: ApolloServer = new ApolloServer({
-      debug: false,
       introspection: true,
       typeDefs,
       resolvers,
-      plugins: [ApolloServerPluginLandingPageGraphQLPlayground({ endpoint: '/graphql' })],
-      context: async ({ event, context, express }) => {
-        const authTokenSt: string = EventUtil.extractBearerTokenFromEvent(event);
-        const token: JwtTokenBase = null;
-        if (!!authTokenSt && authTokenSt.startsWith('Bearer')) {
-          Logger.info('Got : %s', authTokenSt);
-        }
+      plugins: [
+        /*
+        // Install a landing page plugin based on NODE_ENV
+        process.env.NODE_ENV === 'production'
+          ? ApolloServerPluginLandingPageProductionDefault({
+              graphRef: 'my-graph-id@my-graph-variant',
+              footer: false,
+            })
+          : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
 
-        const rval: any = {
-          user: token,
-          headers: event.headers,
-          functionName: context.functionName,
-          event,
-          context,
-        };
-        return rval;
-      },
+           */
+        ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+      ],
     });
+    // Need the server started before we start processing...
+    await server.start();
+
     return server;
   }
 
   // Functions below here are for using as samples
-  public static async createSampleEpsilonConfig(): Promise<EpsilonConfig> {
-    const yamlString: string = SampleServerComponents.loadSampleOpenApiYaml();
+  public static async createSampleEpsilonConfig(label: string): Promise<EpsilonConfig> {
+    const yamlString: string = SampleServerStaticFiles.SAMPLE_OPEN_API_DOC;
     const authorizers: Map<string, AuthorizerFunction> = new Map<string, AuthorizerFunction>();
     authorizers.set('SampleAuthorizer', (token, evt) => BuiltInAuthorizers.simpleLoggedInAuth(token, evt));
     authorizers.set('LogAuthorizer', (token, evt) => BuiltInAuthorizers.simpleNoAuthenticationLogAccess(token, evt));
@@ -136,11 +139,22 @@ export class SampleServerComponents {
     meta.timeoutMS = 10_000;
 
     ApolloFilter.addApolloFilterToList(meta.preFilters, new RegExp('.*graphql.*'), await SampleServerComponents.createSampleApollo(), {
+      context: (arg) => ApolloUtil.defaultEpsilonApolloContext(arg, tokenManipulator.jwtRatchet),
+      timeoutMS: 5_000,
+      corsMethod: EpsilonApolloCorsMethod.All,
+    });
+
+    /*
+
+
+        {
       cors: {
         origin: '*',
         credentials: true,
       },
     } as CreateHandlerOptions);
+
+     */
     meta.errorFilters.push((fCtx) => BuiltInFilters.secureOutboundServerErrorForProduction(fCtx, 'Clean Internal Server Error', 500));
 
     const preFiltersAllowingNull: HttpProcessingConfig = Object.assign({}, meta);
@@ -169,10 +183,10 @@ export class SampleServerComponents {
     };
 
     const background: BackgroundConfig = {
-      aws: {
-        queueUrl: 'FAKE-LOCAL',
-        notificationArn: 'FAKE-LOCAL',
-      },
+      //aws: {
+      //  queueUrl: 'FAKE-LOCAL',
+      //  notificationArn: 'FAKE-LOCAL',
+      //},
       httpMetaEndpoint: '/background/meta',
       httpSubmissionPath: '/background',
       implyTypeFromPathSuffix: false,
@@ -187,6 +201,7 @@ export class SampleServerComponents {
     };
 
     const epsilonConfig: EpsilonConfig = {
+      label: label,
       openApiYamlString: yamlString,
       httpConfig: cfg,
       backgroundConfig: background,
@@ -194,17 +209,16 @@ export class SampleServerComponents {
     return epsilonConfig;
   }
 
-  public static async createSampleEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
-    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
-    backgroundManager.localMode = true;
+  public static async createSampleEpsilonGlobalHandler(label: string): Promise<EpsilonGlobalHandler> {
+    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig(label);
+    const backgroundManager: SingleThreadLocalBackgroundManager = new SingleThreadLocalBackgroundManager();
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;
   }
 
-  public static async createSampleBatchOnlyEpsilonGlobalHandler(): Promise<EpsilonGlobalHandler> {
-    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig();
+  public static async createSampleBatchOnlyEpsilonGlobalHandler(label: string): Promise<EpsilonGlobalHandler> {
+    const epsilonConfig: EpsilonConfig = await SampleServerComponents.createSampleEpsilonConfig(label);
     epsilonConfig.httpConfig.handlers = new Map<string, HandlerFunction<any>>(); // Unused
 
     const byPassCfg: HttpProcessingConfig = Object.assign({}, epsilonConfig.httpConfig.defaultMetaHandling);
@@ -220,20 +234,9 @@ export class SampleServerComponents {
     ];
     epsilonConfig.httpConfig.filterHandledRouteMatches = ['.*']; // Only want the batch handling
 
-    const backgroundManager: BackgroundManager = new BackgroundManager(epsilonConfig.backgroundConfig.aws, {} as AWS.SQS, {} as AWS.SNS);
-    backgroundManager.localMode = true;
+    const backgroundManager: BackgroundManagerLike = new SingleThreadLocalBackgroundManager();
     const epsilonInstance: EpsilonInstance = EpsilonConfigParser.epsilonConfigToEpsilonInstance(epsilonConfig, backgroundManager);
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;
-  }
-
-  public static loadSampleOpenApiYaml(): string {
-    const yamlString: string = fs.readFileSync(path.join(__dirname, '..', 'static', 'sample-open-api-doc.yaml')).toString();
-    return yamlString;
-  }
-
-  public static loadSampleServerGQL(): string {
-    const yamlString: string = fs.readFileSync(path.join(__dirname, '..', 'static', 'sample-server.gql')).toString();
-    return yamlString;
   }
 }

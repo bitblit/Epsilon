@@ -24,7 +24,7 @@ export class GoogleWebTokenManipulator implements WebTokenManipulator<JwtTokenBa
 
   public async parseAndValidateGoogleToken<T extends JwtTokenBase>(
     googleToken: string,
-    allowExpired: boolean = false
+    allowExpired: boolean = false,
   ): Promise<JwtTokenBase> {
     Logger.debug('Auth : %s', StringRatchet.obscure(googleToken, 4));
 

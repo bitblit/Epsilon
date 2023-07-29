@@ -8,6 +8,7 @@ import { EpsilonLoggerConfig } from './epsilon-logger-config';
 import { InterApiConfig } from './inter-api/inter-api-config';
 
 export interface EpsilonConfig {
+  label?: string;
   // If disabled, last resort timeout will instead roll to lambda (not recommended)
   disableLastResortTimeout?: boolean;
 

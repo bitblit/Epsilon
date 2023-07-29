@@ -1,6 +1,6 @@
-import { EpsilonHttpError } from './epsilon-http-error';
+import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
-export class NotFoundError<T = void> extends EpsilonHttpError<T> {
+export class NotFoundError<T = void> extends RestfulApiHttpError<T> {
   public static readonly HTTP_CODE: number = 404;
 
   constructor(...errors: string[]) {
