@@ -1,12 +1,17 @@
 import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common/logger';
+import { Logger } from '@bitblit/ratchet/common';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
+import https from 'https';
+import { StringRatchet } from '@bitblit/ratchet/common';
 import { DateTime } from 'luxon';
 import qs from 'querystring';
-import { EventUtil } from './http/event-util';
-import { EpsilonGlobalHandler } from './epsilon-global-handler';
+import { EventUtil } from './http/event-util.js';
+import { EpsilonGlobalHandler } from './epsilon-global-handler.js';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
+import { JwtTokenBase } from '@bitblit/ratchet/common';
+import { LocalServerCert } from './local-server-cert.js';
+import { SampleServerComponents } from './sample/sample-server-components.js';
+import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator.js';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -15,16 +20,25 @@ export class LocalServer {
   private server: Server;
   private aborted: boolean = false;
 
-  constructor(
-    private globalHandler: EpsilonGlobalHandler,
-    private port: number = 8888,
-  ) {}
+  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888, https: boolean = false) {}
 
   async runServer(): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {
       try {
         Logger.info('Starting Epsilon server on port %d', this.port);
-        this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+
+        if (https) {
+          const options = {
+            key: LocalServerCert.CLIENT_KEY_PEM,
+            cert: LocalServerCert.CLIENT_CERT_PEM,
+          };
+          Logger.info(
+              'Starting https server - THIS SERVER IS NOT SECURE!  The KEYS are in the code!  Testing Server Only - Use at your own risk!'
+          );
+          this.server = https.createServer(options, this.requestHandler.bind(this)).listen(this.port);
+        } else {
+          this.server = http.createServer(this.requestHandler.bind(this)).listen(this.port);
+        }
         Logger.info('Epsilon server is listening');
 
         // Also listen for SIGINT
@@ -160,5 +174,30 @@ export class LocalServer {
 
     response.end(toWrite);
     return !!proxyResult.body;
+  }
+
+  public static async runSampleBatchOnlyServerFromCliArgs(args: string[]): Promise<void> {
+    Logger.setLevel(LoggerLevelName.debug);
+    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleBatchOnlyEpsilonGlobalHandler(
+        'SampleBatchOnlyLocalServer-' + Date.now()
+    );
+    const testServer: LocalServer = new LocalServer(handler);
+    const res: boolean = await testServer.runServer();
+    Logger.info('Res was : %s', res);
+  }
+
+  public static async runSampleLocalServerFromCliArgs(args: string[]): Promise<void> {
+    Logger.setLevel(LoggerLevelName.debug);
+    const localTokenHandler: LocalWebTokenManipulator<JwtTokenBase> = new LocalWebTokenManipulator<JwtTokenBase>(
+        ['abcd1234'],
+        'sample-server'
+    );
+    const token: string = await localTokenHandler.createJWTStringAsync('asdf', {}, ['USER'], 3600);
+
+    Logger.info('Use token: %s', token);
+    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('SampleLocalServer-' + Date.now());
+    const testServer: LocalServer = new LocalServer(handler, 8888, true);
+    const res: boolean = await testServer.runServer();
+    Logger.info('Res was : %s', res);
   }
 }
