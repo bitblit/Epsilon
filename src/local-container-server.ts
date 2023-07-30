@@ -2,9 +2,9 @@ import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
 import { Logger } from '@bitblit/ratchet/common';
 import { LoggerLevelName } from '@bitblit/ratchet/common';
 import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { EventUtil } from './http/event-util.js';
+import { EventUtil } from './http/event-util';
 import fetch from 'cross-fetch';
-import { LocalServer } from './local-server.js';
+import { LocalServer } from './local-server';
 import { StringRatchet } from '@bitblit/ratchet/common';
 
 /**

@@ -1,5 +1,5 @@
 import {BooleanRatchet, Logger} from '@bitblit/ratchet/common';
-import {EpsilonGlobalHandler} from '../epsilon-global-handler.js';
+import {EpsilonGlobalHandler} from '../epsilon-global-handler';
 
 /**
  * IMPORTANT NOTE

@@ -1,17 +1,12 @@
-import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common';
-import http, { IncomingMessage, Server, ServerResponse } from 'http';
+import {APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult} from 'aws-lambda';
+import {Logger, LoggerLevelName, StringRatchet} from '@bitblit/ratchet/common';
+import http, {IncomingMessage, Server, ServerResponse} from 'http';
 import https from 'https';
-import { StringRatchet } from '@bitblit/ratchet/common';
-import { DateTime } from 'luxon';
+import {DateTime} from 'luxon';
 import qs from 'querystring';
-import { EventUtil } from './http/event-util.js';
-import { EpsilonGlobalHandler } from './epsilon-global-handler.js';
-import { LoggerLevelName } from '@bitblit/ratchet/common';
-import { JwtTokenBase } from '@bitblit/ratchet/common';
-import { LocalServerCert } from './local-server-cert.js';
-import { SampleServerComponents } from './sample/sample-server-components.js';
-import { LocalWebTokenManipulator } from './http/auth/local-web-token-manipulator.js';
+import {EventUtil} from './http/event-util';
+import {EpsilonGlobalHandler} from './epsilon-global-handler';
+import {LocalServerCert} from './local-server-cert';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -174,30 +169,5 @@ export class LocalServer {
 
     response.end(toWrite);
     return !!proxyResult.body;
-  }
-
-  public static async runSampleBatchOnlyServerFromCliArgs(args: string[]): Promise<void> {
-    Logger.setLevel(LoggerLevelName.debug);
-    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleBatchOnlyEpsilonGlobalHandler(
-        'SampleBatchOnlyLocalServer-' + Date.now()
-    );
-    const testServer: LocalServer = new LocalServer(handler);
-    const res: boolean = await testServer.runServer();
-    Logger.info('Res was : %s', res);
-  }
-
-  public static async runSampleLocalServerFromCliArgs(args: string[]): Promise<void> {
-    Logger.setLevel(LoggerLevelName.debug);
-    const localTokenHandler: LocalWebTokenManipulator<JwtTokenBase> = new LocalWebTokenManipulator<JwtTokenBase>(
-        ['abcd1234'],
-        'sample-server'
-    );
-    const token: string = await localTokenHandler.createJWTStringAsync('asdf', {}, ['USER'], 3600);
-
-    Logger.info('Use token: %s', token);
-    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('SampleLocalServer-' + Date.now());
-    const testServer: LocalServer = new LocalServer(handler, 8888, true);
-    const res: boolean = await testServer.runServer();
-    Logger.info('Res was : %s', res);
   }
 }

@@ -42,6 +42,7 @@ import { BackgroundManagerLike } from '../background/manager/background-manager-
 import { SampleServerStaticFiles } from './sample-server-static-files';
 import { ApolloUtil } from '../built-in/http/apollo/apollo-util';
 import { EpsilonApolloCorsMethod } from '../built-in/http/apollo/epsilon-apollo-cors-method';
+import {LocalServer} from "../local-server";
 
 export class SampleServerComponents {
   // Prevent instantiation
@@ -239,4 +240,31 @@ export class SampleServerComponents {
     const rval: EpsilonGlobalHandler = new EpsilonGlobalHandler(epsilonInstance);
     return rval;
   }
+
+
+  public static async runSampleBatchOnlyServerFromCliArgs(args: string[]): Promise<void> {
+    Logger.setLevel(LoggerLevelName.debug);
+    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleBatchOnlyEpsilonGlobalHandler(
+        'SampleBatchOnlyLocalServer-' + Date.now()
+    );
+    const testServer: LocalServer = new LocalServer(handler);
+    const res: boolean = await testServer.runServer();
+    Logger.info('Res was : %s', res);
+  }
+
+  public static async runSampleLocalServerFromCliArgs(args: string[]): Promise<void> {
+    Logger.setLevel(LoggerLevelName.debug);
+    const localTokenHandler: LocalWebTokenManipulator<JwtTokenBase> = new LocalWebTokenManipulator<JwtTokenBase>(
+        ['abcd1234'],
+        'sample-server'
+    );
+    const token: string = await localTokenHandler.createJWTStringAsync('asdf', {}, ['USER'], 3600);
+
+    Logger.info('Use token: %s', token);
+    const handler: EpsilonGlobalHandler = await SampleServerComponents.createSampleEpsilonGlobalHandler('SampleLocalServer-' + Date.now());
+    const testServer: LocalServer = new LocalServer(handler, 8888, true);
+    const res: boolean = await testServer.runServer();
+    Logger.info('Res was : %s', res);
+  }
+
 }

@@ -64,7 +64,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@bitblit/ratchet": "4.1.193-alpha",
+    "@bitblit/ratchet": "4.1.194-alpha",
     "@aws-sdk/abort-controller": "3.370.0",
     "@aws-sdk/smithy-client": "3.370.0",
     "@aws-sdk/types": "3.370.0",
@@ -110,8 +110,8 @@
     "y18n": "^5.0.8"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "3.2.81",
-    "@types/aws-lambda": "8.10.115",
+    "@bitblit/ratchet": "4.1.194-alpha",
+    "@types/aws-lambda": "8.10.119",
     "aws-cdk-lib": "2.77.0",
     "constructs": "10.2.14",
     "graphql": "16.6.0"
