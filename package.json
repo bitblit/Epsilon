@@ -38,7 +38,7 @@
     "apply-ci-vars": "yarn ratchet-cli apply-ci-env-variables-to-files github dist/static/build-properties.json",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.* -e deployment/.* -e apollo/.* -e epsilon-cli.* && barrelsby -q --delete -d src/deployment -e .*\\.spec\\.ts ",
+    "generate-barrels": "barrelsby -q --delete -d src -e .*\\.spec\\.ts -e .*sample.* -e deployment/.* -e apollo/.* -e cli/.* && barrelsby -q --delete -d src/deployment -e .*\\.spec\\.ts ",
     "run-local-container-server": "yarn build && node dist/epsilon-cli.js run-local-container-server",
     "run-build-sample-server": "yarn build && node dist/epsilon-cli.js run-sample-local-server",
     "run-sample-server": "node dist/epsilon-cli.js run-sample-local-server",
