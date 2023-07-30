@@ -1,10 +1,10 @@
 import { BaseContext } from '@apollo/server';
 import { EpsilonLambdaApolloContextFunctionArgument } from './epsilon-lambda-apollo-context-function-argument';
-import { EventUtil } from '../../../http/event-util';
+import { EventUtil } from '../../http/event-util';
 import { ExpiredJwtHandling, JwtRatchetLike, JwtTokenBase, Logger, MapRatchet } from '@bitblit/ratchet/common';
 import { DefaultEpsilonApolloContext } from './default-epsilon-apollo-context';
 import { StringRatchet } from '@bitblit/ratchet/common';
-import { UnauthorizedError } from '../../../http/error/unauthorized-error';
+import { UnauthorizedError } from '../../http/error/unauthorized-error';
 
 export class ApolloUtil {
   // Prevent instantiation

@@ -33,15 +33,15 @@ import { RouterUtil } from '../http/route/router-util';
 import { SampleInputValidatedProcessor } from '../built-in/background/sample-input-validated-processor';
 import { HttpProcessingConfig } from '../config/http/http-processing-config';
 import { BuiltInAuthorizers } from '../built-in/http/built-in-authorizers';
-import { ApolloFilter } from '../built-in/http/apollo-filter';
+import { ApolloFilter } from '../apollo/http/apollo-filter';
 import { SampleInputValidatedProcessorData } from '../built-in/background/sample-input-validated-processor-data';
 import { BuiltInFilters } from '../built-in/http/built-in-filters';
 import { LogMessageBackgroundErrorProcessor } from '../built-in/background/log-message-background-error-processor';
 import { SingleThreadLocalBackgroundManager } from '../background/manager/single-thread-local-background-manager';
 import { BackgroundManagerLike } from '../background/manager/background-manager-like';
 import { SampleServerStaticFiles } from './sample-server-static-files';
-import { ApolloUtil } from '../built-in/http/apollo/apollo-util';
-import { EpsilonApolloCorsMethod } from '../built-in/http/apollo/epsilon-apollo-cors-method';
+import { ApolloUtil } from '../apollo/http/apollo-util';
+import { EpsilonApolloCorsMethod } from '../apollo/http/epsilon-apollo-cors-method';
 import {LocalServer} from "../local-server";
 
 export class SampleServerComponents {

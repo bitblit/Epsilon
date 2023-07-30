@@ -13,11 +13,11 @@ import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { ApolloServer, BaseContext, ContextFunction, HeaderMap, HTTPGraphQLRequest, HTTPGraphQLResponse } from '@apollo/server';
 import { ContextUtil } from '../../util/context-util';
-import { EpsilonLambdaApolloOptions } from './apollo/epsilon-lambda-apollo-options';
-import { EpsilonLambdaApolloContextFunctionArgument } from './apollo/epsilon-lambda-apollo-context-function-argument';
-import { ApolloUtil } from './apollo/apollo-util';
-import { EpsilonApolloCorsMethod } from './apollo/epsilon-apollo-cors-method';
-import { BuiltInFilters } from './built-in-filters';
+import { EpsilonLambdaApolloOptions } from './epsilon-lambda-apollo-options';
+import { EpsilonLambdaApolloContextFunctionArgument } from './epsilon-lambda-apollo-context-function-argument';
+import { ApolloUtil } from './apollo-util';
+import { EpsilonApolloCorsMethod } from './epsilon-apollo-cors-method';
+import { BuiltInFilters } from '../../built-in/http/built-in-filters';
 
 export class ApolloFilter {
   public static async handlePathWithApollo<T>(
