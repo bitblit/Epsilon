@@ -67,7 +67,7 @@
     "@aws-sdk/client-sns": "3.405.0",
     "@aws-sdk/client-sqs": "3.405.0",
     "@aws-sdk/types": "3.398.0",
-    "@bitblit/ratchet": "4.1.212-alpha",
+    "@bitblit/ratchet": "4.1.213-alpha",
     "@smithy/abort-controller": "2.0.5",
     "@smithy/smithy-client": "2.0.5",
     "@smithy/util-waiter": "2.0.5",
@@ -112,7 +112,7 @@
     "word-wrap": "^1.2.4"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "4.1.212-alpha",
+    "@bitblit/ratchet": "4.1.213-alpha",
     "@types/aws-lambda": "8.10.119",
     "aws-cdk-lib": "2.89.0",
     "constructs": "10.2.14",
