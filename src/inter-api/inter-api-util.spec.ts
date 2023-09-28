@@ -28,8 +28,8 @@ describe('#interApiUtil', function () {
           Timestamp: '2021-11-04T07:37:08.241Z',
           SignatureVersion: '1',
           Signature: 'LyS2ybM/Epsq5sFqPJd==',
-          SigningCertURL: 'https://sns.us-east-1.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem',
-          UnsubscribeURL:
+          SigningCertUrl: 'https://sns.us-east-1.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem',
+          UnsubscribeUrl:
             'https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:012345678901:GenericApiEventTopicDev:6efec6a5-1f02-4fc5-b0f7-fa7c013cf8bb',
           MessageAttributes: {},
         },

@@ -1,11 +1,9 @@
-import { APIGatewayEvent, Context, ProxyResult } from 'aws-lambda';
-import { Logger } from '@bitblit/ratchet/common';
-import { LoggerLevelName } from '@bitblit/ratchet/common';
-import http, { IncomingMessage, Server, ServerResponse } from 'http';
-import { EventUtil } from './http/event-util';
+import {APIGatewayEvent, Context, ProxyResult} from 'aws-lambda';
+import {Logger, LoggerLevelName, StringRatchet} from '@bitblit/ratchet/common';
+import http, {IncomingMessage, Server, ServerResponse} from 'http';
+import {EventUtil} from './http/event-util';
 import fetch from 'cross-fetch';
-import { LocalServer } from './local-server';
-import { StringRatchet } from '@bitblit/ratchet/common';
+import {LocalServer} from './local-server';
 
 /**
  * A simplistic server for testing your lambdas locally
@@ -57,7 +55,7 @@ export class LocalContainerServer {
         const postResp: Response = await fetch(url, { method: 'POST', body: JSON.stringify(evt) });
         const respBody: any = await postResp.json();
         const result: ProxyResult = respBody;
-        const written: boolean = await LocalServer.writeProxyResultToServerResponse(result, response);
+        const written: boolean = await LocalServer.writeProxyResultToServerResponse(result, response, LoggerLevelName.debug);
         return written;
       } catch (err) {
         Logger.error('Failed: %s', err);

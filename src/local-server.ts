@@ -15,14 +15,14 @@ export class LocalServer {
   private server: Server;
   private aborted: boolean = false;
 
-  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888, https: boolean = false) {}
+  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888, private https: boolean = false) {}
 
   async runServer(): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {
       try {
         Logger.info('Starting Epsilon server on port %d', this.port);
 
-        if (https) {
+        if (this.https) {
           const options = {
             key: LocalServerCert.CLIENT_KEY_PEM,
             cert: LocalServerCert.CLIENT_CERT_PEM,
@@ -64,7 +64,7 @@ export class LocalServer {
       return true;
     } else {
       const result: ProxyResult = await this.globalHandler.lambdaHandler(evt, context);
-      const written: boolean = await LocalServer.writeProxyResultToServerResponse(result, response);
+      const written: boolean = await LocalServer.writeProxyResultToServerResponse(result, response, logEventLevel);
       return written;
     }
   }
@@ -141,17 +141,19 @@ export class LocalServer {
         httpMethod: request.method.toLowerCase(),
         apiId: '1234567890',
         protocol: 'HTTP/1.1',
-      } as APIGatewayEventRequestContext,
-    } as APIGatewayEvent;
+        authorizer: null,
+      }
+    }
 
     return rval;
   }
 
-  public static async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse): Promise<boolean> {
+  public static async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse,
+                                                       logLevel: LoggerLevelName,): Promise<boolean> {
     const isGraphQLSchemaResponse: boolean = !!proxyResult && !!proxyResult.body && proxyResult.body.indexOf('{"data":{"__schema"') > -1;
 
     if (!isGraphQLSchemaResponse) {
-      Logger.debug('Result: %j', proxyResult);
+      Logger.logByLevel(logLevel,'Result: %j', proxyResult);
     }
 
     response.statusCode = proxyResult.statusCode;
