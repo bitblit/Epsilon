@@ -113,11 +113,11 @@
     "word-wrap": "^1.2.4"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "4.1.213-alpha",
+    "@bitblit/ratchet": "^4.1.242-alpha",
     "@types/aws-lambda": "8.10.122",
     "aws-cdk-lib": "2.99.0",
     "constructs": "10.2.70",
-    "graphql": "16.6.0"
+    "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
     "aws-cdk-lib": {
