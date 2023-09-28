@@ -239,4 +239,4 @@ aws lambda add-permission --function-name "arn:aws:lambda:us-east-1:{accountId}:
 ```
 
 And you'll need to remember to go to IAM / Keys and authorize the new stack user to use your KMS key (if you are
-using KMS to encrypt your config via SystemManager, which you should be doing)
+using KMS to encrypt your config via SystemManager, which you should be doing.)
