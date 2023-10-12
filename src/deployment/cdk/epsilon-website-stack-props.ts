@@ -11,7 +11,11 @@ export interface EpsilonWebsiteStackProps extends StackProps {
   simpleAdditionalMappings?: SimpleAdditionalS3WebsiteMapping[];
 }
 
-export enum EpsilonWebsiteStackPropsRoute53Handling {
-  Update = 'Update',
-  DoNotUpdate = 'DoNotUpdate',
-}
+// NOTE: This is a psuedo-enum to fix some issues with Typescript enums.  See: https://exploringjs.com/tackling-ts/ch_enum-alternatives.html for details
+
+export const EpsilonWebsiteStackPropsRoute53Handling = {
+  Update: 'Update',
+  DoNotUpdate: 'DoNotUpdate',
+};
+export type EpsilonWebsiteStackPropsRoute53Handling =
+  (typeof EpsilonWebsiteStackPropsRoute53Handling)[keyof typeof EpsilonWebsiteStackPropsRoute53Handling];
