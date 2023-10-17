@@ -1654,10 +1654,10 @@
     "@babel/parser" "^7.22.15"
     "@babel/types" "^7.22.15"
 
-"@babel/traverse@^7.23.0":
-  version "7.23.0"
-  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.23.0.tgz#18196ddfbcf4ccea324b7f6d3ada00d8c5a99c53"
-  integrity sha512-t/QaEvyIoIkwzpiZ7aoSKK8kObQYeF7T2v+dazAYCb8SXtp58zEVkWW7zAnju8FNKNdr4ScAOEDmMItbyOmEYw==
+"@babel/traverse@^7.23.0", "@babel/traverse@^7.23.2":
+  version "7.23.2"
+  resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.23.2.tgz#329c7a06735e144a506bdb2cad0268b7f46f4ad8"
+  integrity sha512-azpe59SQ48qG6nu2CzcMLbxUudtN+dOM9kDbUqGq3HXUJRlo7i8fvPoxQUzYgLZ4cMVmuZgm8vvBpNeRhd6XSw==
   dependencies:
     "@babel/code-frame" "^7.22.13"
     "@babel/generator" "^7.23.0"
@@ -1689,10 +1689,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitblit/ratchet@4.1.86":
-  version "4.1.86"
-  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-4.1.86.tgz#1af4af95bfd70fe18ac67495fc8f4d17c91e7cf1"
-  integrity sha512-uNijG3RMeg/tr22ZWPYcYhrVijnRREwnYdtx5Q9IZMHcrWJ23hLYL9tY7mXiSJl0UxD4wBP2g/ZHz9wAtgaUUw==
+"@bitblit/ratchet@4.1.88":
+  version "4.1.88"
+  resolved "https://registry.yarnpkg.com/@bitblit/ratchet/-/ratchet-4.1.88.tgz#b2b27ff2b38dfb04093019782bf7caa6406a24db"
+  integrity sha512-2ZbJ5/NfsgnOL1pCFz7FBcBJ82AYbvAMI18CUM00uB8ITFHIfXRk4lESQtHg0ytABqwboHOeZjxV6Qr7rE/iNQ==
   dependencies:
     browserslist "4.22.1"
     lodash "4.17.21"

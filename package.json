@@ -67,7 +67,7 @@
     "@aws-sdk/client-sns": "3.418.0",
     "@aws-sdk/client-sqs": "3.418.0",
     "@aws-sdk/types": "3.418.0",
-    "@bitblit/ratchet": "4.1.86",
+    "@bitblit/ratchet": "4.1.88",
     "@smithy/abort-controller": "2.0.5",
     "@smithy/smithy-client": "2.0.5",
     "@smithy/util-waiter": "2.0.5",
@@ -86,6 +86,7 @@
   },
   "resolutions": {
     "@smithy/types": "^2.3.3",
+    "@babel/traverse": "^7.23.2",
     "ansi-regex": "^5.0.1",
     "ajv": "^6.12.6",
     "axios": "^1.5.1",
@@ -114,7 +115,7 @@
     "word-wrap": "^1.2.4"
   },
   "peerDependencies": {
-    "@bitblit/ratchet": "^4.1.86",
+    "@bitblit/ratchet": "^4.1.88",
     "@types/aws-lambda": "8.10.122",
     "aws-cdk-lib": "2.99.0",
     "constructs": "10.2.70",
