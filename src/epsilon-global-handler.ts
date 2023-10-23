@@ -10,6 +10,7 @@ import { RequestTimeoutError } from './http/error/request-timeout-error';
 import { InternalBackgroundEntry } from './background/internal-background-entry';
 import {
   ErrorRatchet,
+  LoggerInstance,
   LoggerLevelName,
   LoggerOptions,
   LoggerOutputFunction,
@@ -82,6 +83,10 @@ export class EpsilonGlobalHandler {
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
     Logger.info('EpsilonLoggingConfiguration: Updated');
     Logger.dumpOptionsIntoLog();
+  }
+
+  public get defaultLoggerInstance(): LoggerInstance {
+    return Logger.getLogger();
   }
 
   public get epsilon(): EpsilonInstance {
