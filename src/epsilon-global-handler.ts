@@ -77,12 +77,13 @@ export class EpsilonGlobalHandler {
     output.preProcessors = src.concat([new EpsilonLoggingExtensionProcessor()]);
     //output.preProcessors.push();
 
-    const pre: LoggerOptions = Logger.getOptions();
+    Logger.info('EpsilonLoggingConfiguration: configureDefaultLogger: pre');
+    Logger.dumpOptionsIntoLog();
     Logger.changeDefaultOptions(output, true);
-    const post: LoggerOptions = Logger.getOptions();
+    Logger.info('EpsilonLoggingConfiguration: configureDefaultLogger: post');
+    Logger.dumpOptionsIntoLog();
     EpsilonGlobalHandler.LOGGER_CONFIGURED = true;
     Logger.info('EpsilonLoggingConfiguration: Updated');
-    Logger.dumpOptionsIntoLog();
   }
 
   public get defaultLoggerInstance(): LoggerInstance {
