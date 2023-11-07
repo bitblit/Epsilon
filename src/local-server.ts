@@ -40,6 +40,7 @@ export class LocalServer {
         process.on('SIGINT', () => {
           Logger.info('Caught SIGINT - shutting down test server...');
           this.aborted = true;
+          this.server.close();
           res(true);
         });
       } catch (err) {
