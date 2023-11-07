@@ -1,21 +1,24 @@
-import {APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult} from 'aws-lambda';
-import {Logger, LoggerLevelName, StringRatchet} from '@bitblit/ratchet/common';
-import http, {IncomingMessage, Server, ServerResponse} from 'http';
+import { APIGatewayEvent, APIGatewayEventRequestContext, Context, ProxyResult } from 'aws-lambda';
+import { Logger, LoggerLevelName, StringRatchet } from '@bitblit/ratchet/common';
+import http, { IncomingMessage, Server, ServerResponse } from 'http';
 import https from 'https';
-import {DateTime} from 'luxon';
+import { DateTime } from 'luxon';
 import qs from 'querystring';
-import {EventUtil} from './http/event-util';
-import {EpsilonGlobalHandler} from './epsilon-global-handler';
-import {LocalServerCert} from './local-server-cert';
+import { EventUtil } from './http/event-util';
+import { EpsilonGlobalHandler } from './epsilon-global-handler';
+import { LocalServerCert } from './local-server-cert';
 
 /**
  * A simplistic server for testing your lambdas locally
  */
 export class LocalServer {
   private server: Server;
-  private aborted: boolean = false;
 
-  constructor(private globalHandler: EpsilonGlobalHandler, private port: number = 8888, private https: boolean = false) {}
+  constructor(
+    private globalHandler: EpsilonGlobalHandler,
+    private port: number = 8888,
+    private https: boolean = false,
+  ) {}
 
   async runServer(): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {
@@ -28,7 +31,7 @@ export class LocalServer {
             cert: LocalServerCert.CLIENT_CERT_PEM,
           };
           Logger.info(
-              'Starting https server - THIS SERVER IS NOT SECURE!  The KEYS are in the code!  Testing Server Only - Use at your own risk!'
+            'Starting https server - THIS SERVER IS NOT SECURE!  The KEYS are in the code!  Testing Server Only - Use at your own risk!',
           );
           this.server = https.createServer(options, this.requestHandler.bind(this)).listen(this.port);
         } else {
@@ -39,7 +42,6 @@ export class LocalServer {
         // Also listen for SIGINT
         process.on('SIGINT', () => {
           Logger.info('Caught SIGINT - shutting down test server...');
-          this.aborted = true;
           this.server.close();
           res(true);
         });
@@ -61,7 +63,7 @@ export class LocalServer {
     const logEventLevel: LoggerLevelName = EventUtil.eventIsAGraphQLIntrospection(evt) ? LoggerLevelName.silly : LoggerLevelName.info;
 
     if (evt.path == '/epsilon-poison-pill') {
-      this.aborted = true;
+      this.server.close();
       return true;
     } else {
       const result: ProxyResult = await this.globalHandler.lambdaHandler(evt, context);
@@ -143,18 +145,21 @@ export class LocalServer {
         apiId: '1234567890',
         protocol: 'HTTP/1.1',
         authorizer: null,
-      }
-    }
+      },
+    };
 
     return rval;
   }
 
-  public static async writeProxyResultToServerResponse(proxyResult: ProxyResult, response: ServerResponse,
-                                                       logLevel: LoggerLevelName,): Promise<boolean> {
+  public static async writeProxyResultToServerResponse(
+    proxyResult: ProxyResult,
+    response: ServerResponse,
+    logLevel: LoggerLevelName,
+  ): Promise<boolean> {
     const isGraphQLSchemaResponse: boolean = !!proxyResult && !!proxyResult.body && proxyResult.body.indexOf('{"data":{"__schema"') > -1;
 
     if (!isGraphQLSchemaResponse) {
-      Logger.logByLevel(logLevel,'Result: %j', proxyResult);
+      Logger.logByLevel(logLevel, 'Result: %j', proxyResult);
     }
 
     response.statusCode = proxyResult.statusCode;
