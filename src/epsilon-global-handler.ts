@@ -19,10 +19,11 @@ import {
   RestfulApiHttpError,
 } from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
-import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
+import { EpsilonLambdaEventHandler, NoHandlersFoundError } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
 import { InterApiEpsilonLambdaEventHandler } from './lambda-event-handler/inter-api-epsilon-lambda-event-handler';
 import { GenericSnsEpsilonLambdaEventHandler } from './lambda-event-handler/generic-sns-epsilon-lambda-event-handler';
+import { GenericSqsEpsilonLambdaEventHandler } from './lambda-event-handler/generic-sqs-epsilon-lambda-event-handler';
 import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsilon-lambda-event-handler';
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
@@ -59,6 +60,7 @@ export class EpsilonGlobalHandler {
       this._epsilon.backgroundHandler,
       new InterApiEpsilonLambdaEventHandler(this._epsilon),
       new GenericSnsEpsilonLambdaEventHandler(this._epsilon),
+      new GenericSqsEpsilonLambdaEventHandler(this._epsilon),
       new CronEpsilonLambdaEventHandler(this._epsilon),
       new S3EpsilonLambdaEventHandler(this._epsilon),
       new DynamoEpsilonLambdaEventHandler(this._epsilon),
@@ -153,6 +155,7 @@ export class EpsilonGlobalHandler {
     ContextUtil.initContext(this._epsilon, event, context, 'TBD');
     let rval: ProxyResult = null;
     let errorHandler: (evt: any, context: Context, err: any) => Promise<ProxyResult> = EpsilonGlobalHandler.defaultProcessUncaughtError;
+    let noMatchingHandler: boolean = false;
     try {
       if (!this._epsilon) {
         Logger.error('Config not found, abandoning');
@@ -190,7 +193,21 @@ export class EpsilonGlobalHandler {
             'EvtStart: %s',
             label,
           );
-          rval = await handler.processEvent(event, context);
+
+          try {
+            rval = await handler.processEvent(event, context);
+          } catch (err) {
+            if (err instanceof NoHandlersFoundError) {
+              // We found a generic handler to handle this event, but it didn't have any handlers for
+              // this specific message.
+              // Reset "found" flag to false, but still break the loop.
+              found = false;
+              break;
+            } else {
+              throw err;
+            }
+          }
+
           Logger.logByLevel(
             this._epsilon?.config?.loggerConfig?.epsilonStartEndMessageLogLevel || LoggerLevelName.info,
             'EvtEnd: %s',
@@ -199,11 +216,21 @@ export class EpsilonGlobalHandler {
           Logger.silly('EvtEnd:Value: %s Value: %j', label, rval);
         }
       }
+
+      if (!found) {
+        noMatchingHandler = true;
+      }
     } catch (err) {
       // Note: If your errorHandler throws an error its just gonna get thrown up, which is what we want
       // since some of them actually NEED to rethrow errors to get auto-retries (eg, Dynamo)
       rval = await errorHandler(event, context, err);
     }
+
+    if (this.epsilon.config.throwErrorIfNoSuitableEventHandlers && noMatchingHandler) {
+      Logger.error(`No matching handler found for event: ${JSON.stringify(event)}`);
+      throw new Error('No matching handler found for event');
+    }
+
     return rval;
   }
 
