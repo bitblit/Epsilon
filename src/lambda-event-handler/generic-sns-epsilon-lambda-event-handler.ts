@@ -1,4 +1,4 @@
-import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
+import { EpsilonLambdaEventHandler, NoHandlersFoundError } from '../config/epsilon-lambda-event-handler';
 import { Context, ProxyResult, SNSEvent } from 'aws-lambda';
 import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
 import { Logger } from '@bitblit/ratchet/common';
@@ -29,6 +29,7 @@ export class GenericSnsEpsilonLambdaEventHandler implements EpsilonLambdaEventHa
         rval = await handler(evt);
       } else {
         Logger.info('Found no SNS handler for : %s', finder);
+        throw new NoHandlersFoundError();
       }
     }
     return rval;
