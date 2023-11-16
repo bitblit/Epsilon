@@ -19,7 +19,7 @@ import {
   RestfulApiHttpError,
 } from '@bitblit/ratchet/common';
 import { ContextUtil } from './util/context-util';
-import { EpsilonLambdaEventHandler, NoHandlersFoundError } from './config/epsilon-lambda-event-handler';
+import { EpsilonLambdaEventHandler } from './config/epsilon-lambda-event-handler';
 import { WebV2Handler } from './http/web-v2-handler';
 import { InterApiEpsilonLambdaEventHandler } from './lambda-event-handler/inter-api-epsilon-lambda-event-handler';
 import { GenericSnsEpsilonLambdaEventHandler } from './lambda-event-handler/generic-sns-epsilon-lambda-event-handler';
@@ -28,6 +28,7 @@ import { CronEpsilonLambdaEventHandler } from './lambda-event-handler/cron-epsil
 import { S3EpsilonLambdaEventHandler } from './lambda-event-handler/s3-epsilon-lambda-event-handler';
 import { DynamoEpsilonLambdaEventHandler } from './lambda-event-handler/dynamo-epsilon-lambda-event-handler';
 import { EpsilonLoggingExtensionProcessor } from './epsilon-logging-extension-processor';
+import { NoHandlersFoundError } from './config/no-handlers-found-error';
 
 /**
  * This class functions as the adapter from a default Lambda function to the handlers exposed via Epsilon
@@ -227,7 +228,7 @@ export class EpsilonGlobalHandler {
     }
 
     if (this.epsilon.config.throwErrorIfNoSuitableEventHandlers && noMatchingHandler) {
-      Logger.error(`No matching handler found for event: ${JSON.stringify(event)}`);
+      Logger.error('No matching handler found for event: %j', event);
       throw new Error('No matching handler found for event');
     }
 

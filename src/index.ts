@@ -54,6 +54,7 @@ export * from './config/epsilon-lambda-event-handler';
 export * from './config/epsilon-logger-config';
 export * from './config/generic-aws-event-handler-function';
 export * from './config/logging-trace-id-generator';
+export * from './config/no-handlers-found-error';
 export * from './config/s3-config';
 export * from './config/sns-config';
 export * from './config/sqs-config';

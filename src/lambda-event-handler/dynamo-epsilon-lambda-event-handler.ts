@@ -1,10 +1,11 @@
-import { EpsilonLambdaEventHandler, NoHandlersFoundError } from '../config/epsilon-lambda-event-handler';
+import { EpsilonLambdaEventHandler } from '../config/epsilon-lambda-event-handler';
 import { Context, DynamoDBStreamEvent, ProxyResult } from 'aws-lambda';
 import { GenericAwsEventHandlerFunction } from '../config/generic-aws-event-handler-function';
 import { Logger } from '@bitblit/ratchet/common';
 import { AwsUtil } from '../util/aws-util';
 import { EpsilonInstance } from '../epsilon-instance';
 import { LambdaEventDetector } from '@bitblit/ratchet/aws';
+import { NoHandlersFoundError } from '../config/no-handlers-found-error';
 
 export class DynamoEpsilonLambdaEventHandler implements EpsilonLambdaEventHandler<DynamoDBStreamEvent> {
   constructor(private _epsilon: EpsilonInstance) {}

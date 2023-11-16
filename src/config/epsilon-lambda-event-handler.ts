@@ -10,10 +10,3 @@ export interface EpsilonLambdaEventHandler<T> {
   // (eg, for Dynamo, Kinesis, etc) you can override this to allow the error to slip outside Epsilon
   processUncaughtError?(evt: T, context: Context, err: Error): Promise<ProxyResult>;
 }
-
-export class NoHandlersFoundError extends Error {
-  constructor(msg?: string) {
-    super(msg ?? 'No handlers found');
-    Object.setPrototypeOf(this, NoHandlersFoundError.prototype);
-  }
-}
