@@ -17,6 +17,7 @@ package without knowing why it is alpha you'll get exactly what you deserve.
 ## [Unreleased]
 
 - Currently, expanding Epsilon to take advantage of CDK for my most common deployments
+- Epsilon is being moved into the Ratchet Monorepo post-ESM module conversion
 
 ## [3.3.x] - 2023-01-02
 
