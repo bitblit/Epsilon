@@ -60,4 +60,8 @@ export class SingleThreadLocalBackgroundManager extends AbstractBackgroundManage
     Logger.info('Called takeEntryFromBackgroundQueue on SingleThreadedLocal - returning empty');
     return [];
   }
+
+  public async populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>> {
+    return entry;
+  }
 }

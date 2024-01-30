@@ -19,6 +19,7 @@ export abstract class AbstractBackgroundManager implements BackgroundManagerLike
   abstract fetchApproximateNumberOfQueueEntries(): Promise<number>;
   abstract get backgroundManagerName(): string;
   abstract takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]>;
+  abstract populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>>;
 
   public createEntry<T>(type: string, data?: T): BackgroundEntry<T> {
     const rval: BackgroundEntry<T> = {

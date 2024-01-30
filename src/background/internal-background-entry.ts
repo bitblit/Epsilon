@@ -5,4 +5,7 @@ export interface InternalBackgroundEntry<T> extends BackgroundEntry<T> {
   createdEpochMS: number;
   traceId: string;
   traceDepth: number;
+
+  getDataFromS3?: boolean;
+  pathToDataInS3?: string;
 }
