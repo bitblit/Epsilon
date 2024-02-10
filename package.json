@@ -97,7 +97,7 @@
     "hosted-git-info": "^7.0.1",
     "jose": "^4.14.6",
     "json5": "^1.0.2",
-    "lodash": "^4.17.21",
+    "lodash": "=4.17.21",
     "minimist": "^1.2.8",
     "nanoid": "^5.0.1",
     "node-fetch": "^2.6.7",
