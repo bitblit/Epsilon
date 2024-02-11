@@ -154,6 +154,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
       if (!!backgroundEntry) {
         Logger.silly('Processing immediate fire event : %j', backgroundEntry);
         const result: boolean = await this.processSingleBackgroundEntry(backgroundEntry);
+        Logger.silly('Result was : %s', result);
         procd = 1; // Process a single entry
       } else {
         Logger.warn('Tried to process non-background start / immediate event : %j returning false', event);
@@ -264,13 +265,17 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
   // CAW 2020-08-08 : I am making processSingle public because there are times (such as when
   // using AWS batch) that you want to be able to run a background command directly, eg, from
   // the command line without needing an AWS-compliant event wrapping it. Thus, this.
-  public async processSingleBackgroundEntry(e: InternalBackgroundEntry<any>): Promise<boolean> {
+  public async processSingleBackgroundEntry(inE: InternalBackgroundEntry<any>): Promise<boolean> {
+    let e: InternalBackgroundEntry<any> = inE; // Just to make it clear the input parameter is invariant
     // Set the trace ids appropriately
     ContextUtil.setOverrideTraceFromInternalBackgroundEntry(e);
     Logger.info('Background Process Start: %j', e);
     const sw: StopWatch = new StopWatch();
     await this.conditionallyStartTransactionLog(e);
-    await this.mgr.populateInternalEntry(e);
+    if (this?.mgr?.modifyPayloadPreProcess) {
+      Logger.silly('Firing payload pre-process');
+      e = await this.mgr.modifyPayloadPreProcess(e);
+    }
     let rval: boolean = false;
     try {
       await this.fireListenerEvent({

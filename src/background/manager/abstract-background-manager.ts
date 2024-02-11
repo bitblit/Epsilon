@@ -19,7 +19,6 @@ export abstract class AbstractBackgroundManager implements BackgroundManagerLike
   abstract fetchApproximateNumberOfQueueEntries(): Promise<number>;
   abstract get backgroundManagerName(): string;
   abstract takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]>;
-  abstract populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>>;
 
   public createEntry<T>(type: string, data?: T): BackgroundEntry<T> {
     const rval: BackgroundEntry<T> = {
@@ -29,11 +28,11 @@ export abstract class AbstractBackgroundManager implements BackgroundManagerLike
     return rval;
   }
 
-  public wrapEntryForInternal<T>(
+  public async wrapEntryForInternal<T>(
     entry: BackgroundEntry<T>,
     overrideTraceId?: string,
     overrideTraceDepth?: number,
-  ): InternalBackgroundEntry<T> {
+  ): Promise<InternalBackgroundEntry<T>> {
     const rval: InternalBackgroundEntry<T> = Object.assign({}, entry, {
       createdEpochMS: new Date().getTime(),
       guid: AbstractBackgroundManager.generateBackgroundGuid(),

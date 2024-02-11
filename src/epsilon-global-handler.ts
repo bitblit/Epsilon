@@ -113,7 +113,7 @@ export class EpsilonGlobalHandler {
   ): Promise<boolean> {
     let rval: boolean = false;
     if (e?.type) {
-      const internal: InternalBackgroundEntry<any> = this._epsilon.backgroundManager.wrapEntryForInternal(
+      const internal: InternalBackgroundEntry<any> = await this._epsilon.backgroundManager.wrapEntryForInternal(
         e,
         overrideTraceId,
         overrideTraceDepth,

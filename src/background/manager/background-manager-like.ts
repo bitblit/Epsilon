@@ -17,7 +17,11 @@ export interface BackgroundManagerLike {
   // Wraps up an entry
   createEntry<T>(type: string, data?: T): BackgroundEntry<T>;
   // Wraps up an entry and adds internal control structures
-  wrapEntryForInternal<T>(entry: BackgroundEntry<T>, overrideTraceId?: string, overrideTraceDepth?: number): InternalBackgroundEntry<T>;
+  wrapEntryForInternal<T>(
+    entry: BackgroundEntry<T>,
+    overrideTraceId?: string,
+    overrideTraceDepth?: number,
+  ): Promise<InternalBackgroundEntry<T>>;
   // Helper method to simplify building a request and add it to the queue
   addEntryToQueueByParts<T>(type: string, data?: T, fireStartMessage?: boolean): Promise<string>;
   // Add an entry to the queue for background processing, and optionally fire a start message after it is added
@@ -34,6 +38,7 @@ export interface BackgroundManagerLike {
   fetchApproximateNumberOfQueueEntries(): Promise<number>;
   // Read a single entry from the background queue
   takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]>;
-  // Allows repopulating any externally stored data after the entry is pulled and parsed from the queue
-  populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>>;
+  // If defined, allows the entry to be modified immediately prior to submission to the processors
+  // Allows global behavior like reading a large body from S3 for example
+  modifyPayloadPreProcess?<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>>;
 }

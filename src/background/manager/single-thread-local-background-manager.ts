@@ -27,7 +27,7 @@ export class SingleThreadLocalBackgroundManager extends AbstractBackgroundManage
   }
 
   public async addEntryToQueue<T>(entry: BackgroundEntry<T>, fireStartMessage?: boolean): Promise<string> {
-    const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
+    const wrapped: InternalBackgroundEntry<T> = await this.wrapEntryForInternal(entry);
     const rval: string = wrapped.guid;
     Logger.info('Add entry to queue (local) : %j : Start : %s', entry, fireStartMessage);
     this._localBus.next(wrapped);
@@ -36,7 +36,7 @@ export class SingleThreadLocalBackgroundManager extends AbstractBackgroundManage
 
   public async fireImmediateProcessRequest<T>(entry: BackgroundEntry<T>): Promise<string> {
     let rval: string = null;
-    const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
+    const wrapped: InternalBackgroundEntry<T> = await this.wrapEntryForInternal(entry);
     rval = wrapped.guid;
     Logger.info('Fire immediately (local) : %j ', entry);
     this._localBus.next(wrapped);
@@ -59,9 +59,5 @@ export class SingleThreadLocalBackgroundManager extends AbstractBackgroundManage
   public async takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]> {
     Logger.info('Called takeEntryFromBackgroundQueue on SingleThreadedLocal - returning empty');
     return [];
-  }
-
-  public async populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>> {
-    return entry;
   }
 }

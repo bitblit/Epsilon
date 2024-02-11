@@ -6,6 +6,5 @@ export interface InternalBackgroundEntry<T> extends BackgroundEntry<T> {
   traceId: string;
   traceDepth: number;
 
-  getDataFromS3?: boolean;
-  pathToDataInS3?: string;
+  meta?: Record<string, string>;
 }
