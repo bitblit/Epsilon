@@ -34,4 +34,6 @@ export interface BackgroundManagerLike {
   fetchApproximateNumberOfQueueEntries(): Promise<number>;
   // Read a single entry from the background queue
   takeEntryFromBackgroundQueue(): Promise<InternalBackgroundEntry<any>[]>;
+  // Allows repopulating any externally stored data after the entry is pulled and parsed from the queue
+  populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>>;
 }

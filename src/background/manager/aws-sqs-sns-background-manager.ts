@@ -20,6 +20,7 @@ import { InternalBackgroundEntry } from '../internal-background-entry';
 import { AbstractBackgroundManager } from './abstract-background-manager';
 import { BackgroundValidator } from '../background-validator';
 import { PublishCommand, PublishCommandOutput, SNSClient } from '@aws-sdk/client-sns';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 /**
  * Handles all submission of work to the background processing system.
@@ -29,15 +30,22 @@ import { PublishCommand, PublishCommandOutput, SNSClient } from '@aws-sdk/client
  * define the type and validation.
  */
 export class AwsSqsSnsBackgroundManager extends AbstractBackgroundManager {
+  // SQS and SNS payload limit is (256 * 1024). Set threshold lower to allow extra metadata
+  private static readonly LARGE_MESSAGE_SIZE_THRESHOLD: number = 250_000;
+
   constructor(
     private _awsConfig: BackgroundAwsConfig,
     private _sqs: SQSClient,
     private _sns: SNSClient,
+    private _s3Client?: S3Client,
   ) {
     super();
     const cfgErrors: string[] = BackgroundValidator.validateAwsConfig(_awsConfig);
     if (cfgErrors.length) {
       ErrorRatchet.throwFormattedErr('Cannot start - invalid AWS config : %j', cfgErrors);
+    }
+    if (_awsConfig.sendLargePayloadsToS3 && !_s3Client) {
+      ErrorRatchet.throwFormattedErr('Cannot start - sendLargePayloadsToS3 is set but no s3Client provided');
     }
   }
 
@@ -62,6 +70,7 @@ export class AwsSqsSnsBackgroundManager extends AbstractBackgroundManager {
       const wrapped: InternalBackgroundEntry<T> = this.wrapEntryForInternal(entry);
       const rval: string = wrapped.guid;
       // Guard against bad entries up front
+      await this.processMessageForLargePayload(wrapped);
       const params = {
         DelaySeconds: 0,
         MessageBody: JSON.stringify(wrapped),
@@ -91,6 +100,7 @@ export class AwsSqsSnsBackgroundManager extends AbstractBackgroundManager {
       const rval: string = wrapped.guid;
       // Guard against bad entries up front
       Logger.info('Fire immediately (remote) : %j ', entry);
+      await this.processMessageForLargePayload(wrapped);
       const toWrite: any = {
         type: EpsilonConstants.BACKGROUND_SNS_IMMEDIATE_RUN_FLAG,
         backgroundEntry: wrapped,
@@ -185,5 +195,43 @@ export class AwsSqsSnsBackgroundManager extends AbstractBackgroundManager {
     }
 
     return rval;
+  }
+
+  private async processMessageForLargePayload<T>(wrapped: InternalBackgroundEntry<T>): Promise<void> {
+    const payloadApproximateSize: number = Buffer.byteLength(JSON.stringify(wrapped), 'utf-8');
+    if (payloadApproximateSize > AwsSqsSnsBackgroundManager.LARGE_MESSAGE_SIZE_THRESHOLD) {
+      if (this._awsConfig.sendLargePayloadsToS3) {
+        Logger.info('Message payload is above LARGE_MESSAGE_SIZE_THRESHOLD. Uploading to s3.');
+        wrapped.pathToDataInS3 = await this.writeMessageToS3(wrapped.guid, wrapped.data);
+        wrapped.data = undefined;
+        wrapped.getDataFromS3 = true;
+      } else {
+        Logger.warn('Message payload is above LARGE_MESSAGE_SIZE_THRESHOLD but sendLargePayloadsToS3 is not set.');
+      }
+    }
+  }
+
+  private async writeMessageToS3(guid: string, entry: unknown): Promise<string> {
+    const s3FilePath: string = `${this._awsConfig.s3BucketPath}/${guid}.json`;
+    const putCommand = new PutObjectCommand({
+      Bucket: this._awsConfig.s3Bucket,
+      Key: s3FilePath,
+      Body: JSON.stringify(entry),
+    });
+    await this._s3Client.send(putCommand);
+    return s3FilePath;
+  }
+
+  public async populateInternalEntry<T>(entry: InternalBackgroundEntry<T>): Promise<InternalBackgroundEntry<T>> {
+    if (entry.getDataFromS3) {
+      const getCommand = new GetObjectCommand({
+        Bucket: this._awsConfig.s3Bucket,
+        Key: entry.pathToDataInS3,
+      });
+      const getObjectCommandOutput = await this._s3Client.send(getCommand);
+      const bodyString: string = await getObjectCommandOutput.Body.transformToString();
+      entry.data = JSON.parse(bodyString);
+    }
+    return entry;
   }
 }

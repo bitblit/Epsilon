@@ -270,6 +270,7 @@ export class BackgroundHandler implements EpsilonLambdaEventHandler<SNSEvent> {
     Logger.info('Background Process Start: %j', e);
     const sw: StopWatch = new StopWatch();
     await this.conditionallyStartTransactionLog(e);
+    await this.mgr.populateInternalEntry(e);
     let rval: boolean = false;
     try {
       await this.fireListenerEvent({

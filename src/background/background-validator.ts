@@ -85,6 +85,9 @@ export class BackgroundValidator {
       ) {
         rval.push('At least one send notification flag set to true but no sns arn set');
       }
+      if (cfg.sendLargePayloadsToS3 && !(cfg.s3Bucket && cfg.s3BucketPath)) {
+        rval.push('If sendLargePayloadsToS3, then both s3Bucket and s3BucketPath must be defined');
+      }
     }
     return rval;
   }
