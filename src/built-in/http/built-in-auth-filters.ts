@@ -88,6 +88,9 @@ export class BuiltInAuthFilters {
             auth: null,
             error: err['message'],
           };
+          fCtx.allowManipulatorErrorMessagesInResponses = manipulator.allowErrorMessagesInResponses
+            ? manipulator.allowErrorMessagesInResponses()
+            : false;
         }
       }
     }
@@ -106,7 +109,11 @@ export class BuiltInAuthFilters {
             throw new ForbiddenError('You lack privileges to see this endpoint');
           }
         } else {
-          throw new UnauthorizedError('You need to supply credentials for this endpoint');
+          throw new UnauthorizedError(
+            fCtx.allowManipulatorErrorMessagesInResponses
+              ? fCtx.event.authorization.error
+              : 'You need to supply credentials for this endpoint',
+          );
         }
       } else {
         throw new MisconfiguredError().withFormattedErrorMessage(

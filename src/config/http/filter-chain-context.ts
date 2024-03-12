@@ -12,4 +12,5 @@ export interface FilterChainContext {
   routeAndParse: RouteAndParse;
   modelValidator: ModelValidator;
   authenticators: Map<string, AuthorizerFunction>;
+  allowManipulatorErrorMessagesInResponses?: boolean;
 }
