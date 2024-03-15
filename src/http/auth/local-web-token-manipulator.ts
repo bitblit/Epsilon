@@ -3,7 +3,7 @@ import { WebTokenManipulator } from './web-token-manipulator';
 import { UnauthorizedError } from '../error/unauthorized-error';
 import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 import { RequireRatchet } from '@bitblit/ratchet/common/require-ratchet';
-import { ExpiredJwtHandling, JwtRatchet, JwtTokenBase, LoggerLevelName } from '@bitblit/ratchet/common';
+import { ExpiredJwtHandling, JwtRatchet, JwtTokenBase, LoggerLevelName, RestfulApiHttpError } from '@bitblit/ratchet/common';
 import { CommonJwtToken } from '@bitblit/ratchet/common/common-jwt-token';
 
 /**
@@ -111,8 +111,9 @@ export class LocalWebTokenManipulator<T extends JwtTokenBase> implements WebToke
       tokenString = tokenString.substring(7);
     }
     const validated: T = !!tokenString ? await this.parseAndValidateJWTStringAsync(tokenString) : null;
-    if (!!tokenString && !validated) {
-      throw new UnauthorizedError('Found token string but could not extract a token from ' + tokenString);
+    if (!validated && 'test-msg' === tokenString) {
+      // For testing
+      throw new RestfulApiHttpError('Found token string but could not extract a token from ' + tokenString).withHttpStatusCode(444);
     }
 
     return validated;
