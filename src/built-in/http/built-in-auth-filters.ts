@@ -7,7 +7,7 @@ import { ForbiddenError } from '../../http/error/forbidden-error';
 import { AuthorizerFunction } from '../../config/http/authorizer-function';
 import { WebTokenManipulator } from '../../http/auth/web-token-manipulator';
 import { EventUtil } from '../../http/event-util';
-import { JwtTokenBase } from '@bitblit/ratchet/common';
+import { JwtTokenBase, Logger, RestfulApiHttpError } from '@bitblit/ratchet/common';
 
 export class BuiltInAuthFilters {
   public static async requireAllRolesInCommonJwt(fCtx: FilterChainContext, requiredRoleAllOf: string[]): Promise<boolean> {
@@ -81,12 +81,17 @@ export class BuiltInAuthFilters {
             raw: tokenString,
             auth: token,
             error: null,
+            authFailureException: null,
           };
         } catch (err) {
+          const toStore: RestfulApiHttpError = RestfulApiHttpError.objectIsRestfulApiHttpError(err)
+            ? (err as RestfulApiHttpError)
+            : new UnauthorizedError('You need to supply valid credentials for this endpoint');
           fCtx.event.authorization = {
             raw: tokenString,
             auth: null,
             error: err['message'],
+            authFailureException: toStore,
           };
         }
       }
@@ -106,7 +111,12 @@ export class BuiltInAuthFilters {
             throw new ForbiddenError('You lack privileges to see this endpoint');
           }
         } else {
-          throw new UnauthorizedError('You need to supply credentials for this endpoint');
+          if (fCtx?.event?.authorization?.authFailureException) {
+            throw fCtx?.event?.authorization?.authFailureException;
+          } else {
+            // If no error but also no token, then likely they just didn't supply credentials at all
+            throw new UnauthorizedError('You must supply valid credentials for this endpoint');
+          }
         }
       } else {
         throw new MisconfiguredError().withFormattedErrorMessage(
