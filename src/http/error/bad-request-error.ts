@@ -5,6 +5,7 @@ export class BadRequestError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, BadRequestError.prototype);
     this.withHttpStatusCode(BadRequestError.HTTP_CODE);
   }
 }
