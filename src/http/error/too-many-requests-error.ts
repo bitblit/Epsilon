@@ -5,6 +5,7 @@ export class TooManyRequestsError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, TooManyRequestsError.prototype);
     this.withHttpStatusCode(TooManyRequestsError.HTTP_CODE);
   }
 }

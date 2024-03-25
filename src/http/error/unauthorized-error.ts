@@ -5,6 +5,7 @@ export class UnauthorizedError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
     this.withHttpStatusCode(UnauthorizedError.HTTP_CODE);
   }
 }

@@ -5,6 +5,7 @@ export class ForbiddenError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, ForbiddenError.prototype);
     this.withHttpStatusCode(ForbiddenError.HTTP_CODE);
   }
 }

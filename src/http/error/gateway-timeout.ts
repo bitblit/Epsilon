@@ -5,6 +5,7 @@ export class GatewayTimeout<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, GatewayTimeout.prototype);
     this.withHttpStatusCode(GatewayTimeout.HTTP_CODE);
   }
 }
