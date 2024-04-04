@@ -5,6 +5,7 @@ export class ConflictError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, ConflictError.prototype);
     this.withHttpStatusCode(ConflictError.HTTP_CODE);
   }
 }

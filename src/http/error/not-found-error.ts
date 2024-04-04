@@ -5,6 +5,7 @@ export class NotFoundError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, NotFoundError.prototype);
     this.withHttpStatusCode(NotFoundError.HTTP_CODE);
   }
 }

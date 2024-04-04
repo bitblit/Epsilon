@@ -5,6 +5,7 @@ export class RequestTimeoutError<T = void> extends RestfulApiHttpError<T> {
 
   constructor(...errors: string[]) {
     super(...errors);
+    Object.setPrototypeOf(this, RequestTimeoutError.prototype);
     this.withHttpStatusCode(RequestTimeoutError.HTTP_CODE);
   }
 }
