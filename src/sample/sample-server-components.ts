@@ -107,6 +107,13 @@ export class SampleServerComponents {
     handlers.set('post /secure/access-token', (event) => BuiltInHandlers.sample(event));
     handlers.set('get /multi/fixed', (event) => BuiltInHandlers.sample(event, 'fixed'));
     handlers.set('get /multi/{v}', (event) => BuiltInHandlers.sample(event, 'variable'));
+    handlers.set('get /event', (event) => {
+      return Promise.resolve({
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event, null, 2),
+      });
+    });
     handlers.set('get /err/{code}', (event) => {
       const err: Error = ErrorRatchet.fErr('Fake Err : %j', event);
       err['statusCode'] = NumberRatchet.safeNumber(event.pathParameters['code']);

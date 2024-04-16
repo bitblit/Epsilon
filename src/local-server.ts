@@ -93,8 +93,7 @@ export class LocalServer {
 
     const reqTime: number = new Date().getTime();
     const formattedTime: string = DateTime.utc().toFormat('dd/MMM/yyyy:hh:mm:ss ZZ');
-    const queryIdx: number = request.url.indexOf('?');
-    const queryStringParams: any = queryIdx > -1 ? qs.parse(request.url.substring(queryIdx + 1)) : {};
+    const queryStringParams: { [key: string]: string } = LocalServer.parseQueryParamsFromUrlString(path);
     const headers: any = Object.assign({}, request.headers);
     headers['X-Forwarded-Proto'] = 'http'; // This server is always unencrypted
 
@@ -177,5 +176,32 @@ export class LocalServer {
 
     response.end(toWrite);
     return !!proxyResult.body;
+  }
+
+  /**
+   * Takes in a URL string and returns the parsed URL query params in the way the ALB / Lambda
+   * integration does.
+   * Note that it does not URL decode the values.
+   */
+  public static parseQueryParamsFromUrlString(urlString: string): { [key: string]: string } {
+    const rval: { [key: string]: string } = {};
+
+    const searchStringParts: string[] = urlString.split('?');
+    if (searchStringParts.length < 2) {
+      // No query string.
+      return rval;
+    }
+
+    const searchString: string = searchStringParts.slice(1).join('?');
+
+    const searchParts: string[] = searchString.split('&');
+    for (const eachKeyValueString of searchParts) {
+      const eachKeyValueStringParts: string[] = eachKeyValueString.split('=');
+      const eachKey: string = eachKeyValueStringParts[0];
+      const eachValue: string = eachKeyValueStringParts.slice(1).join('=');
+      rval[eachKey] = eachValue;
+    }
+
+    return rval;
   }
 }
