@@ -31,6 +31,21 @@ export class SampleServerStaticFiles {
     '      responses:\n' +
     "        '200':\n" +
     '          description: Standard CORS header response\n' +
+    '  /event:\n' +
+    '    get:\n' +
+    '      description: Tests URL parsing and returns event as JSON\n' +
+    '      tags:\n' +
+    '        - Meta\n' +
+    '        - Public\n' +
+    '      responses:\n' +
+    "        '200':\n" +
+    '          description: The parsed event, as JSON\n' +
+    '    options:\n' +
+    '      tags:\n' +
+    '        - CORS\n' +
+    '      responses:\n' +
+    "        '200':\n" +
+    '          description: Standard CORS header response\n' +
     '  /meta/server:\n' +
     '    get:\n' +
     '      description: >\n' +

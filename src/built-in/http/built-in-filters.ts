@@ -72,7 +72,7 @@ export class BuiltInFilters {
       Object.keys(fCtx.event.queryStringParameters).forEach((k) => {
         const val: string = fCtx.event.queryStringParameters[k];
         if (val) {
-          fCtx.event.queryStringParameters[k] = decodeURIComponent(val);
+          fCtx.event.queryStringParameters[k] = BuiltInFilters.decodeUriComponentAndReplacePlus(val);
         }
       });
     }
@@ -80,12 +80,19 @@ export class BuiltInFilters {
       Object.keys(fCtx.event.multiValueQueryStringParameters).forEach((k) => {
         const val: string[] = fCtx.event.multiValueQueryStringParameters[k];
         if (val && val.length) {
-          const cleaned: string[] = val.map((v) => decodeURIComponent(v));
+          const cleaned: string[] = val.map((v) => BuiltInFilters.decodeUriComponentAndReplacePlus(v));
           fCtx.event.multiValueQueryStringParameters[k] = cleaned;
         }
       });
     }
     return true;
+  }
+
+  /**
+   * Performs decodeURIComponent on a value after replacing all "+" values with spaces.
+   */
+  private static decodeUriComponentAndReplacePlus(val: string): string {
+    return decodeURIComponent(val.replace(/\+/g, ' '));
   }
 
   public static async fixStillEncodedQueryParams(fCtx: FilterChainContext): Promise<boolean> {
