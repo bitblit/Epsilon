@@ -1,6 +1,5 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { Context } from 'aws-lambda';
-import { cloneDeep } from 'lodash';
 import { ExtendedAPIGatewayEvent } from '../../config/http/extended-api-gateway-event';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
@@ -84,7 +83,7 @@ export class RunHandlerAsFilter {
   }
 
   private static eventToStringForLog(event: any): string {
-    const eventToLog = cloneDeep(event);
+    const eventToLog = structuredClone(event);
 
     if (eventToLog?.authorization?.raw) {
       eventToLog.authorization.raw = RunHandlerAsFilter.redact(eventToLog.authorization.raw);
