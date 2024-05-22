@@ -1,5 +1,6 @@
 import { Logger } from '@bitblit/ratchet/common/logger';
 import { Context } from 'aws-lambda';
+import { cloneDeep } from 'lodash';
 import { ExtendedAPIGatewayEvent } from '../../config/http/extended-api-gateway-event';
 import { PromiseRatchet } from '@bitblit/ratchet/common/promise-ratchet';
 import { TimeoutToken } from '@bitblit/ratchet/common/timeout-token';
@@ -13,11 +14,13 @@ import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { RestfulApiHttpError } from '@bitblit/ratchet/common';
 
 export class RunHandlerAsFilter {
+  public static REDACTED_STRING: string = '***redacted***';
+
   public static async runHandler(fCtx: FilterChainContext, rm: RouteAndParse): Promise<boolean> {
     // Check for continue
     // Run the controller
     const handler: Promise<any> = RunHandlerAsFilter.findHandler(rm, fCtx.event, fCtx.context);
-    Logger.debug('Processing event with epsilon: %j', fCtx.event);
+    Logger.debug('Processing event with epsilon: %s', RunHandlerAsFilter.eventToStringForLog(fCtx.event));
     let tmp: any = await handler;
     if (TimeoutToken.isTimeoutToken(tmp)) {
       (tmp as TimeoutToken).writeToLog();
@@ -63,7 +66,10 @@ export class RunHandlerAsFilter {
 
       rval = PromiseRatchet.timeout(
         rm.mapping.function(event, context),
-        'Timed out after ' + rm.mapping.metaProcessingConfig.timeoutMS + ' ms.  Request was ' + JSON.stringify(event),
+        'Timed out after ' +
+          rm.mapping.metaProcessingConfig.timeoutMS +
+          ' ms.  Request was ' +
+          RunHandlerAsFilter.eventToStringForLog(event),
         rm.mapping.metaProcessingConfig.timeoutMS,
       );
     } else if (add404OnMissing) {
@@ -76,5 +82,18 @@ export class RunHandlerAsFilter {
     if (filters) {
       filters.push((fCtx) => RunHandlerAsFilter.runHandler(fCtx, rm));
     }
+  }
+
+  private static eventToStringForLog(event: any): string {
+    const eventToLog = cloneDeep(event);
+
+    if (eventToLog.authorization?.raw) {
+      eventToLog.authorization.raw = RunHandlerAsFilter.REDACTED_STRING;
+    }
+    if (eventToLog.headers?.authorization) {
+      eventToLog.headers.authorization = RunHandlerAsFilter.REDACTED_STRING;
+    }
+
+    return JSON.stringify(eventToLog);
   }
 }
