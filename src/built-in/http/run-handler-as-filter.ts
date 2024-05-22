@@ -12,10 +12,9 @@ import { NullReturnedObjectHandling } from '../../config/http/null-returned-obje
 import { FilterFunction } from '../../config/http/filter-function';
 import { FilterChainContext } from '../../config/http/filter-chain-context';
 import { RestfulApiHttpError } from '@bitblit/ratchet/common';
+import { StringRatchet } from '@bitblit/ratchet/common/string-ratchet';
 
 export class RunHandlerAsFilter {
-  public static REDACTED_STRING: string = '***redacted***';
-
   public static async runHandler(fCtx: FilterChainContext, rm: RouteAndParse): Promise<boolean> {
     // Check for continue
     // Run the controller
@@ -87,13 +86,18 @@ export class RunHandlerAsFilter {
   private static eventToStringForLog(event: any): string {
     const eventToLog = cloneDeep(event);
 
-    if (eventToLog.authorization?.raw) {
-      eventToLog.authorization.raw = RunHandlerAsFilter.REDACTED_STRING;
+    if (eventToLog?.authorization?.raw) {
+      eventToLog.authorization.raw = RunHandlerAsFilter.redact(eventToLog.authorization.raw);
     }
-    if (eventToLog.headers?.authorization) {
-      eventToLog.headers.authorization = RunHandlerAsFilter.REDACTED_STRING;
+    if (eventToLog?.headers?.authorization) {
+      eventToLog.headers.authorization = RunHandlerAsFilter.redact(eventToLog.headers.authorization);
     }
 
     return JSON.stringify(eventToLog);
+  }
+
+  public static redact(input: string): string {
+    const rval: string = input ? StringRatchet.obscure(input, 1, 1) : input;
+    return rval;
   }
 }

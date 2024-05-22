@@ -60,7 +60,7 @@ describe('#routerUtilApplyOpenApiDoc', function () {
     };
     // @ts-expect-error private method
     const logEventObj: any = JSON.parse(RunHandlerAsFilter.eventToStringForLog(inputEvent));
-    expect(logEventObj.authorization.raw).toEqual(RunHandlerAsFilter.REDACTED_STRING);
-    expect(logEventObj.headers.authorization).toEqual(RunHandlerAsFilter.REDACTED_STRING);
+    expect(logEventObj.authorization.raw).toEqual(RunHandlerAsFilter.redact(inputEvent.authorization.raw));
+    expect(logEventObj.headers.authorization).toEqual(RunHandlerAsFilter.redact(logEventObj.headers.authorization));
   });
 });
